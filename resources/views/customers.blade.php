@@ -194,198 +194,67 @@
   </head>
   <body>
     <div class="wrapper">
-      <!-- Sidebar -->
-      <div class="sidebar" data-background-color="dark">
-        <div class="sidebar-logo">
-          <!-- Logo Header -->
-          <div class="logo-header" data-background-color="dark">
-            <a href="/" class="logo">
-              <img
-                src="{{ asset('assets/img/logop.png')}}"
-                alt="navbar brand"-9
-                class="navbar-brand"
-                height="40"
-              />
-            </a>
-            <div class="nav-toggle">
-              <button class="btn btn-toggle toggle-sidebar">
-                <i class="gg-menu-right"></i>
-              </button>
-              <button class="btn btn-toggle sidenav-toggler">
-                <i class="gg-menu-left"></i>
-              </button>
+     <!-- Sidebar -->
+        <div class="sidebar" data-background-color="dark">
+            <div class="sidebar-logo">
+                <div class="logo-header" data-background-color="dark">
+                    <a href="/" class="logo">
+                        <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
+                    </a>
+                    <div class="nav-toggle">
+                        <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                        <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
+                    </div>
+                    <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
+                </div>
             </div>
-            <button class="topbar-toggler more">
-              <i class="gg-more-vertical-alt"></i>
-            </button>
-          </div>
-          <!-- End Logo Header -->
+            <div class="sidebar-wrapper scrollbar scrollbar-inner">
+                <div class="sidebar-content">
+                    <ul class="nav nav-secondary">
+                        <li class="nav-item">
+                            <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
+                        </li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
+                        <li class="nav-item"><a href="/sales/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
+                        <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
+                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
+                        <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
+                        <li class="nav-item"><a href="/avoirs"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
+                        <li class="nav-item"><a href="/reglement-client"><i class="fas fa-credit-card"></i><p>Règlement Client</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
+                        <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
+                        <li class="nav-item"><a href="/purchaseprojects/list"><i class="fas fa-file-alt"></i><p>Projets de Commande</p></a></li>
+                        <li class="nav-item"><a href="/returns"><i class="fas fa-undo-alt"></i><p>Retours Achat</p></a></li>
+                        <li class="nav-item"><a href="/invoices"><i class="fas fa-file-invoice"></i><p>Factures Achat</p></a></li>
+                        <li class="nav-item"><a href="/notes"><i class="fas fa-sticky-note"></i><p>Avoirs Achat</p></a></li>
+                        <li class="nav-item"><a href="/reglement-fournisseur"><i class="fas fa-credit-card"></i><p>Règlement Fournisseur</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
+                        <li class="nav-item"><a href="/receptions"><i class="fas fa-truck-loading"></i><p>Réceptions</p></a></li>
+                        <li class="nav-item"><a href="/articles"><i class="fas fa-cubes"></i><p>Articles</p></a></li>
+                        <li class="nav-item"><a href="/planification-tournee"><i class="fas fa-truck"></i><p>Suivi Livraisons</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fa fa-users"></i></span><h4 class="text-section">Référentiel</h4></li>
+                        <li class="nav-item active"><a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a></li>
+                        <li class="nav-item"><a href="/suppliers"><i class="fa fa-user-tie"></i><p>Fournisseurs</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-cogs"></i></span><h4 class="text-section">Paramètres</h4></li>
+                        <li class="nav-item"><a href="/setting"><i class="fas fa-sliders-h"></i><p>Paramètres</p></a></li>
+                        <li class="nav-item"><a href="/tecdoc"><i class="fas fa-database"></i><p>TecDoc</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-robot"></i></span><h4 class="text-section">Autres</h4></li>
+                        <li class="nav-item"><a href="/voice"><i class="fas fa-robot"></i><p>NEGOBOT</p></a></li>
+                        <li class="nav-item">
+                            <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
+                            </a>
+                            <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
+                                @csrf
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-        <div class="sidebar-wrapper scrollbar scrollbar-inner">
-          <div class="sidebar-content">
-            <ul class="nav nav-secondary">
-              
-
-            <li class="nav-item">
-                <a href="/dashboard">
-                  <i class="fas fa-home"></i>
-                  <p>Dashboard</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a  href="/commande">
-                  <i class="fas fa-shopping-cart"></i>
-                  <p>Nouvelle Commande</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a  href="/orders">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <p>Mes BL</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a  href="/listdevis">
-                <i class="fas fa-file-alt"></i>
-                  <p>Mes Devis</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-              <a href="/listbrouillon">
-              <i class="fas fa-reply-all"></i>
-              <p>Brouillons</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-              <a href="/invoices">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Mes Factures</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-              <a href="/avoirs">
-              <i class="fas fa-reply-all"></i>
-              <p>Mes Avoirs</p>
-                </a>
-              </li>
-
-
-                                          <li class="nav-item">
-              <a href="/purchases/list">
-                <i class="fas fa-file-alt"></i>
-              <p>Commandes Achat</p>
-                </a>
-              </li>
-
-
-              
-                            <li class="nav-item"><a href="/purchaseprojects/list">
-              <i class="fas fa-file-alt"></i>
-              <p>Projets de Commande</p></a></li>
-
-
-              
-
-                   <li class="nav-item">
-              <a href="/returns">
-                <i class="fas fa-file-alt"></i>
-              <p>Retours Achat</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item">
-              <a href="/invoices">
-                <i class="fas fa-money-bill-wave"></i>
-              <p>Factures Achat</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item">
-              <a href="/notes">
-              <i class="fas fa-reply-all"></i>
-              <p>Avoirs Achat</p>
-                </a>
-              </li>
-
-
-
-              <li class="nav-item">
-              <a href="/receptions">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Réception</p>
-                </a>
-              </li>
-
-
-              <li class="nav-item">
-              <a href="/articles">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Articles</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item active">
-              <a href="/customers">
-              <i class="fa fa-user"></i>
-              <p>Clients</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item">
-              <a href="/suppliers">
-              <i class="fa fa-user"></i>
-              <p>Fournisseurs</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-              <a href="/setting">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Paramétres</p>
-                </a>
-              </li>
-
-
-
-              <li class="nav-item">
-  <a href="/tecdoc">
-    <i class="fas fa-cogs"></i> 
-    <p>TecDoc</p>
-  </a>
-</li>    
-
-
-<li class="nav-item">
-  <a href="/voice">
-    <i class="fas fa-robot"></i>
-    <p>NEGOBOT</p>
-  </a>
-</li>
-
-              
-  <!-- Lien de déconnexion -->
-  <li class="nav-item">
-        <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="fas fa-sign-out-alt"></i>
-            <p>Déconnexion</p>
-        </a>
-        <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
-            @csrf
-        </form>
-    </li>             
-
-
-            </ul>
-          </div>
-        </div>
-      </div>
-      <!-- End Sidebar -->
+        <!-- End Sidebar -->
 
       <div class="main-panel">
         <div class="main-header">
@@ -551,12 +420,12 @@
 
         <div class="mb-3 col-md-6">
             <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control">
+            <input type="email" name="email" class="form-control" required>
         </div>
 
         <div class="mb-3 col-md-4">
             <label class="form-label">Téléphone 1</label>
-            <input type="text" name="phone1" class="form-control">
+            <input type="text" name="phone1" class="form-control" required>
         </div>
 
         <div class="mb-3 col-md-4">
@@ -571,7 +440,7 @@
 
         <div class="mb-3 col-md-6">
             <label class="form-label">Adresse</label>
-            <input type="text" name="address" class="form-control">
+            <input type="text" name="address" class="form-control" required>
         </div>
 
         <div class="mb-3 col-md-6">
@@ -581,7 +450,7 @@
 
         <div class="mb-3 col-md-4">
             <label class="form-label">Pays</label>
-            <input type="text" name="country" class="form-control">
+            <input type="text" name="country" class="form-control" required>
         </div>
 
         <div class="mb-3 col-md-4">
@@ -620,8 +489,8 @@
         </div>
 
         <div class="mb-3 col-md-6">
-            <label class="form-label">Groupe Remise</label required>
-            <select name="discount_group_id" class="form-control">
+            <label class="form-label">Groupe Remise</label>
+            <select name="discount_group_id" class="form-control" required>
                 <option value="">-- Choisir --</option>
                 @foreach($discountGroups as $group)
                     <option value="{{ $group->id }}">{{ $group->name }} : {{ $group->discount_rate }} %</option>
@@ -631,7 +500,7 @@
 
         <div class="mb-3 col-md-6">
             <label class="form-label">Mode de paiement</label>
-            <select name="payment_mode_id" class="form-control">
+            <select name="payment_mode_id" class="form-control" required>
                 <option value="">-- Choisir --</option>
                 @foreach($paymentModes as $mode)
                     <option value="{{ $mode->id }}">{{ $mode->name }}</option>
@@ -641,7 +510,7 @@
 
         <div class="mb-3 col-md-6">
             <label class="form-label">Condition de paiement</label>
-            <select name="payment_term_id" class="form-control">
+            <select name="payment_term_id" class="form-control" required>
                 <option value="">-- Choisir --</option>
                 @foreach($paymentTerms as $term)
                     <option value="{{ $term->id }}">{{ $term->label }} : {{ $term->days }} Jours</option>
@@ -659,6 +528,7 @@
             </div>
         </div>
     </div>
+    <!-- fin modal creation -->
 
     <!-- Recherche -->
     <div class="mb-2 d-flex justify-content-center">
@@ -707,6 +577,214 @@
                                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ $customer->id }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
+
+                                <!-- Bouton Véhicules associés -->
+<button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#viewVehiclesModal{{ $customer->id }}">
+    <i class="fas fa-car"></i>
+</button>
+
+
+
+  <!-- View Vehicles Modal -->
+<div class="modal fade" id="viewVehiclesModal{{ $customer->id }}" tabindex="-1" aria-labelledby="viewVehiclesModalLabel{{ $customer->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewVehiclesModalLabel{{ $customer->id }}">Véhicules associés à {{ $customer->name }}</h5>
+                <button type="button" class="btn btn-outline-success btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#addVehicleModal{{ $customer->id }}">
+                    <i class="fas fa-car"></i> Associer un véhicule
+                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                @if($customer->vehicles && $customer->vehicles->count())
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover table-text-small">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Immatriculation</th>
+                                    <th>Marque</th>
+                                    <th>Modèle</th>
+                                    <th>Motorisation</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($customer->vehicles as $vehicle)
+                                    <tr>
+                                        <td>{{ $vehicle->license_plate }}</td>
+                                        <td>{{ $vehicle->brand_name }}</td>
+                                        <td>{{ $vehicle->model_name }}</td>
+                                        <td>{{ $vehicle->engine_description }}</td>
+                                        <td>
+                                            <a href="{{ route('customer.vehicle.catalog', [$customer->id, $vehicle->id]) }}" class="btn btn-outline-primary btn-sm px-2 py-1" style="font-size: 0.90rem;"  onclick="window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); return false;">
+                                                <i class="fas fa-list"></i> Charger le Catalogue
+                                            </a>
+                                            <form action="{{ route('customer.vehicle.destroy', [$customer->id, $vehicle->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ce véhicule ?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt"></i>Supprimer le vehicule </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <p class="text-muted">Aucun véhicule associé.</p>
+                @endif
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+      <!-- Add Vehicle Modal -->
+<div class="modal fade" id="addVehicleModal{{ $customer->id }}" tabindex="-1" aria-labelledby="addVehicleModalLabel{{ $customer->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addVehicleModalLabel{{ $customer->id }}">Associer un véhicule à {{ $customer->name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <form method="POST" action="{{ route('customer.vehicle.store', $customer->id) }}" id="vehicleForm{{ $customer->id }}">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="brand_id_{{ $customer->id }}" class="form-label">Marque :</label>
+                        <select id="brand_id_{{ $customer->id }}" name="brand_id" class="form-control" required>
+                            <option value="">Sélectionner une marque</option>
+                            @foreach($brands as $brand)
+                                <option value="{{ $brand['id'] }}" data-name="{{ $brand['name'] }}">{{ $brand['name'] }}</option>
+                            @endforeach
+                        </select>
+                        <input type="hidden" name="brand_name" id="brand_name_{{ $customer->id }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="model_id_{{ $customer->id }}" class="form-label">Modèle :</label>
+                        <select id="model_id_{{ $customer->id }}" name="model_id" class="form-control" required>
+                            <option value="">Sélectionner un modèle</option>
+                        </select>
+                        <input type="hidden" name="model_name" id="model_name_{{ $customer->id }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="engine_id_{{ $customer->id }}" class="form-label">Motorisation :</label>
+                        <select id="engine_id_{{ $customer->id }}" name="engine_id" class="form-control" required>
+                            <option value="">Sélectionner une motorisation</option>
+                        </select>
+                        <input type="hidden" name="engine_description" id="engine_description_{{ $customer->id }}">
+                        <input type="hidden" name="linkage_target_id" id="linkage_target_id_{{ $customer->id }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="license_plate_{{ $customer->id }}" class="form-label">Immatriculation :</label>
+                        <input type="text" id="license_plate_{{ $customer->id }}" name="license_plate" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">Associer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Script for Vehicle Modal -->
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                // Ensure vehicles modal doesn't open automatically
+                                const vehiclesModal = document.getElementById('viewVehiclesModal{{ $customer->id }}');
+                                vehiclesModal.classList.remove('show');
+                                vehiclesModal.style.display = 'none';
+
+                                // Handle brand selection
+                                document.getElementById('brand_id_{{ $customer->id }}').addEventListener('change', function () {
+                                    const brandId = this.value;
+                                    const brandName = this.options[this.selectedIndex].dataset.name;
+                                    document.getElementById('brand_name_{{ $customer->id }}').value = brandName;
+                                    if (brandId) {
+                                        fetch("{{ route('getModels') }}?brand_id=" + brandId)
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                const modelSelect = document.getElementById('model_id_{{ $customer->id }}');
+                                                modelSelect.innerHTML = '<option value="">Sélectionner un modèle</option>';
+                                                data.forEach(model => {
+                                                    modelSelect.innerHTML += `<option value="${model.id}" data-name="${model.name}">${model.name}</option>`;
+                                                });
+                                            })
+                                            .catch(error => {
+                                                console.error('Error fetching models:', error);
+                                                alert('Erreur lors du chargement des modèles.');
+                                            });
+                                    } else {
+                                        document.getElementById('model_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner un modèle</option>';
+                                    }
+                                    document.getElementById('engine_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner une motorisation</option>';
+                                });
+
+                                // Handle model selection
+                                document.getElementById('model_id_{{ $customer->id }}').addEventListener('change', function () {
+                                    const modelId = this.value;
+                                    const modelName = this.options[this.selectedIndex].dataset.name;
+                                    document.getElementById('model_name_{{ $customer->id }}').value = modelName;
+                                    if (modelId) {
+                                        fetch("{{ route('getEngines') }}?model_id=" + modelId)
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                const engineSelect = document.getElementById('engine_id_{{ $customer->id }}');
+                                                engineSelect.innerHTML = '<option value="">Sélectionner une motorisation</option>';
+                                                data.forEach(engine => {
+                                                    engineSelect.innerHTML += `<option value="${engine.id}" data-description="${engine.description}" data-linking-target-id="${engine.linkageTargetId}">${engine.description}</option>`;
+                                                });
+                                            })
+                                            .catch(error => {
+                                                console.error('Error fetching engines:', error);
+                                                alert('Erreur lors du chargement des motorisations.');
+                                            });
+                                    } else {
+                                        document.getElementById('engine_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner une motorisation</option>';
+                                    }
+                                });
+
+                                // Handle engine selection
+                                document.getElementById('engine_id_{{ $customer->id }}').addEventListener('change', function () {
+                                    const engineDescription = this.options[this.selectedIndex].dataset.description;
+                                    const linkageTargetId = this.options[this.selectedIndex].dataset.linkingTargetId;
+                                    document.getElementById('engine_description_{{ $customer->id }}').value = engineDescription;
+                                    document.getElementById('linkage_target_id_{{ $customer->id }}').value = linkageTargetId;
+                                });
+
+                                // Clear vehicle modal fields when closed
+                                document.getElementById('addVehicleModal{{ $customer->id }}').addEventListener('hidden.bs.modal', function () {
+                                    document.getElementById('vehicleForm{{ $customer->id }}').reset();
+                                    document.getElementById('model_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner un modèle</option>';
+                                    document.getElementById('engine_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner une motorisation</option>';
+                                    document.getElementById('brand_name_{{ $customer->id }}').value = '';
+                                    document.getElementById('model_name_{{ $customer->id }}').value = '';
+                                    document.getElementById('engine_description_{{ $customer->id }}').value = '';
+                                    document.getElementById('linkage_target_id_{{ $customer->id }}').value = '';
+                                });
+                            });
+                        </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                                 <!-- Formulaire suppression -->
                                 <form action="{{ route('customer.destroy', $customer->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ce client ?')">

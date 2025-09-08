@@ -64,15 +64,80 @@ class SalesController extends Controller
     /**
      * Show the form to create a new sales order.
      */
-    public function index()
+  public function index()
     {
         $customers = Customer::with('tvaGroup')->get();
         $tvaRates = $customers->mapWithKeys(function ($c) {
             return [$c->id => is_numeric($c->tvaGroup->rate ?? 0) ? (float)$c->tvaGroup->rate : 0];
         })->toJson();
-        $items = Item::with(['brand', 'supplier', 'tvaGroup'])->get();
-        return view('sales.create', compact('customers', 'tvaRates', 'items'));
+
+        return view('sales.create', compact('customers', 'tvaRates'));
     }
+
+    public function stockDetails(Request $request)
+    {
+        $code = $request->query('code');
+        // Use fully qualified Log to avoid conflicts
+        \Illuminate\Support\Facades\Log::info('Fetching stock details for item code:', ['code' => $code]);
+
+        try {
+            $item = Item::where('code', $code)
+                        ->with(['stocks.store', 'stockMovements' => function ($query) {
+                            $query->latest()->limit(20);
+                        }])
+                        ->first();
+
+            if (!$item) {
+                \Illuminate\Support\Facades\Log::warning('Item not found for code:', ['code' => $code]);
+                return response()->json(['error' => 'Article not found'], 404);
+            }
+
+            $stocks = $item->stocks->map(function ($stock) {
+                return [
+                    'store_name' => optional($stock->store)->name ?? '-',
+                    'quantity' => (int) ($stock->quantity ?? 0),
+                    'updated_at' => $stock->updated_at ? $stock->updated_at->format('d/m/Y H:i') : '-',
+                ];
+            });
+
+            $movements = $item->stockMovements->map(function ($movement) {
+                return [
+                    'type' => ucfirst($movement->type ?? 'unknown'),
+                    'quantity' => (int) ($movement->quantity ?? 0),
+                    'store_name' => optional($movement->store)->name ?? '-',
+                    'cost_price' => is_numeric($movement->cost_price) ? (float) $movement->cost_price : null,
+                    'supplier_name' => $movement->supplier_name ?? '-',
+                    'reference' => $movement->reference ?? '-',
+                    'note' => $movement->note ?? '-',
+                    'created_at' => $movement->created_at ? $movement->created_at->format('d/m/Y H:i') : '-',
+                ];
+            });
+
+            $response = [
+                'stocks' => $stocks->toArray(),
+                'movements' => $movements->toArray(),
+            ];
+
+            \Illuminate\Support\Facades\Log::info('Stock details response:', [
+                'stocks_count' => $stocks->count(),
+                'movements_count' => $movements->count(),
+                'stocks' => $response['stocks'],
+                'movements' => $response['movements'],
+            ]);
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error fetching stock details:', [
+                'code' => $code,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['error' => 'Server error while fetching stock details'], 500);
+        }
+    }
+
+
+
 
     /**
      * Store a new sales order.
@@ -293,8 +358,7 @@ protected function createDeliveryNoteFromOrder(SalesOrder $order, Request $reque
     {
         $customers = Customer::with('tvaGroup')->get();
         $tvaRates = $customers->mapWithKeys(fn($c) => [$c->id => $c->tvaGroup->rate ?? 0])->toJson();
-        $items = Item::with(['brand', 'supplier', 'tvaGroup'])->get();
-        return view('sales.create_direct_delivery', compact('customers', 'tvaRates', 'items'));
+        return view('sales.create_direct_delivery', compact('customers', 'tvaRates'));
     }
 
     /**
@@ -413,10 +477,10 @@ public function storeDirectDeliveryNote(Request $request)
     public function edit($id)
     {
         $order = SalesOrder::with('lines', 'customer')->findOrFail($id);
+        // dd($order);
         $customers = Customer::with('tvaGroup')->get();
         $tvaRates = $customers->mapWithKeys(fn($c) => [$c->id => $c->tvaGroup->rate ?? 0])->toJson();
-        $items = Item::with(['brand', 'supplier', 'tvaGroup'])->get();
-        return view('sales.edit', compact('order', 'customers', 'tvaRates', 'items'));
+        return view('sales.edit', compact('order', 'customers', 'tvaRates'));
     }
 
     /**
@@ -429,6 +493,7 @@ public function storeDirectDeliveryNote(Request $request)
    /**
  * Update a sales order.
  */
+
 public function update(Request $request, $numdoc)
 {
     $request->validate([
@@ -482,6 +547,7 @@ public function update(Request $request, $numdoc)
         }
 
         $order->update([
+            'numclient' => $customer->code,
             'total_ht' => $total,
             'total_ttc' => $total * (1 + $tvaRate / 100),
         ]);
@@ -514,6 +580,7 @@ public function update(Request $request, $numdoc)
                     'total_ttc' => 0,
                     'tva_rate' => $tvaRate,
                     'numdoc' => $numdoc,
+                    'numclient' => $customer->code,
                     'notes' => $request->notes,
                 ]);
                 $souche->last_number += 1;
@@ -979,6 +1046,7 @@ public function validateOrder($id)
     /**
      * Search items by brand, supplier, description, or reference.
      */
+    // la fonction qui search les articles dans nouvelle commande
     public function searchItems(Request $request)
     {
         $query = Item::with(['brand', 'supplier', 'tvaGroup', 'stocks']);
@@ -1007,10 +1075,12 @@ public function validateOrder($id)
             return [
                 'code' => $item->code,
                 'name' => $item->name,
+                'location' => $item->location,
                 'description' => $item->description,
                 'brand' => $item->brand->name ?? null,
                 'supplier' => $item->supplier->name ?? null,
                 'stock_quantity' => $item->getStockQuantityAttribute(),
+                'cost_price' => $item->cost_price,
                 'sale_price' => $item->sale_price,
             ];
         });

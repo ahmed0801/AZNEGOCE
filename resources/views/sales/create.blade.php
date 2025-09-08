@@ -173,11 +173,16 @@
                 max-width: 90%;
             }
         }
+
+                .small-text {
+  font-size: 0.95em; /* ou essaye 0.6em si tu veux encore plus petit */
+}
+
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <!-- Sidebar (unchanged) -->
+         <!-- Sidebar -->
         <div class="sidebar" data-background-color="dark">
             <div class="sidebar-logo">
                 <div class="logo-header" data-background-color="dark">
@@ -194,27 +199,38 @@
             <div class="sidebar-wrapper scrollbar scrollbar-inner">
                 <div class="sidebar-content">
                     <ul class="nav nav-secondary">
-                        <li class="nav-item"><a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a></li>
-                        <li class="nav-item active"><a href="/commande"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
-                        <li class="nav-item"><a href="/orders"><i class="fas fa-file-invoice-dollar"></i><p>Mes BL</p></a></li>
-                        <li class="nav-item"><a href="/listdevis"><i class="fas fa-file-alt"></i><p>Mes Devis</p></a></li>
-                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Brouillons</p></a></li>
-                        <li class="nav-item"><a href="/invoices"><i class="fas fa-money-bill-wave"></i><p>Mes Factures</p></a></li>
-                        <li class="nav-item"><a href="/avoirs"><i class="fas fa-reply-all"></i><p>Mes Avoirs</p></a></li>
+                        <li class="nav-item">
+                            <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
+                        </li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
+                        <li class="nav-item active"><a href="/sales/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
+                        <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
+                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
+                        <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
+                        <li class="nav-item"><a href="/avoirs"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
+                        <li class="nav-item"><a href="/reglement-client"><i class="fas fa-credit-card"></i><p>Règlement Client</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
                         <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
                         <li class="nav-item"><a href="/purchaseprojects/list"><i class="fas fa-file-alt"></i><p>Projets de Commande</p></a></li>
-                        <li class="nav-item"><a href="/returns"><i class="fas fa-file-alt"></i><p>Retours Achat</p></a></li>
-                        <li class="nav-item"><a href="/invoices"><i class="fas fa-money-bill-wave"></i><p>Factures Achat</p></a></li>
-                        <li class="nav-item"><a href="/notes"><i class="fas fa-reply-all"></i><p>Avoirs Achat</p></a></li>
-                        <li class="nav-item"><a href="/receptions"><i class="fas fa-money-bill-wave"></i><p>Réception</p></a></li>
-                        <li class="nav-item"><a href="/articles"><i class="fas fa-money-bill-wave"></i><p>Articles</p></a></li>
+                        <li class="nav-item"><a href="/returns"><i class="fas fa-undo-alt"></i><p>Retours Achat</p></a></li>
+                        <li class="nav-item"><a href="/invoices"><i class="fas fa-file-invoice"></i><p>Factures Achat</p></a></li>
+                        <li class="nav-item"><a href="/notes"><i class="fas fa-sticky-note"></i><p>Avoirs Achat</p></a></li>
+                        <li class="nav-item"><a href="/reglement-fournisseur"><i class="fas fa-credit-card"></i><p>Règlement Fournisseur</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
+                        <li class="nav-item"><a href="/receptions"><i class="fas fa-truck-loading"></i><p>Réceptions</p></a></li>
+                        <li class="nav-item"><a href="/articles"><i class="fas fa-cubes"></i><p>Articles</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fa fa-users"></i></span><h4 class="text-section">Référentiel</h4></li>
                         <li class="nav-item"><a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a></li>
-                        <li class="nav-item"><a href="/suppliers"><i class="fa fa-user"></i><p>Fournisseurs</p></a></li>
-                        <li class="nav-item"><a href="/setting"><i class="fas fa-money-bill-wave"></i><p>Paramétres</p></a></li>
-                        <li class="nav-item"><a href="/tecdoc"><i class="fas fa-cogs"></i><p>TecDoc</p></a></li>
+                        <li class="nav-item"><a href="/suppliers"><i class="fa fa-user-tie"></i><p>Fournisseurs</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-cogs"></i></span><h4 class="text-section">Paramètres</h4></li>
+                        <li class="nav-item"><a href="/setting"><i class="fas fa-sliders-h"></i><p>Paramètres</p></a></li>
+                        <li class="nav-item"><a href="/tecdoc"><i class="fas fa-database"></i><p>TecDoc</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-robot"></i></span><h4 class="text-section">Autres</h4></li>
                         <li class="nav-item"><a href="/voice"><i class="fas fa-robot"></i><p>NEGOBOT</p></a></li>
                         <li class="nav-item">
-                            <a href="{{ route('logout.admin') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
                             </a>
                             <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
@@ -421,8 +437,8 @@
                                         <th>Type</th>
                                         <th>QTE</th>
                                         <th>Magasin</th>
-                                        <th>Cout.HT</th>
-                                        <th>Fournisseur</th>
+                                        <th>Prix.HT</th>
+                                        <th>Source</th>
                                         <th>Référence</th>
                                     </tr>
                                 </thead>
@@ -593,7 +609,7 @@
                         <td>${costPrice.toFixed(2)} €</td>
                         <td>
                             ${price.toFixed(2)} €<br>
-                            <small class="${price >= costPrice ? 'text-success' : 'text-danger'}">
+                            <small class="${price >= costPrice ? 'text-success' : 'text-danger'} small-text">
                                 ${price >= costPrice ? '+' : ''}${(price - costPrice).toFixed(2)} €
                                 (${costPrice > 0 ? (((price - costPrice) / costPrice) * 100).toFixed(0) : 0}%)
                             </small>
@@ -755,7 +771,7 @@
                                         <td>
                                             <span class="badge bg-${movement.quantity >= 0 ? 'success' : 'danger'}">
                                                 ${movement.type || 'Unknown'}
-                                            </span>
+                                            </span><br>
                                             ${movement.created_at || '-'}
                                         </td>
                                         <td>${movement.quantity || 0}</td>

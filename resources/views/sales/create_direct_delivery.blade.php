@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>AZ ERP - Créer une commande de vente</title>
+    <title>AZ ERP - Créer un bon de livraison</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
 
@@ -45,7 +45,7 @@
         .card-body {
             padding: 1.5rem;
         }
-        .btn-primary, .btn-success, .btn-danger {
+        .btn-primary, .btn-success, .btn-danger, .btn-outline-primary {
             font-size: 0.9rem;
             padding: 0.5rem 1rem;
             border-radius: 6px;
@@ -61,7 +61,12 @@
         }
         .btn-danger:hover {
             background-color: #c82333;
-            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+            box-shadow: 0 4px 10px rgba(200, 35, 51, 0.3);
+        }
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
         }
         .table {
             width: 100%;
@@ -99,6 +104,11 @@
         .form-control.quantity, .form-control.unit_price_ht, .form-control.remise {
             width: 100px;
             font-size: 0.9rem;
+        }
+        .form-control.order_date {
+            width: 150px;
+            font-size: 0.85rem;
+            padding: 0.3rem;
         }
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             line-height: 1.8rem;
@@ -162,7 +172,11 @@
                 width: 80px;
                 font-size: 0.8rem;
             }
-            .btn-primary, .btn-success, .btn-danger {
+            .form-control.order_date {
+                width: 100%;
+                font-size: 0.8rem;
+            }
+            .btn-primary, .btn-success, .btn-danger, .btn-outline-primary {
                 padding: 0.4rem 0.8rem;
                 font-size: 0.8rem;
             }
@@ -173,11 +187,14 @@
                 max-width: 90%;
             }
         }
+        .small-text {
+            font-size: 0.95em;
+        }
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <!-- Sidebar (unchanged) -->
+        <!-- Sidebar -->
         <div class="sidebar" data-background-color="dark">
             <div class="sidebar-logo">
                 <div class="logo-header" data-background-color="dark">
@@ -194,27 +211,38 @@
             <div class="sidebar-wrapper scrollbar scrollbar-inner">
                 <div class="sidebar-content">
                     <ul class="nav nav-secondary">
-                        <li class="nav-item"><a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a></li>
-                        <li class="nav-item active"><a href="/commande"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
-                        <li class="nav-item"><a href="/orders"><i class="fas fa-file-invoice-dollar"></i><p>Mes BL</p></a></li>
-                        <li class="nav-item"><a href="/listdevis"><i class="fas fa-file-alt"></i><p>Mes Devis</p></a></li>
-                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Brouillons</p></a></li>
-                        <li class="nav-item"><a href="/invoices"><i class="fas fa-money-bill-wave"></i><p>Mes Factures</p></a></li>
-                        <li class="nav-item"><a href="/avoirs"><i class="fas fa-reply-all"></i><p>Mes Avoirs</p></a></li>
+                        <li class="nav-item">
+                            <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
+                        </li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
+                        <li class="nav-item"><a href="/sales/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
+                        <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
+                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
+                        <li class="nav-item active"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
+                        <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
+                        <li class="nav-item"><a href="/avoirs"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
+                        <li class="nav-item"><a href="/reglement-client"><i class="fas fa-credit-card"></i><p>Règlement Client</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
                         <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
                         <li class="nav-item"><a href="/purchaseprojects/list"><i class="fas fa-file-alt"></i><p>Projets de Commande</p></a></li>
-                        <li class="nav-item"><a href="/returns"><i class="fas fa-file-alt"></i><p>Retours Achat</p></a></li>
-                        <li class="nav-item"><a href="/invoices"><i class="fas fa-money-bill-wave"></i><p>Factures Achat</p></a></li>
-                        <li class="nav-item"><a href="/notes"><i class="fas fa-reply-all"></i><p>Avoirs Achat</p></a></li>
-                        <li class="nav-item"><a href="/receptions"><i class="fas fa-money-bill-wave"></i><p>Réception</p></a></li>
-                        <li class="nav-item"><a href="/articles"><i class="fas fa-money-bill-wave"></i><p>Articles</p></a></li>
+                        <li class="nav-item"><a href="/returns"><i class="fas fa-undo-alt"></i><p>Retours Achat</p></a></li>
+                        <li class="nav-item"><a href="/invoices"><i class="fas fa-file-invoice"></i><p>Factures Achat</p></a></li>
+                        <li class="nav-item"><a href="/notes"><i class="fas fa-sticky-note"></i><p>Avoirs Achat</p></a></li>
+                        <li class="nav-item"><a href="/reglement-fournisseur"><i class="fas fa-credit-card"></i><p>Règlement Fournisseur</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
+                        <li class="nav-item"><a href="/receptions"><i class="fas fa-truck-loading"></i><p>Réceptions</p></a></li>
+                        <li class="nav-item"><a href="/articles"><i class="fas fa-cubes"></i><p>Articles</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fa fa-users"></i></span><h4 class="text-section">Référentiel</h4></li>
                         <li class="nav-item"><a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a></li>
-                        <li class="nav-item"><a href="/suppliers"><i class="fa fa-user"></i><p>Fournisseurs</p></a></li>
-                        <li class="nav-item"><a href="/setting"><i class="fas fa-money-bill-wave"></i><p>Paramétres</p></a></li>
-                        <li class="nav-item"><a href="/tecdoc"><i class="fas fa-cogs"></i><p>TecDoc</p></a></li>
+                        <li class="nav-item"><a href="/suppliers"><i class="fa fa-user-tie"></i><p>Fournisseurs</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-cogs"></i></span><h4 class="text-section">Paramètres</h4></li>
+                        <li class="nav-item"><a href="/setting"><i class="fas fa-sliders-h"></i><p>Paramètres</p></a></li>
+                        <li class="nav-item"><a href="/tecdoc"><i class="fas fa-database"></i><p>TecDoc</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-robot"></i></span><h4 class="text-section">Autres</h4></li>
                         <li class="nav-item"><a href="/voice"><i class="fas fa-robot"></i><p>NEGOBOT</p></a></li>
                         <li class="nav-item">
-                            <a href="{{ route('logout.admin') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
                             </a>
                             <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
@@ -245,7 +273,7 @@
                     <div class="container-fluid">
                         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
                             <li class="nav-item topbar-user dropdown hidden-caret">
-                                <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                                <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
                                     <div class="avatar-sm">
                                         <img src="{{ asset('assets/img/avatar.png') }}" alt="..." class="avatar-img rounded-circle" />
                                     </div>
@@ -299,8 +327,12 @@
                             <form action="{{ route('sales.delivery.store') }}" method="POST" id="salesForm">
                                 @csrf
                                 <div class="row mb-3">
-                                    <div class="col-md-6 mb-2">
-                                        <label class="form-label">Client</label>
+                                    <div class="col-md-4 col-12 mb-2">
+                                        <label class="form-label">Client
+                                            <a href="/customers">
+                                                <i class="fas fa-plus-circle ms-2"></i>
+                                            </a>
+                                        </label>
                                         <select name="customer_id" id="customer_id" class="form-control select2" required>
                                             <option value="" disabled selected>Sélectionner un client</option>
                                             @foreach ($customers as $customer)
@@ -314,34 +346,53 @@
                                                         data-address="{{ $customer->address ?? '' }}"
                                                         data-address_delivery="{{ $customer->address_delivery ?? '' }}"
                                                         data-city="{{ $customer->city ?? '' }}"
-                                                        data-country="{{ $customer->country ?? '' }}">
-                                                    {{ $customer->name }}
+                                                        data-country="{{ $customer->country ?? '' }}"
+                                                        @if($customer->blocked) disabled @endif
+                                                        >
+                                                    {{ $customer->code ?? '' }} ⭆ {{ $customer->name }} 	
+                                                    @if($customer->blocked) <span class="badge bg-danger badge-very-sm"> &#x1F512;</span> @endif
                                                 </option>
                                             @endforeach
                                         </select>
                                         <input type="hidden" name="tva_rate" id="tva_rate" value="0">
                                     </div>
-                                    <div class="col-md-6 mb-2">
+                                    <div class="col-md-5 col-12 mb-2">
+                                        <label class="form-label">Véhicule</label>
+                                        <div class="input-group">
+                                            <select name="vehicle_id" id="vehicle_id" class="form-control select2">
+                                                <option value="" disabled selected>Sélectionner un véhicule</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <hr>
+                                                <a id="loadCatalogBtn" class="btn btn-outline-primary btn-sm px-2 py-1" style="font-size: 0.90rem;" disabled>
+                                                    <i class="fas fa-list"></i> Charger le Catalogue
+                                                </a>
+
+                                                <a id="loadCatalogBtn" class="btn btn-outline-secondary btn-sm px-2 py-1" style="font-size: 0.90rem;" disabled>
+                                                    <i class="fas fa-list"></i> Voir l'historique
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-12 mb-2">
                                         <label class="form-label">Date de commande</label>
-                                        <input type="date" name="order_date" id="order_date" value="{{ now()->format('Y-m-d') }}" class="form-control" required>
+                                        <input type="date" name="order_date" id="order_date" value="{{ now()->format('Y-m-d') }}" class="form-control order_date" required>
                                     </div>
                                 </div>
                                 <div class="mb-3" id="customer_details" style="display: none;">
-                                    <h6 class="font-weight-bold mb-2">Détails du client</h6>
+                                    <!-- <h6 class="font-weight-bold mb-2">Détails du client</h6> -->
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <p><strong>Nom:</strong> <span id="customer_name"></span></p>
-                                            <p><strong>Code client:</strong> <span id="customer_code"></span></p>
-                                            <p><strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p>
-                                            <p><strong>Email:</strong> <span id="customer_email"></span></p>
-                                            <p><strong>Téléphone 1:</strong> <span id="customer_phone1"></span></p>
+                                            <p>	&#128204<strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span></p>
+                                            <p>&#10135<strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p>
+                                            <p>&#9993<strong>Email:</strong> <span id="customer_email"></span></p>
+                                            <p>&#128222<strong>Téléphone 1:</strong> <span id="customer_phone1"></span></p>
                                         </div>
                                         <div class="col-md-6">
-                                            <p><strong>Téléphone 2:</strong> <span id="customer_phone2"></span></p>
-                                            <p><strong>Adresse:</strong> <span id="customer_address"></span></p>
-                                            <p><strong>Adresse de livraison:</strong> <span id="customer_address_delivery"></span></p>
-                                            <p><strong>Ville:</strong> <span id="customer_city"></span></p>
-                                            <p><strong>Pays:</strong> <span id="customer_country"></span></p>
+                                            <p>&#128222<strong>Téléphone 2:</strong> <span id="customer_phone2"></span></p>
+                                            <p>	&#128681<strong>Adresse:</strong> <span id="customer_address"></span></p>
+                                            <p>&#128666<strong>Adresse de livraison:</strong> <span id="customer_address_delivery"></span></p>
+                                            <p>&#127988<strong>Ville & Pays:</strong> <span id="customer_city"></span>, <span id="customer_country"></span></p>
                                         </div>
                                     </div>
                                 </div>
@@ -366,7 +417,7 @@
                                                     <th>Remise %</th>
                                                     <th>Total HT</th>
                                                     <th>Total TTC</th>
-                                                    <th>Actions</th>
+                                                    <th></th>
                                                 </tr>
                                             </thead>
                                             <tbody id="lines_body"></tbody>
@@ -376,16 +427,15 @@
                                         <h5 class="mb-1">Total HT : <span id="total_ht_global" class="text-success fw-bold">0.00</span> €</h5>
                                         <h6 class="mb-0">Total TTC : <span id="total_ttc_global" class="text-danger fw-bold">0.00</span> €</h6>
                                     </div>
-                                    <!-- <button type="button" id="add_line" class="btn btn-outline-secondary mt-2">+ Ajouter une ligne</button> -->
-                                     <a href="/articles" target="_blank" type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Aller a la Page Articles</a>
+                                    <a href="/articles" target="_blank" type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Aller a la Page Articles</a>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Notes / Commentaire</label>
                                     <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de livraison, etc."></textarea>
                                 </div>
                                 <div class="text-end">
-                                    <!-- <button type="submit" name="action" value="save" class="btn btn-primary px-3">✅ Enregistrer Brouillon</button> -->
-                                    <button type="submit" name="action" value="validate" class="btn btn-success px-3 ms-2">✔️ Valider</button>
+                                    <button type="submit" name="action" value="validate" class="btn btn-success px-3 ms-2">✔️ Valider BL</button>
+                                    <button type="submit" name="action" value="validate_and_invoice" class="btn btn-primary px-3 ms-2">📄 Valider et Facturer</button>
                                 </div>
                             </form>
                         </div>
@@ -399,7 +449,9 @@
                     <div class="modal-content">
                         <div class="modal-header bg-primary text-white">
                             <h5 class="modal-title" id="stockDetailsModalLabel"></h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
                         <div class="modal-body">
                             <h6><i class="fas fa-warehouse me-1"></i> Quantité actuelle par magasin :</h6>
@@ -421,8 +473,8 @@
                                         <th>Type</th>
                                         <th>QTE</th>
                                         <th>Magasin</th>
-                                        <th>Cout.HT</th>
-                                        <th>Fournisseur</th>
+                                        <th>Prix.HT</th>
+                                        <th>Source</th>
                                         <th>Référence</th>
                                     </tr>
                                 </thead>
@@ -430,11 +482,13 @@
                             </table>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
                         </div>
                     </div>
                 </div>
             </div>
+
+           
 
             <footer class="footer">
                 <div class="container-fluid d-flex justify-content-between">
@@ -478,6 +532,29 @@
                 console.log('Global Totals - HT:', totalHtGlobal, 'TTC:', totalTtcGlobal);
             }
 
+            function updateCatalogButton() {
+                let customerId = $('#customer_id').val();
+                let vehicleId = $('#vehicle_id').val();
+                let $catalogBtn = $('#loadCatalogBtn');
+                
+                if (customerId && vehicleId && !$('#vehicle_id').prop('disabled')) {
+                    $catalogBtn
+                        .attr('href', `/customers/${customerId}/vehicles/${vehicleId}/catalog`)
+                        .removeAttr('disabled')
+                        .on('click', function(e) {
+                            e.preventDefault();
+                            window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes');
+                            return false;
+                        });
+                    console.log('Catalog button enabled - Customer ID:', customerId, 'Vehicle ID:', vehicleId);
+                } else {
+                    $catalogBtn
+                        .removeAttr('href')
+                        .attr('disabled', 'disabled');
+                    console.log('Catalog button disabled - Customer ID:', customerId, 'Vehicle ID:', vehicleId);
+                }
+            }
+
             $('#customer_id').change(function () {
                 let customerId = $(this).val();
                 let $selectedOption = $(this).find('option:selected');
@@ -491,7 +568,37 @@
                     console.warn('TVA Mismatch - Customer ID:', customerId, 'data-tva:', tvaRate, 'tvaRates[customerId]:', tvaRateFromObject);
                 }
 
+                // Fetch vehicles for the selected customer
+                let $vehicleSelect = $('#vehicle_id');
+                $vehicleSelect.empty().append('<option value="" disabled selected>Sélectionner un véhicule</option>');
+                $vehicleSelect.prop('disabled', true);
+
                 if (customerId) {
+                    $.ajax({
+                        url: '/customers/' + customerId + '/vehicles',
+                        method: 'GET',
+                        success: function (data) {
+                            console.log('Vehicles fetched for Customer ID:', customerId, 'Data:', data);
+                            if (data.length > 0) {
+                                data.forEach((vehicle, index) => {
+                                    let vehicleText = `${vehicle.license_plate} (${vehicle.brand_name} ${vehicle.model_name} - ${vehicle.engine_description})`;
+                                    $vehicleSelect.append(`<option value="${vehicle.id}" ${index === 0 ? 'selected' : ''}>${vehicleText}</option>`);
+                                });
+                                $vehicleSelect.prop('disabled', false).trigger('change');
+                            } else {
+                                $vehicleSelect.append('<option value="" disabled selected>Aucun véhicule associé</option>');
+                            }
+                            $vehicleSelect.select2({ width: '100%' });
+                            updateCatalogButton();
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('AJAX Error fetching vehicles:', status, error, xhr.responseText);
+                            $vehicleSelect.append('<option value="" disabled selected>Erreur lors du chargement des véhicules</option>');
+                            Swal.fire('Erreur', 'Impossible de charger les véhicules pour ce client.', 'error');
+                            updateCatalogButton();
+                        }
+                    });
+
                     if (tvaRate === 0 && $selectedOption.data('tva') == null) {
                         Swal.fire('Erreur', 'Taux TVA non défini pour ce client.', 'error');
                         console.error('TVA Rate undefined for Customer ID:', customerId, 'tvaRates:', tvaRates);
@@ -511,6 +618,9 @@
                 } else {
                     $('#customer_details').hide();
                     $('#tva_rate').val(0);
+                    $vehicleSelect.empty().append('<option value="" disabled selected>Sélectionner un véhicule</option>').prop('disabled', true);
+                    $vehicleSelect.select2({ width: '100%' });
+                    updateCatalogButton();
                 }
 
                 $('#lines_body tr').each(function () {
@@ -522,6 +632,12 @@
 
                 updateGlobalTotals();
                 console.log('Customer ID:', customerId, 'TVA Rate (data-tva):', tvaRate, 'tvaRates[customerId]:', tvaRateFromObject, 'tvaRates:', tvaRates);
+            });
+
+            $('#vehicle_id').change(function () {
+                let vehicleId = $(this).val();
+                console.log('Vehicle selected:', vehicleId);
+                updateCatalogButton();
             });
 
             $('#search_item').on('input', function () {
@@ -593,15 +709,15 @@
                         <td>${costPrice.toFixed(2)} €</td>
                         <td>
                             ${price.toFixed(2)} €<br>
-                            <small class="${price >= costPrice ? 'text-success' : 'text-danger'}">
+                            <small class="${price >= costPrice ? 'text-success' : 'text-danger'} small-text">
                                 ${price >= costPrice ? '+' : ''}${(price - costPrice).toFixed(2)} €
                                 (${costPrice > 0 ? (((price - costPrice) / costPrice) * 100).toFixed(0) : 0}%)
                             </small>
                         </td>
                         <td>
                             <button type="button" class="btn btn-outline-primary btn-sm stock-details-btn" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#stockDetailsModal" 
+                                    data-toggle="modal" 
+                                    data-target="#stockDetailsModal" 
                                     data-code="${code}"
                                     data-name="${name}"
                                     title="Voir les détails du stock">
@@ -625,41 +741,6 @@
                 updateGlobalTotals();
 
                 console.log('Added line - Code:', code, 'Price:', price, 'TVA Rate:', tvaRate, 'Customer ID:', customerId);
-            });
-
-            $(document).on('click', '#add_line', function () {
-                let customerId = $('#customer_id').val();
-                if (!customerId) {
-                    Swal.fire('Erreur', 'Veuillez sélectionner un client avant d\'ajouter une ligne.', 'error');
-                    return;
-                }
-                let tvaRate = parseFloat($('#customer_id').find('option:selected').data('tva') || 0);
-                if (tvaRate === 0 && $('#customer_id').find('option:selected').data('tva') == null) {
-                    Swal.fire('Erreur', 'Taux TVA non défini pour ce client.', 'error');
-                    console.error('TVA Rate undefined for Customer ID:', customerId);
-                    return;
-                }
-                let row = `
-                    <tr data-line-id="${lineCount}">
-                        <td><input type="text" name="lines[${lineCount}][article_code]" class="form-control article_code" required></td>
-                        <td>-</td>
-                        <td>0.00 €</td>
-                        <td>0.00 €</td>
-                        <td>0</td>
-                        <td><input type="number" name="lines[${lineCount}][ordered_quantity]" class="form-control quantity" value="1" min="0"></td>
-                        <td><input type="number" name="lines[${lineCount}][unit_price_ht]" class="form-control unit_price_ht" value="0" step="0.01"></td>
-                        <td><input type="number" name="lines[${lineCount}][remise]" class="form-control remise" value="0" min="0" max="100" step="0.01"></td>
-                        <td class="text-right total_ht">0.00</td>
-                        <td class="text-right total_ttc">0.00</td>
-                        <td><button type="button" class="btn btn-outline-danger btn-sm remove_line">×</button></td>
-                    </tr>
-                `;
-                $('#lines_body').append(row);
-                updateLineTotals($('#lines_body tr:last'), 0, 1, 0, tvaRate);
-                lineCount++;
-                updateGlobalTotals();
-
-                console.log('Added empty line - TVA Rate:', tvaRate, 'Customer ID:', customerId);
             });
 
             $(document).on('click', '.remove_line', function () {
@@ -755,7 +836,7 @@
                                         <td>
                                             <span class="badge bg-${movement.quantity >= 0 ? 'success' : 'danger'}">
                                                 ${movement.type || 'Unknown'}
-                                            </span>
+                                            </span><br>
                                             ${movement.created_at || '-'}
                                         </td>
                                         <td>${movement.quantity || 0}</td>
@@ -792,7 +873,43 @@
                 $('#stockDetailsModal').modal('show');
             });
 
-            $('#customer_id').trigger('change');
+            $('#salesForm').on('submit', function (e) {
+                const actionValue = $(this).find('button[type="submit"]:focus').val();
+                if (actionValue === 'validate_and_invoice') {
+                    e.preventDefault();
+                    $(this).attr('action', '{{ route("sales.delivery.store_and_invoice") }}');
+                    this.submit();
+                }
+            });
+
+            document.getElementById('salesForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const actionValue = e.submitter ? e.submitter.value : null;
+
+                let confirmMessage = '';
+                if (actionValue === 'validate') {
+                    confirmMessage = 'Vous êtes sûr de valider ?';
+                } else if (actionValue === 'validate_and_invoice') {
+                    confirmMessage = 'Vous êtes sûr de facturer ce bon de livraison ?';
+                }
+
+                if (confirmMessage && confirm(confirmMessage)) {
+                    if (actionValue === 'validate_and_invoice') {
+                        this.action = '{{ route("sales.delivery.store_and_invoice") }}';
+                    }
+                    this.submit();
+                }
+            });
+
+            // Ensure modals are hidden on page load
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('show');
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+                modal.querySelectorAll('button, input, select, a').forEach(el => {
+                    el.blur();
+                });
+            });
         });
     </script>
 </body>

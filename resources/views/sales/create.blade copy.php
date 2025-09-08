@@ -29,26 +29,26 @@
 
     <style>
         .card {
-            border-radius: 12px;
+            border-radius: 8px;
             background: linear-gradient(135deg, #ffffff, #f8f9fa);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .card-header {
             background: linear-gradient(135deg, #007bff, #0056b3);
-            border-radius: 12px 12px 0 0;
+            border-radius: 8px 8px 0 0;
         }
         .card h3 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             color: #007bff;
-            font-weight: 700;
+            font-weight: 600;
         }
         .card-body {
-            padding: 2rem;
+            padding: 1.5rem;
         }
         .btn-primary, .btn-success, .btn-danger {
-            font-size: 1rem;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
             transition: all 0.3s ease;
         }
         .btn-primary:hover {
@@ -67,13 +67,14 @@
             width: 100%;
             margin-bottom: 0;
             background-color: #fff;
-            border-radius: 8px;
+            border-radius: 6px;
             overflow: hidden;
         }
         .table th, .table td {
             text-align: left;
             vertical-align: middle;
-            padding: 0.75rem;
+            padding: 0.5rem;
+            font-size: 0.85rem;
         }
         .table thead {
             background: #f8f9fa;
@@ -85,33 +86,39 @@
             background-color: #f2f2f2;
         }
         .table-responsive {
-            max-height: 400px;
+            max-height: 350px;
             overflow-y: auto;
         }
         .form-control, .select2-container--default .select2-selection--single {
-            border-radius: 8px;
+            border-radius: 6px;
             border: 1px solid #ced4da;
-            padding: 0.5rem;
+            padding: 0.4rem;
+            font-size: 0.9rem;
+            min-width: 80px;
+        }
+        .form-control.quantity, .form-control.unit_price_ht, .form-control.remise {
+            width: 100px;
             font-size: 0.9rem;
         }
         .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 2rem;
+            line-height: 1.8rem;
         }
         .form-label {
             font-weight: 600;
             color: #343a40;
+            font-size: 0.9rem;
         }
         #customer_details {
             background: #f8f9fa;
-            border-radius: 8px;
-            padding: 1.5rem;
+            border-radius: 6px;
+            padding: 1rem;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         #search_results {
             background: #fff;
-            border-radius: 8px;
+            border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            max-height: 200px;
+            max-height: 180px;
             overflow-y: auto;
         }
         #search_results div:hover {
@@ -120,31 +127,62 @@
         }
         .total-display {
             background: #f8f9fa;
-            border-radius: 8px;
-            padding: 1rem;
+            border-radius: 6px;
+            padding: 0.8rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .table-text-small th,
+        .table-text-small td,
+        .table-text-small input,
+        .table-text-small button,
+        .table-text-small span,
+        .table-text-small svg {
+            font-size: 0.8rem !important;
+        }
+        .table-text-small th {
+            font-size: 0.75rem !important;
+        }
+        .badge-very-sm {
+            font-size: 0.5rem;
+            padding: 0.1em 0.2em;
+            vertical-align: middle;
+        }
+        .modal-md {
+            max-width: 800px;
         }
         @media (max-width: 768px) {
             .table-responsive {
                 max-height: none;
             }
             .table th, .table td {
-                font-size: 0.85rem;
-                padding: 0.5rem;
+                font-size: 0.75rem;
+                padding: 0.4rem;
+            }
+            .form-control.quantity, .form-control.unit_price_ht, .form-control.remise {
+                width: 80px;
+                font-size: 0.8rem;
             }
             .btn-primary, .btn-success, .btn-danger {
-                padding: 0.5rem 1rem;
-                font-size: 0.85rem;
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
             }
             .card-body {
                 padding: 1rem;
             }
+            .modal-md {
+                max-width: 90%;
+            }
         }
+
+                .small-text {
+  font-size: 0.95em; /* ou essaye 0.6em si tu veux encore plus petit */
+}
+
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <!-- Sidebar -->
+        <!-- Sidebar (unchanged) -->
         <div class="sidebar" data-background-color="dark">
             <div class="sidebar-logo">
                 <div class="logo-header" data-background-color="dark">
@@ -152,78 +190,34 @@
                         <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
                     </a>
                     <div class="nav-toggle">
-                        <button class="btn btn-toggle toggle-sidebar">
-                            <i class="gg-menu-right"></i>
-                        </button>
-                        <button class="btn btn-toggle sidenav-toggler">
-                            <i class="gg-menu-left"></i>
-                        </button>
+                        <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                        <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
                     </div>
-                    <button class="topbar-toggler more">
-                        <i class="gg-more-vertical-alt"></i>
-                    </button>
+                    <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
                 </div>
             </div>
             <div class="sidebar-wrapper scrollbar scrollbar-inner">
                 <div class="sidebar-content">
                     <ul class="nav nav-secondary">
-                        <li class="nav-item">
-                            <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
-                        </li>
-                        <li class="nav-item active">
-                            <a href="/commande"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/orders"><i class="fas fa-file-invoice-dollar"></i><p>Mes BL</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/listdevis"><i class="fas fa-file-alt"></i><p>Mes Devis</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Brouillons</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/invoices"><i class="fas fa-money-bill-wave"></i><p>Mes Factures</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/avoirs"><i class="fas fa-reply-all"></i><p>Mes Avoirs</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/purchaseprojects/list"><i class="fas fa-file-alt"></i><p>Projets de Commande</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/returns"><i class="fas fa-file-alt"></i><p>Retours Achat</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/invoices"><i class="fas fa-money-bill-wave"></i><p>Factures Achat</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/notes"><i class="fas fa-reply-all"></i><p>Avoirs Achat</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/receptions"><i class="fas fa-money-bill-wave"></i><p>Réception</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/articles"><i class="fas fa-money-bill-wave"></i><p>Articles</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/suppliers"><i class="fa fa-user"></i><p>Fournisseurs</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/setting"><i class="fas fa-money-bill-wave"></i><p>Paramétres</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/tecdoc"><i class="fas fa-cogs"></i><p>TecDoc</p></a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/voice"><i class="fas fa-robot"></i><p>NEGOBOT</p></a>
-                        </li>
+                        <li class="nav-item"><a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a></li>
+                        <li class="nav-item active"><a href="/commande"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
+                        <li class="nav-item"><a href="/orders"><i class="fas fa-file-invoice-dollar"></i><p>Mes BL</p></a></li>
+                        <li class="nav-item"><a href="/listdevis"><i class="fas fa-file-alt"></i><p>Mes Devis</p></a></li>
+                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Brouillons</p></a></li>
+                        <li class="nav-item"><a href="/invoices"><i class="fas fa-money-bill-wave"></i><p>Mes Factures</p></a></li>
+                        <li class="nav-item"><a href="/avoirs"><i class="fas fa-reply-all"></i><p>Mes Avoirs</p></a></li>
+                        <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
+                        <li class="nav-item"><a href="/purchaseprojects/list"><i class="fas fa-file-alt"></i><p>Projets de Commande</p></a></li>
+                        <li class="nav-item"><a href="/returns"><i class="fas fa-file-alt"></i><p>Retours Achat</p></a></li>
+                        <li class="nav-item"><a href="/invoices"><i class="fas fa-money-bill-wave"></i><p>Factures Achat</p></a></li>
+                        <li class="nav-item"><a href="/notes"><i class="fas fa-reply-all"></i><p>Avoirs Achat</p></a></li>
+                        <li class="nav-item"><a href="/receptions"><i class="fas fa-money-bill-wave"></i><p>Réception</p></a></li>
+                        <li class="nav-item"><a href="/articles"><i class="fas fa-money-bill-wave"></i><p>Articles</p></a></li>
+                        <li class="nav-item"><a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a></li>
+                        <li class="nav-item"><a href="/suppliers"><i class="fa fa-user"></i><p>Fournisseurs</p></a></li>
+                        <li class="nav-item"><a href="/setting"><i class="fas fa-money-bill-wave"></i><p>Paramétres</p></a></li>
+                        <li class="nav-item"><a href="/tecdoc"><i class="fas fa-cogs"></i><p>TecDoc</p></a></li>
+                        <li class="nav-item"><a href="/voice"><i class="fas fa-robot"></i><p>NEGOBOT</p></a></li>
                         <li class="nav-item">
                             <a href="{{ route('logout.admin') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
@@ -309,8 +303,8 @@
                         <div class="card-body">
                             <form action="{{ route('sales.store') }}" method="POST" id="salesForm">
                                 @csrf
-                                <div class="row mb-4">
-                                    <div class="col-md-6 mb-3">
+                                <div class="row mb-3">
+                                    <div class="col-md-6 mb-2">
                                         <label class="form-label">Client</label>
                                         <select name="customer_id" id="customer_id" class="form-control select2" required>
                                             <option value="" disabled selected>Sélectionner un client</option>
@@ -332,13 +326,13 @@
                                         </select>
                                         <input type="hidden" name="tva_rate" id="tva_rate" value="0">
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-6 mb-2">
                                         <label class="form-label">Date de commande</label>
                                         <input type="date" name="order_date" id="order_date" value="{{ now()->format('Y-m-d') }}" class="form-control" required>
                                     </div>
                                 </div>
-                                <div class="mb-4" id="customer_details" style="display: none;">
-                                    <h6 class="font-weight-bold mb-3">Détails du client</h6>
+                                <div class="mb-3" id="customer_details" style="display: none;">
+                                    <h6 class="font-weight-bold mb-2">Détails du client</h6>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <p><strong>Nom:</strong> <span id="customer_name"></span></p>
@@ -356,18 +350,22 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mb-4">
+                                <div class="mb-3">
                                     <label class="form-label">Rechercher un article</label>
                                     <input type="text" id="search_item" class="form-control" placeholder="Par code, nom, description ou barcode">
                                     <div id="search_results" class="mt-2"></div>
                                 </div>
-                                <div class="mb-4">
-                                    <h6 class="font-weight-bold mb-3">Lignes de commande</h6>
+                                <div class="mb-3">
+                                    <h6 class="font-weight-bold mb-2">Lignes de commande</h6>
                                     <div class="table-responsive">
-                                        <table class="table table-striped table-bordered" id="lines_table">
-                                            <thead>
+                                        <table class="table table-striped table-bordered table-text-small" id="lines_table">
+                                            <thead class="table-dark">
                                                 <tr>
-                                                    <th>Article</th>
+                                                    <th>Réference</th>
+                                                    <th>Désignation</th>
+                                                    <th>Prix A.HT</th>
+                                                    <th>Prix V.HT</th>
+                                                    <th>Stock</th>
                                                     <th>Qté</th>
                                                     <th>PU HT</th>
                                                     <th>Remise %</th>
@@ -379,21 +377,65 @@
                                             <tbody id="lines_body"></tbody>
                                         </table>
                                     </div>
-                                    <div class="total-display mt-3 text-end">
-                                        <h5 class="mb-1">Total HT : <span id="total_ht_global" class="text-success fw-bold">0.00</span> TND</h5>
-                                        <h6 class="mb-0">Total TTC : <span id="total_ttc_global" class="text-danger fw-bold">0.00</span> TND</h6>
+                                    <div class="total-display mt-2 text-end">
+                                        <h5 class="mb-1">Total HT : <span id="total_ht_global" class="text-success fw-bold">0.00</span> €</h5>
+                                        <h6 class="mb-0">Total TTC : <span id="total_ttc_global" class="text-danger fw-bold">0.00</span> €</h6>
                                     </div>
-                                    <button type="button" id="add_line" class="btn btn-outline-secondary mt-3">+ Ajouter une ligne</button>
+                                    <!-- <button type="button" id="add_line" class="btn btn-outline-secondary mt-2">+ Ajouter une ligne</button> -->
+                                     <a href="/articles" target="_blank" type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Aller a la Page Articles</a>
                                 </div>
-                                <div class="mb-4">
+                                <div class="mb-3">
                                     <label class="form-label">Notes / Commentaire</label>
-                                    <textarea name="notes" id="notes" class="form-control" rows="4" placeholder="Remarques internes, conditions de livraison, etc."></textarea>
+                                    <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de livraison, etc."></textarea>
                                 </div>
                                 <div class="text-end">
-                                    <button type="submit" name="action" value="save" class="btn btn-primary px-4">✅ Enregistrer Brouillon</button>
-                                    <button type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2">✔️ Valider</button>
+                                    <button type="submit" name="action" value="save" class="btn btn-primary px-3">✅ Enregistrer Brouillon</button>
+                                    <button type="submit" name="action" value="validate" class="btn btn-success px-3 ms-2">✔️ Valider</button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock Details Modal -->
+            <div class="modal fade" id="stockDetailsModal" tabindex="-1" aria-labelledby="stockDetailsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="stockDetailsModalLabel"></h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h6><i class="fas fa-warehouse me-1"></i> Quantité actuelle par magasin :</h6>
+                            <table class="table table-bordered table-sm" id="stockTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Magasin</th>
+                                        <th>Quantité</th>
+                                        <th>Dernière mise à jour</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stockTableBody"></tbody>
+                            </table>
+                            <hr>
+                            <h6><i class="fas fa-exchange-alt me-1"></i> Mouvements de stock récents :</h6>
+                            <table class="table table-bordered table-sm" id="movementTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>QTE</th>
+                                        <th>Magasin</th>
+                                        <th>Prix.HT</th>
+                                        <th>Source</th>
+                                        <th>Référence</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="movementTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                         </div>
                     </div>
                 </div>
@@ -504,8 +546,12 @@
                                         <div class="p-2 border-b cursor-pointer hover:bg-gray-100"
                                              data-code="${item.code}"
                                              data-name="${item.name}"
-                                             data-price="${item.sale_price}">
-                                            ${item.name} (${item.code}) - ${item.sale_price} TND
+                                             data-price="${item.sale_price}"
+                                             data-cost-price="${item.cost_price}"
+                                             data-stock="${item.stock_quantity || 0}"
+                                             data-location="${item.location || ''}"
+                                             data-is-active="${item.is_active}">
+                                            ${item.name} (${item.code}) - ${item.sale_price} €
                                         </div>
                                     `);
                                 });
@@ -536,12 +582,37 @@
                 let code = $(this).data('code');
                 let name = $(this).data('name');
                 let price = parseFloat($(this).data('price')) || 0;
+                let costPrice = parseFloat($(this).data('cost-price')) || 0;
+                let stock = parseFloat($(this).data('stock')) || 0;
+                let location = $(this).data('location') || '-';
+                let isActive = $(this).data('is-active') ? 1 : 0;
 
                 let row = `
-                    <tr>
+                    <tr data-line-id="${lineCount}">
                         <td>
-                            ${name} (${code})
+                            ${code}<br>
+                            <span class="badge bg-${isActive ? 'success' : 'danger'} badge-very-sm">${isActive ? '🟢 actif' : '🔴 bloqué'}</span>
                             <input type="hidden" name="lines[${lineCount}][article_code]" value="${code}">
+                        </td>
+                        <td>${name}</td>
+                        <td>${costPrice.toFixed(2)} €</td>
+                        <td>
+                            ${price.toFixed(2)} €<br>
+                            <small class="${price >= costPrice ? 'text-success' : 'text-danger'} small-text">
+                                ${price >= costPrice ? '+' : ''}${(price - costPrice).toFixed(2)} €
+                                (${costPrice > 0 ? (((price - costPrice) / costPrice) * 100).toFixed(0) : 0}%)
+                            </small>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-outline-primary btn-sm stock-details-btn" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#stockDetailsModal" 
+                                    data-code="${code}"
+                                    data-name="${name}"
+                                    title="Voir les détails du stock">
+                                ${stock.toFixed(0)}
+                            </button><br>
+                            <small class="text-muted" style="font-size: 0.7rem;">📦 ${location}</small>
                         </td>
                         <td><input type="number" name="lines[${lineCount}][ordered_quantity]" class="form-control quantity" value="1" min="0"></td>
                         <td><input type="number" name="lines[${lineCount}][unit_price_ht]" class="form-control unit_price_ht" value="${price.toFixed(2)}" step="0.01"></td>
@@ -558,7 +629,7 @@
                 $('#search_item').val('');
                 updateGlobalTotals();
 
-                console.log('Added line - Price:', price, 'TVA Rate:', tvaRate, 'Customer ID:', customerId);
+                console.log('Added line - Code:', code, 'Price:', price, 'TVA Rate:', tvaRate, 'Customer ID:', customerId);
             });
 
             $(document).on('click', '#add_line', function () {
@@ -574,8 +645,12 @@
                     return;
                 }
                 let row = `
-                    <tr>
+                    <tr data-line-id="${lineCount}">
                         <td><input type="text" name="lines[${lineCount}][article_code]" class="form-control article_code" required></td>
+                        <td>-</td>
+                        <td>0.00 €</td>
+                        <td>0.00 €</td>
+                        <td>0</td>
                         <td><input type="number" name="lines[${lineCount}][ordered_quantity]" class="form-control quantity" value="1" min="0"></td>
                         <td><input type="number" name="lines[${lineCount}][unit_price_ht]" class="form-control unit_price_ht" value="0" step="0.01"></td>
                         <td><input type="number" name="lines[${lineCount}][remise]" class="form-control remise" value="0" min="0" max="100" step="0.01"></td>
@@ -629,6 +704,98 @@
 
                 console.log('Line Totals - HT:', totalHt, 'TTC:', totalTtc, 'TVA Rate:', tvaRate);
             }
+
+            // Stock Details Modal Handler
+            $(document).on('click', '.stock-details-btn', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                let code = $(this).data('code');
+                let name = $(this).data('name');
+
+                $('#stockDetailsModalLabel').text(`Détail du stock – ${code} : ${name}`);
+                $('#stockTableBody').empty();
+                $('#movementTableBody').empty();
+
+                $.ajax({
+                    url: '{{ route("items.stock.details") }}',
+                    method: 'GET',
+                    data: { code: code },
+                    success: function (data) {
+                        console.log('AJAX Response:', data);
+
+                        if (data.error) {
+                            console.error('Server returned error:', data.error);
+                            $('#stockTableBody').append(`
+                                <tr><td colspan="3" class="text-center text-danger">Erreur: ${data.error}</td></tr>
+                            `);
+                            $('#movementTableBody').append(`
+                                <tr><td colspan="6" class="text-center text-danger">Erreur: ${data.error}</td></tr>
+                            `);
+                            return;
+                        }
+
+                        if (data.stocks && data.stocks.length > 0) {
+                            data.stocks.forEach(stock => {
+                                $('#stockTableBody').append(`
+                                    <tr>
+                                        <td>${stock.store_name || '-'}</td>
+                                        <td>${stock.quantity}</td>
+                                        <td>${stock.updated_at || '-'}</td>
+                                    </tr>
+                                `);
+                            });
+                        } else {
+                            $('#stockTableBody').append(`
+                                <tr><td colspan="3" class="text-center text-muted">Aucun stock trouvé</td></tr>
+                            `);
+                        }
+
+                        if (data.movements && data.movements.length > 0) {
+                            data.movements.forEach(movement => {
+                                let costPrice = parseFloat(movement.cost_price);
+                                let costPriceFormatted = isNaN(costPrice) ? '-' : costPrice.toFixed(2) + ' €';
+                                $('#movementTableBody').append(`
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-${movement.quantity >= 0 ? 'success' : 'danger'}">
+                                                ${movement.type || 'Unknown'}
+                                            </span><br>
+                                            ${movement.created_at || '-'}
+                                        </td>
+                                        <td>${movement.quantity || 0}</td>
+                                        <td>${movement.store_name || '-'}</td>
+                                        <td>${costPriceFormatted}</td>
+                                        <td>${movement.supplier_name || '-'}</td>
+                                        <td>${movement.reference || '-'}</td>
+                                    </tr>
+                                `);
+                            });
+                        } else {
+                            $('#movementTableBody').append(`
+                                <tr><td colspan="6" class="text-center text-muted">Aucun mouvement trouvé</td></tr>
+                            `);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('AJAX Error:', {
+                            status: status,
+                            error: error,
+                            responseText: xhr.responseText,
+                            statusCode: xhr.status
+                        });
+                        let errorMessage = xhr.status === 404 ? 'Article non trouvé' : `Erreur serveur: ${xhr.status} ${xhr.statusText} - ${xhr.responseJSON?.message || 'Erreur inconnue'}`;
+                        $('#stockTableBody').append(`
+                            <tr><td colspan="3" class="text-center text-danger">${errorMessage}</td></tr>
+                        `);
+                        $('#movementTableBody').append(`
+                            <tr><td colspan="6" class="text-center text-danger">${errorMessage}</td></tr>
+                        `);
+                    }
+                });
+
+                $('#stockDetailsModal').modal('show');
+            });
 
             $('#customer_id').trigger('change');
         });

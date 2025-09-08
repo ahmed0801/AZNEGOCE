@@ -60,6 +60,7 @@
                 <td><strong>N° Commande :</strong> {{ $deliveryNote->salesOrder->numdoc ?? '-' }}</td>
             </tr>
         </table>
+        
 
         <table class="items-table">
             <thead>
@@ -87,7 +88,9 @@
                 @endforeach
             </tbody>
         </table>
-
+@if($deliveryNote->notes)
+        <p><b>Note :</b> <u>{{ $deliveryNote->notes ?? '-' }}</u></p>
+@endif
         <div class="totals-box">
             <table>
                 <tr>

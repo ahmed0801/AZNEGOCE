@@ -194,161 +194,67 @@
   </head>
   <body>
     <div class="wrapper">
-      <!-- Sidebar -->
-      <div class="sidebar" data-background-color="dark">
-        <div class="sidebar-logo">
-          <!-- Logo Header -->
-          <div class="logo-header" data-background-color="dark">
-            <a href="/" class="logo">
-              <img
-                src="{{ asset('assets/img/logop.png')}}"
-                alt="navbar brand"-9
-                class="navbar-brand"
-                height="40"
-              />
-            </a>
-            <div class="nav-toggle">
-              <button class="btn btn-toggle toggle-sidebar">
-                <i class="gg-menu-right"></i>
-              </button>
-              <button class="btn btn-toggle sidenav-toggler">
-                <i class="gg-menu-left"></i>
-              </button>
+     <!-- Sidebar -->
+        <div class="sidebar" data-background-color="dark">
+            <div class="sidebar-logo">
+                <div class="logo-header" data-background-color="dark">
+                    <a href="/" class="logo">
+                        <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
+                    </a>
+                    <div class="nav-toggle">
+                        <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                        <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
+                    </div>
+                    <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
+                </div>
             </div>
-            <button class="topbar-toggler more">
-              <i class="gg-more-vertical-alt"></i>
-            </button>
-          </div>
-          <!-- End Logo Header -->
+            <div class="sidebar-wrapper scrollbar scrollbar-inner">
+                <div class="sidebar-content">
+                    <ul class="nav nav-secondary">
+                        <li class="nav-item">
+                            <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
+                        </li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
+                        <li class="nav-item"><a href="/commande"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
+                        <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
+                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
+                        <li class="nav-item"><a href="/invoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
+                        <li class="nav-item"><a href="/avoirs"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
+                        <li class="nav-item"><a href="/reglement-client"><i class="fas fa-credit-card"></i><p>Règlement Client</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
+                        <li class="nav-item active"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
+                        <li class="nav-item"><a href="/purchaseprojects/list"><i class="fas fa-file-alt"></i><p>Projets de Commande</p></a></li>
+                        <li class="nav-item"><a href="/returns"><i class="fas fa-undo-alt"></i><p>Retours Achat</p></a></li>
+                        <li class="nav-item"><a href="/invoices"><i class="fas fa-file-invoice"></i><p>Factures Achat</p></a></li>
+                        <li class="nav-item"><a href="/notes"><i class="fas fa-sticky-note"></i><p>Avoirs Achat</p></a></li>
+                        <li class="nav-item"><a href="/reglement-fournisseur"><i class="fas fa-credit-card"></i><p>Règlement Fournisseur</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
+                        <li class="nav-item"><a href="/receptions"><i class="fas fa-truck-loading"></i><p>Réceptions</p></a></li>
+                        <li class="nav-item"><a href="/articles"><i class="fas fa-cubes"></i><p>Articles</p></a></li>
+                        <li class="nav-item"><a href="/planification-tournee"><i class="fas fa-truck"></i><p>Suivi Livraisons</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fa fa-users"></i></span><h4 class="text-section">Référentiel</h4></li>
+                        <li class="nav-item"><a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a></li>
+                        <li class="nav-item"><a href="/suppliers"><i class="fa fa-user-tie"></i><p>Fournisseurs</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-cogs"></i></span><h4 class="text-section">Paramètres</h4></li>
+                        <li class="nav-item"><a href="/setting"><i class="fas fa-sliders-h"></i><p>Paramètres</p></a></li>
+                        <li class="nav-item"><a href="/tecdoc"><i class="fas fa-database"></i><p>TecDoc</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-robot"></i></span><h4 class="text-section">Autres</h4></li>
+                        <li class="nav-item"><a href="/voice"><i class="fas fa-robot"></i><p>NEGOBOT</p></a></li>
+                        <li class="nav-item">
+                            <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
+                            </a>
+                            <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
+                                @csrf
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-        <div class="sidebar-wrapper scrollbar scrollbar-inner">
-          <div class="sidebar-content">
-            <ul class="nav nav-secondary">
-              
-
-            <li class="nav-item">
-                <a href="/dashboard">
-                  <i class="fas fa-home"></i>
-                  <p>Dashboard</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a  href="/commande">
-                  <i class="fas fa-shopping-cart"></i>
-                  <p>Nouvelle Commande</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a  href="/orders">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <p>Mes BL</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a  href="/listdevis">
-                <i class="fas fa-file-alt"></i>
-                  <p>Mes Devis</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-              <a href="/listbrouillon">
-              <i class="fas fa-reply-all"></i>
-              <p>Brouillons</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-              <a href="/invoices">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Mes Factures</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-              <a href="/avoirs">
-              <i class="fas fa-reply-all"></i>
-              <p>Mes Avoirs</p>
-                </a>
-              </li>
-
-
-                                          <li class="nav-item active">
-              <a href="/purchases/list">
-                <i class="fas fa-file-alt"></i>
-              <p>Commandes Achat</p>
-                </a>
-              </li>
-
-
-
-              <li class="nav-item">
-              <a href="/receptions">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Réception</p>
-                </a>
-              </li>
-
-
-              <li class="nav-item">
-              <a href="/articles">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Articles</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item">
-              <a href="/customers">
-              <i class="fa fa-user"></i>
-              <p>Clients</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item">
-              <a href="/suppliers">
-              <i class="fa fa-user"></i>
-              <p>Fournisseurs</p>
-                </a>
-              </li>
-              
-
-              <li class="nav-item">
-              <a href="/setting">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Paramétres</p>
-                </a>
-              </li>
-
-
-
-              <li class="nav-item">
-  <a href="/tecdoc">
-    <i class="fas fa-cogs"></i> 
-    <p>TecDoc</p>
-  </a>
-</li>    
-
-              
-  <!-- Lien de déconnexion -->
-  <li class="nav-item">
-        <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="fas fa-sign-out-alt"></i>
-            <p>Déconnexion</p>
-        </a>
-        <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
-            @csrf
-        </form>
-    </li>             
-
-
-            </ul>
-          </div>
-        </div>
-      </div>
-      <!-- End Sidebar -->
+        <!-- End Sidebar -->
 
       <div class="main-panel">
         <div class="main-header">
@@ -468,218 +374,227 @@
           <!-- End Navbar -->
         </div>
 
-        <div class="container">
-          <div class="page-inner">
-          @if(session('success'))
+       <div class="container">
+    <div class="page-inner">
+        @if(session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
             </div>
         @endif
 
-
-
-        <div class="container mt-4">
-        {{-- Affichage des messages d'erreur --}}
         @if(session('error'))
             <div class="alert alert-danger">
                 {{ session('error') }}
             </div>
         @endif
-        <div class="container mt-4">
 
-    <h4>📋 Liste des commandes d'achat : 
-      
-                  <a href="/purchases" class="btn btn-sm btn-success" >Nouveau 
-           <i class="fas fa-plus-circle ms-2"></i>
-</a>
-    </h4>
-    
-    
-<form method="GET" action="{{ route('purchases.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+        <h4>📋 Liste des commandes d'achat : 
+            <a href="/purchases" class="btn btn-sm btn-success">Nouveau 
+                <i class="fas fa-plus-circle ms-2"></i>
+            </a>
+        </h4>
 
-    <select name="supplier_id" class="form-select form-select-sm" style="width: 150px;">
-        <option value="">Fournisseur (Tous)</option>
-        @foreach($suppliers as $supplier)
-            <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
-                {{ $supplier->name }}
-            </option>
-        @endforeach
-    </select>
+        <form method="GET" action="{{ route('purchases.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+            <select name="supplier_id" class="form-select form-select-sm" style="width: 150px;">
+                <option value="">Fournisseur (Tous)</option>
+                @foreach($suppliers as $supplier)
+                    <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
+                        {{ $supplier->name }}
+                    </option>
+                @endforeach
+            </select>
 
-    <select name="status" class="form-select form-select-sm" style="width: 170px;">
-        <option value="">Statut commande (Tous)</option>
-        <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
-        <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validé</option>
-    </select>
+            <select name="status" class="form-select form-select-sm" style="width: 170px;">
+                <option value="">Statut commande (Tous)</option>
+                <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
+                <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validé</option>
+            </select>
 
-    <select name="reception_status" class="form-select form-select-sm" style="width: 160px;">
-        <option value="">Statut réception (Tous)</option>
-        <option value="En_cours" {{ request('reception_status') == 'En_cours' ? 'selected' : '' }}>Non Réceptionnée</option>
-        <option value="Reçu" {{ request('reception_status') == 'Reçu' ? 'selected' : '' }}>Reçu</option>
-        <option value="Partiel" {{ request('reception_status') == 'Partiel' ? 'selected' : '' }}>Partiel</option>
-    </select>
+            <select name="reception_status" class="form-select form-select-sm" style="width: 160px;">
+                <option value="">Statut réception (Tous)</option>
+                <option value="En_cours" {{ request('reception_status') == 'En_cours' ? 'selected' : '' }}>Non Réceptionnée</option>
+                <option value="Reçu" {{ request('reception_status') == 'Reçu' ? 'selected' : '' }}>Reçu</option>
+                <option value="Partiel" {{ request('reception_status') == 'Partiel' ? 'selected' : '' }}>Partiel</option>
+            </select>
+de
+            <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début"
+                value="{{ request('date_from') }}">
+à
+            <input type="date" name="date_to" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin"
+                value="{{ request('date_to') }}">
 
-    <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début"
-        value="{{ request('date_from') }}">
+            <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
+                <i class="fas fa-filter me-1"></i> Filtrer
+            </button>
 
-    <input type="date" name="date_to" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin"
-        value="{{ request('date_to') }}">
+            <button type="submit" name="action" value="export" formaction="{{ route('purchases.export') }}" 
+                class="btn btn-outline-success btn-sm px-3">
+                <i class="fas fa-file-excel me-1"></i> Exporter
+            </button>
 
-    <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-        <i class="fas fa-filter me-1"></i> Filtrer
-    </button>
+            <a href="{{ route('purchases.list') }}" class="btn btn-outline-secondary btn-sm px-3">
+                <i class="fas fa-undo me-1"></i> Réinitialiser
+            </a>
+        </form>
 
-    <button type="submit" name="action" value="export" formaction="{{ route('purchases.export') }}" 
-        class="btn btn-outline-success btn-sm px-3">
-        <i class="fas fa-file-excel me-1"></i> Exporter
-    </button>
+        @foreach ($purchases as $purchase)
+            <div class="card mb-4 shadow-sm border-0">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
+                    <div>
+                        <h6 class="mb-0">
+                            <strong>Commande N° : {{ $purchase->numdoc }}</strong> –
+                            {{ $purchase->supplier->name }}
+                            <span class="text-muted small">({{ \Carbon\Carbon::parse($purchase->order_date)->format('d/m/Y') }})</span>
+                        </h6>
+                        @if($purchase->status === 'brouillon')
+                            <span class="badge bg-secondary">{{ ucfirst($purchase->status) }}</span>
+                        @else
+                            <span class="badge bg-success">{{ ucfirst($purchase->status) }}</span>
+                        @endif
 
-    <a href="{{ route('purchases.list') }}" class="btn btn-outline-secondary btn-sm px-3">
-        <i class="fas fa-undo me-1"></i> Réinitialiser
-    </a>
-
-</form>
-
-
+                                                                        @if($purchase->status_livraison === 'non_récuperée')
+                            <span class="badge bg-warning text-dark">{{ ucfirst($purchase->status_livraison) }}</span>
+                        @else
+                            <span class="badge bg-success">{{ ucfirst($purchase->status_livraison) }}</span>
+                        @endif
 
 
-
-    @foreach ($purchases as $purchase)
-                <div class="card mb-4 shadow-sm border-0">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
-                        <div>
-                            <h6 class="mb-0">
-                                <strong>Commande N° : {{ $purchase->numdoc }}</strong> –
-                                {{ $purchase->supplier->name }}
-                                <span class="text-muted small">({{ \Carbon\Carbon::parse($purchase->order_date)->format('d/m/Y') }})</span>
-                            </h6>
-                            @if($purchase->status === 'brouillon')
-                                <span class="badge bg-secondary">{{ ucfirst($purchase->status) }}</span>
-                            @else
-                                <span class="badge bg-success">{{ ucfirst($purchase->status) }}</span>
+                        @if($purchase->reception)
+                            @if(ucfirst($purchase->reception->status) == 'En_cours')
+                                <span class="badge bg-danger text-dark">Non Réceptionnée</span>
+                            @elseif(ucfirst($purchase->reception->status) == 'Reçu')
+                                <span class="badge bg-success text-dark">Réceptionnée</span>
+                            @elseif(ucfirst($purchase->reception->status) == 'Partiel')
+                                <span class="badge bg-warning text-dark">Partiellement Réceptionnée</span>
                             @endif
-                            @if($purchase->reception)
-                                @if(ucfirst($purchase->reception->status) == 'En_cours')
-                                    <span class="badge bg-danger text-dark">Non Réceptionnée</span>
-                                @elseif(ucfirst($purchase->reception->status) == 'Reçu')
-                                    <span class="badge bg-success text-dark">Réceptionnée</span>
-                                @elseif(ucfirst($purchase->reception->status) == 'Partiel')
-                                    <span class="badge bg-warning text-dark">Partiellement Réceptionnée</span>
-                                @endif
+                        @endif
+
+
+
+
+
+
+                        <span class="text-muted small">
+                            @if($purchase->returns()->exists())
+                                ↪︎ {{ count($purchase->returns) }} Retour(s) associé(s)
                             @endif
-
-
-                                                                        @if($purchase->returns()->exists())
-                                     
-                                           <span class="text-muted small">
-                                                ↪︎ {{count($purchase->returns)}} Retour(s) associé(s)
-                                           </span>
-                                  
-                                    @endif
-
-
-                        </div>
-                                                <div class="btn-group">
-                            <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $purchase->id }})">
-                                ➕ Détails
-                            </button>
-                            <a href="{{ route('purchases.export_single', $purchase->id) }}" class="btn btn-xs btn-outline-success">
-                                EXCEL <i class="fas fa-file-excel"></i>
-                            </a>
-                            <a href="{{ route('purchases.print_single', $purchase->id) }}" class="btn btn-xs btn-outline-primary" title="Télécharger PDF" target="_blank">
-                                PDF <i class="fas fa-print"></i>
-                            </a>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle dropdown-toggle-split"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    @if($purchase->reception)
-                                        <a class="dropdown-item" href="{{ route('receptions.show', $purchase->reception->id) }}" title="Voir la réception">
-                                            <i class="fas fa-box"></i> Voir Réception ({{ ucfirst($purchase->reception->status) }})
-                                        </a>
-                                    @elseif($purchase->status === 'brouillon')
-                                        <form action="{{ route('purchases.validate', $purchase->id) }}" method="POST" onsubmit="return confirm('Valider cette commande ?')" class="d-inline">
-                                            @csrf
-                                            @method('PUT')
-                                            <button type="submit" class="dropdown-item">
-                                                <i class="fas fa-check"></i> Valider la commande
-                                            </button>
-                                        </form>
-                                    @else
-                                        <span class="dropdown-item disabled" title="Aucune réception disponible">
-                                            <i class="fas fa-box"></i> Aucune réception
-                                        </span>
-                                    @endif
-                                    <a class="dropdown-item" href="{{ route('purchases.edit', $purchase->id) }}">
-                                        <i class="fas fa-edit"></i> Modifier
-                                    </a>
-                                    @php
-                                        $parametres = \App\Models\ParametresAchat::first();
-                                    @endphp
-                                    @if($purchase->status === 'validée' && (!$parametres->reception_obligatoire_retour || ($purchase->reception && in_array($purchase->reception->status, ['Reçu', 'Partiel']))))
-                                        <a class="dropdown-item" href="{{ route('purchases.return.create', $purchase->id) }}">
-                                            <i class="fas fa-undo"></i> Créer un retour
-                                        </a>
-                                    @endif
-                                    @if($purchase->returns()->exists())
-                                        @foreach($purchase->returns as $return)
-                                            <a class="dropdown-item" href="{{ route('purchases.return.show', $return->id) }}">
-                                                <i class="fas fa-eye"></i> Retour #{{ $return->numdoc }} ({{ ucfirst($return->type) }})
-                                            </a>
-                                        @endforeach
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
+                            @if($purchase->invoiced)
+                                | ☑ Facturé
+                            @endif
+                        </span>
                     </div>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $purchase->id }})">
+                            ➕ Détails
+                        </button>
+                        <a href="{{ route('purchases.export_single', $purchase->id) }}" class="btn btn-xs btn-outline-success">
+                            EXCEL <i class="fas fa-file-excel"></i>
+                        </a>
+                        <a href="{{ route('purchases.print_single', $purchase->id) }}" class="btn btn-xs btn-outline-primary" title="Télécharger PDF" target="_blank">
+                            PDF <i class="fas fa-print"></i>
+                        </a>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle dropdown-toggle-split"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                @if($purchase->reception)
+                                    <a class="dropdown-item" href="{{ route('receptions.show', $purchase->reception->id) }}" title="Voir la réception">
+                                        <i class="fas fa-box"></i> Voir Réception ({{ ucfirst($purchase->reception->status) }})
+                                    </a>
+                                @elseif($purchase->status === 'brouillon')
+                                    <form action="{{ route('purchases.validate', $purchase->id) }}" method="POST" onsubmit="return confirm('Valider cette commande ?')" class="d-inline">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-check"></i> Valider la commande
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="dropdown-item disabled" title="Aucune réception disponible">
+                                        <i class="fas fa-box"></i> Aucune réception
+                                    </span>
+                                @endif
+                                <a class="dropdown-item" href="{{ route('purchases.edit', $purchase->id) }}">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </a>
+                                @if($purchase->status === 'validée' && !$purchase->invoiced)
+                                    <a class="dropdown-item" href="{{ route('invoices.create_direct', $purchase->id) }}">
+                                        <i class="fas fa-file-invoice"></i> Créer une facture directe
+                                    </a>
+                                @endif
+                                @php
+                                    $parametres = \App\Models\ParametresAchat::first();
+                                @endphp
+                                @if($purchase->status === 'validée' && (!$parametres->reception_obligatoire_retour || ($purchase->reception && in_array($purchase->reception->status, ['Reçu', 'Partiel']))))
+                                    <a class="dropdown-item" href="{{ route('purchases.return.create', $purchase->id) }}">
+                                        <i class="fas fa-undo"></i> Créer un retour
+                                    </a>
+                                @endif
 
-                    <div id="lines-{{ $purchase->id }}" class="card-body d-none bg-light">
-                        <h6 class="fw-bold mb-3">🧾 Lignes de la commande</h6>
-                        <table class="table table-sm table-bordered align-middle">
-                            <thead class="table-light text-center">
-                                <tr>
-                                    <th>Code Article</th>
-                                    <th>Désignation</th>
-                                    <th>Qté</th>
-                                    <th>PU HT</th>
-                                    <th>Remise (%)</th>
-                                    <th>Total Ligne</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($purchase->lines as $line)
-                                    <tr>
-                                        <td>{{ $line->article_code }}</td>
-                                        <td>{{ $line->item->name ?? '-' }}</td>
-                                        <td class="text-center">{{ $line->ordered_quantity }}</td>
-                                        <td class="text-end">{{ number_format($line->unit_price_ht, 2) }} €</td>
-                                        <td class="text-end">{{ $line->remise }}%</td>
-                                        <td class="text-end">{{ number_format($line->total_ligne_ht, 2) }} €</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                
+                                            @if($purchase->status_livraison === 'non_récuperée')
+                                                                                            <form action="{{ route('purchase.ship', $purchase->id) }}" method="POST" onsubmit="return confirm('Valider cette récupération ?')" class="d-inline">
+                                                    @csrf
+                                                    @method('POST')
+                                                    <button type="submit" class="dropdown-item">
+                                                        <i class="fas fa-check"></i> Confirmer la Récupération
+                                                    </button>
+                                                </form>
+                                                @endif
 
-                        <div class="text-end mt-3">
-                            <div class="p-3 bg-white border rounded d-inline-block">
-                                <strong>Total HT :</strong> {{ number_format($purchase->total_ht, 2) }} €<br>
-                                <strong>Total TTC :</strong> {{ number_format($purchase->total_ttc, 2) }} €
+
+                                @if($purchase->returns()->exists())
+                                    @foreach($purchase->returns as $return)
+                                        <a class="dropdown-item" href="{{ route('purchases.return.show', $return->id) }}">
+                                            <i class="fas fa-eye"></i> Retour #{{ $return->numdoc }} ({{ ucfirst($return->type) }})
+                                        </a>
+                                    @endforeach
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
-            @endforeach
-</div>
 
-         
-            
-           
-           
-          </div>
-        </div>
-        </div>
+                <div id="lines-{{ $purchase->id }}" class="card-body d-none bg-light">
+                    <h6 class="fw-bold mb-3">🧾 Lignes de la commande</h6>
+                    <table class="table table-sm table-bordered align-middle">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th>Code Article</th>
+                                <th>Désignation</th>
+                                <th>Qté</th>
+                                <th>PU HT</th>
+                                <th>Remise (%)</th>
+                                <th>Total Ligne</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($purchase->lines as $line)
+                                <tr>
+                                    <td>{{ $line->article_code }}</td>
+                                    <td>{{ $line->item->name ?? '-' }}</td>
+                                    <td class="text-center">{{ $line->ordered_quantity }}</td>
+                                    <td class="text-end">{{ number_format($line->unit_price_ht, 2) }} €</td>
+                                    <td class="text-end">{{ $line->remise }}%</td>
+                                    <td class="text-end">{{ number_format($line->total_ligne_ht, 2) }} €</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <div class="text-end mt-3">
+                        <div class="p-3 bg-white border rounded d-inline-block">
+                            <strong>Total HT :</strong> {{ number_format($purchase->total_ht, 2) }} €<br>
+                            <strong>Total TTC :</strong> {{ number_format($purchase->total_ttc, 2) }} €
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+</div>
         <footer class="footer">
           <div class="container-fluid d-flex justify-content-between">
             <nav class="pull-left">

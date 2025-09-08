@@ -14,10 +14,17 @@ use App\Models\SalesOrder;
 use App\Models\SalesOrderLine;
 use App\Models\DeliveryNote;
 use App\Models\DeliveryNoteLine;
+use App\Models\DiscountGroup;
+use App\Models\Invoice;
+use App\Models\InvoiceLine;
+use App\Models\PaymentMode;
+use App\Models\PaymentTerm;
 use App\Models\Souche;
 use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\Supplier;
+use App\Models\TvaGroup;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -349,6 +356,7 @@ protected function createDeliveryNoteFromOrder(SalesOrder $order, Request $reque
         $souche->last_number += 1;
         $souche->save();
     });
+
 }
 
     /**
@@ -356,9 +364,16 @@ protected function createDeliveryNoteFromOrder(SalesOrder $order, Request $reque
      */
     public function createDirectDeliveryNote()
     {
-        $customers = Customer::with('tvaGroup')->get();
+        $customers = Customer::with(['tvaGroup', 'vehicles'])->get();
         $tvaRates = $customers->mapWithKeys(fn($c) => [$c->id => $c->tvaGroup->rate ?? 0])->toJson();
-        return view('sales.create_direct_delivery', compact('customers', 'tvaRates'));
+
+                $tvaGroups = TvaGroup::all();
+$discountGroups = DiscountGroup::all();
+$paymentModes = PaymentMode::all();
+$paymentTerms = PaymentTerm::all();
+
+
+        return view('sales.create_direct_delivery', compact('customers', 'tvaRates','tvaGroups','discountGroups','paymentModes','paymentTerms'));
     }
 
     /**
@@ -449,10 +464,9 @@ public function storeDirectDeliveryNote(Request $request)
                     'total_ttc' => $total * (1 + $tvaRate / 100),
                 ]);
 
-                if ($status === 'validée') {
+                
                     $this->createDeliveryNoteFromOrder($order, $request);
-                }
-
+               
                 $souche->last_number += 1;
                 $souche->save();
                 \Log::info('Souche updated', ['numdoc' => $numdoc, 'new_last_number' => $souche->last_number]);
@@ -471,16 +485,205 @@ public function storeDirectDeliveryNote(Request $request)
     });
 }
 
+
+
+
+
+
+
+
+
+
+// creer et facturer un BL 
+public function storedeliveryandinvoice(Request $request)
+{
+    $request->validate([
+        'customer_id' => 'required|exists:customers,id',
+        'order_date' => 'required|date',
+        'lines' => 'required|array',
+        'lines.*.article_code' => 'required|exists:items,code',
+        'lines.*.ordered_quantity' => 'required|numeric|min:0',
+        'lines.*.unit_price_ht' => 'required|numeric|min:0',
+        'lines.*.remise' => 'nullable|numeric|min:0|max:100',
+    ]);
+
+    return DB::transaction(function () use ($request) {
+        $customer = Customer::with('tvaGroup')->findOrFail($request->customer_id);
+        $tvaRate = $customer->tvaGroup->rate ?? 0;
+
+        // Create Delivery Note
+        $maxRetries = 3;
+        $retryCount = 0;
+        $souche = Souche::where('type', 'bon_livraison')->lockForUpdate()->first();
+        if (!$souche) {
+            \Log::error('Souche bon_livraison manquante');
+            throw new \Exception('Souche pour bon de livraison manquante');
+        }
+
+        while ($retryCount < $maxRetries) {
+            $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
+            $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
+
+            \Log::info('Generating delivery note numdoc', ['numdoc' => $numdoc, 'last_number' => $souche->last_number, 'retry' => $retryCount]);
+
+            if (!DeliveryNote::where('numdoc', $numdoc)->exists()) {
+                $deliveryNote = DeliveryNote::create([
+                    'customer_id' => $request->customer_id,
+                    'delivery_date' => $request->order_date,
+                    'numclient' => $customer->code,
+                    'status' => 'expédié',
+                    'status_livraison' => 'livré',
+                    'total_delivered' => 0,
+                    'total_ht' => 0,
+                    'total_ttc' => 0,
+                    'notes' => $request->notes,
+                    'numdoc' => $numdoc,
+                    'tva_rate' => $tvaRate,
+                    'store_id' => $request->store_id ?? 1,
+                    'invoiced' => true,
+                ]);
+
+                $totalDelivered = 0;
+                $totalHt = 0;
+                foreach ($request->lines as $line) {
+                    $item = Item::where('code', $line['article_code'])->first();
+                    if (!$item) {
+                        throw new \Exception("Article {$line['article_code']} introuvable.");
+                    }
+                    if ($item->getStockQuantityAttribute() < $line['ordered_quantity']) {
+                        throw new \Exception("Stock insuffisant pour l'article {$line['article_code']}.");
+                    }
+
+                    $total_ligne_ht = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
+                    $unit_price_ttc = $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100) * (1 + $tvaRate / 100);
+                    $total_ligne_ttc = $total_ligne_ht * (1 + $tvaRate / 100);
+
+                    DeliveryNoteLine::create([
+                        'delivery_note_id' => $deliveryNote->id,
+                        'article_code' => $line['article_code'],
+                        'delivered_quantity' => $line['ordered_quantity'],
+                        'unit_price_ht' => $line['unit_price_ht'],
+                        'unit_price_ttc' => $unit_price_ttc,
+                        'remise' => $line['remise'] ?? 0,
+                        'total_ligne_ht' => $total_ligne_ht,
+                        'total_ligne_ttc' => $total_ligne_ttc,
+                    ]);
+
+                    $totalDelivered += $line['ordered_quantity'];
+                    $totalHt += $total_ligne_ht;
+
+                    // Update stock
+                    $storeId = $deliveryNote->store_id ?? 1;
+                    $stock = Stock::firstOrNew([
+                        'item_id' => $item->id,
+                        'store_id' => $storeId,
+                    ]);
+                    $stock->quantity = ($stock->quantity ?? 0) - $line['ordered_quantity'];
+                    $stock->save();
+
+                    $cost_price = $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
+                    StockMovement::create([
+                        'item_id' => $item->id,
+                        'store_id' => $storeId,
+                        'type' => 'vente',
+                        'quantity' => -$line['ordered_quantity'],
+                        'cost_price' => $cost_price,
+                        'supplier_name' => $customer->name,
+                        'reason' => 'Validation bon de livraison #' . $deliveryNote->numdoc,
+                        'reference' => $deliveryNote->numdoc,
+                    ]);
+                }
+// dd( $deliveryNote);
+                $deliveryNote->update([
+                    'total_delivered' => $totalDelivered,
+                    'total_ht' => $totalHt,
+                    'total_ttc' => $totalHt * (1 + $tvaRate / 100),
+                    'invoiced' => true,
+                ]);
+
+                // Create Invoice
+                $soucheInvoice = Souche::where('type', 'facture_vente')->lockForUpdate()->first();
+                if (!$soucheInvoice) {
+                    throw new \Exception('Souche facture vente manquante.');
+                }
+
+                $nextNumberInvoice = str_pad($soucheInvoice->last_number + 1, $soucheInvoice->number_length, '0', STR_PAD_LEFT);
+                $numdocInvoice = ($soucheInvoice->prefix ?? '') . ($soucheInvoice->suffix ?? '') . $nextNumberInvoice;
+
+                $dueDate = $customer->paymentTerm
+                    ? Carbon::parse($request->order_date)->addDays($customer->paymentTerm->days)
+                    : null;
+
+                $invoice = Invoice::create([
+                    'numdoc' => $numdocInvoice,
+                    'type' => 'direct',
+                    'numclient' => $customer->code,
+                    'customer_id' => $customer->id,
+                    'invoice_date' => $request->order_date,
+                    'due_date' => $dueDate,
+                    'status' => 'validée',
+                    'paid' => false,
+                    'total_ht' => $totalHt,
+                    'total_ttc' => $totalHt * (1 + $tvaRate / 100),
+                    'tva_rate' => $tvaRate,
+                    'notes' => $request->notes,
+                ]);
+
+                foreach ($deliveryNote->lines as $line) {
+                    InvoiceLine::create([
+                        'invoice_id' => $invoice->id,
+                        'delivery_note_id' => $deliveryNote->id,
+                        'article_code' => $line->article_code,
+                        'quantity' => $line->delivered_quantity,
+                        'unit_price_ht' => $line->unit_price_ht,
+                        'remise' => $line->remise ?? 0,
+                        'total_ligne_ht' => $line->total_ligne_ht,
+                        'total_ligne_ttc' => $line->total_ligne_ttc,
+                    ]);
+                }
+
+                $deliveryNote->update(['invoiced' => true]);
+                $invoice->deliveryNotes()->attach($deliveryNote->id);
+
+                $souche->last_number += 1;
+                $souche->save();
+                $soucheInvoice->last_number += 1;
+                $soucheInvoice->save();
+
+                return redirect("/salesinvoices")
+                    ->with('success', 'Bon de livraison validé et facture créée avec succès. Facture n°' . $invoice->numdoc);
+            }
+
+            $souche->last_number += 1;
+            $souche->save();
+            $retryCount++;
+            \Log::warning('Duplicate numdoc detected, retrying', ['numdoc' => $numdoc, 'retry' => $retryCount]);
+        }
+
+        \Log::error('Failed to find unique numdoc after retries', ['last_numdoc' => $numdoc, 'retries' => $maxRetries]);
+        throw new \Exception('Impossible de générer un numéro de document unique après plusieurs tentatives.');
+    });
+}
+
+// fin creer et facturer un BL
+
+
+
+
+
+
+
+
     /**
      * Edit a sales order.
      */
     public function edit($id)
     {
         $order = SalesOrder::with('lines', 'customer')->findOrFail($id);
+        // dd($order);
         $customers = Customer::with('tvaGroup')->get();
         $tvaRates = $customers->mapWithKeys(fn($c) => [$c->id => $c->tvaGroup->rate ?? 0])->toJson();
-        $items = Item::with(['brand', 'supplier', 'tvaGroup'])->get();
-        return view('sales.edit', compact('order', 'customers', 'tvaRates', 'items'));
+        return view('sales.edit', compact('order', 'customers', 'tvaRates'));
     }
 
     /**
@@ -493,6 +696,7 @@ public function storeDirectDeliveryNote(Request $request)
    /**
  * Update a sales order.
  */
+
 public function update(Request $request, $numdoc)
 {
     $request->validate([
@@ -546,6 +750,7 @@ public function update(Request $request, $numdoc)
         }
 
         $order->update([
+            'numclient' => $customer->code,
             'total_ht' => $total,
             'total_ttc' => $total * (1 + $tvaRate / 100),
         ]);
@@ -578,6 +783,7 @@ public function update(Request $request, $numdoc)
                     'total_ttc' => 0,
                     'tva_rate' => $tvaRate,
                     'numdoc' => $numdoc,
+                    'numclient' => $customer->code,
                     'notes' => $request->notes,
                 ]);
                 $souche->last_number += 1;

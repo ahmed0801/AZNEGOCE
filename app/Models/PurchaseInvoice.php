@@ -9,7 +9,7 @@ class PurchaseInvoice extends Model
 {
     protected $fillable = [
         'supplier_id', 'numdoc', 'invoice_date', 'status', 'total_ht', 'total_ttc',
-        'tva_rate', 'notes', 'type'
+        'tva_rate', 'notes', 'type','supplier_invoice_file'
     ];
 
 public function supplier()

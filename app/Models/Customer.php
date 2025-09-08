@@ -32,4 +32,10 @@ public function paymentTerm()
     }
     
 
+     public function vehicles()
+    {
+        return $this->hasMany(Vehicle::class);
+    }
+    
+
 }

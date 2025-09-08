@@ -1,9 +1,8 @@
-```php
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>AZ ERP</title>
+    <title>AZ ERP - Liste des Bons de Livraison</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
     
@@ -14,21 +13,21 @@
     <!-- Fonts and icons -->
     <script src="{{ asset('assets/js/plugin/webfont/webfont.min.js') }}"></script>
     <script>
-      WebFont.load({
-        google: { families: ["Public Sans:300,400,500,600,700"] },
-        custom: {
-          families: [
-            "Font Awesome 5 Solid",
-            "Font Awesome 5 Regular",
-            "Font Awesome 5 Brands",
-            "simple-line-icons",
-          ],
-          urls: ["{{ asset('assets/css/fonts.min.css') }}"],
-        },
-        active: function () {
-          sessionStorage.fonts = true;
-        },
-      });
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["{{ asset('assets/css/fonts.min.css') }}"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
     </script>
 
     <!-- CSS Files -->
@@ -38,111 +37,31 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <style>
-        #panierDropdown + .dropdown-menu {
-            width: 900px;
-            min-width: 350px;
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        .panier-dropdown {
-            width: 100%;
-            min-width: 350px;
-        }
-
-        .panier-dropdown .notif-item {
-            padding: 10px;
-            margin-bottom: 5px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .dropdown-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .notif-scroll {
-            padding: 10px;
-        }
-
-        .notif-center {
-            padding: 5px 0;
-        }
-
-        .dropdown-footer {
-            padding: 10px;
-            border-top: 1px solid #ddd;
-        }
-
-        .table {
-            width: 100%;
-            margin-bottom: 0;
-        }
-
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        .table-striped tbody tr:nth-child(odd) {
-            background-color: #f2f2f2;
-        }
-
-        .btn-sm {
-            padding: 0.2rem 0.5rem;
-            font-size: 0.75rem;
-        }
-
-        .text-muted {
-            font-size: 0.85rem;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .card {
-            border-radius: 12px;
-            background: linear-gradient(135deg, #ffffff, #f8f9fa);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .card h3 {
-            font-size: 1.8rem;
-            color: #007bff;
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-
-        .card h6 {
-            font-size: 1rem;
-            color: #6c757d;
-        }
-
-        .card-body {
-            padding: 2rem;
-        }
-
-        .card .text-info {
-            color: #17a2b8 !important;
-        }
-
-        .btn-primary {
-            font-size: 1.1rem;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
-        }
+        #panierDropdown + .dropdown-menu { width: 900px; min-width: 350px; padding: 10px; border-radius: 8px; }
+        .panier-dropdown { width: 100%; min-width: 350px; }
+        .panier-dropdown .notif-item { padding: 10px; margin-bottom: 5px; border-bottom: 1px solid #ddd; }
+        .dropdown-title { font-weight: bold; margin-bottom: 10px; }
+        .notif-scroll { padding: 10px; }
+        .notif-center { padding: 5px 0; }
+        .dropdown-footer { padding: 10px; border-top: 1px solid #ddd; }
+        .table { width: 100%; margin-bottom: 0; }
+        .table th, .table td { text-align: center; vertical-align: middle; }
+        .table-striped tbody tr:nth-child(odd) { background-color: #f2f2f2; }
+        .btn-sm { padding: 0.2rem 0.5rem; font-size: 0.75rem; }
+        .text-muted { font-size: 0.85rem; }
+        .text-center { text-align: center; }
+        .card { border-radius: 12px; background: linear-gradient(135deg, #ffffff, #f8f9fa); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .card h3 { font-size: 1.8rem; color: #007bff; margin-bottom: 1rem; font-weight: 700; }
+        .card h6 { font-size: 1rem; color: #6c757d; }
+        .card-body { padding: 2rem; }
+        .card .text-info { color: #17a2b8 !important; }
+        .btn-primary { font-size: 1.1rem; padding: 1rem 1.5rem; border-radius: 8px; transition: all 0.3s ease; }
+        .btn-primary:hover { background-color: #0056b3; box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); }
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <!-- Sidebar -->
+     <!-- Sidebar -->
         <div class="sidebar" data-background-color="dark">
             <div class="sidebar-logo">
                 <div class="logo-header" data-background-color="dark">
@@ -150,139 +69,48 @@
                         <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
                     </a>
                     <div class="nav-toggle">
-                        <button class="btn btn-toggle toggle-sidebar">
-                            <i class="gg-menu-right"></i>
-                        </button>
-                        <button class="btn btn-toggle sidenav-toggler">
-                            <i class="gg-menu-left"></i>
-                        </button>
+                        <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                        <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
                     </div>
-                    <button class="topbar-toggler more">
-                        <i class="gg-more-vertical-alt"></i>
-                    </button>
+                    <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
                 </div>
             </div>
             <div class="sidebar-wrapper scrollbar scrollbar-inner">
                 <div class="sidebar-content">
                     <ul class="nav nav-secondary">
                         <li class="nav-item">
-                            <a href="/dashboard">
-                                <i class="fas fa-home"></i>
-                                <p>Dashboard</p>
-                            </a>
+                            <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
                         </li>
-                        <li class="nav-item">
-                            <a href="/commande">
-                                <i class="fas fa-shopping-cart"></i>
-                                <p>Nouvelle Commande</p>
-                            </a>
-                        </li>
-                        <li class="nav-item active">
-                            <a href="/sales/list">
-                                <i class="fas fa-file-invoice-dollar"></i>
-                                <p>Mes BL</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/listdevis">
-                                <i class="fas fa-file-alt"></i>
-                                <p>Mes Devis</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/listbrouillon">
-                                <i class="fas fa-reply-all"></i>
-                                <p>Brouillons</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/invoices">
-                                <i class="fas fa-money-bill-wave"></i>
-                                <p>Mes Factures</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/avoirs">
-                                <i class="fas fa-reply-all"></i>
-                                <p>Mes Avoirs</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/purchases/list">
-                                <i class="fas fa-file-alt"></i>
-                                <p>Commandes Achat</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/purchaseprojects/list">
-                                <i class="fas fa-file-alt"></i>
-                                <p>Projets de Commande</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/returns">
-                                <i class="fas fa-file-alt"></i>
-                                <p>Retours Achat</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/invoices">
-                                <i class="fas fa-money-bill-wave"></i>
-                                <p>Factures Achat</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/notes">
-                                <i class="fas fa-reply-all"></i>
-                                <p>Avoirs Achat</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/receptions">
-                                <i class="fas fa-money-bill-wave"></i>
-                                <p>Réception</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/articles">
-                                <i class="fas fa-money-bill-wave"></i>
-                                <p>Articles</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/customers">
-                                <i class="fa fa-user"></i>
-                                <p>Clients</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/suppliers">
-                                <i class="fa fa-user"></i>
-                                <p>Fournisseurs</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/setting">
-                                <i class="fas fa-money-bill-wave"></i>
-                                <p>Paramétres</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/tecdoc">
-                                <i class="fas fa-cogs"></i>
-                                <p>TecDoc</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/voice">
-                                <i class="fas fa-robot"></i>
-                                <p>NEGOBOT</p>
-                            </a>
-                        </li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
+                        <li class="nav-item"><a href="/sales/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
+                        <li class="nav-item active"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
+                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
+                        <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
+                        <li class="nav-item"><a href="/avoirs"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
+                        <li class="nav-item"><a href="/reglement-client"><i class="fas fa-credit-card"></i><p>Règlement Client</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
+                        <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
+                        <li class="nav-item"><a href="/purchaseprojects/list"><i class="fas fa-file-alt"></i><p>Projets de Commande</p></a></li>
+                        <li class="nav-item"><a href="/returns"><i class="fas fa-undo-alt"></i><p>Retours Achat</p></a></li>
+                        <li class="nav-item"><a href="/invoices"><i class="fas fa-file-invoice"></i><p>Factures Achat</p></a></li>
+                        <li class="nav-item"><a href="/notes"><i class="fas fa-sticky-note"></i><p>Avoirs Achat</p></a></li>
+                        <li class="nav-item"><a href="/reglement-fournisseur"><i class="fas fa-credit-card"></i><p>Règlement Fournisseur</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
+                        <li class="nav-item"><a href="/receptions"><i class="fas fa-truck-loading"></i><p>Réceptions</p></a></li>
+                        <li class="nav-item"><a href="/articles"><i class="fas fa-cubes"></i><p>Articles</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fa fa-users"></i></span><h4 class="text-section">Référentiel</h4></li>
+                        <li class="nav-item"><a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a></li>
+                        <li class="nav-item"><a href="/suppliers"><i class="fa fa-user-tie"></i><p>Fournisseurs</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-cogs"></i></span><h4 class="text-section">Paramètres</h4></li>
+                        <li class="nav-item"><a href="/setting"><i class="fas fa-sliders-h"></i><p>Paramètres</p></a></li>
+                        <li class="nav-item"><a href="/tecdoc"><i class="fas fa-database"></i><p>TecDoc</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-robot"></i></span><h4 class="text-section">Autres</h4></li>
+                        <li class="nav-item"><a href="/voice"><i class="fas fa-robot"></i><p>NEGOBOT</p></a></li>
                         <li class="nav-item">
                             <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <i class="fas fa-sign-out-alt"></i>
-                                <p>Déconnexion</p>
+                                <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
                             </a>
                             <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
                                 @csrf
@@ -294,6 +122,7 @@
         </div>
         <!-- End Sidebar -->
 
+
         <div class="main-panel">
             <div class="main-header">
                 <div class="main-header-logo">
@@ -302,16 +131,10 @@
                             <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="20" />
                         </a>
                         <div class="nav-toggle">
-                            <button class="btn btn-toggle toggle-sidebar">
-                                <i class="gg-menu-right"></i>
-                            </button>
-                            <button class="btn btn-toggle sidenav-toggler">
-                                <i class="gg-menu-left"></i>
-                            </button>
+                            <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                            <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
                         </div>
-                        <button class="topbar-toggler more">
-                            <i class="gg-more-vertical-alt"></i>
-                        </button>
+                        <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
                     </div>
                 </div>
                 <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
@@ -442,7 +265,7 @@
                                         </button>
                                         <div class="dropdown-menu">
                                             @if($order->status === 'brouillon')
-                                                <a class="dropdown-item" href="{{ route('sales.edit', $order->numdoc) }}">
+                                                <a class="dropdown-item" href="{{ route('sales.edit', $order->id) }}">
                                                     <i class="fas fa-edit"></i> Modifier
                                                 </a>
                                                 <form action="{{ route('sales.validate', $order->id) }}" method="POST" onsubmit="return confirm('Valider cette commande ?')" class="d-inline">

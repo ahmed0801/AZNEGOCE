@@ -6,6 +6,9 @@ use App\Models\PurchaseOrder;
 use App\Models\Reception;
 use App\Models\ReceptionLine;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReceptionController extends Controller
 {
@@ -127,5 +130,145 @@ public function update(Request $request, $id)
 
 
 
+public function scan($id)
+    {
+        $reception = Reception::with(['lines.item', 'purchaseOrder.supplier', 'purchaseOrder.lines'])->findOrFail($id);
 
+        // Prepare article quantities for the view
+        $articleQuantities = $reception->lines->mapWithKeys(function ($line) use ($reception) {
+            $orderedQuantity = $reception->purchaseOrder && $reception->purchaseOrder->lines
+                ? ($reception->purchaseOrder->lines->firstWhere('article_code', $line->article_code)->ordered_quantity ?? 0)
+                : 0;
+            return [$line->article_code => [
+                'name' => $line->item ? $line->item->name : 'Non disponible',
+                'demanded' => $orderedQuantity,
+                'scanned' => $line->received_quantity,
+                'remaining' => max(0, $orderedQuantity - $line->received_quantity),
+            ]];
+        })->toArray();
+
+        // Log for debugging
+        Log::info('Article Quantities for Reception', [
+            'reception_id' => $id,
+            'article_quantities' => $articleQuantities,
+        ]);
+
+        return view('receptions.scan', compact('reception', 'articleQuantities'));
+    }
+
+    public function scanReception(Request $request, $id)
+    {
+        $reception = Reception::with(['lines', 'purchaseOrder'])->findOrFail($id);
+
+        // Preprocess validate_only to handle string inputs
+        $validateOnly = filter_var($request->input('validate_only', false), FILTER_VALIDATE_BOOLEAN);
+
+        // Log raw request data for debugging
+        Log::info('Scan Reception Request', [
+            'reception_id' => $id,
+            'request_data' => $request->all(),
+            'validate_only_raw' => $request->input('validate_only'),
+            'validate_only_processed' => $validateOnly,
+        ]);
+
+        $data = $request->validate([
+            'reception_id' => 'required|exists:receptions,id',
+            'code_article' => 'required|string',
+            'quantite' => 'required|integer|min:1',
+            'notes' => 'nullable|string',
+            'validate_only' => 'nullable|boolean',
+        ]);
+
+        $line = $reception->lines->firstWhere('article_code', $data['code_article']);
+        if (!$line) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Article non trouvé dans la réception.',
+            ], 422);
+        }
+
+        $orderedQuantity = $reception->purchaseOrder->lines
+            ->firstWhere('article_code', $data['code_article'])
+            ->ordered_quantity ?? 0;
+
+        if ($line->received_quantity >= $orderedQuantity) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Quantité scannée dépasse la quantité demandée.',
+            ], 422);
+        }
+
+        if ($validateOnly) {
+            return response()->json(['valid' => true]);
+        }
+
+        // Update the line
+        $line->received_quantity += $data['quantite'];
+        $line->save();
+
+        // Update total received
+        $totalReceived = $reception->lines->sum('received_quantity');
+        $reception->total_received = $totalReceived;
+
+        // Check if all quantities match
+        $allMatched = $reception->lines->every(function ($line) use ($reception) {
+            $orderedQuantity = $reception->purchaseOrder->lines
+                ->firstWhere('article_code', $line->article_code)
+                ->ordered_quantity ?? 0;
+            return $line->received_quantity >= $orderedQuantity;
+        });
+
+        $reception->status = $allMatched ? 'reçu' : 'partiel';
+        $reception->save();
+
+        // Prepare response data
+        $articleQuantities = $reception->lines->mapWithKeys(function ($line) use ($reception) {
+            return [$line->article_code => [
+                'name' => $line->item->name ?? 'Non disponible',
+                'demanded' => $reception->purchaseOrder->lines->firstWhere('article_code', $line->article_code)->ordered_quantity ?? 0,
+                'scanned' => $line->received_quantity,
+                'remaining' => max(0, ($reception->purchaseOrder->lines->firstWhere('article_code', $line->article_code)->ordered_quantity ?? 0) - $line->received_quantity),
+            ]];
+        })->toArray();
+
+        $scanData = [
+            'code_article' => $data['code_article'],
+            'remaining_quantity' => max(0, $orderedQuantity - $line->received_quantity),
+            'article_completed' => $line->received_quantity >= $orderedQuantity,
+            'document_completed' => $allMatched,
+        ];
+
+        Log::info('Reception scanned and updated', [
+            'reception_id' => $reception->id,
+            'article_code' => $data['code_article'],
+            'quantity' => $data['quantite'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'article_quantities' => $articleQuantities,
+            'scanned_quantity' => $totalReceived,
+            'scan_data' => $scanData,
+        ]);
+    }
+
+    public function generatePdf($id)
+    {
+        $reception = Reception::with(['purchaseOrder.supplier', 'lines.item'])->findOrFail($id);
+
+        $data = [
+            'reception' => $reception,
+            'date' => \Carbon\Carbon::parse($reception->reception_date)->format('d/m/Y'),
+            'supplier' => $reception->purchaseOrder->supplier,
+        ];
+
+        $pdf = Pdf::loadView('receptions.pdf', $data);
+        $fileName = 'reception_' . $reception->id . '_' . time() . '.pdf';
+        $path = 'receptions/' . $fileName;
+        Storage::disk('public')->put($path, $pdf->output());
+
+        Log::info('Reception PDF generated', ['reception_id' => $reception->id, 'file_path' => $path]);
+
+        return redirect(Storage::disk('public')->url($path));
+    }
 }

@@ -26,6 +26,9 @@ use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use PDF; 
@@ -511,6 +514,50 @@ public function export(Request $request)
         return $pdf->stream("commande_{$purchase->numdoc}.pdf");
     }
     
+
+
+
+
+
+// imprimer avis de retrait
+
+public function withdrawalNotice(Request $request, $id)
+{
+    $purchase = PurchaseOrder::with(['supplier', 'lines.item'])
+        ->where('id', $id)
+        ->firstOrFail();
+
+    // Vérifiez que le statut de livraison est "non_récuperée"
+    if ($purchase->status_livraison !== 'non_récuperée') {
+        return redirect()->route('purchases.list')->with('error', 'L\'avis de retrait ne peut être généré que pour les commandes non récupérées.');
+    }
+
+    $company = CompanyInformation::first() ?? new CompanyInformation([
+        'name' => 'Test Company S.A.R.L',
+        'address' => '123 Rue Fictive, Tunis 1000',
+        'phone' => '+216 12 345 678',
+        'email' => 'contact@testcompany.com',
+        'matricule_fiscal' => '1234567ABC000',
+        'swift' => 'TESTTNTT',
+        'rib' => '123456789012',
+        'iban' => 'TN59 1234 5678 9012 3456 7890',
+        'logo_path' => 'assets/img/test_logo.png',
+    ]);
+
+    $generator = new BarcodeGeneratorPNG();
+    $barcode = 'data:image/png;base64,' . base64_encode(
+        $generator->getBarcode($purchase->numdoc, $generator::TYPE_CODE_128)
+    );
+
+    // Récupérer le commentaire depuis la requête
+    $comment = $request->input('comment');
+
+    $pdf = Pdf::loadView('pdf.withdrawal_notice', compact('purchase', 'company', 'barcode', 'comment'));
+    return $pdf->stream("avis_retrait_{$purchase->numdoc}.pdf");
+}
+
+
+
 
 
 
@@ -2154,6 +2201,90 @@ public function searchReturns(Request $request)
     return response()->json($returns->toArray());
 }
 
+
+
+
+
+
+            public function markAsShipped(Request $request, $id)
+    {
+        return DB::transaction(function () use ($request, $id) {
+            $deliveryNote = PurchaseOrder::findOrFail($id);
+
+            $deliveryNote->update(['status_livraison' => 'Reçu']);
+
+            return redirect("/purchases/list")
+                ->with('success', 'Bon de livraison validé avec succès.');
+        });
+    }
+
+
+
+
+
+
+
+
+    // route joindre factures fournisseurs
+
+    public function uploadSupplierInvoice(Request $request, $id)
+    {
+        $request->validate([
+            'supplier_invoice_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB max, allow PDF and images
+        ]);
+
+        $invoice = PurchaseInvoice::findOrFail($id);
+
+        if ($invoice->supplier_invoice_file) {
+            Storage::delete($invoice->supplier_invoice_file);
+        }
+
+        $file = $request->file('supplier_invoice_file');
+        $fileName = 'supplier_invoices/purchase_invoice_' . $invoice->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('public', $fileName);
+
+        $invoice->update(['supplier_invoice_file' => $path]);
+
+        Log::info('Supplier invoice uploaded', [
+            'purchase_invoice_id' => $invoice->id,
+            'file_path' => $path,
+        ]);
+
+        return redirect()->route('invoices.list')
+            ->with('success', 'Facture fournisseur jointe avec succès.');
+    }
+
+    public function downloadSupplierInvoice($id)
+    {
+        $invoice = PurchaseInvoice::findOrFail($id);
+
+        if (!$invoice->supplier_invoice_file || !Storage::exists($invoice->supplier_invoice_file)) {
+            Log::warning('Supplier invoice file not found', ['purchase_invoice_id' => $invoice->id]);
+            return redirect()->route('invoices.list')
+                ->with('error', 'Fichier de la facture fournisseur non trouvé.');
+        }
+
+        return Storage::download($invoice->supplier_invoice_file, 'facture_fournisseur_' . $invoice->numdoc . '.' . pathinfo($invoice->supplier_invoice_file, PATHINFO_EXTENSION));
+    }
+
+    public function deleteSupplierInvoice($id)
+    {
+        $invoice = PurchaseInvoice::findOrFail($id);
+
+        if ($invoice->supplier_invoice_file && Storage::exists($invoice->supplier_invoice_file)) {
+            Storage::delete($invoice->supplier_invoice_file);
+            $invoice->update(['supplier_invoice_file' => null]);
+
+            Log::info('Supplier invoice deleted', ['purchase_invoice_id' => $invoice->id]);
+        }
+
+        return redirect()->route('invoices.list')
+            ->with('success', 'Facture fournisseur supprimée avec succès.');
+    }
+
+    
+
+    
 
 
     

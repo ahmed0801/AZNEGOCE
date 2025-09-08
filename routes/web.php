@@ -21,11 +21,14 @@ use App\Http\Controllers\DevisController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\PayementmodeController;
 use App\Http\Controllers\PayementtermController;
+use App\Http\Controllers\PlanificationTourneeController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\PurchaseInvoiceController;
 use App\Http\Controllers\PurchaseProjectController;
 use App\Http\Controllers\PurchaseSettingsController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\SalesInvoicesController;
+use App\Http\Controllers\SalesReturnController;
 use App\Http\Controllers\SoucheController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\StockMovementController;
@@ -36,12 +39,14 @@ use App\Http\Controllers\TvaGroupController;
 use App\Http\Controllers\UnitController;
 use App\Models\Arrivage;
 use App\Models\Brand;
+use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\PurchaseOrder;
 use App\Models\Store;
 use App\Models\TvaGroup;
 use App\Models\Unit;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -198,6 +203,11 @@ Route::delete('/customer/{id}', [CustomerController::class, 'destroy'])->name('c
 Route::put('/customer/{id}', [CustomerController::class, 'update'])->name('customer.update');
 
 
+// Vehicle routes vehicule
+Route::post('/customers/{customer}/vehicles', [CustomerController::class, 'storeVehicle'])->name('customer.vehicle.store');
+Route::delete('/customers/{customer}/vehicles/{vehicle}', [CustomerController::class, 'destroyVehicle'])->name('customer.vehicle.destroy');
+Route::get('/customers/{customer}/vehicles/{vehicle}/catalog', [CustomerController::class, 'viewCatalog'])->name('customer.vehicle.catalog');
+
 
 Route::get('/suppliers', [SupplierController::class, 'index'])->name('supplier.index');
 Route::post('/supplier', [SupplierController::class, 'store'])->name('supplier.store');
@@ -225,6 +235,8 @@ Route::get('/purchases/{id}/export', [PurchaseController::class, 'exportSingle']
 Route::get('/purchases/{id}/return', [PurchaseController::class, 'createReturn'])->name('purchases.return.create');
 Route::post('/purchases/{id}/return', [PurchaseController::class, 'storeReturn'])->name('purchases.return.store');
 
+// avis de retrait
+Route::post('/purchases/{id}/withdrawal_notice', [PurchaseController::class, 'withdrawalNotice'])->name('purchases.withdrawal_notice');
 
 
 
@@ -300,6 +312,9 @@ Route::get('/receptions/{id}', [ReceptionController::class, 'show'])->name('rece
 Route::get('/receptions/{id}/edit', [ReceptionController::class, 'edit'])->name('receptions.edit');
 Route::put('/receptions/{id}', [ReceptionController::class, 'update'])->name('receptions.update');
 
+
+
+
 Route::post('/magasin/generate-locations', [StoreController::class, 'generateLocations'])->name('generate.locations');
 
 
@@ -354,35 +369,128 @@ Route::get('/export/{id}', [SalesController::class, 'exportSingle'])->name('sale
 
 
 
+
+
+
+
+
 Route::prefix('delivery_notes')->group(function () {
     Route::get('/list', [DeliveryNotesController::class, 'list'])->name('delivery_notes.list');
     Route::get('/export/{id}', [DeliveryNotesController::class, 'exportSingle'])->name('delivery_notes.export_single');
     Route::get('/print/{id}', [DeliveryNotesController::class, 'printSingle'])->name('delivery_notes.print_single');
+
+        Route::get('/{id}/edit', [DeliveryNotesController::class, 'edit'])->name('delivery_notes.edit');
+    Route::put('/{id}', [DeliveryNotesController::class, 'update'])->name('delivery_notes.update');
+Route::post('/delivery_notes/{id}/validate', [DeliveryNotesController::class, 'markAsValidated'])->name('delivery_notes.validate');
+Route::post('/delivery_notes/{id}/ship', [DeliveryNotesController::class, 'markAsShipped'])->name('delivery_notes.ship');
+
+    Route::put('/delivery_notes/{id}/cancel', [DeliveryNotesController::class, 'cancel'])->name('delivery_notes.cancel');
+
+// imprimer bordereau d envoi
+Route::post('/delivery_notes/{id}/shipping_note', [DeliveryNotesController::class, 'shippingNote'])->name('delivery_notes.shipping_note');
+
+        Route::get('/returns/list', [DeliveryNotesController::class, 'returnsList'])->name('delivery_notes.salesreturns.list');
+    Route::get('/{id}/returns/create', [DeliveryNotesController::class, 'createReturn'])->name('delivery_notes.salesreturns.create');
+    Route::post('/{id}/returns', [DeliveryNotesController::class, 'storeReturn'])->name('delivery_notes.salesreturns.store');
+    Route::get('/returns/{id}', [DeliveryNotesController::class, 'showReturn'])->name('delivery_notes.salesreturns.show');
+    Route::get('/returns/{id}/export', [DeliveryNotesController::class, 'exportSingleReturn'])->name('delivery_notes.salesreturns.export_single');
+    Route::get('/returns/{id}/print', [DeliveryNotesController::class, 'printSingleReturn'])->name('delivery_notes.salesreturns.print_single');
+    Route::get('/returns/{id}/edit', [DeliveryNotesController::class, 'editReturn'])->name('delivery_notes.returns.edit');
+    Route::put('/returns/{id}', [DeliveryNotesController::class, 'updateReturn'])->name('delivery_notes.returns.update');
+    
+
 });
+
+Route::post('/purchase/{id}/ship', [PurchaseController::class, 'markAsShipped'])->name('purchase.ship');
+
 
 
     // Delivery Notes
     Route::get('/sales/delivery/create', [SalesController::class, 'createDirectDeliveryNote'])->name('sales.delivery.create');
     Route::post('/sales/delivery', [SalesController::class, 'storeDirectDeliveryNote'])->name('sales.delivery.store');
 
-    // Invoices
-    Route::get('/sales/invoices', [SalesController::class, 'invoicesList'])->name('sales.invoices.list');
-    Route::get('/sales/invoices/create/direct/{orderId}', [SalesController::class, 'createDirectInvoice'])->name('sales.invoices.create_direct');
-    Route::get('/sales/invoices/create/grouped', [SalesController::class, 'createGroupedInvoice'])->name('sales.invoices.create_grouped');
-    Route::get('/sales/invoices/create/free', [SalesController::class, 'createFreeInvoice'])->name('sales.invoices.create_free');
-    Route::post('/sales/invoices', [SalesController::class, 'storeInvoice'])->name('sales.invoices.store');
-    Route::get('/sales/invoices/{id}/edit', [SalesController::class, 'editInvoice'])->name('sales.invoices.edit');
-    Route::put('/sales/invoices/{numdoc}', [SalesController::class, 'updateInvoice'])->name('sales.invoices.update');
-    Route::get('/sales/invoices/{id}/export', [SalesController::class, 'exportSingleInvoice'])->name('sales.invoices.export');
-    Route::get('/sales/invoices/{id}/print', [SalesController::class, 'printSingleInvoice'])->name('sales.invoices.print');
 
-    // Quotes
+// Sales Invoices
+Route::get('/salesinvoices', [SalesInvoicesController::class, 'invoicesList'])->name('salesinvoices.index');
+Route::get('/salesinvoices/create_direct/{deliveryNoteId}', [SalesInvoicesController::class, 'createDirectInvoice'])->name('salesinvoices.create_direct');
+Route::post('/salesinvoices/store_direct/{deliveryNoteId}', [SalesInvoicesController::class, 'storeDirectInvoice'])->name('salesinvoices.store_direct');
+Route::get('/salesinvoices/create_grouped', [SalesInvoicesController::class, 'createGroupedInvoice'])->name('salesinvoices.create_grouped');
+Route::post('/salesinvoices/store_grouped', [SalesInvoicesController::class, 'storeGroupedInvoice'])->name('salesinvoices.store_grouped');
+Route::get('/salesinvoices/create_free', [SalesInvoicesController::class, 'createFreeInvoice'])->name('salesinvoices.create_free');
+Route::post('/salesinvoices/store_free', [SalesInvoicesController::class, 'storeFreeInvoice'])->name('salesinvoices.store_free');
+Route::get('/salesinvoices/{id}/edit', [SalesInvoicesController::class, 'editInvoice'])->name('salesinvoices.edit');
+Route::put('/salesinvoices/{numdoc}', [SalesInvoicesController::class, 'updateInvoice'])->name('salesinvoices.update');
+Route::put('/salesinvoices/{id}/paid', [SalesInvoicesController::class, 'markAsPaid'])->name('salesinvoices.markAsPaid');
+Route::get('/salesinvoices/{id}/print', [SalesInvoicesController::class, 'printSingleInvoice'])->name('salesinvoices.print');
+Route::get('/salesinvoices/{id}/printduplicata', [SalesInvoicesController::class, 'printSingleInvoiceduplicata'])->name('salesinvoices.printduplicata');
+Route::get('/salesinvoices/{id}/printsansref', [SalesInvoicesController::class, 'printSingleInvoicesansref'])->name('salesinvoices.printsansref');
+Route::get('/salesinvoices/{id}/printsansrem', [SalesInvoicesController::class, 'printSingleInvoicesansrem'])->name('salesinvoices.printsansrem');
+Route::get('/salesinvoices/{id}/printsans2', [SalesInvoicesController::class, 'printSingleInvoicesans2'])->name('salesinvoices.printsans2');
+
+Route::get('/salesinvoices/{id}/export', [SalesInvoicesController::class, 'exportSingleInvoice'])->name('salesinvoices.export_single');
+Route::get('/salesinvoices/export', [SalesInvoicesController::class, 'exportInvoices'])->name('salesinvoices.export');
+Route::get('/sales/orders/search', [SalesInvoicesController::class, 'search'])->name('sales.orders.search');
+
+
+
+
+
+
+
+
+// routes factures fournisseurs
+Route::post('/invoices/{id}/upload_supplier_invoice', [PurchaseController::class, 'uploadSupplierInvoice'])->name('invoices.upload_supplier_invoice');
+Route::get('/invoices/{id}/download_supplier_invoice', [PurchaseController::class, 'downloadSupplierInvoice'])->name('invoices.download_supplier_invoice');
+Route::delete('/invoices/{id}/delete_supplier_invoice', [PurchaseController::class, 'deleteSupplierInvoice'])->name('invoices.delete_supplier_invoice');
+
+
+
+
+// Sales Notes (Avoirs)
+Route::get('/salesnotes/create_from_return', [SalesInvoicesController::class, 'createReturnNote'])->name('salesnotes.create_return');
+Route::post('/salesnotes/store_return', [SalesInvoicesController::class, 'storeReturnNote'])->name('salesnotes.store_return');
+Route::get('/salesnotes/create_from_invoice', [SalesInvoicesController::class, 'createInvoiceNote'])->name('salesnotes.create_invoice');
+Route::post('/salesnotes/store_invoice', [SalesInvoicesController::class, 'storeInvoiceNote'])->name('salesnotes.store_invoice');
+Route::get('/salesnotes/return/lines', [SalesInvoicesController::class, 'getReturnLines'])->name('salesnotes.return_lines');
+Route::get('/salesnotes/invoice/lines', [SalesInvoicesController::class, 'getInvoiceLines'])->name('salesnotes.invoice_lines');
+Route::get('/salesnotes', [SalesInvoicesController::class, 'notesList'])->name('salesnotes.list');
+Route::get('/salesnotes/{id}/print', [SalesInvoicesController::class, 'printSingleNote'])->name('salesnotes.print_single');
+Route::get('/salesnotes/{id}/export', [SalesInvoicesController::class, 'printSingleNote'])->name('salesnotes.export_single');
+
+
+
+
+Route::post('/sales/delivery/store-and-invoice', [SalesController::class, 'storedeliveryandinvoice'])->name('sales.delivery.store_and_invoice');
+
+
+    // Quotes - projet de commande
     Route::get('/sales/quotes', [SalesController::class, 'quotesList'])->name('sales.quotes.list');
     Route::get('/sales/quotes/create', [SalesController::class, 'createQuote'])->name('sales.quotes.create');
     Route::post('/sales/quotes', [SalesController::class, 'storeQuote'])->name('sales.quotes.store');
     Route::post('/sales/quotes/{id}/convert', [SalesController::class, 'convertQuoteToOrder'])->name('sales.quotes.convert');
     Route::get('/sales/quotes/{id}/export', [SalesController::class, 'exportSingleQuote'])->name('sales.quotes.export');
     Route::get('/sales/quotes/{id}/print', [SalesController::class, 'printSingleQuote'])->name('sales.quotes.print');
+
+
+
+// suivi livraison
+    Route::get('/planification-tournee', [PlanificationTourneeController::class, 'index'])->name('planification.tournee.index');
+    Route::get('/planification-tournee/creer', [PlanificationTourneeController::class, 'create'])->name('planification.tournee.create');
+    Route::post('/planification-tournee', [PlanificationTourneeController::class, 'store'])->name('planification.tournee.store');
+    Route::get('/planification-tournee/{id}/editer', [PlanificationTourneeController::class, 'edit'])->name('planification.tournee.edit');
+    Route::put('/planification-tournee/{id}', [PlanificationTourneeController::class, 'update'])->name('planification.tournee.update');
+    Route::delete('/planification-tournee/{id}', [PlanificationTourneeController::class, 'destroy'])->name('planification.tournee.destroy');
+    Route::get('/planification-tournee/planning-chauffeur', [PlanificationTourneeController::class, 'planningChauffeur'])->name('planification.tournee.planning.chauffeur');
+    Route::post('/planification-tournee/scan', [PlanificationTourneeController::class, 'scan'])->name('planification.tournee.scan');
+    Route::post('/planification-tournee/{id}/valider', [PlanificationTourneeController::class, 'valider'])->name('planification.tournee.valider');
+    Route::get('/planification-tournee/rapport', [PlanificationTourneeController::class, 'rapport'])->name('planification.tournee.rapport');
+
+
+
+
+
+
+
 
     // Search Routes
     Route::get('/sales/search', [SalesController::class, 'search'])->name('sales.search');
@@ -496,12 +604,22 @@ Route::get('/passwordform', function () {
     return view('modifypassword'); 
 });
 
+Route::get('/testtest', function () {
+    $users=Invoice::all();
+    return ($users); 
+});
+
 
 Route::get('/receptions', [ReceptionController::class, 'index'])->name('receptions.index');
 Route::get('/receptions/{NumReception}', [ReceptionController::class, 'show'])->name('receptions.shownav');
 Route::post('/receptions/pdf', [ReceptionController::class, 'genererPDF'])->name('receptions.pdf');
 Route::post('/receptions/print-multiple', [ReceptionController::class, 'printMultiple'])->name('receptions.printMultiple');
 Route::get('/receptions/multiple/{Nums}', [ReceptionController::class, 'showMultiple'])->name('receptions.showMultiple');
+
+
+Route::get('/receptions/{id}/scan', [ReceptionController::class, 'scan'])->name('receptions.scan');
+Route::post('/receptions/{id}/scan', [ReceptionController::class, 'scanReception'])->name('receptions.scan.update');
+Route::get('/receptions/{id}/generate-pdf', [ReceptionController::class, 'generatePdf'])->name('receptions.generate_pdf');
 
 
 
@@ -539,6 +657,8 @@ Route::get('/Categories', [TecdocController::class, 'getCategories'])->name('get
 Route::get('/getparts', [TecdocController::class, 'getparts'])->name('getparts');
 Route::get('/persoget', [TecdocController::class, 'persoget'])->name('persoget');
 
+// rechercher les vehicules d un client
+Route::get('/customers/{id}/vehicles', [CustomerController::class, 'getVehicles'])->name('customer.vehicles');
 
 
 
@@ -577,6 +697,13 @@ Route::get('/admin/dashboard', [AuthController::class, 'adminDashboard'])->name(
 Route::post('/admin/logout', [AuthController::class, 'logoutAdmin'])->name('logout.admin');
 
 
+
+
+
+
+// tv client
+Route::get('/tvclient', [DeliveryNotesController::class, 'tvClient'])->name('tvclient');
+Route::get('/tvclient/data', [DeliveryNotesController::class, 'tvClientData'])->name('tvclient.data');
 
 
 
