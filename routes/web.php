@@ -447,15 +447,31 @@ Route::delete('/invoices/{id}/delete_supplier_invoice', [PurchaseController::cla
 
 
 // Sales Notes (Avoirs)
-Route::get('/salesnotes/create_from_return', [SalesInvoicesController::class, 'createReturnNote'])->name('salesnotes.create_return');
-Route::post('/salesnotes/store_return', [SalesInvoicesController::class, 'storeReturnNote'])->name('salesnotes.store_return');
-Route::get('/salesnotes/create_from_invoice', [SalesInvoicesController::class, 'createInvoiceNote'])->name('salesnotes.create_invoice');
-Route::post('/salesnotes/store_invoice', [SalesInvoicesController::class, 'storeInvoiceNote'])->name('salesnotes.store_invoice');
-Route::get('/salesnotes/return/lines', [SalesInvoicesController::class, 'getReturnLines'])->name('salesnotes.return_lines');
-Route::get('/salesnotes/invoice/lines', [SalesInvoicesController::class, 'getInvoiceLines'])->name('salesnotes.invoice_lines');
-Route::get('/salesnotes', [SalesInvoicesController::class, 'notesList'])->name('salesnotes.list');
-Route::get('/salesnotes/{id}/print', [SalesInvoicesController::class, 'printSingleNote'])->name('salesnotes.print_single');
-Route::get('/salesnotes/{id}/export', [SalesInvoicesController::class, 'printSingleNote'])->name('salesnotes.export_single');
+// Route::get('/salesnotes/create_from_return', [SalesInvoicesController::class, 'createReturnNote'])->name('salesnotes.create_return');
+// Route::post('/salesnotes/store_return', [SalesInvoicesController::class, 'storeReturnNote'])->name('salesnotes.store_return');
+// Route::get('/salesnotes/create_from_invoice', [SalesInvoicesController::class, 'createInvoiceNote'])->name('salesnotes.create_invoice');
+// Route::post('/salesnotes/store_invoice', [SalesInvoicesController::class, 'storeInvoiceNote'])->name('salesnotes.store_invoice');
+// Route::get('/salesnotes/return/lines', [SalesInvoicesController::class, 'getReturnLines'])->name('salesnotes.return_lines');
+// Route::get('/salesnotes/invoice/lines', [SalesInvoicesController::class, 'getInvoiceLines'])->name('salesnotes.invoice_lines');
+// Route::get('/salesnotes', [SalesInvoicesController::class, 'notesList'])->name('salesnotes.list');
+// Route::get('/salesnotes/{id}/print', [SalesInvoicesController::class, 'printSingleNote'])->name('salesnotes.print_single');
+// Route::get('/salesnotes/{id}/export', [SalesInvoicesController::class, 'printSingleNote'])->name('salesnotes.export_single');
+
+// Sales Notes (Avoirs) avoir vente nouveau
+Route::get('/salesnotes/source/documents', [SalesInvoicesController::class, 'getSourceDocuments'])->name('salesnotes.source.documents');
+Route::get('/salesnotes/source/lines', [SalesInvoicesController::class, 'getSourceLines'])->name('salesnotes.source.lines');
+Route::get('/salesnotes/create', [SalesInvoicesController::class, 'createSalesNote'])->name('salesnotes.create');
+Route::post('/salesnotes/store', [SalesInvoicesController::class, 'storeSalesNote'])->name('salesnotes.store_sales_note');
+
+
+    Route::get('/salesnotes/list', [SalesInvoicesController::class, 'notesList'])->name('salesnotes.list');
+    Route::get('/salesnotes/edit/{id}', [SalesInvoicesController::class, 'editSalesNote'])->name('salesnotes.edit');
+    Route::put('/salesnotes/update/{id}', [SalesInvoicesController::class, 'updateSalesNote'])->name('salesnotes.update');
+    Route::get('/salesnotes/export', [SalesInvoicesController::class, 'exportNotes'])->name('salesnotes.export');
+    Route::get('/salesnotes/export/{id}', [SalesInvoicesController::class, 'exportSingleNote'])->name('salesnotes.export_single');
+    Route::get('/salesnotes/print/{id}', [SalesInvoicesController::class, 'printSingleNote'])->name('salesnotes.print_single');
+
+
 
 
 
@@ -604,10 +620,7 @@ Route::get('/passwordform', function () {
     return view('modifypassword'); 
 });
 
-Route::get('/testtest', function () {
-    $users=Invoice::all();
-    return ($users); 
-});
+
 
 
 Route::get('/receptions', [ReceptionController::class, 'index'])->name('receptions.index');

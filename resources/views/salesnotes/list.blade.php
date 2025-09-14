@@ -2,9 +2,13 @@
 <html lang="fr">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Créer un Retour de Vente - AZ ERP</title>
+    <title>AZ ERP - Liste des Avoirs de Vente</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
+
+    <!-- jQuery + Bootstrap JS (v4) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Fonts and icons -->
     <script src="{{ asset('assets/js/plugin/webfont/webfont.min.js') }}"></script>
@@ -31,8 +35,15 @@
     <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <style>
+        .table { width: 100%; margin-bottom: 0; }
+        .table th, .table td { text-align: center; vertical-align: middle; }
+        .table-striped tbody tr:nth-child(odd) { background-color: #f2f2f2; }
+        .btn-sm { padding: 0.2rem 0.5rem; font-size: 0.75rem; }
+        .text-muted { font-size: 0.85rem; }
+        .text-center { text-align: center; }
         .card {
             border-radius: 12px;
             background: linear-gradient(135deg, #ffffff, #f8f9fa);
@@ -41,36 +52,15 @@
         .card h3 {
             font-size: 1.8rem;
             color: #007bff;
+            margin-bottom: 1rem;
             font-weight: 700;
         }
         .card h6 {
             font-size: 1rem;
             color: #6c757d;
         }
-        .card-body {
-            padding: 2rem;
-        }
-        .table {
-            width: 100%;
-            margin-bottom: 0;
-        }
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
-        }
-        .table-striped tbody tr:nth-child(odd) {
-            background-color: #f2f2f2;
-        }
-        .btn-sm {
-            padding: 0.2rem 0.5rem;
-            font-size: 0.75rem;
-        }
-        .text-muted {
-            font-size: 0.85rem;
-        }
-        .text-info {
-            color: #17a2b8 !important;
-        }
+        .card-body { padding: 2rem; }
+        .card .text-info { color: #17a2b8 !important; }
         .btn-primary {
             font-size: 1.1rem;
             padding: 1rem 1.5rem;
@@ -81,16 +71,8 @@
             background-color: #0056b3;
             box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
         }
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        .quantity-input {
-            width: 100px;
-        }
-        .error {
-            font-size: 0.85rem;
-            color: #dc3545;
-        }
+        .form-select-sm { width: auto; display: inline-block; }
+        .badge { font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -118,9 +100,9 @@
                         <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
                         <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
-                        <li class="nav-item active"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
                         <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
-                        <li class="nav-item"><a href="/salesnotes/list"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
+                        <li class="nav-item active"><a href="/salesnotes/list"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
                         <li class="nav-item"><a href="/reglement-client"><i class="fas fa-credit-card"></i><p>Règlement Client</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
                         <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
@@ -191,7 +173,7 @@
                                                 <div class="u-text">
                                                     <h4>{{ Auth::user()->name }}</h4>
                                                     <p class="text-muted">{{ Auth::user()->email }}</p>
-                                                    <a href="/setting" class="btn btn-xs btn-secondary btn-sm">Paramètres</a>
+                                                    <a href="/setting" class="btn btn-xs btn-secondary btn-sm">Paramétres</a>
                                                 </div>
                                             </div>
                                         </li>
@@ -212,111 +194,151 @@
 
             <div class="container">
                 <div class="page-inner">
-                    <h4>📋 Créer un retour pour le bon de livraison : {{ $deliveryNote->numdoc }}</h4>
+                    @if(session('success'))
+                        <div class="alert alert-success">{{ session('success') }}</div>
+                    @endif
                     @if(session('error'))
                         <div class="alert alert-danger">{{ session('error') }}</div>
                     @endif
-                    <div class="card">
-                        <div class="card-body">
-                            <form action="{{ route('delivery_notes.salesreturns.store', $deliveryNote->id) }}" method="POST">
-                                @csrf
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Client</label>
-                                            <input type="text" class="form-control" value="{{ $deliveryNote->customer->name ?? 'Inconnu' }}" readonly>
-                                            <input type="hidden" name="customer_id" value="{{ $deliveryNote->customer->id }}">
-                                        </div>
+
+                    <div class="container mt-4">
+                        <h4>📋 Liste des avoirs de vente :
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Nouvel avoir <i class="fas fa-plus-circle ms-2"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="{{ route('salesnotes.create') }}">Créer un avoir</a>
+                                </div>
+                            </div>
+                        </h4>
+
+                        <form method="GET" action="{{ route('salesnotes.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+                            <select name="customer_id" class="form-select form-select-sm select2" style="width: 150px;">
+                                <option value="">Client (Tous)</option>
+                                @foreach($customers as $customer)
+                                    <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
+                                        {{ $customer->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <select name="status" class="form-select form-select-sm" style="width: 170px;">
+                                <option value="">Statut avoir (Tous)</option>
+                                <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
+                                <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
+                            </select>
+                            <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début" value="{{ request('date_from') }}">
+                            <span class="mx-1">à</span>
+                            <input type="date" name="date_to" class="form-control form-control-sm" style="width: 120px;" placeholder="Date fin" value="{{ request('date_to') }}">
+                            <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
+                                <i class="fas fa-filter me-1"></i> Filtrer
+                            </button>
+                            <button type="submit" name="action" value="export" formaction="{{ route('salesnotes.export') }}" class="btn btn-outline-success btn-sm px-3">
+                                <i class="fas fa-file-excel me-1"></i> EXCEL
+                            </button>
+                            <a href="{{ route('salesnotes.list') }}" class="btn btn-outline-secondary btn-sm px-3">
+                                <i class="fas fa-undo me-1"></i> Réinitialiser
+                            </a>
+                        </form>
+
+                        @foreach ($notes as $note)
+                            <div class="card mb-4 shadow-sm border-0">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
+                                    <div>
+                                        <h6 class="mb-0">
+                                            <strong>Avoir N° : {{ $note->numdoc }}</strong> –
+                                            &#x1F482;{{ $note->customer->name ?? 'N/A' }}
+                                            <span class="text-muted small">({{ $note->customer->code ?? 'N/A' }})</span>
+                                            <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($note->note_date)->format('d/m/Y') }}</span>
+                                        </h6>
+                                        @if($note->status === 'brouillon')
+                                            <span class="badge bg-secondary">{{ ucfirst($note->status) }}</span>
+                                        @else
+                                            <span class="badge bg-success">{{ ucfirst($note->status) }}</span>
+                                        @endif
+                                        <span class="text-muted small">&#8594; type: {{ ucfirst($note->type ?? 'N/A') }}</span>
+                                        @if($note->sales_invoice_id)
+                                            <span class="text-muted small">Facture: {{ $note->salesInvoice->numdoc ?? 'N/A' }}</span>
+                                        @elseif($note->sales_return_id)
+                                            <span class="text-muted small">Retour: {{ $note->salesReturn->numdoc ?? 'N/A' }}</span>
+                                        @endif
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label>Date du retour</label>
-                                            <input type="date" name="return_date" class="form-control @error('return_date') is-invalid @enderror" value="{{ old('return_date', now()->format('Y-m-d')) }}" required>
-                                            @error('return_date')
-                                                <span class="error">{{ $message }}</span>
-                                            @enderror
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $note->id }})">
+                                            ➕ Détails
+                                        </button>
+
+                                        <a href="{{ route('salesnotes.export_single', $note->id) }}" class="btn btn-xs btn-outline-success">
+                                            EXCEL <i class="fas fa-file-excel"></i>
+                                        </a>
+                                        <a href="{{ route('salesnotes.print_single', $note->id) }}" class="btn btn-xs btn-outline-primary" title="Télécharger PDF" target="_blank">
+                                            PDF <i class="fas fa-print"></i>
+                                        </a>
+
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                        @if($note->status === 'brouillon')
+                                                    <a class="dropdown-item" href="{{ route('salesnotes.edit', $note->id) }}">
+                                                        <i class="fas fa-edit"></i> Modifier
+                                                    </a>
+                                                @endif
+
+                                              
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label>Type de retour</label>
-                                            <select name="type" class="form-control select2 @error('type') is-invalid @enderror" id="returnType" required>
-                                                <option value="total" {{ old('type') == 'total' ? 'selected' : '' }}>Total</option>
-                                                <option value="partiel" {{ old('type') == 'partiel' ? 'selected' : '' }}>Partiel</option>
-                                            </select>
-                                            @error('type')
-                                                <span class="error">{{ $message }}</span>
-                                            @enderror
-                                        </div>
+
+
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Notes</label>
-                                    <textarea name="notes" class="form-control">{{ old('notes') }}</textarea>
-                                </div>
-                                <div id="partialReturnSection" class="mt-4" style="{{ old('type', 'total') == 'total' ? 'display: none;' : '' }}">
-                                    <h6 class="fw-bold mb-3">🧾 Lignes du retour</h6>
-                                    <table class="table table-sm table-bordered table-striped align-middle">
+
+                                <div id="lines-{{ $note->id }}" class="card-body d-none bg-light">
+                                    <h6 class="fw-bold mb-3">🧾 Lignes de l'avoir</h6>
+                                    <table class="table table-sm table-bordered align-middle">
                                         <thead class="table-light text-center">
                                             <tr>
-                                                <th>Sélectionner</th>
                                                 <th>Code Article</th>
                                                 <th>Désignation</th>
-                                                <th>Qté Livrée</th>
-                                                <th>Qté Retournée</th>
+                                                <th>Qté</th>
                                                 <th>PU HT</th>
                                                 <th>Remise (%)</th>
+                                                <th>TVA (%)</th>
                                                 <th>Total Ligne</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach($deliveryNote->lines as $line)
-                                                @php
-                                                    $totalReturned = \App\Models\SalesReturnLine::where('article_code', $line->article_code)
-                                                        ->whereHas('salesReturn', fn($q) => $q->where('delivery_note_id', $deliveryNote->id))
-                                                        ->sum('returned_quantity');
-                                                    $maxReturnable = $line->delivered_quantity - $totalReturned;
-                                                @endphp
+                                            @foreach ($note->lines as $line)
                                                 <tr>
-                                                    <td>
-                                                        <input type="checkbox" name="lines[{{ $line->article_code }}][selected]" value="1" class="select-line" {{ old("lines.{$line->article_code}.selected") == 1 ? 'checked' : '' }}>
-                                                        <input type="hidden" name="lines[{{ $line->article_code }}][article_code]" value="{{ $line->article_code }}">
-                                                    </td>
-                                                    <td>{{ $line->article_code }}</td>
-                                                    <td>{{ $line->item->name ?? '-' }}</td>
-                                                    <td class="text-center">{{ $line->delivered_quantity }}</td>
-                                                    <td>
-                                                        <input type="number" name="lines[{{ $line->article_code }}][returned_quantity]" class="form-control quantity-input @error("lines.{$line->article_code}.returned_quantity") is-invalid @enderror" min="0" max="{{ $maxReturnable }}" value="{{ old("lines.{$line->article_code}.returned_quantity", 0) }}" {{ old("lines.{$line->article_code}.selected") != 1 ? 'disabled' : '' }}>
-                                                        @error("lines.{$line->article_code}.returned_quantity")
-                                                            <span class="error">{{ $message }}</span>
-                                                        @enderror
-                                                    </td>
+                                                    <td>{{ $line->article_code ?? '-' }}</td>
+                                                    <td>{{ $line->item->name ?? $line->description ?? '-' }}</td>
+                                                    <td class="text-center">{{ $line->quantity }}</td>
                                                     <td class="text-end">{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
-                                                    <td class="text-end">{{ $line->remise }}%</td>
+                                                    <td class="text-end">{{ $line->remise ?? 0 }}%</td>
+                                                    <td class="text-end">{{ $note->tva_rate ?? 0 }}%</td>
                                                     <td class="text-end">{{ number_format($line->total_ligne_ht, 2, ',', ' ') }} €</td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
+                                    <div class="text-end mt-3">
+                                        <div class="p-3 bg-white border rounded d-inline-block">
+                                            <strong>Total HT :</strong> {{ number_format($note->total_ht, 2, ',', ' ') }} €<br>
+                                            <strong>Total TTC :</strong> {{ number_format($note->total_ttc, 2, ',', ' ') }} €
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="text-end mt-3">
-                                    <button type="submit" class="btn btn-primary">Créer le retour</button>
-                                    <a href="{{ route('delivery_notes.list') }}" class="btn btn-secondary">Annuler</a>
-                                </div>
-                            </form>
-                        </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
 
             <footer class="footer">
                 <div class="container-fluid d-flex justify-content-between">
-                    <div class="copyright">
-                        © AZ NEGOCE. All Rights Reserved.
-                    </div>
-                    <div>
-                        by <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.
-                    </div>
+                    <div class="copyright">© AZ NEGOCE. All Rights Reserved.</div>
+                    <div>by <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.</div>
                 </div>
             </footer>
         </div>
@@ -326,65 +348,26 @@
     <script src="{{ asset('assets/js/core/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
     <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
-    <!-- jQuery Scrollbar -->
     <script src="{{ asset('assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
-    <!-- Chart JS -->
     <script src="{{ asset('assets/js/plugin/chart.js/chart.min.js') }}"></script>
-    <!-- jQuery Sparkline -->
     <script src="{{ asset('assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js') }}"></script>
-    <!-- Chart Circle -->
     <script src="{{ asset('assets/js/plugin/chart-circle/circles.min.js') }}"></script>
-    <!-- Datatables -->
     <script src="{{ asset('assets/js/plugin/datatables/datatables.min.js') }}"></script>
-    <!-- Bootstrap Notify -->
     <script src="{{ asset('assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
-    <!-- jQuery Vector Maps -->
     <script src="{{ asset('assets/js/plugin/jsvectormap/jsvectormap.min.js') }}"></script>
     <script src="{{ asset('assets/js/plugin/jsvectormap/world.js') }}"></script>
-    <!-- Sweet Alert -->
     <script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
-    <!-- Kaiadmin JS -->
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
-    <!-- Select2 -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
         $(document).ready(function () {
             $('.select2').select2({ width: '100%' });
-
-            $('#returnType').on('change', function () {
-                if ($(this).val() === 'partiel') {
-                    $('#partialReturnSection').show();
-                    $('.select-line').prop('disabled', false);
-                    $('.quantity-input').each(function () {
-                        if ($(this).closest('tr').find('.select-line').is(':checked')) {
-                            $(this).prop('disabled', false);
-                        }
-                    });
-                } else {
-                    $('#partialReturnSection').hide();
-                    $('.select-line').prop('disabled', true);
-                    $('.quantity-input').prop('disabled', true);
-                }
-            });
-
-            $('.select-line').on('change', function () {
-                const quantityInput = $(this).closest('tr').find('.quantity-input');
-                quantityInput.prop('disabled', !this.checked);
-                if (!this.checked) {
-                    quantityInput.val(0);
-                }
-            });
-
-            $('.quantity-input').on('input', function () {
-                const max = parseFloat($(this).attr('max')) || 0;
-                const value = parseFloat($(this).val()) || 0;
-                if (value > max) {
-                    $(this).val(max);
-                    alert('La quantité à retourner ne peut pas dépasser la quantité livrée restante.');
-                }
-            });
         });
+
+        function toggleLines(id) {
+            const section = document.getElementById('lines-' + id);
+            section.classList.toggle('d-none');
+        }
     </script>
 </body>
 </html>

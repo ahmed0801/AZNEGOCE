@@ -14,12 +14,15 @@ use App\Models\Item;
 use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\CompanyInformation;
+use App\Models\SalesReturnLine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Arr;
 
 class SalesInvoicesController extends Controller
 {
@@ -64,6 +67,9 @@ class SalesInvoicesController extends Controller
         return view('salesinvoices.create_direct', compact('deliveryNote', 'customers'));
     }
 
+
+
+    
     public function storeDirectInvoice(Request $request, $deliveryNoteId)
     {
         $request->validate([
@@ -847,30 +853,6 @@ public function editInvoice($id)
 
 
 
-    public function notesList(Request $request)
-    {
-        $query = SalesNote::with(['customer', 'lines.item', 'salesInvoice', 'salesReturn'])
-            ->orderBy('updated_at', 'desc');
-
-        if ($request->filled('customer_id')) {
-            $query->where('customer_id', $request->customer_id);
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-        if ($request->filled('date_from')) {
-            $query->whereDate('note_date', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('note_date', '<=', $request->date_to);
-        }
-
-        $notes = $query->get();
-        $customers = Customer::orderBy('name')->get();
-
-        return view('notes.list', compact('notes', 'customers'));
-    }
-
     public function createReturnNote()
     {
         $customers = Customer::orderBy('name')->get();
@@ -1129,9 +1111,797 @@ public function editInvoice($id)
         return response()->json(['lines' => $lines]);
     }
 
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// avoirs vente
+public function notesList(Request $request)
+    {
+        $query = SalesNote::with(['customer', 'lines.item', 'salesInvoice', 'salesReturn'])
+            ->orderBy('updated_at', 'desc');
+
+        if ($request->filled('customer_id')) {
+            $query->where('customer_id', $request->customer_id);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('note_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('note_date', '<=', $request->date_to);
+        }
+
+        $notes = $query->get();
+        $customers = Customer::orderBy('name')->get();
+
+        return view('salesnotes.list', compact('notes', 'customers'));
+    }
+
+    public function createSalesNote()
+    {
+        $customers = Customer::with('tvaGroup')->orderBy('name')->get();
+        $returns = SalesReturn::with(['customer', 'lines.item'])
+            ->where('invoiced', false)
+            ->get();
+        $invoices = Invoice::with(['customer', 'lines.item'])
+            ->where('status', 'validée')
+            ->get();
+        $tvaRates = $customers->pluck('tvaGroup.rate', 'id')->toArray();
+
+        return view('salesnotes.create_sales_note', compact('customers', 'returns', 'invoices', 'tvaRates'));
+    }
+
+    public function storeSalesNote(Request $request)
+    {
+        $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+            'note_date' => 'required|date',
+            'tva_rate' => 'required|numeric|min:0',
+            'source_type' => 'required|in:return,invoice',
+            'source_ids' => 'required|array',
+            'source_ids.*' => 'required|numeric',
+            'lines' => 'required|array',
+            'lines.*.quantity' => 'required|numeric|gt:0',
+            'lines.*.unit_price_ht' => 'required|numeric|gt:0',
+            'lines.*.remise' => 'nullable|numeric|min:0|max:100',
+            'lines.*.article_code' => 'required|exists:items,code',
+            'lines.*.source_id' => 'required|numeric',
+            'notes' => 'nullable|string|max:500',
+            'action' => 'required|in:save,validate',
+        ]);
+
+        return DB::transaction(function () use ($request) {
+            \Log::info('storeSalesNote called', [
+                'customer_id' => $request->customer_id,
+                'source_type' => $request->source_type,
+                'source_ids' => $request->source_ids,
+                'lines' => $request->lines,
+                'action' => $request->action,
+            ]);
+
+            $customer = Customer::with(['tvaGroup', 'paymentTerm'])->findOrFail($request->customer_id);
+            $tvaRate = $request->tva_rate;
+            $dueDate = $customer->paymentTerm
+                ? Carbon::parse($request->note_date)->addDays($customer->paymentTerm->days)
+                : null;
+
+            $souche = Souche::where('type', 'avoir_vente')->lockForUpdate()->first();
+            if (!$souche) {
+                throw new \Exception('Souche avoir vente manquante.');
+            }
+
+            $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
+            $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
+
+            $note = SalesNote::create([
+                'numdoc' => $numdoc,
+                'customer_id' => $request->customer_id,
+                'note_date' => $request->note_date,
+                'due_date' => $dueDate,
+                'status' => $request->action === 'validate' ? 'validée' : 'brouillon',
+                'paid' => false,
+                'total_ht' => 0,
+                'total_ttc' => 0,
+                'tva_rate' => $tvaRate,
+                'notes' => $request->notes,
+                'type' => $request->source_type === 'return' ? 'from_return' : 'from_invoice',
+                'sales_return_id' => $request->source_type === 'return' ? $request->source_ids[0] : null,
+                'sales_invoice_id' => $request->source_type === 'invoice' ? $request->source_ids[0] : null,
+            ]);
+
+            $totalHt = 0;
+            $returnLines = [];
+
+            foreach ($request->lines as $index => $line) {
+                if ($request->source_type === 'return') {
+                    $source = SalesReturn::findOrFail($line['source_id']);
+                    $sourceLine = $source->lines->where('article_code', $line['article_code'])->first();
+                    if (!$sourceLine) {
+                        throw new \Exception("Ligne de retour introuvable pour l'article {$line['article_code']}.");
+                    }
+                    if ($line['quantity'] > $sourceLine->returned_quantity) {
+                        throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
+                    }
+                } else {
+                    $source = Invoice::findOrFail($line['source_id']);
+                    $sourceLine = $source->lines->where('article_code', $line['article_code'])->first();
+                    if (!$sourceLine) {
+                        throw new \Exception("Ligne de facture introuvable pour l'article {$line['article_code']}.");
+                    }
+                    if ($line['quantity'] > $sourceLine->quantity) {
+                        throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
+                    }
+                    if ($sourceLine->quantity <= 0 || $sourceLine->unit_price_ht <= 0) {
+                        \Log::warning('Invalid InvoiceLine data', [
+                            'invoice_id' => $source->id,
+                            'article_code' => $line['article_code'],
+                            'quantity' => $sourceLine->quantity,
+                            'unit_price_ht' => $sourceLine->unit_price_ht,
+                        ]);
+                        throw new \Exception("Données de facture invalides pour l'article {$line['article_code']}.");
+                    }
+                    $returnLines[] = [
+                        'article_code' => $line['article_code'],
+                        'returned_quantity' => $line['quantity'],
+                        'unit_price_ht' => $line['unit_price_ht'],
+                        'remise' => $line['remise'] ?? 0,
+                        'description' => $sourceLine->description ?? ($sourceLine->item->name ?? $line['article_code']),
+                    ];
+                }
+
+                $totalLigneHt = -$line['quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
+                $totalLigneTtc = $totalLigneHt * (1 + $tvaRate / 100);
+
+                SalesNoteLine::create([
+                    'sales_note_id' => $note->id,
+                    'sales_return_id' => $request->source_type === 'return' ? $line['source_id'] : null,
+                    'sales_invoice_id' => $request->source_type === 'invoice' ? $line['source_id'] : null,
+                    'article_code' => $line['article_code'],
+                    'quantity' => -$line['quantity'],
+                    'unit_price_ht' => $line['unit_price_ht'],
+                    'remise' => $line['remise'] ?? 0,
+                    'total_ligne_ht' => $totalLigneHt,
+                    'total_ligne_ttc' => $totalLigneTtc,
+                ]);
+
+                $totalHt += $totalLigneHt;
+            }
+
+            $note->update([
+                'total_ht' => $totalHt,
+                'total_ttc' => $totalHt * (1 + $tvaRate / 100),
+            ]);
+
+            if ($request->action === 'validate' && $request->source_type === 'invoice') {
+                $returnSouche = Souche::where('type', 'retour_vente')->lockForUpdate()->first();
+                if (!$returnSouche) {
+                    throw new \Exception('Souche retour vente manquante.');
+                }
+
+                $returnNextNumber = str_pad($returnSouche->last_number + 1, $returnSouche->number_length, '0', STR_PAD_LEFT);
+                $returnNumdoc = ($returnSouche->prefix ?? '') . ($returnSouche->suffix ?? '') . $returnNextNumber;
+
+                $returnTotalHt = 0;
+
+                $salesReturn = SalesReturn::create([
+                    'numdoc' => $returnNumdoc,
+                    'customer_id' => $request->customer_id,
+                    'return_date' => $request->note_date,
+                    'invoiced' => false,
+                    'tva_rate' => $tvaRate,
+                    'total_ht' => 0,
+                    'total_ttc' => 0,
+                    'store_id' => 1,
+                    'delivery_note_id' => null,
+                    'notes' => 'Retour généré automatiquement pour avoir #' . $note->numdoc,
+                ]);
+
+                \Log::info('SalesReturn created', [
+                    'id' => $salesReturn->id,
+                    'numdoc' => $returnNumdoc,
+                    'customer_id' => $request->customer_id,
+                ]);
+
+                foreach ($returnLines as $returnLine) {
+                    \Log::info('Processing SalesReturnLine', [
+                        'article_code' => $returnLine['article_code'],
+                        'returned_quantity' => $returnLine['returned_quantity'],
+                        'unit_price_ht' => $returnLine['unit_price_ht'],
+                        'remise' => $returnLine['remise'],
+                    ]);
+
+                    $totalLigneHt = $returnLine['returned_quantity'] * $returnLine['unit_price_ht'] * (1 - ($returnLine['remise'] / 100));
+                    \Log::info('Calculated total_ligne_ht', [
+                        'total_ligne_ht' => $totalLigneHt,
+                        'calculation' => "{$returnLine['returned_quantity']} * {$returnLine['unit_price_ht']} * (1 - {$returnLine['remise']}/100)",
+                    ]);
+
+                    if ($totalLigneHt == 0) {
+                        \Log::warning('total_ligne_ht is zero', [
+                            'returnLine' => $returnLine,
+                        ]);
+                        throw new \Exception("Le total HT de la ligne est zéro pour l'article {$returnLine['article_code']}.");
+                    }
+
+                    $returnTotalHt += $totalLigneHt;
+
+                    SalesReturnLine::create([
+                        'sales_return_id' => $salesReturn->id,
+                        'article_code' => $returnLine['article_code'],
+                        'returned_quantity' => $returnLine['returned_quantity'],
+                        'unit_price_ht' => $returnLine['unit_price_ht'],
+                        'remise' => $returnLine['remise'],
+                        'total_ligne_ht' => $totalLigneHt,
+                        'description' => $returnLine['description'],
+                    ]);
+
+                    $item = Item::where('code', $returnLine['article_code'])->first();
+                    if ($item) {
+                        $storeId = $salesReturn->store_id ?? 1;
+                        $stock = Stock::firstOrNew([
+                            'item_id' => $item->id,
+                            'store_id' => $storeId,
+                        ]);
+                        $stock->quantity = ($stock->quantity ?? 0) + $returnLine['returned_quantity'];
+                        $stock->save();
+
+                        StockMovement::create([
+                            'item_id' => $item->id,
+                            'store_id' => $storeId,
+                            'type' => 'retour_vente',
+                            'quantity' => $returnLine['returned_quantity'],
+                            'cost_price' => $returnLine['unit_price_ht'] * (1 - ($returnLine['remise'] / 100)),
+                            'supplier_name' => $customer->name,
+                            'reason' => 'Retour automatique pour avoir vente #' . $note->numdoc,
+                            'reference' => $note->numdoc,
+                        ]);
+                    }
+                }
+
+                $salesReturn->update([
+                    'total_ht' => $returnTotalHt,
+                    'total_ttc' => $returnTotalHt * (1 + $tvaRate / 100),
+                ]);
+
+                \Log::info('SalesReturn updated with totals', [
+                    'id' => $salesReturn->id,
+                    'total_ht' => $returnTotalHt,
+                    'total_ttc' => $returnTotalHt * (1 + $tvaRate / 100),
+                ]);
+
+                $returnSouche->last_number += 1;
+                $returnSouche->save();
+
+                $note->update(['sales_return_id' => $salesReturn->id]);
+            }
+
+            if ($request->action === 'validate' && $request->source_type === 'return') {
+                SalesReturn::whereIn('id', $request->source_ids)
+                    ->where('invoiced', false)
+                    ->update(['invoiced' => true]);
+            }
+
+            $souche->last_number += 1;
+            $souche->save();
+
+            \Log::info('SalesNote created', [
+                'id' => $note->id,
+                'numdoc' => $note->numdoc,
+                'type' => $note->type,
+                'sales_return_id' => $note->sales_return_id,
+                'sales_invoice_id' => $note->sales_invoice_id,
+            ]);
+
+            return redirect()->route('salesnotes.list')
+                ->with('success', $request->action === 'validate'
+                    ? 'Avoir validé avec succès.'
+                    : 'Avoir enregistré comme brouillon.');
+        });
+    }
+
+  public function editSalesNote($id)
+{
+    $salesNote = SalesNote::with(['customer', 'lines'])->findOrFail($id);
+    $customers = Customer::with('tvaGroup')->orderBy('name')->get();
+    $tvaRates = $customers->mapWithKeys(function ($customer) {
+        return [$customer->id => $customer->tvaGroup->rate ?? 0];
+    })->toArray();
+
+    // Load source documents based on source_type
+    $sourceDocuments = collect();
+    if ($salesNote->source_type == 'return') {
+        $sourceDocuments = SalesReturn::whereIn('id', $salesNote->source_ids)
+            ->with('customer')
+            ->get()
+            ->map(function ($doc) {
+                return (object) [
+                    'id' => $doc->id,
+                    'numdoc' => $doc->numdoc,
+                    'customer_name' => $doc->customer->name ?? 'N/A'
+                ];
+            });
+    } elseif ($salesNote->source_type == 'invoice') {
+        $sourceDocuments = Invoice::whereIn('id', $salesNote->source_ids)
+            ->with('customer')
+            ->get()
+            ->map(function ($doc) {
+                return (object) [
+                    'id' => $doc->id,
+                    'numdoc' => $doc->numdoc,
+                    'customer_name' => $doc->customer->name ?? 'N/A'
+                ];
+            });
+    }
+
+    $salesNote->sourceDocuments = $sourceDocuments;
+
+    \Log::info('Edit Sales Note Data', [
+        'salesNote' => $salesNote->toArray(),
+        'tvaRates' => $tvaRates,
+        'sourceDocuments' => $sourceDocuments->toArray()
+    ]);
+
+    return view('salesnotes.edit', compact('salesNote', 'customers', 'tvaRates'));
+}
+
+    public function updateSalesNote(Request $request, $id)
+    {
+        $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+            'note_date' => 'required|date',
+            'tva_rate' => 'required|numeric|min:0',
+            'source_type' => 'required|in:return,invoice',
+            'source_ids' => 'required|array',
+            'source_ids.*' => 'required|numeric',
+            'lines' => 'required|array',
+            'lines.*.quantity' => 'required|numeric|gt:0',
+            'lines.*.unit_price_ht' => 'required|numeric|gt:0',
+            'lines.*.remise' => 'nullable|numeric|min:0|max:100',
+            'lines.*.article_code' => 'required|exists:items,code',
+            'lines.*.source_id' => 'required|numeric',
+            'notes' => 'nullable|string|max:500',
+            'action' => 'required|in:save,validate',
+        ]);
+
+        return DB::transaction(function () use ($request, $id) {
+            \Log::info('updateSalesNote called', [
+                'id' => $id,
+                'customer_id' => $request->customer_id,
+                'source_type' => $request->source_type,
+                'source_ids' => $request->source_ids,
+                'lines' => $request->lines,
+                'action' => $request->action,
+            ]);
+
+            $salesNote = SalesNote::with(['lines', 'customer', 'salesReturn'])->findOrFail($id);
+            if ($salesNote->status === 'validée') {
+                throw new \Exception('Un avoir validé ne peut pas être modifié.');
+            }
+
+            $customer = Customer::with(['tvaGroup', 'paymentTerm'])->findOrFail($request->customer_id);
+            $tvaRate = $request->tva_rate;
+            $dueDate = $customer->paymentTerm
+                ? Carbon::parse($request->note_date)->addDays($customer->paymentTerm->days)
+                : null;
+
+            $salesNote->lines()->delete();
+            $totalHt = 0;
+            $returnLines = [];
+
+            foreach ($request->lines as $index => $line) {
+                if ($request->source_type === 'return') {
+                    $source = SalesReturn::findOrFail($line['source_id']);
+                    $sourceLine = $source->lines->where('article_code', $line['article_code'])->first();
+                    if (!$sourceLine) {
+                        throw new \Exception("Ligne de retour introuvable pour l'article {$line['article_code']}.");
+                    }
+                    if ($line['quantity'] > $sourceLine->returned_quantity) {
+                        throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
+                    }
+                } else {
+                    $source = Invoice::findOrFail($line['source_id']);
+                    $sourceLine = $source->lines->where('article_code', $line['article_code'])->first();
+                    if (!$sourceLine) {
+                        throw new \Exception("Ligne de facture introuvable pour l'article {$line['article_code']}.");
+                    }
+                    if ($line['quantity'] > $sourceLine->quantity) {
+                        throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
+                    }
+                    if ($sourceLine->quantity <= 0 || $sourceLine->unit_price_ht <= 0) {
+                        \Log::warning('Invalid InvoiceLine data', [
+                            'invoice_id' => $source->id,
+                            'article_code' => $line['article_code'],
+                            'quantity' => $sourceLine->quantity,
+                            'unit_price_ht' => $sourceLine->unit_price_ht,
+                        ]);
+                        throw new \Exception("Données de facture invalides pour l'article {$line['article_code']}.");
+                    }
+                    $returnLines[] = [
+                        'article_code' => $line['article_code'],
+                        'returned_quantity' => $line['quantity'],
+                        'unit_price_ht' => $line['unit_price_ht'],
+                        'remise' => $line['remise'] ?? 0,
+                        'description' => $sourceLine->description ?? ($sourceLine->item->name ?? $line['article_code']),
+                    ];
+                }
+
+                $totalLigneHt = -$line['quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
+                $totalLigneTtc = $totalLigneHt * (1 + $tvaRate / 100);
+
+                SalesNoteLine::create([
+                    'sales_note_id' => $salesNote->id,
+                    'sales_return_id' => $request->source_type === 'return' ? $line['source_id'] : null,
+                    'sales_invoice_id' => $request->source_type === 'invoice' ? $line['source_id'] : null,
+                    'article_code' => $line['article_code'],
+                    'quantity' => -$line['quantity'],
+                    'unit_price_ht' => $line['unit_price_ht'],
+                    'remise' => $line['remise'] ?? 0,
+                    'total_ligne_ht' => $totalLigneHt,
+                    'total_ligne_ttc' => $totalLigneTtc,
+                ]);
+
+                $totalHt += $totalLigneHt;
+            }
+
+            $salesNote->update([
+                'customer_id' => $request->customer_id,
+                'note_date' => $request->note_date,
+                'due_date' => $dueDate,
+                'status' => $request->action === 'validate' ? 'validée' : 'brouillon',
+                'total_ht' => $totalHt,
+                'total_ttc' => $totalHt * (1 + $tvaRate / 100),
+                'tva_rate' => $tvaRate,
+                'notes' => $request->notes,
+                'type' => $request->source_type === 'return' ? 'from_return' : 'from_invoice',
+                'sales_return_id' => $request->source_type === 'return' ? $request->source_ids[0] : null,
+                'sales_invoice_id' => $request->source_type === 'invoice' ? $request->source_ids[0] : null,
+            ]);
+
+            if ($request->action === 'validate' && $request->source_type === 'invoice') {
+                // Delete existing SalesReturn if it exists
+                if ($salesNote->sales_return_id) {
+                    $existingReturn = SalesReturn::find($salesNote->sales_return_id);
+                    if ($existingReturn) {
+                        $existingReturn->lines()->delete();
+                        foreach ($existingReturn->lines as $line) {
+                            $item = Item::where('code', $line->article_code)->first();
+                            if ($item) {
+                                $stock = Stock::firstOrNew([
+                                    'item_id' => $item->id,
+                                    'store_id' => $existingReturn->store_id ?? 1,
+                                ]);
+                                $stock->quantity = ($stock->quantity ?? 0) - $line->returned_quantity;
+                                $stock->save();
+                            }
+                        }
+                        $existingReturn->delete();
+                    }
+                }
+
+                $returnSouche = Souche::where('type', 'retour_vente')->lockForUpdate()->first();
+                if (!$returnSouche) {
+                    throw new \Exception('Souche retour vente manquante.');
+                }
+
+                $returnNextNumber = str_pad($returnSouche->last_number + 1, $returnSouche->number_length, '0', STR_PAD_LEFT);
+                $returnNumdoc = ($returnSouche->prefix ?? '') . ($returnSouche->suffix ?? '') . $returnNextNumber;
+
+                $returnTotalHt = 0;
+
+                $salesReturn = SalesReturn::create([
+                    'numdoc' => $returnNumdoc,
+                    'customer_id' => $request->customer_id,
+                    'return_date' => $request->note_date,
+                    'invoiced' => false,
+                    'tva_rate' => $tvaRate,
+                    'total_ht' => 0,
+                    'total_ttc' => 0,
+                    'store_id' => 1,
+                    'delivery_note_id' => null,
+                    'notes' => 'Retour généré automatiquement pour avoir #' . $salesNote->numdoc,
+                ]);
+
+                foreach ($returnLines as $returnLine) {
+                    $totalLigneHt = $returnLine['returned_quantity'] * $returnLine['unit_price_ht'] * (1 - ($returnLine['remise'] / 100));
+                    $returnTotalHt += $totalLigneHt;
+
+                    SalesReturnLine::create([
+                        'sales_return_id' => $salesReturn->id,
+                        'article_code' => $returnLine['article_code'],
+                        'returned_quantity' => $returnLine['returned_quantity'],
+                        'unit_price_ht' => $returnLine['unit_price_ht'],
+                        'remise' => $returnLine['remise'],
+                        'total_ligne_ht' => $totalLigneHt,
+                        'description' => $returnLine['description'],
+                    ]);
+
+                    $item = Item::where('code', $returnLine['article_code'])->first();
+                    if ($item) {
+                        $storeId = $salesReturn->store_id ?? 1;
+                        $stock = Stock::firstOrNew([
+                            'item_id' => $item->id,
+                            'store_id' => $storeId,
+                        ]);
+                        $stock->quantity = ($stock->quantity ?? 0) + $returnLine['returned_quantity'];
+                        $stock->save();
+
+                        StockMovement::create([
+                            'item_id' => $item->id,
+                            'store_id' => $storeId,
+                            'type' => 'retour_vente',
+                            'quantity' => $returnLine['returned_quantity'],
+                            'cost_price' => $returnLine['unit_price_ht'] * (1 - ($returnLine['remise'] / 100)),
+                            'supplier_name' => $customer->name,
+                            'reason' => 'Retour automatique pour avoir vente #' . $salesNote->numdoc,
+                            'reference' => $salesNote->numdoc,
+                        ]);
+                    }
+                }
+
+                $salesReturn->update([
+                    'total_ht' => $returnTotalHt,
+                    'total_ttc' => $returnTotalHt * (1 + $tvaRate / 100),
+                ]);
+
+                $returnSouche->last_number += 1;
+                $returnSouche->save();
+
+                $salesNote->update(['sales_return_id' => $salesReturn->id]);
+            }
+
+            if ($request->action === 'validate' && $request->source_type === 'return') {
+                SalesReturn::whereIn('id', $request->source_ids)
+                    ->where('invoiced', false)
+                    ->update(['invoiced' => true]);
+            }
+
+            \Log::info('SalesNote updated', [
+                'id' => $salesNote->id,
+                'numdoc' => $salesNote->numdoc,
+                'type' => $salesNote->type,
+                'sales_return_id' => $salesNote->sales_return_id,
+                'sales_invoice_id' => $salesNote->sales_invoice_id,
+            ]);
+
+            return redirect()->route('salesnotes.list')
+                ->with('success', $request->action === 'validate'
+                    ? 'Avoir validé avec succès.'
+                    : 'Avoir mis à jour avec succès.');
+        });
+    }
+
+    public function getSourceDocuments(Request $request)
+    {
+        try {
+            Log::info('getSourceDocuments called', [
+                'source_type' => $request->input('source_type'),
+                'customer_id' => $request->input('customer_id'),
+            ]);
+
+            $sourceType = $request->input('source_type');
+            $customerId = $request->input('customer_id');
+            $documents = collect();
+
+            if (!in_array($sourceType, ['return', 'invoice'])) {
+                Log::warning('Invalid source_type', ['source_type' => $sourceType]);
+                return response()->json(['documents' => []], 400);
+            }
+
+            if (!$customerId) {
+                Log::warning('No customer_id provided');
+                return response()->json(['documents' => []], 400);
+            }
+
+            if ($sourceType === 'return') {
+                $returns = SalesReturn::query()
+                    ->where('invoiced', false)
+                    ->where('customer_id', $customerId)
+                    ->with('customer')
+                    ->latest()->get();
+                Log::info('SalesReturn documents query result', [
+                    'count' => $returns->count(),
+                    'customer_id' => $customerId,
+                ]);
+                $documents = $returns->map(function ($return) {
+                    return [
+                        'id' => $return->id,
+                        'numdoc' => $return->numdoc ?? 'N/A',
+                        'customer_name' => $return->customer ? $return->customer->name : 'N/A',
+                    ];
+                });
+            } elseif ($sourceType === 'invoice') {
+                $invoices = Invoice::query()
+                    ->where('status', 'validée')
+                    ->where('customer_id', $customerId)
+                    ->with('customer')
+                    ->latest()->get();
+                Log::info('Invoice documents query result', [
+                    'count' => $invoices->count(),
+                    'customer_id' => $customerId,
+                ]);
+                $documents = $invoices->map(function ($invoice) {
+                    return [
+                        'id' => $invoice->id,
+                        'numdoc' => $invoice->numdoc ?? 'N/A',
+                        'customer_name' => $invoice->customer ? $invoice->customer->name : 'N/A',
+                    ];
+                });
+            }
+
+            Log::info('getSourceDocuments response', [
+                'documents_count' => $documents->count(),
+                'documents' => $documents->toArray(),
+            ]);
+            return response()->json(['documents' => $documents]);
+        } catch (\Exception $e) {
+            Log::error('Error in getSourceDocuments', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['error' => 'Server error occurred while fetching documents'], 500);
+        }
+    }
+
+    public function getSourceLines(Request $request)
+    {
+        try {
+            Log::info('getSourceLines called', [
+                'source_type' => $request->input('source_type'),
+                'source_ids' => $request->input('source_ids', []),
+            ]);
+
+            $sourceType = $request->input('source_type');
+            $sourceIds = Arr::wrap($request->input('source_ids', []));
+
+            if (!in_array($sourceType, ['return', 'invoice'])) {
+                Log::warning('Invalid source_type', ['source_type' => $sourceType]);
+                return response()->json(['lines' => []], 400);
+            }
+
+            if (empty($sourceIds)) {
+                Log::warning('No source_ids provided', ['source_ids' => $sourceIds]);
+                return response()->json(['lines' => []]);
+            }
+
+            $lines = collect();
+
+            if ($sourceType === 'return') {
+                $returns = SalesReturn::query()
+                    ->whereIn('id', $sourceIds)
+                    ->where('invoiced', false)
+                    ->with(['lines.item', 'customer'])
+                    ->get();
+
+                Log::info('SalesReturn query result', [
+                    'count' => $returns->count(),
+                    'ids' => $returns->pluck('id')->toArray(),
+                ]);
+
+                if ($returns->isEmpty()) {
+                    Log::warning('No SalesReturns found for provided IDs', ['source_ids' => $sourceIds]);
+                    return response()->json(['lines' => []]);
+                }
+
+                $lines = $returns->flatMap(function ($return) {
+                    Log::info('Processing SalesReturn', [
+                        'id' => $return->id,
+                        'numdoc' => $return->numdoc,
+                        'customer_exists' => !is_null($return->customer),
+                        'lines_count' => $return->lines->count(),
+                    ]);
+
+                    return $return->lines->map(function ($line) use ($return) {
+                        Log::info('Processing SalesReturn line', [
+                            'return_id' => $return->id,
+                            'article_code' => $line->article_code,
+                            'item_exists' => !is_null($line->item),
+                        ]);
+
+                        return [
+                            'source_id' => $return->id,
+                            'source_numdoc' => $return->numdoc ?? 'N/A',
+                            'article_code' => $line->article_code ?? 'N/A',
+                            'description' => $line->item ? ($line->item->name ?? $line->description ?? $line->article_code ?? 'N/A') : ($line->description ?? $line->article_code ?? 'N/A'),
+                            'quantity' => $line->returned_quantity ?? 0,
+                            'unit_price_ht' => $line->unit_price_ht ?? 0,
+                            'remise' => $line->remise ?? 0,
+                        ];
+                    });
+                });
+            } elseif ($sourceType === 'invoice') {
+                $invoices = Invoice::query()
+                    ->whereIn('id', $sourceIds)
+                    ->where('status', 'validée')
+                    ->with(['lines.item', 'customer'])
+                    ->get();
+
+                Log::info('Invoice query result', [
+                    'count' => $invoices->count(),
+                    'ids' => $invoices->pluck('id')->toArray(),
+                ]);
+
+                if ($invoices->isEmpty()) {
+                    Log::warning('No Invoices found for provided IDs', ['source_ids' => $sourceIds]);
+                    return response()->json(['lines' => []]);
+                }
+
+                $lines = $invoices->flatMap(function ($invoice) {
+                    Log::info('Processing Invoice', [
+                        'id' => $invoice->id,
+                        'numdoc' => $invoice->numdoc,
+                        'customer_exists' => !is_null($invoice->customer),
+                        'lines_count' => $invoice->lines->count(),
+                    ]);
+
+                    return $invoice->lines->map(function ($line) use ($invoice) {
+                        Log::info('Processing Invoice line', [
+                            'invoice_id' => $invoice->id,
+                            'article_code' => $line->article_code,
+                            'item_exists' => !is_null($line->item),
+                        ]);
+
+                        return [
+                            'source_id' => $invoice->id,
+                            'source_numdoc' => $invoice->numdoc ?? 'N/A',
+                            'article_code' => $line->article_code ?? 'N/A',
+                            'description' => $line->item ? ($line->item->name ?? $line->description ?? $line->article_code ?? 'N/A') : ($line->description ?? $line->article_code ?? 'N/A'),
+                            'quantity' => $line->quantity ?? 0,
+                            'unit_price_ht' => $line->unit_price_ht ?? 0,
+                            'remise' => $line->remise ?? 0,
+                        ];
+                    });
+                });
+            }
+
+            Log::info('getSourceLines response', [
+                'lines_count' => $lines->count(),
+                'lines' => $lines->toArray(),
+            ]);
+
+            return response()->json(['lines' => $lines->toArray()]);
+        } catch (\Exception $e) {
+            Log::error('Error in getSourceLines', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['error' => 'Server error occurred while fetching lines'], 500);
+        }
+    }
+
     public function printSingleNote($id)
     {
-        $note = SalesNote::with(['customer', 'lines.item', 'salesInvoice', 'salesReturn'])->findOrFail($id);
+        $salesNote = SalesNote::with(['customer', 'lines.item', 'salesInvoice', 'salesReturn'])->findOrFail($id);
         $company = CompanyInformation::first() ?? new CompanyInformation([
             'name' => 'Test Company S.A.R.L',
             'address' => '123 Rue Fictive, Tunis 1000',
@@ -1146,11 +1916,11 @@ public function editInvoice($id)
 
         $generator = new BarcodeGeneratorPNG();
         $barcode = 'data:image/png;base64,' . base64_encode(
-            $generator->getBarcode($note->numdoc, $generator::TYPE_CODE_128)
+            $generator->getBarcode($salesNote->numdoc, $generator::TYPE_CODE_128)
         );
 
-        $pdf = Pdf::loadView('notes.pdf', compact('note', 'company', 'barcode'));
-        return $pdf->stream("avoir_{$note->numdoc}.pdf");
+        $pdf = Pdf::loadView('salesnotes.pdf', compact('salesNote', 'company', 'barcode'));
+        return $pdf->download("avoir_{$salesNote->numdoc}.pdf");
     }
 
     public function exportSingleNote($id)
@@ -1159,9 +1929,24 @@ public function editInvoice($id)
         return Excel::download(new \App\Exports\SalesNoteExport($note), 'avoir_' . $note->numdoc . '.xlsx');
     }
 
+    public function exportNotes(Request $request)
+    {
+        $query = SalesNote::with(['customer', 'lines.item', 'salesInvoice', 'salesReturn']);
 
+        if ($request->filled('customer_id')) {
+            $query->where('customer_id', $request->customer_id);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('note_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('note_date', '<=', $request->date_to);
+        }
 
-
-
-    
+        $notes = $query->get();
+        return Excel::download(new \App\Exports\SalesNotesExport($notes), 'avoirs_ventes_' . Carbon::now()->format('YmdHis') . '.xlsx');
+    }
 }

@@ -48,4 +48,22 @@ class SalesNote extends Model
     {
         return $this->hasMany(SalesNoteLine::class);
     }
+
+    // Accessor for source_ids
+    public function getSourceIdsAttribute()
+    {
+        return $this->lines->pluck('source_id')->unique()->filter()->values()->toArray();
+    }
+
+    // Accessor for source_type
+    public function getSourceTypeAttribute()
+    {
+        if ($this->type === 'from_return') {
+            return 'return';
+        } elseif ($this->type === 'from_invoice') {
+            return 'invoice';
+        }
+        return null;
+    }
+    
 }

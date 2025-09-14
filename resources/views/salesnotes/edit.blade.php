@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>AZ ERP - Modifier la Facture #{{ $invoice->numdoc }}</title>
+    <title>AZ ERP - Modifier un Avoir</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
 
@@ -38,8 +38,8 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <style>
-        #documents + .select2-container .select2-selection--multiple {
-            width: 900px;
+        #source_ids + .select2-container .select2-selection--multiple {
+            width: 100%;
             min-width: 350px;
             padding: 10px;
             border-radius: 8px;
@@ -158,8 +158,8 @@
                         <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
-                        <li class="nav-item active"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
-                        <li class="nav-item"><a href="/salesnotes/list"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
+                        <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
+                        <li class="nav-item active"><a href="/salesnotes/list"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
                         <li class="nav-item"><a href="/reglement-client"><i class="fas fa-credit-card"></i><p>Règlement Client</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
                         <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
@@ -230,7 +230,7 @@
                                                 <div class="u-text">
                                                     <h4>{{ Auth::user()->name }}</h4>
                                                     <p class="text-muted">{{ Auth::user()->email }}</p>
-                                                    <a href="/setting" class="btn btn-xs btn-secondary btn-sm">Paramétres</a>
+                                                    <a href="/setting" class="btn btn-xs btn-secondary btn-sm">Paramètres</a>
                                                 </div>
                                             </div>
                                         </li>
@@ -260,72 +260,73 @@
 
                     <div class="card mt-4">
                         <div class="card-header bg-white border-start border-4 border-primary">
-                            <h3>📝 Modifier la Facture #{{ $invoice->numdoc }}</h3>
-                            <h6 class="text-muted">Type: {{ ucfirst($invoice->type ?? 'N/A') }}</h6>
+                            <h3>📝 Modifier l'Avoir #{{ $salesNote->numdoc }}</h3>
+                            <h6 class="text-muted">Type: Avoir Vente</h6>
                         </div>
                         <div class="card-body">
-                            <form method="POST" action="{{ route('salesinvoices.update', $invoice->numdoc) }}">
+                            <form method="POST" action="{{ route('salesnotes.update', $salesNote->id) }}">
                                 @csrf
                                 @method('PUT')
-                                <input type="hidden" name="type" value="{{ $invoice->type }}">
-                                <input type="hidden" name="tva_rate" id="tva_rate" value="{{ $invoice->tva_rate ?? 0 }}">
+                                <input type="hidden" name="tva_rate" id="tva_rate" value="{{ $salesNote->tva_rate }}">
                                 <div class="row mb-3">
                                     <div class="col-md-4">
                                         <label class="form-label" for="customer_id">Client</label>
                                         <select name="customer_id" id="customer_id" class="form-control select2" required>
+                                            <option value="">Sélectionner un client</option>
                                             @foreach($customers as $customer)
-                                                <option value="{{ $customer->id }}" data-code="{{ $customer->code ?? 'N/A' }}" {{ $invoice->customer_id == $customer->id ? 'selected' : '' }}>
-                                                    {{ $customer->name }} ({{ $customer->code ?? 'N/A'}}) 
+                                                <option value="{{ $customer->id }}"
+                                                        data-tva-rate="{{ $tvaRates[$customer->id] ?? 0 }}"
+                                                        data-code="{{ $customer->code ?? 'N/A' }}"
+                                                        {{ $salesNote->customer_id == $customer->id ? 'selected' : '' }}>
+                                                    {{ $customer->name }} ({{ $customer->code ?? 'N/A' }})
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <input type="hidden" name="numclient" id="numclient" value="{{ $invoice->customer->code ?? '' }}">
+                                        <input type="hidden" name="numclient" id="numclient" value="{{ $salesNote->customer->code ?? 'N/A' }}">
                                     </div>
                                     <div class="col-md-2">
                                         <label class="form-label">TVA %</label>
-                                        <input type="text" id="tva_display" class="form-control" value="{{ $invoice->tva_rate ?? 0 }}" readonly>
+                                        <input type="text" id="tva_display" class="form-control" value="{{ number_format($salesNote->tva_rate, 2, '.', '') }}" readonly>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label" for="invoice_date">Date de Facture</label>
-                                        <input type="date" name="invoice_date" id="invoice_date" class="form-control" value="{{ $invoice->invoice_date->format('Y-m-d') }}" required>
+                                        <label class="form-label" for="note_date">Date de l'Avoir</label>
+                                        <input type="date" name="note_date" id="note_date" class="form-control" value="{{ $salesNote->note_date->format('Y-m-d') }}" required>
                                     </div>
                                 </div>
-                                @if($invoice->type !== 'libre')
-                                    <div class="mb-3">
-                                        <label class="form-label">Bons de Livraison et Retours</label>
-                                        <select name="documents[]" id="documents" class="form-control select2-documents" multiple required>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="source_type">Type de Source</label>
+                                        <select name="source_type" id="source_type" class="form-control select2" required>
+                                            <option value="">Sélectionner le type</option>
+                                            <option value="return" {{ $salesNote->source_type == 'return' ? 'selected' : '' }}>Retour (non facturé)</option>
+                                            <option value="invoice" {{ $salesNote->source_type == 'invoice' ? 'selected' : '' }}>Facture (validée)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Documents</label>
+                                        <select name="source_ids[]" id="source_ids" class="form-control select2-documents" multiple required>
                                             @php
                                                 $selectedDocuments = [];
-                                                foreach ($invoice->lines as $line) {
-                                                    if ($line->delivery_note_id && $line->deliveryNote) {
-                                                        $key = 'delivery_' . $line->delivery_note_id;
-                                                        if (!in_array($key, $selectedDocuments)) {
-                                                            $selectedDocuments[] = $key;
-                                                            echo '<option value="' . $key . '" selected data-tva-rate="' . ($line->deliveryNote->tva_rate ?? $invoice->tva_rate ?? 0) . '">#' . ($line->deliveryNote->numdoc ?? 'N/A') . ' - ' . ($line->deliveryNote->customer_name ?? $invoice->customer->name ?? 'N/A') . ' (' . ($line->deliveryNote->order_date ? \Carbon\Carbon::parse($line->deliveryNote->order_date)->format('d/m/Y') : 'N/A') . ')</option>';
-                                                        }
-                                                    } elseif ($line->sales_return_id && $line->salesReturn) {
-                                                        $key = 'return_' . $line->sales_return_id;
-                                                        if (!in_array($key, $selectedDocuments)) {
-                                                            $selectedDocuments[] = $key;
-                                                            echo '<option value="' . $key . '" selected data-tva-rate="' . ($line->salesReturn->tva_rate ?? $invoice->tva_rate ?? 0) . '">#' . ($line->salesReturn->numdoc ?? 'N/A') . ' - ' . ($line->salesReturn->customer_name ?? $invoice->customer->name ?? 'N/A') . ' (' . ($line->salesReturn->order_date ? \Carbon\Carbon::parse($line->salesReturn->order_date)->format('d/m/Y') : 'N/A') . ')</option>';
-                                                        }
+                                                foreach ($salesNote->lines as $line) {
+                                                    if ($line->source_id && !in_array($line->source_id, $selectedDocuments)) {
+                                                        $selectedDocuments[] = $line->source_id;
+                                                        $doc = $salesNote->sourceDocuments->firstWhere('id', $line->source_id);
+                                                        $numdoc = $doc->numdoc ?? $line->source_numdoc ?? 'N/A';
+                                                        $customer_name = $doc->customer_name ?? $salesNote->customer->name ?? 'N/A';
+                                                        echo '<option value="' . $line->source_id . '" selected>#' . $numdoc . ' - ' . $customer_name . '</option>';
                                                     }
                                                 }
                                             @endphp
                                         </select>
                                     </div>
-                                @endif
-                                <h6 class="fw-bold mb-3">🧾 Lignes de la Facture</h6>
+                                </div>
+                                <h6 class="fw-bold mb-3">🧾 Lignes de l'Avoir</h6>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-bordered align-middle" id="lines-table">
                                         <thead class="table-light text-center">
                                             <tr>
-                                                @if($invoice->type !== 'libre')
-                                                    <th>Document</th>
-                                                    <th>Article</th>
-                                                @else
-                                                    <th>Description</th>
-                                                @endif
+                                                <th>Document</th>
+                                                <th>Article</th>
                                                 <th>Qté</th>
                                                 <th>PU HT</th>
                                                 <th>Remise (%)</th>
@@ -336,54 +337,44 @@
                                             </tr>
                                         </thead>
                                         <tbody id="lines">
-                                            @foreach($invoice->lines as $index => $line)
+                                            @foreach($salesNote->lines as $index => $line)
                                                 <tr>
-                                                    @if($invoice->type !== 'libre')
-                                                        <td>
-                                                            <input type="text" value="{{ $line->deliveryNote ? ' #' . ($line->deliveryNote->numdoc ?? 'N/A') : ($line->salesReturn ? '#' . ($line->salesReturn->numdoc ?? 'N/A') : '-') }}" class="form-control" readonly>
-                                                            <input type="hidden" name="lines[{{ $index }}][delivery_note_id]" value="{{ $line->delivery_note_id ?? '' }}">
-                                                            <input type="hidden" name="lines[{{ $index }}][sales_return_id]" value="{{ $line->sales_return_id ?? '' }}">
-                                                        </td>
-                                                        <td>
-                                                            <input type="text" value="{{ $line->article_code ?? '' }} - {{ $line->item ? $line->item->name : ($line->description ?? '-') }}" class="form-control" readonly>
-                                                            <input type="hidden" name="lines[{{ $index }}][article_code]" value="{{ $line->article_code ?? '' }}">
-                                                        </td>
-                                                    @else
-                                                        <td><input type="text" name="lines[{{ $index }}][description]" class="form-control description" value="{{ $line->description ?? ($line->item->name ?? '') }}" required></td>
-                                                    @endif
-                                                    <td><input type="number" name="lines[{{ $index }}][quantity]" class="form-control qty" value="{{ $line->quantity ?? 1 }}" min="1" required></td>
-                                                    <td><input type="number" step="0.01" name="lines[{{ $index }}][unit_price_ht]" class="form-control pu" value="{{ $line->unit_price_ht ?? 0 }}" min="0" required></td>
+                                                    <td>
+                                                        <input type="text" value="{{ $line->source_numdoc ?? 'N/A' }}" class="form-control" readonly>
+                                                        <input type="hidden" name="lines[{{ $index }}][source_id]" value="{{ $line->source_id }}">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" value="{{ $line->article_code }} - {{ $line->description ?? 'N/A' }}" class="form-control" readonly>
+                                                        <input type="hidden" name="lines[{{ $index }}][article_code]" value="{{ $line->article_code }}">
+                                                    </td>
+                                                    <td><input type="number" name="lines[{{ $index }}][quantity]" class="form-control qty" value="{{ abs($line->quantity) }}" max="{{ abs($line->quantity) }}" min="0" step="0.01" required></td>
+                                                    <td><input type="number" step="0.01" name="lines[{{ $index }}][unit_price_ht]" class="form-control pu" value="{{ $line->unit_price_ht }}" min="0" required></td>
                                                     <td><input type="number" step="0.01" name="lines[{{ $index }}][remise]" class="form-control remise" value="{{ $line->remise ?? 0 }}" min="0" max="100"></td>
-                                                    <td><input type="text" name="lines[{{ $index }}][tva]" class="form-control tva_ligne" value="{{ $line->tva ?? ($invoice->tva_rate ?? 0) }}" readonly></td>
-                                                    <td><input type="text" class="form-control total" value="{{ number_format($line->total_ligne_ht ?? ($line->quantity * $line->unit_price_ht * (1 - ($line->remise ?? 0) / 100)), 2, ',', ' ') }}" readonly></td>
-                                                    <td><input type="text" class="form-control totalttc" value="{{ number_format($line->total_ligne_ttc ?? ($line->quantity * $line->unit_price_ht * (1 - ($line->remise ?? 0) / 100) * (1 + ($line->tva ?? $invoice->tva_rate ?? 0) / 100)), 2, ',', ' ') }}" readonly></td>
+                                                    <td><input type="text" name="lines[{{ $index }}][tva]" class="form-control tva_ligne" value="{{ number_format($salesNote->tva_rate, 2) }}" readonly></td>
+                                                    <td><input type="text" class="form-control total" value="{{ number_format(-$line->quantity * $line->unit_price_ht * (1 - ($line->remise ?? 0) / 100), 2, '.', '') }}" readonly></td>
+                                                    <td><input type="text" class="form-control totalttc" value="{{ number_format(-$line->quantity * $line->unit_price_ht * (1 - ($line->remise ?? 0) / 100) * (1 + $salesNote->tva_rate / 100), 2, '.', '') }}" readonly></td>
                                                     <td><button type="button" class="btn btn-outline-danger btn-sm remove-line">×</button></td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
                                 </div>
-                                @if($invoice->type === 'libre')
-                                    <div class="mb-3 text-end">
-                                        <button type="button" class="btn btn-outline-secondary" id="addLine">+ Ajouter une Ligne</button>
-                                    </div>
-                                @endif
                                 <div class="row align-items-center mb-4">
                                     <div class="col-md-6">
                                         <label class="form-label">Notes / Commentaire</label>
-                                        <textarea name="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de facturation, etc.">{{ $invoice->notes }}</textarea>
+                                        <textarea name="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de facturation, etc.">{{ $salesNote->notes }}</textarea>
                                     </div>
                                     <div class="col-md-6 text-end">
                                         <div class="p-3 bg-light border rounded shadow-sm">
-                                            <h5 class="mb-1">Total HT : <span id="grandTotal" class="text-success fw-bold">{{ number_format($invoice->total_ht ?? 0, 2, ',', ' ') }}</span> TND</h5>
-                                            <h6 class="mb-0">Total TTC : <span id="grandTotalTTC" class="text-danger fw-bold">{{ number_format($invoice->total_ttc ?? 0, 2, ',', ' ') }}</span> TND</h6>
+                                            <h5 class="mb-1">Total HT : <span id="grandTotal" class="text-success fw-bold">0,00</span> TND</h5>
+                                            <h6 class="mb-0">Total TTC : <span id="grandTotalTTC" class="text-danger fw-bold">0,00</span> TND</h6>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="text-end">
                                     <button type="submit" name="action" value="save" class="btn btn-primary px-4">✅ Enregistrer Brouillon</button>
-                                    <button type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2">✔️ Valider la Facture</button>
-                                    <a href="{{ route('salesinvoices.index') }}" class="btn btn-danger px-4 ms-2">Annuler</a>
+                                    <button type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2">✔️ Valider l'Avoir</button>
+                                    <a href="{{ route('salesnotes.list') }}" class="btn btn-danger px-4 ms-2">Annuler</a>
                                 </div>
                             </form>
                         </div>
@@ -415,68 +406,90 @@
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
 
     <script>
-        let lineIndex = {{ count($invoice->lines) }};
-        const invoiceType = '{{ $invoice->type }}';
+        let lineIndex = {{ $salesNote->lines->count() }};
         const tvaMap = {!! json_encode($tvaRates ?? []) !!};
         let isInitialLoad = true; // Flag to track initial load
 
         $(document).ready(function () {
             console.log('Document ready, initializing Select2 and form');
 
-            // Initialize Select2 for customer dropdown
-            $('.select2').select2({ width: '100%' });
+            // Initialize Select2 for customer and source type dropdowns
+            $('.select2').select2({
+                width: '100%',
+                placeholder: 'Sélectionner une option',
+                minimumResultsForSearch: Infinity
+            });
 
-            // Initialize Select2 for documents without triggering change
-            if (invoiceType !== 'libre') {
-                $('.select2-documents').select2({
-                    ajax: {
-                        url: "{{ route('sales.orders.search') }}",
-                        dataType: 'json',
-                        delay: 500, // Increased delay to avoid race conditions
-                        data: function (params) {
-                            const customer = $('#customer_id').find(':selected');
-                            return {
-                                term: params.term || '',
-                                customer_id: customer.val() || '',
-                                customer_code: customer.data('code') || '',
-                                type: invoiceType === 'direct' ? 'delivery' : 'all'
-                            };
-                        },
-                        processResults: function (data) {
-                            console.log('Search Response:', data);
-                            return {
-                                results: data.map(item => ({
-                                    id: `${item.type}_${item.id}`,
-                                    text: `${item.type === 'delivery' ? 'Bon de Livraison' : 'Retour Vente'} #${item.numdoc} - ${item.customer_name} (${new Date(item.order_date).toLocaleDateString('fr-FR')})`,
-                                    type: item.type,
-                                    numdoc: item.numdoc,
-                                    lines: item.lines,
-                                    tva_rate: item.tva_rate
-                                }))
-                            };
-                        },
-                        cache: true
+            // Initialize Select2 for source documents
+            $('.select2-documents').select2({
+                ajax: {
+                    url: "{{ route('salesnotes.source.documents') }}",
+                    dataType: 'json',
+                    delay: 500,
+                    data: function (params) {
+                        return {
+                            term: params.term || '',
+                            source_type: $('#source_type').val() || '',
+                            customer_id: $('#customer_id').val() || ''
+                        };
                     },
-                    placeholder: 'Sélectionner des bons de livraison ou retours',
-                    minimumInputLength: 0,
-                    width: '100%'
-                });
+                    processResults: function (data) {
+                        console.log('Search Response:', data);
+                        return {
+                            results: data.documents.map(item => ({
+                                id: item.id,
+                                text: `#${item.numdoc} - ${item.customer_name || 'N/A'}`
+                            }))
+                        };
+                    },
+                    cache: true
+                },
+                placeholder: 'Sélectionner des retours ou factures',
+                minimumInputLength: 0,
+                width: '100%',
+                allowClear: true
+            });
+
+            // Initialize existing source documents
+            const preSelectedDocs = [
+                @foreach($salesNote->lines as $line)
+                    @if($line->source_id)
+                        '{{ $line->source_id }}',
+                    @endif
+                @endforeach
+            ].filter(Boolean);
+            console.log('Pre-selected Docs:', preSelectedDocs);
+            if (preSelectedDocs.length > 0) {
+                $('.select2-documents').val(preSelectedDocs).trigger('select2:select');
+                setTimeout(() => {
+                    console.log('Fetching document details via AJAX');
+                    $.ajax({
+                        url: "{{ route('salesnotes.source.documents') }}",
+                        data: {
+                            source_type: $('#source_type').val(),
+                            customer_id: $('#customer_id').val()
+                        },
+                        dataType: 'json',
+                        success: function (data) {
+                            console.log('AJAX Success, Data:', data);
+                            isInitialLoad = false;
+                            recalculate();
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('AJAX Error:', status, error, xhr.responseText);
+                            isInitialLoad = false;
+                            recalculate();
+                        }
+                    });
+                }, 1000);
+            } else {
+                isInitialLoad = false;
+                recalculate();
             }
 
             function getTVA() {
-                if (invoiceType === 'libre') {
-                    const customerId = parseInt($('select[name="customer_id"]').val());
-                    return parseFloat(tvaMap[customerId]) || {{ $invoice->tva_rate ?? 0 }};
-                }
-                const selectedItems = $('.select2-documents').select2('data');
-                if (selectedItems.length === 0) return parseFloat(tvaMap[$('#customer_id').val()]) || {{ $invoice->tva_rate ?? 0 }};
-                const tvaRates = selectedItems.map(item => parseFloat(item.tva_rate || $('#documents option[value="' + item.id + '"]').data('tva-rate')));
-                if (new Set(tvaRates).size > 1) {
-                    alert('Erreur : Les documents sélectionnés ont des taux de TVA différents.');
-                    $('.select2-documents').val(null).trigger('change');
-                    return {{ $invoice->tva_rate ?? 0 }};
-                }
-                return tvaRates[0] || {{ $invoice->tva_rate ?? 0 }};
+                const customerId = parseInt($('#customer_id').val());
+                return parseFloat(tvaMap[customerId]) || {{ $salesNote->tva_rate ?? 0 }};
             }
 
             function recalculate() {
@@ -487,7 +500,7 @@
                     const qty = parseFloat($(this).find('.qty').val()) || 0;
                     const pu = parseFloat($(this).find('.pu').val()) || 0;
                     const remise = parseFloat($(this).find('.remise').val()) || 0;
-                    const lineHT = qty * pu * (1 - remise / 100);
+                    const lineHT = -qty * pu * (1 - remise / 100); // Negative for credit note
                     const lineTTC = lineHT * (1 + tva / 100);
                     $(this).find('.tva_ligne').val(tva.toFixed(2));
                     $(this).find('.total').val(lineHT.toLocaleString('fr-FR', { minimumFractionDigits: 2 }));
@@ -506,9 +519,17 @@
                 const selectedOption = $(this).find('option:selected');
                 const numclient = selectedOption.data('code') || '';
                 $('#numclient').val(numclient);
-                if (invoiceType !== 'libre') {
-                    $('.select2-documents').val(null).trigger('change');
-                }
+                $('.select2-documents').val(null).trigger('change');
+                $('#lines').empty();
+                lineIndex = 0;
+                recalculate();
+            });
+
+            $('#source_type').on('change', function () {
+                console.log('Source type changed:', $(this).val());
+                $('.select2-documents').val(null).trigger('change');
+                $('#lines').empty();
+                lineIndex = 0;
                 recalculate();
             });
 
@@ -516,27 +537,6 @@
                 console.log('Line input changed, recalculating');
                 recalculate();
             });
-
-            if (invoiceType === 'libre') {
-                $('#addLine').click(function () {
-                    console.log('Adding new line, index:', lineIndex);
-                    const tva = getTVA();
-                    const newRow = `
-                        <tr>
-                            <td><input type="text" name="lines[${lineIndex}][description]" class="form-control description" required placeholder="Ex: Service de maintenance"></td>
-                            <td><input type="number" name="lines[${lineIndex}][quantity]" class="form-control qty" value="1" min="1" required></td>
-                            <td><input type="number" step="0.01" name="lines[${lineIndex}][unit_price_ht]" class="form-control pu" value="0" min="0" required></td>
-                            <td><input type="number" step="0.01" name="lines[${lineIndex}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
-                            <td><input type="text" name="lines[${lineIndex}][tva]" class="form-control tva_ligne" value="${tva.toFixed(2)}" readonly></td>
-                            <td><input type="text" class="form-control total" value="0,00" readonly></td>
-                            <td><input type="text" class="form-control totalttc" value="0,00" readonly></td>
-                            <td><button type="button" class="btn btn-outline-danger btn-sm remove-line">×</button></td>
-                        </tr>`;
-                    $('#lines').append(newRow);
-                    lineIndex++;
-                    recalculate();
-                });
-            }
 
             $('#lines').on('click', '.remove-line', function () {
                 console.log('Removing line');
@@ -546,93 +546,65 @@
 
             $('.select2-documents').on('select2:select select2:unselect', function (e) {
                 console.log('Select2 event:', e.type, 'isInitialLoad:', isInitialLoad, 'selected:', $(this).val());
-                if (invoiceType === 'libre') return;
-                if (isInitialLoad) return; // Skip during initial load
+                if (isInitialLoad) return;
                 $('#lines').empty();
                 lineIndex = 0;
-                const selectedItems = $(this).select2('data');
-                console.log('Selected Items:', selectedItems);
-                const tva = getTVA();
-                $('#tva_display').val(tva.toFixed(2));
-                $('#tva_rate').val(tva);
-                selectedItems.forEach(item => {
-                    item.lines.forEach(line => {
-                        const qty = line.quantity || line.ordered_quantity || line.delivered_quantity || 1;
-                        const lineHT = qty * line.unit_price_ht * (1 - (line.remise || 0) / 100);
-                        const lineTTC = lineHT * (1 + tva / 100);
-                        const row = `
-                            <tr>
-                                <td>
-                                    <input type="text" value="${item.type === 'delivery' ? 'Bon de Livraison' : 'Retour Vente'} #${item.numdoc}" class="form-control" readonly>
-                                    <input type="hidden" name="lines[${lineIndex}][${item.type === 'delivery' ? 'delivery_note_id' : 'sales_return_id'}]" value="${item.id.replace(/^(delivery|return)_/, '')}">
-                                </td>
-                                <td>
-                                    <input type="text" value="${line.article_code} - ${line.item_name || line.description || '-'}" class="form-control" readonly>
-                                    <input type="hidden" name="lines[${lineIndex}][article_code]" value="${line.article_code}">
-                                </td>
-                                <td><input type="number" name="lines[${lineIndex}][quantity]" class="form-control qty" value="${qty}" min="1" required></td>
-                                <td><input type="number" step="0.01" name="lines[${lineIndex}][unit_price_ht]" class="form-control pu" value="${line.unit_price_ht}" min="0" required></td>
-                                <td><input type="number" step="0.01" name="lines[${lineIndex}][remise]" class="form-control remise" value="${line.remise || 0}" min="0" max="100"></td>
-                                <td><input type="text" name="lines[${lineIndex}][tva]" class="form-control tva_ligne" value="${tva.toFixed(2)}" readonly></td>
-                                <td><input type="text" class="form-control total" value="${lineHT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}" readonly></td>
-                                <td><input type="text" class="form-control totalttc" value="${lineTTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}" readonly></td>
-                                <td><button type="button" class="btn btn-outline-danger btn-sm remove-line">×</button></td>
-                            </tr>`;
-                        $('#lines').append(row);
-                        lineIndex++;
-                    });
-                });
-                recalculate();
-            });
-
-            // Initialize existing documents and lines
-            @if($invoice->type !== 'libre')
-                const preSelectedDocs = [
-                    @foreach($invoice->lines as $line)
-                        @if($line->delivery_note_id)
-                            'delivery_{{ $line->delivery_note_id }}',
-                        @elseif($line->sales_return_id)
-                            'return_{{ $line->sales_return_id }}',
-                        @endif
-                    @endforeach
-                ].filter(Boolean); // Remove duplicates and empty values
-                console.log('Pre-selected Docs:', preSelectedDocs);
-                if (preSelectedDocs.length > 0) {
-                    // Set initial Select2 values without triggering change
-                    $('.select2-documents').val(preSelectedDocs);
-                    // Delay AJAX to avoid interfering with initial rendering
-                    setTimeout(() => {
-                        console.log('Fetching document details via AJAX');
-                        $.ajax({
-                            url: "{{ route('sales.orders.search') }}",
-                            data: {
-                                customer_id: $('#customer_id').val(),
-                                customer_code: $('#customer_id').find(':selected').data('code') || '',
-                                type: invoiceType === 'direct' ? 'delivery' : 'all'
-                            },
-                            dataType: 'json',
-                            success: function (data) {
-                                console.log('AJAX Success, Data:', data);
-                                isInitialLoad = false; // Allow future changes to update lines
-                                recalculate();
-                            },
-                            error: function (xhr, status, error) {
-                                console.error('AJAX Error:', status, error, xhr.responseText);
-                                isInitialLoad = false;
-                                recalculate(); // Keep Blade-rendered lines
-                            }
-                        });
-                    }, 1000); // 1-second delay
-                } else {
-                    isInitialLoad = false;
+                const selectedIds = $(this).val() || [];
+                const sourceType = $('#source_type').val();
+                if (!sourceType || selectedIds.length === 0) {
                     recalculate();
+                    return;
                 }
-            @else
-                isInitialLoad = false;
-                recalculate();
-            @endif
 
-            // $('#customer_id').trigger('change');
+                $.ajax({
+                    url: "{{ route('salesnotes.source.lines') }}",
+                    data: {
+                        source_type: sourceType,
+                        source_ids: selectedIds
+                    },
+                    dataType: 'json',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    success: function (data) {
+                        console.log('AJAX Success, Lines:', data);
+                        const tva = getTVA();
+                        $('#tva_display').val(tva.toFixed(2));
+                        $('#tva_rate').val(tva);
+                        data.lines.forEach(line => {
+                            const qty = Math.abs(parseFloat(line.quantity)) || 1;
+                            const lineHT = -qty * line.unit_price_ht * (1 - (line.remise || 0) / 100);
+                            const lineTTC = lineHT * (1 + tva / 100);
+                            const row = `
+                                <tr>
+                                    <td>
+                                        <input type="text" value="${line.source_numdoc || 'N/A'}" class="form-control" readonly>
+                                        <input type="hidden" name="lines[${lineIndex}][source_id]" value="${line.source_id}">
+                                    </td>
+                                    <td>
+                                        <input type="text" value="${line.article_code} - ${line.description || 'N/A'}" class="form-control" readonly>
+                                        <input type="hidden" name="lines[${lineIndex}][article_code]" value="${line.article_code}">
+                                    </td>
+                                    <td><input type="number" name="lines[${lineIndex}][quantity]" class="form-control qty" value="${qty}" max="${qty}" min="0" step="0.01" required></td>
+                                    <td><input type="number" step="0.01" name="lines[${lineIndex}][unit_price_ht]" class="form-control pu" value="${line.unit_price_ht}" min="0" required></td>
+                                    <td><input type="number" step="0.01" name="lines[${lineIndex}][remise]" class="form-control remise" value="${line.remise || 0}" min="0" max="100"></td>
+                                    <td><input type="text" name="lines[${lineIndex}][tva]" class="form-control tva_ligne" value="${tva.toFixed(2)}" readonly></td>
+                                    <td><input type="text" class="form-control total" value="${lineHT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}" readonly></td>
+                                    <td><input type="text" class="form-control totalttc" value="${lineTTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}" readonly></td>
+                                    <td><button type="button" class="btn btn-outline-danger btn-sm remove-line">×</button></td>
+                                </tr>`;
+                            $('#lines').append(row);
+                            lineIndex++;
+                        });
+                        recalculate();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('AJAX Error:', status, error, xhr.responseText);
+                        $('#lines').html('<tr><td colspan="9">Erreur lors du chargement des lignes.</td></tr>');
+                        recalculate();
+                    }
+                });
+            });
         });
     </script>
 </body>

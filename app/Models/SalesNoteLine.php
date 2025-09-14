@@ -39,4 +39,23 @@ class SalesNoteLine extends Model
     {
         return $this->belongsTo(Item::class, 'article_code', 'code');
     }
+
+    // Accessor for source_id
+    public function getSourceIdAttribute()
+    {
+        return $this->sales_return_id ?? $this->sales_invoice_id;
+    }
+
+    // Accessor for source_numdoc (optional, for display)
+    public function getSourceNumdocAttribute()
+    {
+        if ($this->sales_return_id) {
+            return optional($this->salesReturn)->numdoc ?? 'N/A';
+        } elseif ($this->sales_invoice_id) {
+            return optional($this->salesInvoice)->numdoc ?? 'N/A';
+        }
+        return 'N/A';
+    }
+
+    
 }
