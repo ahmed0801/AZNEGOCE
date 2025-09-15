@@ -50,6 +50,15 @@
             text-align: center;
             color: #666;
         }
+        tfoot td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        tfoot td.text-right {
+            text-align: right;
+        }
     </style>
 </head>
 <body>
@@ -115,6 +124,13 @@
                 </tr>
             @endforeach
         </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" class="text-right">Total</td>
+                <td class="text-right">{{ number_format($payments->sum('amount'), 2, ',', ' ') }} €</td>
+                <td colspan="3"></td>
+            </tr>
+        </tfoot>
     </table>
 
     <div class="footer">

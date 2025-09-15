@@ -208,62 +208,41 @@
 
                         <div class="card card-round">
                             <div class="card-body">
-                                <form method="GET" action="{{ route('payments.index') }}" class="mb-3">
-                                    <div class="row align-items-end">
-                                        <div class="col-md-4 mb-2">
-                                            <label for="customer_id" class="form-label">Client</label>
-                                            <select name="customer_id" id="customer_id" class="form-select form-select-sm select3">
-                                                <option value="">Tous</option>
-                                                @foreach($customers as $customer)
-                                                    <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
-                                                        {{ $customer->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4 mb-2">
-                                            <label for="supplier_id" class="form-label">Fournisseur</label>
-                                            <select name="supplier_id" id="supplier_id" class="form-select form-select-sm select3">
-                                                <option value="">Tous</option>
-                                                @foreach($suppliers as $supplier)
-                                                    <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
-                                                        {{ $supplier->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4 mb-2">
-                                            <label for="payment_mode" class="form-label">Mode de paiement</label>
-                                            <select name="payment_mode" id="payment_mode" class="form-select form-select-sm select3">
-                                                <option value="">Tous</option>
-                                                @foreach($paymentModes as $mode)
-                                                    <option value="{{ $mode->name }}" {{ request('payment_mode') == $mode->name ? 'selected' : '' }}>
-                                                        {{ $mode->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3 mb-2">
-                                            <label for="lettrage_code" class="form-label">Code lettrage</label>
-                                            <input type="text" name="lettrage_code" id="lettrage_code" class="form-control form-control-sm" placeholder="Code lettrage" value="{{ request('lettrage_code') }}">
-                                        </div>
-                                        <div class="col-md-3 mb-2">
-                                            <label for="date_from" class="form-label">Date début</label>
-                                            <input type="date" name="date_from" id="date_from" class="form-control form-control-sm" placeholder="Date début" value="{{ request('date_from') }}">
-                                        </div>
-                                        <div class="col-md-3 mb-2">
-                                            <label for="date_to" class="form-label">Date fin</label>
-                                            <input type="date" name="date_to" id="date_to" class="form-control form-control-sm" placeholder="Date fin" value="{{ request('date_to') }}">
-                                        </div>
-                                        <div class="col-md-3 mb-2 d-flex align-items-end gap-2">
-                                            <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                                                <i class="fas fa-filter me-1"></i> Filtrer
-                                            </button>
-                                            <a href="{{ route('payments.index') }}" class="btn btn-outline-secondary btn-sm px-3">
-                                                <i class="fas fa-undo me-1"></i> Réinitialiser
-                                            </a>
-                                        </div>
-                                    </div>
+                                <form method="GET" action="{{ route('payments.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+                                    <select name="customer_id" class="form-select form-select-sm select3" style="width: 150px;">
+                                        <option value="">Client (Tous)</option>
+                                        @foreach($customers as $customer)
+                                            <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
+                                                {{ $customer->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <select name="supplier_id" class="form-select form-select-sm select3" style="width: 150px;">
+                                        <option value="">Fournisseur (Tous)</option>
+                                        @foreach($suppliers as $supplier)
+                                            <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
+                                                {{ $supplier->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <select name="payment_mode" class="form-select form-select-sm select3" style="width: 150px;">
+                                        <option value="">Mode de paiement (Tous)</option>
+                                        @foreach($paymentModes as $mode)
+                                            <option value="{{ $mode->name }}" {{ request('payment_mode') == $mode->name ? 'selected' : '' }}>
+                                                {{ $mode->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <input type="text" name="lettrage_code" class="form-control form-control-sm" style="width: 150px;" placeholder="Code lettrage" value="{{ request('lettrage_code') }}">
+                                    <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début" value="{{ request('date_from') }}">
+                                    <span class="mx-1">à</span>
+                                    <input type="date" name="date_to" class="form-control form-control-sm" style="width: 120px;" placeholder="Date fin" value="{{ request('date_to') }}">
+                                    <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
+                                        <i class="fas fa-filter me-1"></i> Filtrer
+                                    </button>
+                                    <a href="{{ route('payments.index') }}" class="btn btn-outline-secondary btn-sm px-3">
+                                        <i class="fas fa-undo me-1"></i> Réinitialiser
+                                    </a>
                                 </form>
 
                                 <div class="table-responsive">
