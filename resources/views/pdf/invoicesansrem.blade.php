@@ -26,6 +26,8 @@
         th { background-color: #e9ecef; color: #2c3e50; font-weight: bold; border-bottom: 2px solid #007bff; }
         .info-table { margin-bottom: 20px; border: 1px solid #2c3e50; }
         .info-table td { text-align: left; padding: 6px; border: none; }
+                        .info-table .vehicle-row { background-color: #e3f2fd; font-style: italic; }
+
         .info-table tr:nth-child(odd) { background-color: #f8f9fa; }
         .items-table tr:nth-child(even) { background-color: #f9f9f9; }
         .totals-box { width: 300px; margin: 20px 0 0 auto; border: 2px double #2c3e50; padding: 10px; background-color: #ffffff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
@@ -65,6 +67,10 @@
                 <td><strong>TVA :</strong> {{ number_format($invoice->tva_rate, 2, ',', ' ') }}%</td>
                 <td><strong>Type :</strong> {{ ucfirst($invoice->type) }}</td>
             </tr>
+                        <tr class="vehicle-row">
+                <td class="vehicle-icon"><strong>Véhicule :</strong> {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}</td>
+                <td></td>
+            </tr>
         </table>
 
         <table class="items-table">
@@ -91,6 +97,9 @@
                 @endforeach
             </tbody>
         </table>
+                @if($invoice->notes)
+        <p><b>Note :</b> <u>{{ $invoice->notes ?? '-' }}</u></p>
+@endif
 
         <div class="totals-box">
             <table>

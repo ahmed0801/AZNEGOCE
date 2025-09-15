@@ -28,7 +28,7 @@ class SalesInvoicesController extends Controller
 {
     public function invoicesList(Request $request)
     {
-        $query = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns'])
+        $query = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])
             ->orderBy('updated_at', 'desc');
 
         if ($request->filled('customer_id')) {
@@ -55,7 +55,7 @@ class SalesInvoicesController extends Controller
 
     public function createDirectInvoice($deliveryNoteId)
     {
-        $deliveryNote = DeliveryNote::with(['lines.item', 'customer'])
+        $deliveryNote = DeliveryNote::with(['lines.item', 'customer','vehicle'])
             ->whereIn('status', ['expédié', 'livré'])
             ->findOrFail($deliveryNoteId);
 
@@ -85,6 +85,7 @@ class SalesInvoicesController extends Controller
             }
 
             $customer = $deliveryNote->customer;
+            $vehicle_id = $deliveryNote->vehicle_id;
             $tvaRate = $deliveryNote->tva_rate ?? 0;
             $dueDate = $customer->paymentTerm
                 ? Carbon::parse($request->invoice_date)->addDays($customer->paymentTerm->days)
@@ -103,6 +104,7 @@ class SalesInvoicesController extends Controller
                 'type' => 'direct',
                 'numclient' => $customer->code ?? null,
                 'customer_id' => $customer->id,
+                'vehicle_id' => $vehicle_id,
                 'invoice_date' => $request->invoice_date,
                 'due_date' => $dueDate,
                 'status' => $request->action === 'validate' ? 'validée' : 'brouillon',
@@ -496,7 +498,7 @@ public function editInvoice($id)
 
     public function printSingleInvoice($id)
     {
-        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns'])->findOrFail($id);
+        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
         $company = CompanyInformation::first() ?? new CompanyInformation([
             'name' => 'Test Company S.A.R.L',
             'address' => '123 Rue Fictive, Tunis 1000',
@@ -523,7 +525,7 @@ public function editInvoice($id)
 
     public function printSingleInvoiceduplicata($id)
     {
-        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns'])->findOrFail($id);
+        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
         $company = CompanyInformation::first() ?? new CompanyInformation([
             'name' => 'Test Company S.A.R.L',
             'address' => '123 Rue Fictive, Tunis 1000',
@@ -547,7 +549,7 @@ public function editInvoice($id)
 
      public function printSingleInvoicesansref($id)
     {
-        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns'])->findOrFail($id);
+        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
         $company = CompanyInformation::first() ?? new CompanyInformation([
             'name' => 'Test Company S.A.R.L',
             'address' => '123 Rue Fictive, Tunis 1000',
@@ -572,7 +574,7 @@ public function editInvoice($id)
 
          public function printSingleInvoicesansrem($id)
     {
-        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns'])->findOrFail($id);
+        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
         // dd($invoice);
         $company = CompanyInformation::first() ?? new CompanyInformation([
             'name' => 'Test Company S.A.R.L',
@@ -599,7 +601,7 @@ public function editInvoice($id)
 
          public function printSingleInvoicesans2($id)
     {
-        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns'])->findOrFail($id);
+        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
         $company = CompanyInformation::first() ?? new CompanyInformation([
             'name' => 'Test Company S.A.R.L',
             'address' => '123 Rue Fictive, Tunis 1000',

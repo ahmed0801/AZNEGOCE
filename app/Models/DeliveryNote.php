@@ -11,7 +11,7 @@ class DeliveryNote extends Model
     use HasFactory;
 
 protected $fillable = [
-    'sales_order_id', 'numclient', 'delivery_date', 'status', 'total_delivered', 
+    'sales_order_id', 'numclient', 'vehicle_id', 'delivery_date', 'status', 'total_delivered', 
     'total_ht', 'total_ttc', 'tva_rate', 'notes', 'numdoc','status_livraison','invoiced', 'vendeur',
 ];
 
@@ -38,6 +38,11 @@ public function customer()
     public function salesReturns()
     {
         return $this->hasMany(SalesReturn::class, 'delivery_note_id');
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class);
     }
 
 

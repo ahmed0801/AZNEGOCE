@@ -288,6 +288,7 @@ protected function createDeliveryNoteFromOrder(SalesOrder $order, Request $reque
             'total_ht' => 0, // Initialize
             'total_ttc' => 0, // Initialize
             'numclient' => $order->numclient,
+            'vehicle_id' => $request->vehicle_id,
             'tva_rate' => $order->tva_rate,
             'numdoc' => $numdoc,
             'notes' => $request->notes,
@@ -390,6 +391,7 @@ public function storeDirectDeliveryNote(Request $request)
 {
     $request->validate([
         'customer_id' => 'required|exists:customers,id',
+        'vehicle_id' => 'nullable|exists:vehicles,id',
         'order_date' => 'required|date',
         'lines' => 'required|array',
         'lines.*.article_code' => 'required|exists:items,code',
@@ -499,6 +501,7 @@ public function storedeliveryandinvoice(Request $request)
 {
     $request->validate([
         'customer_id' => 'required|exists:customers,id',
+        'vehicle_id' => 'nullable|exists:vehicles,id',
         'order_date' => 'required|date',
         'lines' => 'required|array',
         'lines.*.article_code' => 'required|exists:items,code',
@@ -529,6 +532,7 @@ public function storedeliveryandinvoice(Request $request)
             if (!DeliveryNote::where('numdoc', $numdoc)->exists()) {
                 $deliveryNote = DeliveryNote::create([
                     'customer_id' => $request->customer_id,
+                    'vehicle_id' => $request->vehicle_id,
                     'delivery_date' => $request->order_date,
                     'numclient' => $customer->code,
                     'status' => 'expédié',
@@ -619,6 +623,7 @@ public function storedeliveryandinvoice(Request $request)
                     'type' => 'direct',
                     'numclient' => $customer->code,
                     'customer_id' => $customer->id,
+                    'vehicle_id' => $request->vehicle_id,
                     'invoice_date' => $request->order_date,
                     'due_date' => $dueDate,
                     'status' => 'validée',

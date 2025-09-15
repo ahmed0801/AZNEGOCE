@@ -10,7 +10,7 @@ class Invoice extends Model
     use HasFactory;
 
     protected $fillable = [
-        'numdoc', 'type', 'numclient', 'customer_id', 'invoice_date', 'due_date', 'status', 'paid',
+        'numdoc', 'type', 'numclient', 'customer_id', 'vehicle_id', 'invoice_date', 'due_date', 'status', 'paid',
         'total_ht', 'total_ttc', 'tva_rate', 'notes'
     ];
 
@@ -40,5 +40,10 @@ class Invoice extends Model
     {
         return $this->belongsToMany(SalesReturn::class, 'invoice_delivery_notes')
                     ->withPivot('delivery_note_id');
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class);
     }
 }

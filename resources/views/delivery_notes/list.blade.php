@@ -351,6 +351,8 @@
                             </div>
 
                             <div id="lines-{{ $deliveryNote->id }}" class="card-body d-none bg-light">
+                             <h6 class="fw-bold mb-3"><i class="fa fa-solid fa-car"></i> : {{ $deliveryNote->vehicle ? ($deliveryNote->vehicle->license_plate . ' (' . $deliveryNote->vehicle->brand_name . ' ' . $deliveryNote->vehicle->model_name . ')') : '-' }}</h6>
+
                                 @if($deliveryNote->notes)
                                 <h6 class="fw-bold mb-3">🧾 Note : {{$deliveryNote->notes}}</h6>
                                 @endif

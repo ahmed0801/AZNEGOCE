@@ -221,7 +221,7 @@
                         <li class="nav-item active"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
                         <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
-                        <li class="nav-item"><a href="/avoirs"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
+                        <li class="nav-item"><a href="/salesnotes/list"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
                         <li class="nav-item"><a href="/reglement-client"><i class="fas fa-credit-card"></i><p>Règlement Client</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
                         <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
@@ -346,8 +346,11 @@
                                                         data-address="{{ $customer->address ?? '' }}"
                                                         data-address_delivery="{{ $customer->address_delivery ?? '' }}"
                                                         data-city="{{ $customer->city ?? '' }}"
-                                                        data-country="{{ $customer->country ?? '' }}">
-                                                    {{ $customer->code ?? '' }} ⭆ {{ $customer->name }}
+                                                        data-country="{{ $customer->country ?? '' }}"
+                                                        @if($customer->blocked) disabled @endif
+                                                        >
+                                                    {{ $customer->code ?? '' }} ⭆ {{ $customer->name }} 	
+                                                    @if($customer->blocked) <span class="badge bg-danger badge-very-sm"> &#x1F512;</span> @endif
                                                 </option>
                                             @endforeach
                                         </select>
@@ -377,21 +380,19 @@
                                     </div>
                                 </div>
                                 <div class="mb-3" id="customer_details" style="display: none;">
-                                    <h6 class="font-weight-bold mb-2">Détails du client</h6>
+                                    <!-- <h6 class="font-weight-bold mb-2">Détails du client</h6> -->
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <p><strong>Nom:</strong> <span id="customer_name"></span></p>
-                                            <p><strong>Code client:</strong> <span id="customer_code"></span></p>
-                                            <p><strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p>
-                                            <p><strong>Email:</strong> <span id="customer_email"></span></p>
-                                            <p><strong>Téléphone 1:</strong> <span id="customer_phone1"></span></p>
+                                            <p>	&#128204<strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span></p>
+                                            <p>&#10135<strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p>
+                                            <p>&#9993<strong>Email:</strong> <span id="customer_email"></span></p>
+                                            <p>&#128222<strong>Téléphone 1:</strong> <span id="customer_phone1"></span></p>
                                         </div>
                                         <div class="col-md-6">
-                                            <p><strong>Téléphone 2:</strong> <span id="customer_phone2"></span></p>
-                                            <p><strong>Adresse:</strong> <span id="customer_address"></span></p>
-                                            <p><strong>Adresse de livraison:</strong> <span id="customer_address_delivery"></span></p>
-                                            <p><strong>Ville:</strong> <span id="customer_city"></span></p>
-                                            <p><strong>Pays:</strong> <span id="customer_country"></span></p>
+                                            <p>&#128222<strong>Téléphone 2:</strong> <span id="customer_phone2"></span></p>
+                                            <p>	&#128681<strong>Adresse:</strong> <span id="customer_address"></span></p>
+                                            <p>&#128666<strong>Adresse de livraison:</strong> <span id="customer_address_delivery"></span></p>
+                                            <p>&#127988<strong>Ville & Pays:</strong> <span id="customer_city"></span>, <span id="customer_country"></span></p>
                                         </div>
                                     </div>
                                 </div>

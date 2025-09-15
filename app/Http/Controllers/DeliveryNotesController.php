@@ -25,7 +25,7 @@ class DeliveryNotesController extends Controller
 {
     public function list(Request $request)
     {
-$query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item'])
+$query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item','vehicle'])
     ->orderBy('delivery_notes.updated_at', 'desc');
 
         if ($request->filled('numclient')) {
@@ -63,7 +63,7 @@ $query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item'])
 
    public function printSingle($id)
     {
-        $deliveryNote = DeliveryNote::with(['salesOrder', 'lines.item'])
+        $deliveryNote = DeliveryNote::with(['salesOrder', 'lines.item','vehicle'])
             ->leftJoin('customers', 'delivery_notes.numclient', '=', 'customers.code')
             ->select('delivery_notes.*', 'customers.name as customer_name')
             ->where('delivery_notes.id', $id)
