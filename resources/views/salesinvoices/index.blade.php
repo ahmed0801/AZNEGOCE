@@ -16,12 +16,7 @@
         WebFont.load({
             google: { families: ["Public Sans:300,400,500,600,700"] },
             custom: {
-                families: [
-                    "Font Awesome 5 Solid",
-                    "Font Awesome 5 Regular",
-                    "Font Awesome 5 Brands",
-                    "simple-line-icons",
-                ],
+                families: ["Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"],
                 urls: ["{{ asset('assets/css/fonts.min.css') }}"],
             },
             active: function () {
@@ -44,33 +39,13 @@
         .btn-sm { padding: 0.2rem 0.5rem; font-size: 0.75rem; }
         .text-muted { font-size: 0.85rem; }
         .text-center { text-align: center; }
-        .card {
-            border-radius: 12px;
-            background: linear-gradient(135deg, #ffffff, #f8f9fa);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .card h3 {
-            font-size: 1.8rem;
-            color: #007bff;
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-        .card h6 {
-            font-size: 1rem;
-            color: #6c757d;
-        }
+        .card { border-radius: 12px; background: linear-gradient(135deg, #ffffff, #f8f9fa); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .card h3 { font-size: 1.8rem; color: #007bff; margin-bottom: 1rem; font-weight: 700; }
+        .card h6 { font-size: 1rem; color: #6c757d; }
         .card-body { padding: 2rem; }
         .card .text-info { color: #17a2b8 !important; }
-        .btn-primary {
-            font-size: 1.1rem;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
-        }
+        .btn-primary { font-size: 1.1rem; padding: 1rem 1.5rem; border-radius: 8px; transition: all 0.3s ease; }
+        .btn-primary:hover { background-color: #0056b3; box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); }
         .form-select-sm { width: auto; display: inline-block; }
         .badge { font-size: 0.85rem; }
     </style>
@@ -103,14 +78,14 @@
                         <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
                         <li class="nav-item active"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
                         <li class="nav-item"><a href="/salesnotes/list"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
-                        <li class="nav-item"><a href="/reglement-client"><i class="fas fa-credit-card"></i><p>Règlement Client</p></a></li>
+                        <li class="nav-item"><a href="/paymentlist"><i class="fas fa-credit-card"></i><p>Règlements</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
                         <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
                         <li class="nav-item"><a href="/purchaseprojects/list"><i class="fas fa-file-alt"></i><p>Projets de Commande</p></a></li>
                         <li class="nav-item"><a href="/returns"><i class="fas fa-undo-alt"></i><p>Retours Achat</p></a></li>
                         <li class="nav-item"><a href="/invoices"><i class="fas fa-file-invoice"></i><p>Factures Achat</p></a></li>
                         <li class="nav-item"><a href="/notes"><i class="fas fa-sticky-note"></i><p>Avoirs Achat</p></a></li>
-                        <li class="nav-item"><a href="/reglement-fournisseur"><i class="fas fa-credit-card"></i><p>Règlement Fournisseur</p></a></li>
+                        <li class="nav-item"><a href="/paymentlist"><i class="fas fa-credit-card"></i><p>Règlements</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
                         <li class="nav-item"><a href="/receptions"><i class="fas fa-truck-loading"></i><p>Réceptions</p></a></li>
                         <li class="nav-item"><a href="/articles"><i class="fas fa-cubes"></i><p>Articles</p></a></li>
@@ -262,18 +237,14 @@
                                         @else
                                             <span class="badge bg-success">{{ ucfirst($invoice->status) }}</span>
                                         @endif
-
                                         @if($invoice->status != 'brouillon')
-                                        @if($invoice->paid)
-                                            <span class="badge bg-success">Payé</span>
-                                        @else
-                                            <span class="badge bg-danger">Non payé</span>
+                                            @if($invoice->paid)
+                                                <span class="badge bg-success">Payé</span>
+                                            @else
+                                                <span class="badge bg-danger">Non payé ({{ number_format($invoice->getRemainingBalanceAttribute(), 2, ',', ' ') }} €)</span>
+                                            @endif
                                         @endif
-                                        @endif
-
-                                             <span class="text-muted small">&#8594; type: {{ ucfirst($invoice->type ?? 'N/A') }}</span>
-
-
+                                        <span class="text-muted small">&#8594; type: {{ ucfirst($invoice->type ?? 'N/A') }}</span>
                                     </div>
                                     <div class="btn-group">
                                         <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $invoice->id }})">
@@ -295,26 +266,20 @@
                                                         <i class="fas fa-edit"></i> Modifier
                                                     </a>
                                                 @endif
-
                                                 @if($invoice->status === 'validée')
-                                                <a class="dropdown-item" href="{{ route('salesinvoices.printduplicata', $invoice->id) }}" target="_blank">
+                                                    <a class="dropdown-item" href="{{ route('salesinvoices.printduplicata', $invoice->id) }}" target="_blank">
                                                         <i class="fas fa-print"></i> imp. DUPLICATA
                                                     </a>
-                                                    @endif
-
                                                     <a class="dropdown-item" href="{{ route('salesinvoices.printsansref', $invoice->id) }}" target="_blank">
                                                         <i class="fas fa-print"></i> imp. Sans Réf.
                                                     </a>
-
                                                     <a class="dropdown-item" href="{{ route('salesinvoices.printsansrem', $invoice->id) }}" target="_blank">
                                                         <i class="fas fa-print"></i> imp. Sans Rémise
                                                     </a>
-
                                                     <a class="dropdown-item" href="{{ route('salesinvoices.printsans2', $invoice->id) }}" target="_blank">
                                                         <i class="fas fa-print"></i> imp. Sans Réf & Rém
                                                     </a>
-
-
+                                                @endif
                                                 @if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
                                                     @foreach($invoice->deliveryNotes as $deliveryNote)
                                                         <a class="dropdown-item" href="{{ route('delivery_notes.edit', $deliveryNote->id) }}">
@@ -323,6 +288,9 @@
                                                     @endforeach
                                                 @endif
                                                 @if($invoice->status === 'validée' && !$invoice->paid)
+                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#makePaymentModal{{ $invoice->id }}">
+                                                        <i class="fas fa-credit-card"></i> Faire un règlement
+                                                    </a>
                                                     <form action="{{ route('salesinvoices.markAsPaid', $invoice->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Marquer cette facture comme payée ?')">
                                                         @csrf
                                                         @method('PUT')
@@ -355,10 +323,10 @@
                                                 <tr>
                                                     <td>{{ $line->article_code ?? '-' }}</td>
                                                     <td>{{ $line->item->name ?? $line->description ?? '-' }}</td>
-                                                    <td class="text-center">{{ $line->quantity }}</td>
+                                                    <td class="text-center">{{ number_format($line->quantity, 0, ',', ' ') }}</td>
                                                     <td class="text-end">{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
-                                                    <td class="text-end">{{ $line->remise ?? 0 }}%</td>
-                                                    <td class="text-end">{{ $invoice->tva_rate ?? 0 }}%</td>
+                                                    <td class="text-end">{{ number_format($line->remise ?? 0, 2, ',', ' ') }}%</td>
+                                                    <td class="text-end">{{ number_format($invoice->tva_rate ?? 0, 2, ',', ' ') }}%</td>
                                                     <td class="text-end">{{ number_format($line->total_ligne_ht, 2, ',', ' ') }} €</td>
                                                 </tr>
                                             @endforeach
@@ -369,6 +337,52 @@
                                             <strong>Total HT :</strong> {{ number_format($invoice->total_ht, 2, ',', ' ') }} €<br>
                                             <strong>Total TTC :</strong> {{ number_format($invoice->total_ttc, 2, ',', ' ') }} €
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Make Payment Modal -->
+                            <div class="modal fade" id="makePaymentModal{{ $invoice->id }}" tabindex="-1" aria-labelledby="makePaymentModalLabel{{ $invoice->id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="makePaymentModalLabel{{ $invoice->id }}">Faire un règlement pour {{ $invoice->numdoc }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form action="{{ route('salesinvoices.make_payment', $invoice->id) }}" method="POST">
+                                            @csrf
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label for="amount{{ $invoice->id }}" class="form-label">Montant (€)</label>
+                                                    <input type="number" step="0.01" class="form-control" id="amount{{ $invoice->id }}" name="amount" max="{{ $invoice->getRemainingBalanceAttribute() }}" required>
+                                                    <small>Reste à payer : {{ number_format($invoice->getRemainingBalanceAttribute(), 2, ',', ' ') }} €</small>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="payment_date{{ $invoice->id }}" class="form-label">Date de paiement</label>
+                                                    <input type="date" class="form-control" id="payment_date{{ $invoice->id }}" name="payment_date" value="{{ now()->format('Y-m-d') }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="payment_mode{{ $invoice->id }}" class="form-label">Mode de paiement</label>
+                                                    <select class="form-control select2" id="payment_mode{{ $invoice->id }}" name="payment_mode" required>
+                                                        @foreach(\App\Models\PaymentMode::all() as $mode)
+                                                            <option value="{{ $mode->name }}">{{ $mode->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="reference{{ $invoice->id }}" class="form-label">Référence (optionnel)</label>
+                                                    <input type="text" class="form-control" id="reference{{ $invoice->id }}" name="reference">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="notes{{ $invoice->id }}" class="form-label">Notes (optionnel)</label>
+                                                    <textarea class="form-control" id="notes{{ $invoice->id }}" name="notes"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>

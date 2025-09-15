@@ -14,6 +14,7 @@ use App\Models\Item;
 use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\CompanyInformation;
+use App\Models\Payment;
 use App\Models\SalesReturnLine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -1956,4 +1957,68 @@ public function notesList(Request $request)
         $notes = $query->get();
         return Excel::download(new \App\Exports\SalesNotesExport($notes), 'avoirs_ventes_' . Carbon::now()->format('YmdHis') . '.xlsx');
     }
+
+
+
+
+
+
+
+
+
+
+
+
+  public function makePayment(Request $request, $id)
+{
+    $invoice = Invoice::findOrFail($id);
+    if ($invoice->status !== 'validée' || $invoice->paid) {
+        return redirect()->back()->with('error', 'Cette facture ne peut pas être payée.');
+    }
+
+    $request->validate([
+        'amount' => 'required|numeric|min:0.01|max:' . $invoice->getRemainingBalanceAttribute(),
+        'payment_date' => 'required|date',
+        'payment_mode' => 'required|string|exists:payment_modes,name',
+        'reference' => 'nullable|string|max:255',
+        'notes' => 'nullable|string',
+    ]);
+
+    DB::beginTransaction();
+    try {
+        // Create the payment
+        $payment = Payment::create([
+            'payable_id' => $invoice->id,
+            'payable_type' => Invoice::class,
+            'customer_id' => $invoice->customer_id,
+            'amount' => $request->amount,
+            'payment_date' => $request->payment_date,
+            'payment_mode' => $request->payment_mode,
+            'reference' => $request->reference,
+            'notes' => $request->notes,
+        ]);
+
+        // Generate lettrage code
+        $payment->lettrage_code = $payment->generateLettrageCode();
+        $payment->save();
+
+        // Refresh the invoice's payments relationship to include the new payment
+        $invoice->load('payments');
+
+        // Update paid status with floating-point tolerance
+        $remainingBalance = $invoice->total_ttc - $invoice->payments->sum('amount');
+        $invoice->update(['paid' => $remainingBalance <= 0.01]); // Tolerance for floating-point issues
+
+        DB::commit();
+
+        return redirect()->back()->with('success', 'Paiement enregistré avec succès.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->with('error', 'Erreur lors de l\'enregistrement du paiement: ' . $e->getMessage());
+    }
+}
+
+
+
+    
 }

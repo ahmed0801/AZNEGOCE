@@ -21,6 +21,7 @@ use App\Http\Controllers\DevisController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\PayementmodeController;
 use App\Http\Controllers\PayementtermController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanificationTourneeController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\PurchaseInvoiceController;
@@ -434,6 +435,13 @@ Route::get('/sales/orders/search', [SalesInvoicesController::class, 'search'])->
 
 
 
+// Payments reglement
+Route::get('/paymentlist', [PaymentController::class, 'index'])->name('payments.index');
+Route::get('/paymentlist/export/pdf', [PaymentController::class, 'exportPdf'])->name('payments.export_pdf');
+Route::get('/paymentlist/export/excel', [PaymentController::class, 'exportExcel'])->name('payments.export_excel');
+Route::post('/salesinvoices/{id}/pay', [SalesInvoicesController::class, 'makePayment'])->name('salesinvoices.make_payment');
+Route::post('/purchaseinvoices/{id}/pay', [PaymentController::class, 'makePayment'])->name('purchaseinvoices.make_payment');
+Route::put('/purchaseinvoices/{id}/mark-as-paid', [PaymentController::class, 'markAsPaid'])->name('purchaseinvoices.markAsPaid');
 
 
 

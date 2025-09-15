@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Détails du Retour de Vente - AZ ERP</title>
+    <title>AZ NEGOCE - Liste des Règlements</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
 
@@ -30,58 +30,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}" />
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
-    <style>
-        .card {
-            border-radius: 12px;
-            background: linear-gradient(135deg, #ffffff, #f8f9fa);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .card h3 {
-            font-size: 1.8rem;
-            color: #007bff;
-            font-weight: 700;
-        }
-        .card h6 {
-            font-size: 1rem;
-            color: #6c757d;
-        }
-        .card-body {
-            padding: 2rem;
-        }
-        .table {
-            width: 100%;
-            margin-bottom: 0;
-        }
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
-        }
-        .table-striped tbody tr:nth-child(odd) {
-            background-color: #f2f2f2;
-        }
-        .btn-sm {
-            padding: 0.2rem 0.5rem;
-            font-size: 0.75rem;
-        }
-        .text-muted {
-            font-size: 0.85rem;
-        }
-        .text-info {
-            color: #17a2b8 !important;
-        }
-        .btn-primary {
-            font-size: 1.1rem;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
-        }
-    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 </head>
 <body>
     <div class="wrapper">
@@ -102,13 +51,16 @@
             <div class="sidebar-wrapper scrollbar scrollbar-inner">
                 <div class="sidebar-content">
                     <ul class="nav nav-secondary">
-                        <li class="nav-item"><a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a></li>
+                        <li class="nav-item {{ Route::is('dashboard') ? 'active' : '' }}">
+                            <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
+                        </li>
+                        @if(Auth::user()->role != 'livreur')
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
                         <li class="nav-item"><a href="/sales/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
                         <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
                         <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
-                        <li class="nav-item active"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
                         <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
                         <li class="nav-item"><a href="/salesnotes/list"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
@@ -121,10 +73,12 @@
                         <li class="nav-item {{ Route::is('payments.index') ? 'active' : '' }}">
                             <a href="{{ route('payments.index') }}"><i class="fas fa-credit-card"></i><p>Règlements</p></a>
                         </li>
-                                                <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
                         <li class="nav-item"><a href="/receptions"><i class="fas fa-truck-loading"></i><p>Réceptions</p></a></li>
                         <li class="nav-item"><a href="/articles"><i class="fas fa-cubes"></i><p>Articles</p></a></li>
+                        @endif
                         <li class="nav-item"><a href="/planification-tournee"><i class="fas fa-truck"></i><p>Suivi Livraisons</p></a></li>
+                        @if(Auth::user()->role != 'livreur')
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fa fa-users"></i></span><h4 class="text-section">Référentiel</h4></li>
                         <li class="nav-item"><a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a></li>
                         <li class="nav-item"><a href="/suppliers"><i class="fa fa-user-tie"></i><p>Fournisseurs</p></a></li>
@@ -133,6 +87,7 @@
                         <li class="nav-item"><a href="/tecdoc"><i class="fas fa-database"></i><p>TecDoc</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-robot"></i></span><h4 class="text-section">Autres</h4></li>
                         <li class="nav-item"><a href="/voice"><i class="fas fa-robot"></i><p>NEGOBOT</p></a></li>
+                        @endif
                         <li class="nav-item">
                             <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
@@ -204,97 +159,141 @@
 
             <div class="container">
                 <div class="page-inner">
-                    <h4>📋 Détails du Retour de Vente : {{ $return->numdoc }}</h4>
-                    @if(session('success'))
-                        <div class="alert alert-success">{{ session('success') }}</div>
-                    @endif
-                    @if(session('error'))
-                        <div class="alert alert-danger">{{ session('error') }}</div>
-                    @endif
-
-                    <div class="card mb-4 shadow-sm border-0">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
+                    @if(Auth::user()->role == 'livreur')
+                        <!-- Interface spéciale pour livreur -->
+                        <div class="text-center mt-5">
+                            <h3 class="fw-bold mb-4">Bienvenue {{ Auth::user()->name }}</h3>
+                            <p class="mb-5">Choisissez une option pour continuer :</p>
+                            <div class="row justify-content-center">
+                                <div class="col-md-3 mb-3">
+                                    <a href="/planification-tournee/planning-chauffeur" class="btn btn-primary btn-lg w-100 py-4">
+                                        🚚 Ma Journée
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="/planification-tournee" class="btn btn-info btn-lg w-100 py-4">
+                                        🏢 Planning Société
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="/planification-tournee/rapport" class="btn btn-success btn-lg w-100 py-4">
+                                        📊 Rapport & Historique Scan
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <!-- Payments Content -->
+                        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
                             <div>
-                                <h6 class="mb-0">
-                                    <strong>Retour N° : {{ $return->numdoc }}</strong> –
-                                    Client : {{ $return->customer->name ?? 'Inconnu' }}
-                                    <span class="text-muted small">({{ \Carbon\Carbon::parse($return->return_date)->format('d/m/Y') }})</span>
-                                </h6>
-                                <span class="badge bg-primary">{{ ucfirst($return->type) }}</span>
-                                <span class="badge bg-info">BL: {{ $return->deliveryNote->numdoc ?? '-' }}</span>
-                                @if($return->invoiced)
-                                    <span class="badge bg-success">Facturé</span>
-                                @endif
+                                <h3 class="fw-bold mb-3">Règlements</h3>
+                                <h6 class="op-7 mb-2">Liste des règlements clients et fournisseurs</h6>
                             </div>
-                            <div class="btn-group">
-                                <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $return->id }})">
-                                    ➕ Détails
-                                </button>
-
-                                <a href="{{ route('delivery_notes.salesreturns.export_single', $return->id) }}" class="btn btn-sm btn-outline-success">
-                                    EXCEL <i class="fas fa-file-excel"></i>
+                            <div class="ms-md-auto py-2 py-md-0">
+                                <a href="{{ route('payments.export_pdf') }}?{{ request()->getQueryString() }}" class="btn btn-label-success btn-round me-2">
+                                    <span class="btn-label"><i class="fas fa-file-pdf"></i></span> Exporter PDF
                                 </a>
-                                <a href="{{ route('delivery_notes.salesreturns.print_single', $return->id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
-                                    PDF <i class="fas fa-print"></i>
-                                </a>
-                                <a href="{{ route('delivery_notes.salesreturns.list') }}" class="btn btn-sm btn-outline-secondary">
-                                    <i class="fas fa-arrow-left"></i> Retour
+                                <a href="{{ route('payments.export_excel') }}?{{ request()->getQueryString() }}" class="btn btn-label-success btn-round">
+                                    <span class="btn-label"><i class="fas fa-file-excel"></i></span> Exporter Excel
                                 </a>
                             </div>
                         </div>
-                        <div id="lines-{{ $return->id }}" class="card-body d-none bg-light">
-                            <h6 class="fw-bold mb-3">🧾 Lignes du retour</h6>
-                            <table class="table table-sm table-bordered table-striped align-middle">
-                                <thead class="table-light text-center">
-                                    <tr>
-                                        <th>Code Article</th>
-                                        <th>Désignation</th>
-                                        <th>Qté Retournée</th>
-                                        <th>PU HT</th>
-                                        <th>Remise (%)</th>
-                                        <th>Total Ligne</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($return->lines as $line)
-                                        <tr>
-                                            <td>{{ $line->article_code }}</td>
-                                            <td>{{ $line->item->name ?? '-' }}</td>
-                                            <td class="text-center">{{ $line->returned_quantity }}</td>
-                                            <td class="text-end">{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
-                                            <td class="text-end">{{ $line->remise }}%</td>
-                                            <td class="text-end">{{ number_format($line->total_ligne_ht, 2, ',', ' ') }} €</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                            <div class="text-end mt-3">
-                                <div class="p-3 bg-white border rounded d-inline-block">
-                                    <strong>Total HT :</strong> {{ number_format($return->total_ht, 2, ',', ' ') }} €<br>
-                                    <strong>Total TTC :</strong> {{ number_format($return->total_ttc, 2, ',', ' ') }} €
+
+                        @if(session('success'))
+                            <div class="alert alert-success">{{ session('success') }}</div>
+                        @endif
+                        @if(session('error'))
+                            <div class="alert alert-danger">{{ session('error') }}</div>
+                        @endif
+
+                        <div class="card card-round">
+                            <div class="card-body">
+                                <form method="GET" action="{{ route('payments.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+                                    <select name="customer_id" class="form-select form-select-sm select3" style="width: 150px;">
+                                        <option value="">Client (Tous)</option>
+                                        @foreach($customers as $customer)
+                                            <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
+                                                {{ $customer->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <select name="supplier_id" class="form-select form-select-sm select3" style="width: 150px;">
+                                        <option value="">Fournisseur (Tous)</option>
+                                        @foreach($suppliers as $supplier)
+                                            <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
+                                                {{ $supplier->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <select name="payment_mode" class="form-select form-select-sm select3" style="width: 150px;">
+                                        <option value="">Mode de paiement (Tous)</option>
+                                        @foreach($paymentModes as $mode)
+                                            <option value="{{ $mode->name }}" {{ request('payment_mode') == $mode->name ? 'selected' : '' }}>
+                                                {{ $mode->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <input type="text" name="lettrage_code" class="form-control form-control-sm" style="width: 150px;" placeholder="Code lettrage" value="{{ request('lettrage_code') }}">
+                                    <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début" value="{{ request('date_from') }}">
+                                    <span class="mx-1">à</span>
+                                    <input type="date" name="date_to" class="form-control form-control-sm" style="width: 120px;" placeholder="Date fin" value="{{ request('date_to') }}">
+                                    <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
+                                        <i class="fas fa-filter me-1"></i> Filtrer
+                                    </button>
+                                    <a href="{{ route('payments.index') }}" class="btn btn-outline-secondary btn-sm px-3">
+                                        <i class="fas fa-undo me-1"></i> Réinitialiser
+                                    </a>
+                                </form>
+
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered align-items-center mb-0">
+                                        <thead class="thead-light text-center">
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Client/Fournisseur</th>
+                                                <th>Facture</th>
+                                                <th>Mode de Paiement</th>
+                                                <th class="text-end">Montant (€)</th>
+                                                <th>Code Lettrage</th>
+                                                <th>Référence</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($payments as $payment)
+                                                <tr>
+                                                    <td>{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
+                                                    <td>
+                                                        @if($payment->customer)
+                                                            {{ $payment->customer->name }} (Client)
+                                                        @elseif($payment->supplier)
+                                                            {{ $payment->supplier->name }} (Fournisseur)
+                                                        @else
+                                                            N/A
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if($payment->payable_type === 'App\\Models\\Invoice')
+                                                            Facture Vente: {{ $payment->payable->numdoc ?? 'N/A' }}
+                                                        @elseif($payment->payable_type === 'App\\Models\\PurchaseInvoice')
+                                                            Facture Achat: {{ $payment->payable->numdoc ?? 'N/A' }}
+                                                        @else
+                                                            N/A
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ $payment->payment_mode }}</td>
+                                                    <td class="text-end">{{ number_format($payment->amount, 2, ',', ' ') }}</td>
+                                                    <td>{{ $payment->lettrage_code ?? '-' }}</td>
+                                                    <td>{{ $payment->reference ?? '-' }}</td>
+                                                    <td>{{ $payment->notes ?? '-' }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                            @if($return->notes)
-                                <div class="mt-3">
-                                    <strong>Notes :</strong>
-                                    <p>{{ $return->notes }}</p>
-                                </div>
-                            @endif
                         </div>
-                    </div>
-
-
-                                <div class="mt-3">
-                <a href="{{ url()->previous()}}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Retour
-                </a>
-                            <a href="/delivery_notes/returns/list" class="btn btn-primary">
-     Voir la liste des Retours Vente
-</a>
-            </div>
-
-
-
+                    @endif
                 </div>
             </div>
 
@@ -315,37 +314,34 @@
     <script src="{{ asset('assets/js/core/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
     <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
-    <!-- jQuery Scrollbar -->
     <script src="{{ asset('assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
-    <!-- Chart JS -->
-    <script src="{{ asset('assets/js/plugin/chart.js/chart.min.js') }}"></script>
-    <!-- jQuery Sparkline -->
-    <script src="{{ asset('assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js') }}"></script>
-    <!-- Chart Circle -->
-    <script src="{{ asset('assets/js/plugin/chart-circle/circles.min.js') }}"></script>
-    <!-- Datatables -->
     <script src="{{ asset('assets/js/plugin/datatables/datatables.min.js') }}"></script>
-    <!-- Bootstrap Notify -->
     <script src="{{ asset('assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
-    <!-- jQuery Vector Maps -->
-    <script src="{{ asset('assets/js/plugin/jsvectormap/jsvectormap.min.js') }}"></script>
-    <script src="{{ asset('assets/js/plugin/jsvectormap/world.js') }}"></script>
-    <!-- Sweet Alert -->
     <script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
-    <!-- Kaiadmin JS -->
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
-    <!-- Select2 -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
     <script>
         $(document).ready(function () {
-            $('.select2').select2({ width: '100%' });
-        });
+            $('.select3').select2({
+                placeholder: "-- Sélectionner une option --",
+                allowClear: true,
+                width: '100%',
+                dropdownAutoWidth: true,
+                theme: "classic"
+            });
 
-        function toggleLines(id) {
-            const section = document.getElementById('lines-' + id);
-            section.classList.toggle('d-none');
-        }
+            // Initialize DataTables for payments table
+            $('table').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json'
+                },
+                paging: true,
+                searching: true,
+                info: true,
+                ordering: true
+            });
+        });
     </script>
 </body>
 </html>

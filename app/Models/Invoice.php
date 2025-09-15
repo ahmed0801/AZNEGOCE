@@ -46,4 +46,20 @@ class Invoice extends Model
     {
         return $this->belongsTo(Vehicle::class);
     }
+
+public function payments()
+{
+    return $this->morphMany(Payment::class, 'payable');
+}
+
+public function getRemainingBalanceAttribute()
+{
+    return $this->total_ttc - $this->payments->sum('amount');
+}
+
+    public function markAsPaid()
+    {
+        $this->update(['paid' => $this->getRemainingBalanceAttribute() <= 0]);
+    }
+
 }

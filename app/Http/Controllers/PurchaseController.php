@@ -865,13 +865,16 @@ public function storeReturn(Request $request, $id)
 
     public function invoicesList(Request $request)
 {
-    $query = PurchaseInvoice::with(['supplier', 'lines.item'])->orderBy('updated_at', 'desc');
+    $query = PurchaseInvoice::with(['supplier', 'lines.item','payments'])->orderBy('updated_at', 'desc');
 
     if ($request->filled('supplier_id')) {
         $query->where('supplier_id', $request->supplier_id);
     }
     if ($request->filled('status')) {
         $query->where('status', $request->status);
+    }
+    if ($request->filled('paid')) {
+        $query->where('paid', $request->paid === '1');
     }
     if ($request->filled('type')) {
         $query->where('type', $request->type);

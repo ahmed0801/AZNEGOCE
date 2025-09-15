@@ -96,13 +96,13 @@
                     <ul class="nav nav-secondary">
                         <li class="nav-item"><a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
-                        <li class="nav-item"><a href="/commande"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
+                        <li class="nav-item"><a href="/sales/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
                         <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
                         <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
-                        <li class="nav-item active"><a href="/invoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
-                        <li class="nav-item"><a href="/avoirs"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
+                        <li class="nav-item active"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
+                        <li class="nav-item"><a href="/salesnotes/list"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
                         <li class="nav-item"><a href="/reglement-client"><i class="fas fa-credit-card"></i><p>Règlement Client</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
                         <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
@@ -253,21 +253,27 @@
                                     <div>
                                         <h6 class="mb-0">
                                             <strong>Facture N° : {{ $invoice->numdoc }}</strong> –
-                                            {{ $invoice->customer->name ?? 'N/A' }}
+                                            &#x1F482;{{ $invoice->customer->name ?? 'N/A' }}
                                             <span class="text-muted small">({{ $invoice->numclient ?? 'N/A' }})</span>
-                                            <span class="text-muted small">({{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }})</span>
+                                            <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</span>
                                         </h6>
                                         @if($invoice->status === 'brouillon')
                                             <span class="badge bg-secondary">{{ ucfirst($invoice->status) }}</span>
                                         @else
                                             <span class="badge bg-success">{{ ucfirst($invoice->status) }}</span>
                                         @endif
-                                        <span class="badge bg-info">{{ ucfirst($invoice->type ?? 'N/A') }}</span>
+
+                                        @if($invoice->status != 'brouillon')
                                         @if($invoice->paid)
                                             <span class="badge bg-success">Payé</span>
                                         @else
                                             <span class="badge bg-danger">Non payé</span>
                                         @endif
+                                        @endif
+
+                                             <span class="text-muted small">&#8594; type: {{ ucfirst($invoice->type ?? 'N/A') }}</span>
+
+
                                     </div>
                                     <div class="btn-group">
                                         <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $invoice->id }})">
@@ -331,7 +337,7 @@
                                 </div>
 
                                 <div id="lines-{{ $invoice->id }}" class="card-body d-none bg-light">
-                                    <h6 class="fw-bold mb-3">🧾 Lignes de la facture</h6>
+                                    <h6 class="fw-bold mb-3"><i class="fa fa-solid fa-car"></i> : {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}</h6>
                                     <table class="table table-sm table-bordered align-middle">
                                         <thead class="table-light text-center">
                                             <tr>

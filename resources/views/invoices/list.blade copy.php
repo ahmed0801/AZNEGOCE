@@ -215,13 +215,13 @@
                             <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
                         </li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
-                        <li class="nav-item"><a href="/commande"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
+                        <li class="nav-item"><a href="/sales/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
                         <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
                         <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
-                        <li class="nav-item"><a href="/invoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
-                        <li class="nav-item"><a href="/avoirs"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
+                        <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
+                        <li class="nav-item"><a href="/salesnotes/list"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
                         <li class="nav-item"><a href="/reglement-client"><i class="fas fa-credit-card"></i><p>Règlement Client</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
                         <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
@@ -493,6 +493,24 @@ de
                                             </a>
                                         @endforeach
                                     @endif
+
+
+                                    <!-- Supplier Invoice Actions -->
+                            @if($invoice->supplier_invoice_file)
+                                <a class="dropdown-item" href="{{ route('invoices.download_supplier_invoice', $invoice->id) }}" target="_blank">
+                                    <i class="fas fa-eye"></i> Voir Facture Fournisseur
+                                </a>
+                                <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteSupplierInvoiceModal{{ $invoice->id }}">
+                                    <i class="fas fa-trash"></i> Supprimer Facture Fournisseur
+                                </a>
+                            @else
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#uploadSupplierInvoiceModal{{ $invoice->id }}">
+                                    <i class="fas fa-upload"></i> Joindre Facture Fournisseur
+                                </a>
+                            @endif
+
+
+                            
                                 </div>
                             </div>
                         </div>
@@ -535,9 +553,84 @@ de
                         </div>
                     </div>
                 </div>
+
+
+
+
+
+
+
+                
+<!-- facture fournisseur -->
+<!-- Upload Supplier Invoice Modal -->
+            <div class="modal fade" id="uploadSupplierInvoiceModal{{ $invoice->id }}" tabindex="-1" aria-labelledby="uploadSupplierInvoiceModalLabel{{ $invoice->id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="uploadSupplierInvoiceModalLabel{{ $invoice->id }}">Joindre Facture Fournisseur pour {{ $invoice->numdoc }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="{{ route('invoices.upload_supplier_invoice', $invoice->id) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="supplier_invoice_file{{ $invoice->id }}" class="form-label">Choisir le fichier (PDF uniquement)</label>
+                                    <input type="file" class="form-control" id="supplier_invoice_file{{ $invoice->id }}" name="supplier_invoice_file" accept="application/pdf,image/jpeg,image/png" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <button type="submit" class="btn btn-primary">Joindre</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Supplier Invoice Modal -->
+            <div class="modal fade" id="deleteSupplierInvoiceModal{{ $invoice->id }}" tabindex="-1" aria-labelledby="deleteSupplierInvoiceModalLabel{{ $invoice->id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteSupplierInvoiceModalLabel{{ $invoice->id }}">Supprimer Facture Fournisseur</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="{{ route('invoices.delete_supplier_invoice', $invoice->id) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <div class="modal-body">
+                                Êtes-vous sûr de vouloir supprimer la facture fournisseur associée à {{ $invoice->numdoc }} ?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <button type="submit" class="btn btn-danger">Supprimer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+<!-- fin facture fournisseur -->
+
+
+
+
+
+
+
             @endforeach
         </div>
     </div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 
