@@ -34,9 +34,16 @@ public function payments()
         return $this->morphMany(Payment::class, 'payable');
     }
 
+
+
+    
     public function getRemainingBalanceAttribute()
     {
-        return $this->total_ttc - $this->payments->sum('amount');
+        // Calculate remaining balance: total_ttc - sum of payment amounts
+        $paidAmount = $this->payments->sum('amount');
+        // For purchase invoices, total_ttc can be negative (e.g., credit invoice).
+        // A negative payment (décaissement) reduces the liability.
+        return round($this->total_ttc + $paidAmount, 2);
     }
 
     public function markAsPaid()

@@ -439,11 +439,12 @@ Route::get('/sales/orders/search', [SalesInvoicesController::class, 'search'])->
 Route::get('/paymentlist', [PaymentController::class, 'index'])->name('payments.index');
 Route::get('/paymentlist/export/pdf', [PaymentController::class, 'exportPdf'])->name('payments.export_pdf');
 Route::get('/paymentlist/export/excel', [PaymentController::class, 'exportExcel'])->name('payments.export_excel');
-Route::post('/salesinvoices/{id}/pay', [SalesInvoicesController::class, 'makePayment'])->name('salesinvoices.make_payment');
-Route::post('/purchaseinvoices/{id}/pay', [PaymentController::class, 'makePayment'])->name('purchaseinvoices.make_payment');
+Route::post('/salesinvoices/{id}/pay', [PaymentController::class, 'makePayment'])->name('salesinvoices.make_payment');
+Route::post('/purchaseinvoices/{id}/pay', [PaymentController::class, 'makePaymentPurchase'])->name('purchaseinvoices.make_payment');
 Route::put('/purchaseinvoices/{id}/mark-as-paid', [PaymentController::class, 'markAsPaid'])->name('purchaseinvoices.markAsPaid');
 
-
+    Route::post('/salesnotes/{id}/make_payment', [PaymentController::class, 'makePaymentSalesNote'])->name('salesnotes.make_payment');
+ Route::post('/notes/{id}/make_payment', [PaymentController::class, 'makePaymentPurchaseNote'])->name('notes.make_payment');
 
 
 // routes factures fournisseurs

@@ -30,14 +30,6 @@ class Payment extends Model
 
     protected static function booted()
     {
-        static::saving(function ($payment) {
-            $paymentMode = PaymentMode::where('name', $payment->payment_mode)->first();
-            if ($paymentMode) {
-                // Adjust amount based on payment mode type
-                $payment->amount = $paymentMode->type === 'décaissement' ? -abs($payment->amount) : abs($payment->amount);
-            }
-        });
-
         static::saved(function ($payment) {
             // Update customer balance if customer_id is set
             if ($payment->customer_id) {
@@ -45,7 +37,7 @@ class Payment extends Model
                 if ($paymentMode && $paymentMode->customer_balance_action) {
                     $customer = Customer::find($payment->customer_id);
                     if ($customer) {
-                        $amount = abs($payment->amount); // Use absolute value for balance updates
+                        $amount = $payment->amount;
                         if ($paymentMode->customer_balance_action === '+') {
                             $customer->solde += $amount;
                         } else {
@@ -56,7 +48,6 @@ class Payment extends Model
                             'customer_id' => $customer->id,
                             'payment_id' => $payment->id,
                             'action' => $paymentMode->customer_balance_action,
-                            'type' => $paymentMode->type,
                             'new_balance' => $customer->solde,
                         ]);
                     }
@@ -69,7 +60,7 @@ class Payment extends Model
                 if ($paymentMode && $paymentMode->supplier_balance_action) {
                     $supplier = Supplier::find($payment->supplier_id);
                     if ($supplier) {
-                        $amount = abs($payment->amount); // Use absolute value for balance updates
+                        $amount = $payment->amount;
                         if ($paymentMode->supplier_balance_action === '+') {
                             $supplier->solde += $amount;
                         } else {
@@ -80,7 +71,6 @@ class Payment extends Model
                             'supplier_id' => $supplier->id,
                             'payment_id' => $payment->id,
                             'action' => $paymentMode->supplier_balance_action,
-                            'type' => $paymentMode->type,
                             'new_balance' => $supplier->solde,
                         ]);
                     }

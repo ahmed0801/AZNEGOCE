@@ -471,6 +471,16 @@ de
                                         @else
                                             <span class="badge bg-success">{{ ucfirst($note->status) }}</span>
                                         @endif
+
+                                        @if($note->status != 'brouillon')
+                                            @if($note->paid)
+                                                <span class="badge bg-success">Payé</span>
+                                            @else
+                                                <span class="badge bg-danger">Non payé ({{ number_format($note->getRemainingBalanceAttribute(), 2, ',', ' ') }} €)</span>
+                                            @endif
+                                        @endif
+
+
                                         <span class="badge bg-info">{{ ucfirst(str_replace('_', ' ', $note->type)) }}</span>
                                     </div>
                                     <div class="btn-group">
@@ -494,6 +504,14 @@ de
                                                         <i class="fas fa-edit"></i> Modifier
                                                     </a>
                                                 @endif
+
+                                                 @if($note->status === 'validée' && !$note->paid)
+                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#makePaymentModal{{ $note->id }}">
+                                                        <i class="fas fa-credit-card"></i> Faire un règlement
+                                                    </a>
+                                                @endif
+
+
                                                 @if($note->purchaseReturn)
                                                     <a class="dropdown-item" href="{{ route('returns.show', $note->purchaseReturn->id) }}">
                                                         <i class="fas fa-eye"></i> Retour #{{ $note->purchaseReturn->numdoc }}
@@ -545,11 +563,81 @@ de
                                         </div>
                                     </div>
                                 </div>
+
+
+
+                                 <!-- Make Payment Modal -->
+                                @if($note->status === 'validée' && !$note->paid)
+                                    <div class="modal fade" id="makePaymentModal{{ $note->id }}" tabindex="-1" aria-labelledby="makePaymentModalLabel{{ $note->id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="makePaymentModalLabel{{ $note->id }}">Faire un règlement pour {{ $note->numdoc }}</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <form action="{{ route('notes.make_payment', $note->id) }}" method="POST" class="payment-form">
+                                                    @csrf
+                                                    <div class="modal-body">
+                                                        @if ($errors->any())
+                                                            <div class="alert alert-danger">
+                                                                <ul>
+                                                                    @foreach ($errors->all() as $error)
+                                                                        <li>{{ $error }}</li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            </div>
+                                                        @endif
+                                                        <div class="mb-3">
+                                                            <label for="amount{{ $note->id }}" class="form-label">Montant (€)</label>
+                                                            <input type="number" step="0.01" class="form-control" id="amount{{ $note->id }}" name="amount"  value="{{ old('amount') }}" required>
+                                                            <small>Reste à payer : {{ number_format($note->getRemainingBalanceAttribute(), 2, ',', ' ') }} €</small>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="payment_date{{ $note->id }}" class="form-label">Date de paiement</label>
+                                                            <input type="date" class="form-control" id="payment_date{{ $note->id }}" name="payment_date" value="{{ old('payment_date', now()->format('Y-m-d')) }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="payment_mode{{ $note->id }}" class="form-label">Mode de paiement</label>
+                                                            <select class="form-control select2" id="payment_mode{{ $note->id }}" name="payment_mode" required>
+                                                                @foreach(\App\Models\PaymentMode::all() as $mode)
+                                                                    <option value="{{ $mode->name }}" {{ old('payment_mode') == $mode->name ? 'selected' : '' }}>{{ $mode->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="reference{{ $note->id }}" class="form-label">Référence (optionnel)</label>
+                                                            <input type="text" class="form-control" id="reference{{ $note->id }}" name="reference" value="{{ old('reference') }}">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="notes{{ $note->id }}" class="form-label">Notes (optionnel)</label>
+                                                            <textarea class="form-control" id="notes{{ $note->id }}" name="notes">{{ old('notes') }}</textarea>
+                                                        </div>
+                                                        <input type="hidden" name="form_id" value="payment_form_{{ $note->id }}">
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                                        <button type="submit" class="btn btn-primary payment-submit-btn">Enregistrer</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+
+
+
+
                             </div>
                         @empty
                             <div class="alert alert-info">
                                 Aucun avoir trouvé.
                             </div>
+
+
+                            
                         @endforelse
                     </div>
    </div>   </div>

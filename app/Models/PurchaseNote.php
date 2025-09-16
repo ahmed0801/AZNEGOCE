@@ -20,6 +20,7 @@ class PurchaseNote extends Model
         'total_ttc',
         'tva_rate',
         'notes',
+        'paid',
         'purchase_return_id',
         'purchase_invoice_id',
     ];
@@ -43,4 +44,29 @@ class PurchaseNote extends Model
     {
         return $this->hasMany(PurchaseNoteLine::class);
     }
+
+
+
+        public function payments()
+    {
+        return $this->morphMany(Payment::class, 'payable');
+    }
+
+
+
+    public function getRemainingBalanceAttribute()
+    {
+        // Calculate remaining balance: total_ttc - sum of payment amounts
+        $paidAmount = $this->payments->sum('amount');
+        // For purchase notes, total_ttc is typically negative (e.g., refund owed).
+        // A negative payment (décaissement) reduces the liability.
+        return round($this->total_ttc + $paidAmount, 2);
+    }
+
+
+    public function markAsPaid()
+    {
+        $this->update(['paid' => $this->getRemainingBalanceAttribute() <= 0.01]); // Add tolerance
+    }
+
 }

@@ -7,7 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class PaymentMode extends Model
 {
-    protected $fillable = ['name'];
+    protected $fillable = [
+        'name',
+        'customer_balance_action', // '+' or '-' for customer balance
+        'supplier_balance_action', // '+' or '-' for supplier balance
+                'type', // décaissement or encaissement
+
+    ];
 
     public function customers()
     {

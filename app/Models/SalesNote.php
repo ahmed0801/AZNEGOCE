@@ -65,5 +65,19 @@ class SalesNote extends Model
         }
         return null;
     }
+
+
+        public function payments()
+    {
+        return $this->morphMany(Payment::class, 'payable');
+    }
+
+    public function getRemainingBalanceAttribute()
+    {
+        return $this->total_ttc - $this->payments->sum('amount');
+    }
+
+
     
+
 }

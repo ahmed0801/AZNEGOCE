@@ -367,7 +367,6 @@
                                     <thead class="table-dark">
                                         <tr>
                                             <th>Nom</th>
-                                            <th>Type</th>
                                             <th>Action Solde Client</th>
                                             <th>Action Solde Fournisseur</th>
                                             <th>Action</th>
@@ -377,7 +376,6 @@
                                         @foreach ($paymentmodes as $paymentmode)
                                             <tr>
                                                 <td>{{ $paymentmode->name }}</td>
-                                                 <td>{{ ucfirst($paymentmode->type) }}</td>
                                                 <td>{{ $paymentmode->customer_balance_action ?? '-' }}</td>
                                                 <td>{{ $paymentmode->supplier_balance_action ?? '-' }}</td>
                                                 <td>
@@ -417,20 +415,6 @@
                                                                             <span class="text-danger">{{ $message }}</span>
                                                                         @enderror
                                                                     </div>
-
-
-                                                                    <!-- Type -->
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <label for="type_{{ $paymentmode->id }}" class="form-label">Type</label>
-                                                                        <select name="type" id="type_{{ $paymentmode->id }}" class="form-select" required>
-                                                                            <option value="décaissement" {{ $paymentmode->type == 'décaissement' ? 'selected' : '' }}>Décaissement</option>
-                                                                            <option value="encaissement" {{ $paymentmode->type == 'encaissement' ? 'selected' : '' }}>Encaissement</option>
-                                                                        </select>
-                                                                        @error('type')
-                                                                            <span class="text-danger">{{ $message }}</span>
-                                                                        @enderror
-                                                                    </div>
-                                                                    
                                                                     <!-- Action sur Solde Client -->
                                                                     <div class="mb-3 col-md-4">
                                                                         <label for="customer_balance_action_{{ $paymentmode->id }}" class="form-label">Action sur Solde Client</label>

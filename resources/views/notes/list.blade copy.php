@@ -40,7 +40,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}" />
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 
 
@@ -194,176 +194,70 @@
   </head>
   <body>
     <div class="wrapper">
-      <!-- Sidebar -->
-      <div class="sidebar" data-background-color="dark">
-        <div class="sidebar-logo">
-          <!-- Logo Header -->
-          <div class="logo-header" data-background-color="dark">
-            <a href="/" class="logo">
-              <img
-                src="{{ asset('assets/img/logop.png')}}"
-                alt="navbar brand"-9
-                class="navbar-brand"
-                height="40"
-              />
-            </a>
-            <div class="nav-toggle">
-              <button class="btn btn-toggle toggle-sidebar">
-                <i class="gg-menu-right"></i>
-              </button>
-              <button class="btn btn-toggle sidenav-toggler">
-                <i class="gg-menu-left"></i>
-              </button>
+       <!-- Sidebar -->
+        <div class="sidebar" data-background-color="dark">
+            <div class="sidebar-logo">
+                <div class="logo-header" data-background-color="dark">
+                    <a href="/" class="logo">
+                        <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
+                    </a>
+                    <div class="nav-toggle">
+                        <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                        <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
+                    </div>
+                    <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
+                </div>
             </div>
-            <button class="topbar-toggler more">
-              <i class="gg-more-vertical-alt"></i>
-            </button>
-          </div>
-          <!-- End Logo Header -->
+            <div class="sidebar-wrapper scrollbar scrollbar-inner">
+                <div class="sidebar-content">
+                    <ul class="nav nav-secondary">
+                        <li class="nav-item">
+                            <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
+                        </li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
+                        <li class="nav-item"><a href="/sales/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
+                        <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
+                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
+                        <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
+                        <li class="nav-item"><a href="/salesnotes/list"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
+                        <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
+                        <li class="nav-item"><a href="/purchaseprojects/list"><i class="fas fa-file-alt"></i><p>Projets de Commande</p></a></li>
+                        <li class="nav-item"><a href="/returns"><i class="fas fa-undo-alt"></i><p>Retours Achat</p></a></li>
+                        <li class="nav-item"><a href="/invoices"><i class="fas fa-file-invoice"></i><p>Factures Achat</p></a></li>
+                        <li class="nav-item active"><a href="/notes"><i class="fas fa-sticky-note"></i><p>Avoirs Achat</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-credit-card"></i></span><h4 class="text-section">Règlements</h4></li>
+                        <li class="nav-item {{ Route::is('payments.index') ? 'active' : '' }}">
+                            <a href="{{ route('payments.index') }}"><i class="fas fa-credit-card"></i><p>Règlements</p></a>
+                        </li>
+                                                <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
+                        <li class="nav-item"><a href="/receptions"><i class="fas fa-truck-loading"></i><p>Réceptions</p></a></li>
+                        <li class="nav-item"><a href="/articles"><i class="fas fa-cubes"></i><p>Articles</p></a></li>
+                                                <li class="nav-item"><a href="/planification-tournee"><i class="fas fa-truck"></i><p>Suivi Livraisons</p></a></li>
+
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fa fa-users"></i></span><h4 class="text-section">Référentiel</h4></li>
+                        <li class="nav-item"><a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a></li>
+                        <li class="nav-item"><a href="/suppliers"><i class="fa fa-user-tie"></i><p>Fournisseurs</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-cogs"></i></span><h4 class="text-section">Paramètres</h4></li>
+                        <li class="nav-item"><a href="/setting"><i class="fas fa-sliders-h"></i><p>Paramètres</p></a></li>
+                        <li class="nav-item"><a href="/tecdoc"><i class="fas fa-database"></i><p>TecDoc</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-robot"></i></span><h4 class="text-section">Autres</h4></li>
+                        <li class="nav-item"><a href="/voice"><i class="fas fa-robot"></i><p>NEGOBOT</p></a></li>
+                        <li class="nav-item">
+                            <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
+                            </a>
+                            <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
+                                @csrf
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-        <div class="sidebar-wrapper scrollbar scrollbar-inner">
-          <div class="sidebar-content">
-            <ul class="nav nav-secondary">
-              
-
-            <li class="nav-item">
-                <a href="/dashboard">
-                  <i class="fas fa-home"></i>
-                  <p>Dashboard</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a  href="/commande">
-                  <i class="fas fa-shopping-cart"></i>
-                  <p>Nouvelle Commande</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a  href="/orders">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <p>Mes BL</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a  href="/listdevis">
-                <i class="fas fa-file-alt"></i>
-                  <p>Mes Devis</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-              <a href="/listbrouillon">
-              <i class="fas fa-reply-all"></i>
-              <p>Brouillons</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-              <a href="/invoices">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Mes Factures</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-              <a href="/avoirs">
-              <i class="fas fa-reply-all"></i>
-              <p>Mes Avoirs</p>
-                </a>
-              </li>
-
-
-                                          <li class="nav-item">
-              <a href="/purchases/list">
-                <i class="fas fa-file-alt"></i>
-              <p>Commandes Achat</p>
-                </a>
-              </li>
-
-
-
-              <li class="nav-item">
-              <a href="/receptions">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Réception</p>
-                </a>
-              </li>
-
-
-              <li class="nav-item">
-              <a href="/articles">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Articles</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item">
-              <a href="/customers">
-              <i class="fa fa-user"></i>
-              <p>Clients</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item">
-              <a href="/suppliers">
-              <i class="fa fa-user"></i>
-              <p>Fournisseurs</p>
-                </a>
-              </li>
-              
-
-              <li class="nav-item">
-              <a href="/setting">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Paramétres</p>
-                </a>
-              </li>
-
-
-                <li class="nav-item">
-              <a href="/returns">
-                <i class="fas fa-file-alt"></i>
-              <p>Retours Achat</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item active">
-              <a href="/invoices">
-                <i class="fas fa-money-bill-wave"></i>
-              <p>Factures Achat</p>
-                </a>
-              </li>
-
-
-
-              <li class="nav-item">
-  <a href="/tecdoc">
-    <i class="fas fa-cogs"></i> 
-    <p>TecDoc</p>
-  </a>
-</li>    
-
-              
-  <!-- Lien de déconnexion -->
-  <li class="nav-item">
-        <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="fas fa-sign-out-alt"></i>
-            <p>Déconnexion</p>
-        </a>
-        <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
-            @csrf
-        </form>
-    </li>             
-
-
-            </ul>
-          </div>
-        </div>
-      </div>
-      <!-- End Sidebar -->
+        <!-- End Sidebar -->
 
       <div class="main-panel">
         <div class="main-header">
@@ -486,226 +380,178 @@
         
         
 
-      <div class="container">
-        <div class="page-inner">
-            @if(session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-danger">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            <div class="container mt-4">
-                <h4>📄 Liste des avoirs d'achat :
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            Nouvel avoir <i class="fas fa-plus-circle ms-2"></i>
-                        </button>
-                        <div class="dropdown-menu">
-                            @if($returns->isEmpty())
-                                <a class="dropdown-item disabled" href="#">À partir d’un retour (aucun retour disponible)</a>
-                            @else
-                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#selectReturnModal">À partir d’un retour</a>
-                            @endif
-                            @if($invoices->isEmpty())
-                                <a class="dropdown-item disabled" href="#">À partir d’une facture (aucune facture disponible)</a>
-                            @else
-                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#selectInvoiceModal">À partir d’une facture</a>
-                            @endif
+       <div class="container">
+                <div class="page-inner">
+                    @if(session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
                         </div>
-                    </div>
-                </h4>
+                    @endif
 
-                <form method="GET" action="{{ route('notes.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-                    <select name="supplier_id" class="form-select form-select-sm select2" style="width: 150px;">
-                        <option value="">Fournisseur (Tous)</option>
-                        @foreach($suppliers as $supplier)
-                            <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
-                                {{ $supplier->name }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    <select name="status" class="form-select form-select-sm select2" style="width: 170px;">
-                        <option value="">Statut avoir (Tous)</option>
-                        <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
-                        <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
-                    </select>
-
-                    <select name="type" class="form-select form-select-sm select2" style="width: 170px;">
-                        <option value="">Type avoir (Tous)</option>
-                        <option value="from_return" {{ request('type') == 'from_return' ? 'selected' : '' }}>À partir d’un retour</option>
-                        <option value="from_invoice" {{ request('type') == 'from_invoice' ? 'selected' : '' }}>À partir d’une facture</option>
-                    </select>
-
-                    <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début"
-                        value="{{ request('date_from') }}">
-
-                    <input type="date" name="date_to" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin"
-                        value="{{ request('date_to') }}">
-
-                    <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                        <i class="fas fa-filter me-1"></i> Filtrer
-                    </button>
-
-                    <button type="submit" name="action" value="export" formaction="{{ route('notes.export') }}"
-                        class="btn btn-outline-success btn-sm px-3">
-                        <i class="fas fa-file-excel me-1"></i> EXCEL
-                    </button>
-
-                    <a href="{{ route('notes.list') }}" class="btn btn-outline-secondary btn-sm px-3">
-                        <i class="fas fa-undo me-1"></i> Réinitialiser
-                    </a>
-                </form>
-
-                <!-- Modal for selecting a return -->
-                <div class="modal fade" id="selectReturnModal" tabindex="-1" aria-labelledby="selectReturnModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="selectReturnModalLabel">Sélectionner un retour</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <select id="return_id" class="form-select select2" style="width: 100%;">
-                                    <option value="">Choisir un retour</option>
-                                    @foreach($returns as $return)
-                                        <option value="{{ $return->id }}">{{ $return->numdoc }} - {{ $return->supplier ? $return->supplier->name : 'Fournisseur inconnu' }} ({{ \Carbon\Carbon::parse($return->return_date)->format('d/m/Y') }})</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
-                                <a href="#" id="createFromReturnLink" class="btn btn-outline-primary btn-sm">Créer l’avoir</a>
-                            </div>
+                    @if(session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
                         </div>
-                    </div>
-                </div>
+                    @endif
 
-                <!-- Modal for selecting an invoice -->
-                <div class="modal fade" id="selectInvoiceModal" tabindex="-1" aria-labelledby="selectInvoiceModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="selectInvoiceModalLabel">Sélectionner une facture</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <select id="invoice_id" class="form-select select2" style="width: 100%;">
-                                    <option value="">Choisir une facture</option>
-                                    @foreach($invoices as $invoice)
-                                        <option value="{{ $invoice->id }}">{{ $invoice->numdoc }} - {{ $invoice->supplier ? $invoice->supplier->name : 'Fournisseur inconnu' }} ({{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }})</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
-                                <a href="#" id="createFromInvoiceLink" class="btn btn-outline-primary btn-sm">Créer l’avoir</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                @forelse ($notes as $note)
-                    <div class="card mb-4 shadow-sm border-0">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
-                            <div>
-                                <h6 class="mb-0">
-                                    <strong>Avoir N° : {{ $note->numdoc }}</strong> –
-                                    {{ $note->supplier ? $note->supplier->name : 'Fournisseur inconnu' }}
-                                    <span class="text-muted small">({{ \Carbon\Carbon::parse($note->note_date)->format('d/m/Y') }})</span>
-                                </h6>
-                                @if($note->status === 'brouillon')
-                                    <span class="badge bg-secondary">{{ ucfirst($note->status) }}</span>
-                                @else
-                                    <span class="badge bg-success">{{ ucfirst($note->status) }}</span>
-                                @endif
-                                <span class="badge bg-info">{{ ucfirst(str_replace('_', ' ', $note->type)) }}</span>
-                            </div>
+                    <div class="container mt-4">
+                        <h4>📄 Liste des avoirs d'achat :
                             <div class="btn-group">
-                                <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $note->id }})">
-                                    ➕ Détails
+                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    Nouvel avoir <i class="fas fa-plus-circle ms-2"></i>
                                 </button>
-                                <a href="{{ route('notes.exportSingle', $note->id) }}" class="btn btn-xs btn-outline-success">
-                                    EXCEL <i class="fas fa-file-excel"></i>
-                                </a>
-                                <a href="{{ route('notes.printSingle', $note->id) }}" class="btn btn-xs btn-outline-primary" title="Télécharger PDF" target="_blank">
-                                    PDF <i class="fas fa-print"></i>
-                                </a>
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle dropdown-toggle-split"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                        <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
-                                    </button>
-                                    <div class="dropdown-menu">
+                                <div class="dropdown-menu">
+                                    @if($returns->isEmpty())
+                                        <a class="dropdown-item disabled" href="#">À partir d’un retour (aucun retour disponible)</a>
+                                    @else
+                                        <a class="dropdown-item" href="{{ route('notes.create_from_return') }}">À partir d’un retour</a>
+                                    @endif
+                                    @if($invoices->isEmpty())
+                                        <a class="dropdown-item disabled" href="#">À partir d’une facture (aucune facture disponible)</a>
+                                    @else
+                                        <a class="dropdown-item" href="{{ route('notes.create_from_invoice') }}">À partir d’une facture</a>
+                                    @endif
+                                </div>
+                            </div>
+                        </h4>
+
+                        <form method="GET" action="{{ route('notes.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+                            <select name="supplier_id" class="form-select form-select-sm select2" style="width: 150px;">
+                                <option value="">Fournisseur (Tous)</option>
+                                @foreach($suppliers as $supplier)
+                                    <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
+                                        {{ $supplier->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            <select name="status" class="form-select form-select-sm select2" style="width: 170px;">
+                                <option value="">Statut avoir (Tous)</option>
+                                <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
+                                <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
+                            </select>
+
+                            <select name="type" class="form-select form-select-sm select2" style="width: 170px;">
+                                <option value="">Type avoir (Tous)</option>
+                                <option value="from_return" {{ request('type') == 'from_return' ? 'selected' : '' }}>À partir d’un retour</option>
+                                <option value="from_invoice" {{ request('type') == 'from_invoice' ? 'selected' : '' }}>À partir d’une facture</option>
+                            </select>
+de
+                            <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début"
+                                value="{{ request('date_from') }}">
+à
+                            <input type="date" name="date_to" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin"
+                                value="{{ request('date_to') }}">
+
+                            <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
+                                <i class="fas fa-filter me-1"></i> Filtrer
+                            </button>
+
+                            <button type="submit" name="action" value="export" formaction="{{ route('notes.export') }}"
+                                class="btn btn-outline-success btn-sm px-3">
+                                <i class="fas fa-file-excel me-1"></i> EXCEL
+                            </button>
+
+                            <a href="{{ route('notes.list') }}" class="btn btn-outline-secondary btn-sm px-3">
+                                <i class="fas fa-undo me-1"></i> Réinitialiser
+                            </a>
+                        </form>
+
+                        @forelse ($notes as $note)
+                            <div class="card mb-4 shadow-sm border-0">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
+                                    <div>
+                                        <h6 class="mb-0">
+                                            <strong>Avoir N° : {{ $note->numdoc }}</strong> –
+                                            {{ $note->supplier ? $note->supplier->name : 'Fournisseur inconnu' }}
+                                            <span class="text-muted small">({{ \Carbon\Carbon::parse($note->note_date)->format('d/m/Y') }})</span>
+                                        </h6>
                                         @if($note->status === 'brouillon')
-                                            <a class="dropdown-item" href="{{ route('notes.edit', $note->numdoc) }}">
-                                                <i class="fas fa-edit"></i> Modifier
-                                            </a>
+                                            <span class="badge bg-secondary">{{ ucfirst($note->status) }}</span>
+                                        @else
+                                            <span class="badge bg-success">{{ ucfirst($note->status) }}</span>
                                         @endif
-                                        @if($note->purchaseReturn)
-                                            <a class="dropdown-item" href="{{ route('returns.show', $note->purchaseReturn->id) }}">
-                                                <i class="fas fa-eye"></i> Retour #{{ $note->purchaseReturn->numdoc }}
-                                            </a>
-                                        @endif
-                                        @if($note->purchaseInvoice)
-                                            <a class="dropdown-item" href="{{ route('invoices.show', $note->purchaseInvoice->id) }}">
-                                                <i class="fas fa-eye"></i> Facture #{{ $note->purchaseInvoice->numdoc }}
-                                            </a>
-                                        @endif
+                                        <span class="badge bg-info">{{ ucfirst(str_replace('_', ' ', $note->type)) }}</span>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $note->id }})">
+                                            ➕ Détails
+                                        </button>
+                                        <a href="{{ route('notes.exportSingle', $note->id) }}" class="btn btn-xs btn-outline-success">
+                                            EXCEL <i class="fas fa-file-excel"></i>
+                                        </a>
+                                        <a href="{{ route('notes.printSingle', $note->id) }}" class="btn btn-xs btn-outline-primary" title="Télécharger PDF" target="_blank">
+                                            PDF <i class="fas fa-print"></i>
+                                        </a>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle dropdown-toggle-split"
+                                                data-toggle="dropdown" aria-expanded="false">
+                                                <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                @if($note->status === 'brouillon')
+                                                    <a class="dropdown-item" href="{{ route('notes.edit', $note->id) }}">
+                                                        <i class="fas fa-edit"></i> Modifier
+                                                    </a>
+                                                @endif
+                                                @if($note->purchaseReturn)
+                                                    <a class="dropdown-item" href="{{ route('returns.show', $note->purchaseReturn->id) }}">
+                                                        <i class="fas fa-eye"></i> Retour #{{ $note->purchaseReturn->numdoc }}
+                                                    </a>
+                                                @endif
+                                                @if($note->purchaseInvoice)
+                                                    <a class="dropdown-item" href="{{ route('invoices.show', $note->purchaseInvoice->id) }}>
+                                                        <i class="fas fa-eye"></i> Facture #{{ $note->purchaseInvoice->numdoc }}
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="lines-{{ $note->id }}" class="card-body d-none bg-light">
+                                    <h6 class="fw-bold mb-3">🧾 Lignes de l’avoir</h6>
+                                    <table class="table table-sm table-bordered align-middle">
+                                        <thead class="table-light text-center">
+                                            <tr>
+                                                <th>Code Article</th>
+                                                <th>Désignation</th>
+                                                <th>Qté</th>
+                                                <th>PU HT</th>
+                                                <th>Remise (%)</th>
+                                                <th>TVA (%)</th>
+                                                <th>Total Ligne</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($note->lines as $line)
+                                                <tr>
+                                                    <td>{{ $line->article_code ?? '-' }}</td>
+                                                    <td>{{ $line->item ? $line->item->name : ($line->description ?? '-') }}</td>
+                                                    <td class="text-center">{{ $line->quantity }}</td>
+                                                    <td class="text-end">{{ number_format($line->unit_price_ht, 2) }} €</td>
+                                                    <td class="text-end">{{ $line->remise }}%</td>
+                                                    <td class="text-end">{{ $line->tva }}%</td>
+                                                    <td class="text-end">{{ number_format($line->total_ligne_ht, 2) }} €</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+
+                                    <div class="text-end mt-3">
+                                        <div class="p-3 bg-white border rounded d-inline-block">
+                                            <strong>Total HT :</strong> {{ number_format($note->total_ht, 2) }} €<br>
+                                            <strong>Total TTC :</strong> {{ number_format($note->total_ttc, 2) }} €
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div id="lines-{{ $note->id }}" class="card-body d-none bg-light">
-                            <h6 class="fw-bold mb-3">🧾 Lignes de l’avoir</h6>
-                            <table class="table table-sm table-bordered align-middle">
-                                <thead class="table-light text-center">
-                                    <tr>
-                                        <th>Code Article</th>
-                                        <th>Désignation</th>
-                                        <th>Qté</th>
-                                        <th>PU HT</th>
-                                        <th>Remise (%)</th>
-                                        <th>TVA (%)</th>
-                                        <th>Total Ligne</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($note->lines as $line)
-                                        <tr>
-                                            <td>{{ $line->article_code ?? '-' }}</td>
-                                            <td>{{ $line->item ? $line->item->name : ($line->description ?? '-') }}</td>
-                                            <td class="text-center">{{ $line->quantity }}</td>
-                                            <td class="text-end">{{ number_format($line->unit_price_ht, 2) }} €</td>
-                                            <td class="text-end">{{ $line->remise }}%</td>
-                                            <td class="text-end">{{ $line->tva }}%</td>
-                                            <td class="text-end">{{ number_format($line->total_ligne_ht, 2) }} €</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-
-                            <div class="text-end mt-3">
-                                <div class="p-3 bg-white border rounded d-inline-block">
-                                    <strong>Total HT :</strong> {{ number_format($note->total_ht, 2) }} €<br>
-                                    <strong>Total TTC :</strong> {{ number_format($note->total_ttc, 2) }} €
-                                </div>
+                        @empty
+                            <div class="alert alert-info">
+                                Aucun avoir trouvé.
                             </div>
-                        </div>
+                        @endforelse
                     </div>
-                @empty
-                    <div class="alert alert-info">
-                        Aucun avoir trouvé.
-                    </div>
-                @endforelse
-            </div>
    </div>   </div>
 
 
@@ -776,55 +622,90 @@
 
 
 
-<!-- Ajoute select2 si pas déjà inclus -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
- <script>
-        $(document).ready(function() {
-            // Initialize Select2
-            $('.select2').select2({
-                theme: 'bootstrap',
-                width: '100%'
-            });
-
-            // Debug: Log when Select2 is initialized
-            console.log('Select2 initialized');
-
-            // Update the create link when a return is selected
-            $('#return_id').on('change', function() {
-                const returnId = $(this).val();
-                console.log('Return selected:', returnId); // Debug
-                if (returnId) {
-                    const url = '{{ route("notes.create_from_return", ":returnId") }}'.replace(':returnId', returnId);
-                    $('#createFromReturnLink').attr('href', url);
-                    console.log('Updated return link:', url); // Debug
-                } else {
-                    $('#createFromReturnLink').attr('href', '#');
-                    console.log('Return link reset to #'); // Debug
-                }
-            });
-
-            // Update the create link when an invoice is selected
-            $('#invoice_id').on('change', function() {
-                const invoiceId = $(this).val();
-                console.log('Invoice selected:', invoiceId); // Debug
-                if (invoiceId) {
-                    const url = '{{ route("notes.create_from_invoice", ":invoiceId") }}'.replace(':invoiceId', invoiceId);
-                    $('#createFromInvoiceLink').attr('href', url);
-                    console.log('Updated invoice link:', url); // Debug
-                } else {
-                    $('#createFromInvoiceLink').attr('href', '#');
-                    console.log('Invoice link reset to #'); // Debug
-                }
-            });
+          <script>
+    $(document).ready(function() {
+        // Initialize Select2
+        $('.select2').select2({
+            theme: 'bootstrap4',
+            width: '100%'
         });
 
-        function toggleLines(id) {
-            const section = document.getElementById('lines-' + id);
-            section.classList.toggle('d-none');
-        }
-    </script>
+        // Debug: Log when Select2 is initialized
+        console.log('Select2 initialized');
 
+        // Handle return selection
+        $('#return_id').on('select2:select', function(e) {
+            e.stopPropagation();
+            const returnId = $(this).val();
+            console.log('Return selected:', returnId);
+            if (returnId) {
+                const url = '{{ route("notes.create_from_return", ":returnId") }}'.replace(':returnId', returnId);
+                $('#createFromReturnForm').attr('action', url);
+                $('#createFromReturnButton').removeAttr('disabled').removeClass('disabled');
+                console.log('Updated return form action:', url);
+            } else {
+                $('#createFromReturnForm').attr('action', '#');
+                $('#createFromReturnButton').attr('disabled', 'disabled').addClass('disabled');
+                console.log('Return form action reset to #');
+            }
+        });
+
+        // Handle invoice selection
+        $('#invoice_id').on('select2:select', function(e) {
+            e.stopPropagation();
+            const invoiceId = $(this).val();
+            console.log('Invoice selected:', invoiceId);
+            if (invoiceId) {
+                const url = '{{ route("notes.create_from_invoice", ":invoiceId") }}'.replace(':invoiceId', invoiceId);
+                $('#createFromInvoiceForm').attr('action', url);
+                $('#createFromInvoiceButton').removeAttr('disabled').removeClass('disabled');
+                console.log('Updated invoice form action:', url);
+            } else {
+                $('#createFromInvoiceForm').attr('action', '#');
+                $('#createFromInvoiceButton').attr('disabled', 'disabled').addClass('disabled');
+                console.log('Invoice form action reset to #');
+            }
+        });
+
+        // Debug: Log when modals are opened
+        $('#selectReturnModal').on('shown.bs.modal', function() {
+            console.log('Return modal opened');
+        });
+        $('#selectInvoiceModal').on('shown.bs.modal', function() {
+            console.log('Invoice modal opened');
+        });
+
+        // Debug: Log when buttons are clicked
+        $('#createFromReturnButton').on('click', function() {
+            const url = $('#createFromReturnForm').attr('action');
+            console.log('Create from return button clicked, form action:', url);
+            if (url && url !== '#') {
+                console.log('Submitting return form to:', url);
+                // Form submission will handle navigation
+            } else {
+                console.error('Invalid return URL');
+                alert('Veuillez sélectionner un retour valide.');
+            }
+        });
+
+        $('#createFromInvoiceButton').on('click', function() {
+            const url = $('#createFromInvoiceForm').attr('action');
+            console.log('Create from invoice button clicked, form action:', url);
+            if (url && url !== '#') {
+                console.log('Submitting invoice form to:', url);
+                // Form submission will handle navigation
+            } else {
+                console.error('Invalid invoice URL');
+                alert('Veuillez sélectionner une facture valide.');
+            }
+        });
+    });
+
+    function toggleLines(id) {
+        const section = document.getElementById('lines-' + id);
+        section.classList.toggle('d-none');
+    }
+</script>
 
   </body>
 </html>

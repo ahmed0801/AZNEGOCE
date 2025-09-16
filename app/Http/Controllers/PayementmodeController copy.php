@@ -40,7 +40,6 @@ class PayementmodeController extends Controller
             'name' => 'required|string|max:255|unique:payment_modes,name,' . $id,
             'customer_balance_action' => 'required|in:+,-',
             'supplier_balance_action' => 'required|in:+,-',
-            'type' => 'required|in:décaissement,encaissement',
         ]);
 
         try {
@@ -49,7 +48,6 @@ class PayementmodeController extends Controller
                 'name' => $request->name,
                 'customer_balance_action' => $request->customer_balance_action,
                 'supplier_balance_action' => $request->supplier_balance_action,
-                'type' => $request->type,
             ]);
             return back()->with('success', 'Mode de paiement mis à jour.');
         } catch (\Exception $e) {
