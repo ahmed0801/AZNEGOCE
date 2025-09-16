@@ -189,8 +189,11 @@
                         <li class="nav-item"><a href="/returns"><i class="fas fa-undo-alt"></i><p>Retours Achat</p></a></li>
                         <li class="nav-item"><a href="/invoices"><i class="fas fa-file-invoice"></i><p>Factures Achat</p></a></li>
                         <li class="nav-item"><a href="/notes"><i class="fas fa-sticky-note"></i><p>Avoirs Achat</p></a></li>
-                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-credit-card"></i></span><h4 class="text-section">Règlements</h4></li>
-                        <li class="nav-item {{ Route::is('payments.index') ? 'active' : '' }}">
+                      <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-credit-card"></i></span><h4 class="text-section">Comptabilité</h4></li>
+                                                <li class="nav-item {{ Route::is('generalaccounts.index') ? 'active' : '' }}">
+                            <a href="{{ route('generalaccounts.index') }}"><i class="fas fa-book"></i><p>Comptes Généraux</p></a>
+                        </li>
+                                                <li class="nav-item {{ Route::is('payments.index') ? 'active' : '' }}">
                             <a href="{{ route('payments.index') }}"><i class="fas fa-credit-card"></i><p>Règlements</p></a>
                         </li>
                                                 <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
@@ -556,14 +559,14 @@
                         </a>
                     </div>
                     <div class="col-sm-6 col-md-4 mb-3 setting-card" data-keywords="comptabilité finance banque">
-                        <a href="#" class="text-decoration-none">
+                        <a href="/generalaccounts" class="text-decoration-none">
                             <div class="card card-stats card-warning card-round text-center">
                                 <div class="card-body">
                                     <div class="icon-big text-center warning">
                                         <i class="fas fa-university"></i>
                                     </div>
                                     <div class="numbers mt-2">
-                                        <p class="card-category">Paramètres Comptables</p>
+                                        <p class="card-category">Comptes Généraux</p>
                                     </div>
                                 </div>
                             </div>
