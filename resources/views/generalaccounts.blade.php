@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>AZ ERP - Modes de Paiement</title>
+    <title>AZ ERP - Comptes Généraux</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
 
@@ -214,6 +214,9 @@
                         <li class="nav-item {{ Route::is('paymentmode.index') ? 'active' : '' }}">
                             <a href="{{ route('paymentmode.index') }}"><i class="fas fa-credit-card"></i><p>Modes de Paiement</p></a>
                         </li>
+                        <li class="nav-item {{ Route::is('generalaccounts.index') ? 'active' : '' }}">
+                            <a href="{{ route('generalaccounts.index') }}"><i class="fas fa-book"></i><p>Comptes Généraux</p></a>
+                        </li>
                         <li class="nav-item"><a href="/tecdoc"><i class="fas fa-database"></i><p>TecDoc</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-robot"></i></span><h4 class="text-section">Autres</h4></li>
                         <li class="nav-item"><a href="/voice"><i class="fas fa-robot"></i><p>NEGOBOT</p></a></li>
@@ -296,25 +299,33 @@
                     @endif
 
                     <div class="container mt-4">
-                        <h4>Modes de Paiement</h4>
+                        <h4>Comptes Généraux</h4>
 
                         <!-- Bouton pour ouvrir le modal -->
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createItemModal">
-                            Créer un Mode de Paiement
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAccountModal">
+                            Créer un Compte Général
                         </button>
 
                         <!-- Modal Créer -->
-                        <div class="modal fade" id="createItemModal" tabindex="-1" aria-labelledby="createItemModalLabel" aria-hidden="true">
+                        <div class="modal fade" id="createAccountModal" tabindex="-1" aria-labelledby="createAccountModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="createItemModalLabel">Créer un Mode de Paiement</h5>
+                                        <h5 class="modal-title" id="createAccountModalLabel">Créer un Compte Général</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form id="createItemForm" action="{{ route('paymentmode.store') }}" method="POST">
+                                        <form id="createAccountForm" action="{{ route('generalaccounts.store') }}" method="POST">
                                             @csrf
                                             <div class="row">
+                                                <!-- Numéro de Compte -->
+                                                <div class="mb-3 col-md-4">
+                                                    <label for="account_number" class="form-label">Numéro de Compte</label>
+                                                    <input type="text" class="form-control" id="account_number" name="account_number" value="{{ old('account_number') }}" required>
+                                                    @error('account_number')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                                 <!-- Nom -->
                                                 <div class="mb-3 col-md-4">
                                                     <label for="name" class="form-label">Nom</label>
@@ -327,58 +338,11 @@
                                                 <div class="mb-3 col-md-4">
                                                     <label for="type" class="form-label">Type</label>
                                                     <select name="type" id="type" class="form-select" required>
-                                                        <option value="décaissement" {{ old('type') == 'décaissement' ? 'selected' : '' }}>Décaissement</option>
-                                                        <option value="encaissement" {{ old('type') == 'encaissement' ? 'selected' : '' }}>Encaissement</option>
+                                                        <option value="caisse" {{ old('type') == 'caisse' ? 'selected' : '' }}>Caisse</option>
+                                                        <option value="banque" {{ old('type') == 'banque' ? 'selected' : '' }}>Banque</option>
+                                                        <option value="coffre" {{ old('type') == 'coffre' ? 'selected' : '' }}>Coffre</option>
                                                     </select>
                                                     @error('type')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-                                                <!-- Action sur Solde Client -->
-                                                <div class="mb-3 col-md-4">
-                                                    <label for="customer_balance_action" class="form-label">Action sur Solde Client</label>
-                                                    <select name="customer_balance_action" id="customer_balance_action" class="form-select" required>
-                                                        <option value="+" {{ old('customer_balance_action', '+') == '+' ? 'selected' : '' }}>+ (Augmenter)</option>
-                                                        <option value="-" {{ old('customer_balance_action') == '-' ? 'selected' : '' }}>- (Diminuer)</option>
-                                                    </select>
-                                                    @error('customer_balance_action')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-                                                <!-- Action sur Solde Fournisseur -->
-                                                <div class="mb-3 col-md-4">
-                                                    <label for="supplier_balance_action" class="form-label">Action sur Solde Fournisseur</label>
-                                                    <select name="supplier_balance_action" id="supplier_balance_action" class="form-select" required>
-                                                        <option value="+" {{ old('supplier_balance_action', '-') == '+' ? 'selected' : '' }}>+ (Augmenter)</option>
-                                                        <option value="-" {{ old('supplier_balance_action', '-') == '-' ? 'selected' : '' }}>- (Diminuer)</option>
-                                                    </select>
-                                                    @error('supplier_balance_action')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-                                                <!-- Compte Débit -->
-                                                <div class="mb-3 col-md-4">
-                                                    <label for="debit_account_id" class="form-label">Compte Débit</label>
-                                                    <select name="debit_account_id" id="debit_account_id" class="form-select">
-                                                        <option value="">Aucun</option>
-                                                        @foreach ($generalAccounts as $account)
-                                                            <option value="{{ $account->id }}" {{ old('debit_account_id') == $account->id ? 'selected' : '' }}>{{ $account->name }} ({{ $account->account_number }})</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('debit_account_id')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-                                                <!-- Compte Crédit -->
-                                                <div class="mb-3 col-md-4">
-                                                    <label for="credit_account_id" class="form-label">Compte Crédit</label>
-                                                    <select name="credit_account_id" id="credit_account_id" class="form-select">
-                                                        <option value="">Aucun</option>
-                                                        @foreach ($generalAccounts as $account)
-                                                            <option value="{{ $account->id }}" {{ old('credit_account_id') == $account->id ? 'selected' : '' }}>{{ $account->name }} ({{ $account->account_number }})</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('credit_account_id')
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
                                                 </div>
@@ -395,39 +359,35 @@
 
                         <!-- Recherche -->
                         <div class="mb-1 d-flex justify-content-center">
-                            <input type="text" id="searchItemInput" class="form-control search-box" placeholder="🔍 Rechercher un Mode de Paiement...">
+                            <input type="text" id="searchAccountInput" class="form-control search-box" placeholder="🔍 Rechercher un Compte Général...">
                         </div>
 
-                        @if ($paymentmodes->count() > 0)
+                        @if ($generalAccounts->count() > 0)
                             <div class="table-responsive">
-                                <table class="table table-bordered table-hover table-text-small" id="itemsTable">
+                                <table class="table table-bordered table-hover table-text-small" id="accountsTable">
                                     <thead class="table-dark">
                                         <tr>
+                                            <th>Numéro de Compte</th>
                                             <th>Nom</th>
                                             <th>Type</th>
-                                            <th>Action Solde Client</th>
-                                            <th>Action Solde Fournisseur</th>
-                                            <th>Compte Débit</th>
-                                            <th>Compte Crédit</th>
+                                            <th>Solde</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($paymentmodes as $paymentmode)
+                                        @foreach ($generalAccounts as $account)
                                             <tr>
-                                                <td>{{ $paymentmode->name }}</td>
-                                                <td>{{ ucfirst($paymentmode->type) }}</td>
-                                                <td>{{ $paymentmode->customer_balance_action ?? '-' }}</td>
-                                                <td>{{ $paymentmode->supplier_balance_action ?? '-' }}</td>
-                                                <td>{{ $paymentmode->debitAccount ? $paymentmode->debitAccount->name . ' (' . $paymentmode->debitAccount->account_number . ')' : '-' }}</td>
-                                                <td>{{ $paymentmode->creditAccount ? $paymentmode->creditAccount->name . ' (' . $paymentmode->creditAccount->account_number . ')' : '-' }}</td>
+                                                <td>{{ $account->account_number }}</td>
+                                                <td>{{ $account->name }}</td>
+                                                <td>{{ ucfirst($account->type) }}</td>
+                                                <td>{{ number_format($account->balance, 2) }}</td>
                                                 <td>
                                                     <!-- Modifier -->
-                                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ $paymentmode->id }}">
+                                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editAccountModal{{ $account->id }}">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     <!-- Supprimer -->
-                                                    <form action="{{ route('paymentmode.destroy', $paymentmode->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ce mode ?')">
+                                                    <form action="{{ route('generalaccounts.destroy', $account->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ce compte ?')">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button class="btn btn-sm btn-danger" title="Supprimer">
@@ -438,82 +398,43 @@
                                             </tr>
 
                                             <!-- Modal Modifier -->
-                                            <div class="modal fade" id="editItemModal{{ $paymentmode->id }}" tabindex="-1" aria-labelledby="editItemModalLabel{{ $paymentmode->id }}" aria-hidden="true">
+                                            <div class="modal fade" id="editAccountModal{{ $account->id }}" tabindex="-1" aria-labelledby="editAccountModalLabel{{ $account->id }}" aria-hidden="true">
                                                 <div class="modal-dialog modal-lg">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title">Modifier le Mode de Paiement : {{ $paymentmode->name }}</h5>
+                                                            <h5 class="modal-title">Modifier le Compte Général : {{ $account->name }}</h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form action="{{ route('paymentmode.update', $paymentmode->id) }}" method="POST">
+                                                            <form action="{{ route('generalaccounts.update', $account->id) }}" method="POST">
                                                                 @csrf
                                                                 @method('PUT')
                                                                 <div class="row">
+                                                                    <!-- Numéro de Compte -->
+                                                                    <div class="mb-3 col-md-4">
+                                                                        <label class="form-label">Numéro de Compte</label>
+                                                                        <input type="text" name="account_number" class="form-control" value="{{ $account->account_number }}" required>
+                                                                        @error('account_number')
+                                                                            <span class="text-danger">{{ $message }}</span>
+                                                                        @enderror
+                                                                    </div>
                                                                     <!-- Nom -->
                                                                     <div class="mb-3 col-md-4">
                                                                         <label class="form-label">Nom</label>
-                                                                        <input type="text" name="name" class="form-control" value="{{ $paymentmode->name }}" required>
+                                                                        <input type="text" name="name" class="form-control" value="{{ $account->name }}" required>
                                                                         @error('name')
                                                                             <span class="text-danger">{{ $message }}</span>
                                                                         @enderror
                                                                     </div>
                                                                     <!-- Type -->
                                                                     <div class="mb-3 col-md-4">
-                                                                        <label for="type_{{ $paymentmode->id }}" class="form-label">Type</label>
-                                                                        <select name="type" id="type_{{ $paymentmode->id }}" class="form-select" required>
-                                                                            <option value="décaissement" {{ $paymentmode->type == 'décaissement' ? 'selected' : '' }}>Décaissement</option>
-                                                                            <option value="encaissement" {{ $paymentmode->type == 'encaissement' ? 'selected' : '' }}>Encaissement</option>
+                                                                        <label for="type_{{ $account->id }}" class="form-label">Type</label>
+                                                                        <select name="type" id="type_{{ $account->id }}" class="form-select" required>
+                                                                            <option value="caisse" {{ $account->type == 'caisse' ? 'selected' : '' }}>Caisse</option>
+                                                                            <option value="banque" {{ $account->type == 'banque' ? 'selected' : '' }}>Banque</option>
+                                                                            <option value="coffre" {{ $account->type == 'coffre' ? 'selected' : '' }}>Coffre</option>
                                                                         </select>
                                                                         @error('type')
-                                                                            <span class="text-danger">{{ $message }}</span>
-                                                                        @enderror
-                                                                    </div>
-                                                                    <!-- Action sur Solde Client -->
-                                                                    <div class="mb-3 col-md-4">
-                                                                        <label for="customer_balance_action_{{ $paymentmode->id }}" class="form-label">Action sur Solde Client</label>
-                                                                        <select name="customer_balance_action" id="customer_balance_action_{{ $paymentmode->id }}" class="form-select" required>
-                                                                            <option value="+" {{ $paymentmode->customer_balance_action == '+' ? 'selected' : '' }}>+ (Augmenter)</option>
-                                                                            <option value="-" {{ $paymentmode->customer_balance_action == '-' ? 'selected' : '' }}>- (Diminuer)</option>
-                                                                        </select>
-                                                                        @error('customer_balance_action')
-                                                                            <span class="text-danger">{{ $message }}</span>
-                                                                        @enderror
-                                                                    </div>
-                                                                    <!-- Action sur Solde Fournisseur -->
-                                                                    <div class="mb-3 col-md-4">
-                                                                        <label for="supplier_balance_action_{{ $paymentmode->id }}" class="form-label">Action sur Solde Fournisseur</label>
-                                                                        <select name="supplier_balance_action" id="supplier_balance_action_{{ $paymentmode->id }}" class="form-select" required>
-                                                                            <option value="+" {{ $paymentmode->supplier_balance_action == '+' ? 'selected' : '' }}>+ (Augmenter)</option>
-                                                                            <option value="-" {{ $paymentmode->supplier_balance_action == '-' ? 'selected' : '' }}>- (Diminuer)</option>
-                                                                        </select>
-                                                                        @error('supplier_balance_action')
-                                                                            <span class="text-danger">{{ $message }}</span>
-                                                                        @enderror
-                                                                    </div>
-                                                                    <!-- Compte Débit -->
-                                                                    <div class="mb-3 col-md-4">
-                                                                        <label for="debit_account_id_{{ $paymentmode->id }}" class="form-label">Compte Débit</label>
-                                                                        <select name="debit_account_id" id="debit_account_id_{{ $paymentmode->id }}" class="form-select">
-                                                                            <option value="">Aucun</option>
-                                                                            @foreach ($generalAccounts as $account)
-                                                                                <option value="{{ $account->id }}" {{ $paymentmode->debit_account_id == $account->id ? 'selected' : '' }}>{{ $account->name }} ({{ $account->account_number }})</option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                        @error('debit_account_id')
-                                                                            <span class="text-danger">{{ $message }}</span>
-                                                                        @enderror
-                                                                    </div>
-                                                                    <!-- Compte Crédit -->
-                                                                    <div class="mb-3 col-md-4">
-                                                                        <label for="credit_account_id_{{ $paymentmode->id }}" class="form-label">Compte Crédit</label>
-                                                                        <select name="credit_account_id" id="credit_account_id_{{ $paymentmode->id }}" class="form-select">
-                                                                            <option value="">Aucun</option>
-                                                                            @foreach ($generalAccounts as $account)
-                                                                                <option value="{{ $account->id }}" {{ $paymentmode->credit_account_id == $account->id ? 'selected' : '' }}>{{ $account->name }} ({{ $account->account_number }})</option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                        @error('credit_account_id')
                                                                             <span class="text-danger">{{ $message }}</span>
                                                                         @enderror
                                                                     </div>
@@ -532,7 +453,7 @@
                                 </table>
                             </div>
                         @else
-                            <p class="text-center text-muted">Aucun mode de paiement trouvé.</p>
+                            <p class="text-center text-muted">Aucun compte général trouvé.</p>
                         @endif
                     </div>
                 </div>
@@ -564,7 +485,7 @@
     <script>
         $(document).ready(function () {
             // Initialize DataTables
-            $('#itemsTable').DataTable({
+            $('#accountsTable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json'
                 },
@@ -575,9 +496,9 @@
             });
 
             // Custom search functionality
-            document.getElementById("searchItemInput").addEventListener("keyup", function() {
+            document.getElementById("searchAccountInput").addEventListener("keyup", function() {
                 var input = this.value.toLowerCase();
-                var rows = document.querySelectorAll("#itemsTable tbody tr");
+                var rows = document.querySelectorAll("#accountsTable tbody tr");
 
                 rows.forEach(function(row) {
                     row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";

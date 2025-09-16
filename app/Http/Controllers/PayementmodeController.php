@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\PaymentMode;
+use App\Models\GeneralAccount;
 use Illuminate\Http\Request;
 
 class PayementmodeController extends Controller
 {
     public function index()
     {
-        $paymentmodes = PaymentMode::orderBy('name')->get();
-        return view('paymentmodes', compact('paymentmodes'));
+        $paymentmodes = PaymentMode::with(['debitAccount', 'creditAccount'])->orderBy('name')->get();
+        $generalAccounts = GeneralAccount::orderBy('name')->get();
+        return view('paymentmodes', compact('paymentmodes', 'generalAccounts'));
     }
 
     public function store(Request $request)
@@ -19,6 +21,9 @@ class PayementmodeController extends Controller
             'name' => 'required|string|max:255|unique:payment_modes,name',
             'customer_balance_action' => 'required|in:+,-',
             'supplier_balance_action' => 'required|in:+,-',
+            'type' => 'required|in:décaissement,encaissement',
+            'debit_account_id' => 'nullable|exists:general_accounts,id',
+            'credit_account_id' => 'nullable|exists:general_accounts,id',
         ]);
 
         try {
@@ -26,6 +31,9 @@ class PayementmodeController extends Controller
                 'name' => $request->name,
                 'customer_balance_action' => $request->customer_balance_action,
                 'supplier_balance_action' => $request->supplier_balance_action,
+                'type' => $request->type,
+                'debit_account_id' => $request->debit_account_id,
+                'credit_account_id' => $request->credit_account_id,
             ]);
             return back()->with('success', 'Mode de paiement créé avec succès.');
         } catch (\Exception $e) {
@@ -41,6 +49,8 @@ class PayementmodeController extends Controller
             'customer_balance_action' => 'required|in:+,-',
             'supplier_balance_action' => 'required|in:+,-',
             'type' => 'required|in:décaissement,encaissement',
+            'debit_account_id' => 'nullable|exists:general_accounts,id',
+            'credit_account_id' => 'nullable|exists:general_accounts,id',
         ]);
 
         try {
@@ -50,6 +60,8 @@ class PayementmodeController extends Controller
                 'customer_balance_action' => $request->customer_balance_action,
                 'supplier_balance_action' => $request->supplier_balance_action,
                 'type' => $request->type,
+                'debit_account_id' => $request->debit_account_id,
+                'credit_account_id' => $request->credit_account_id,
             ]);
             return back()->with('success', 'Mode de paiement mis à jour.');
         } catch (\Exception $e) {

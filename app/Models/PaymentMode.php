@@ -12,6 +12,9 @@ class PaymentMode extends Model
         'customer_balance_action', // '+' or '-' for customer balance
         'supplier_balance_action', // '+' or '-' for supplier balance
                 'type', // décaissement or encaissement
+                'debit_account_id',
+                'credit_account_id',
+
 
     ];
 
@@ -19,4 +22,15 @@ class PaymentMode extends Model
     {
         return $this->hasMany(Customer::class);
     }
+
+        public function debitAccount()
+    {
+        return $this->belongsTo(GeneralAccount::class, 'debit_account_id');
+    }
+
+    public function creditAccount()
+    {
+        return $this->belongsTo(GeneralAccount::class, 'credit_account_id');
+    }
+
 }

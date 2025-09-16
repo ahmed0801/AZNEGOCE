@@ -39,13 +39,13 @@ class Payment extends Model
         });
 
         static::saved(function ($payment) {
-            // Update customer balance if customer_id is set
-            if ($payment->customer_id) {
-                $paymentMode = PaymentMode::where('name', $payment->payment_mode)->first();
-                if ($paymentMode && $paymentMode->customer_balance_action) {
+            $paymentMode = PaymentMode::where('name', $payment->payment_mode)->first();
+            if ($paymentMode) {
+                // Update customer balance if customer_id is set
+                if ($payment->customer_id && $paymentMode->customer_balance_action) {
                     $customer = Customer::find($payment->customer_id);
                     if ($customer) {
-                        $amount = abs($payment->amount); // Use absolute value for balance updates
+                        $amount = abs($payment->amount);
                         if ($paymentMode->customer_balance_action === '+') {
                             $customer->solde += $amount;
                         } else {
@@ -61,15 +61,12 @@ class Payment extends Model
                         ]);
                     }
                 }
-            }
 
-            // Update supplier balance if supplier_id is set
-            if ($payment->supplier_id) {
-                $paymentMode = PaymentMode::where('name', $payment->payment_mode)->first();
-                if ($paymentMode && $paymentMode->supplier_balance_action) {
+                // Update supplier balance if supplier_id is set
+                if ($payment->supplier_id && $paymentMode->supplier_balance_action) {
                     $supplier = Supplier::find($payment->supplier_id);
                     if ($supplier) {
-                        $amount = abs($payment->amount); // Use absolute value for balance updates
+                        $amount = abs($payment->amount);
                         if ($paymentMode->supplier_balance_action === '+') {
                             $supplier->solde += $amount;
                         } else {
@@ -82,6 +79,35 @@ class Payment extends Model
                             'action' => $paymentMode->supplier_balance_action,
                             'type' => $paymentMode->type,
                             'new_balance' => $supplier->solde,
+                        ]);
+                    }
+                }
+
+                // Update general account balances
+                $amount = abs($payment->amount);
+                if ($paymentMode->debit_account_id) {
+                    $debitAccount = GeneralAccount::find($paymentMode->debit_account_id);
+                    if ($debitAccount) {
+                        $debitAccount->balance += $amount; // ✅ Débit augmente le solde
+                        $debitAccount->save();
+                        \Log::info('Debit account balance updated', [
+                            'account_id' => $debitAccount->id,
+                            'payment_id' => $payment->id,
+                            'amount' => $amount,
+                            'new_balance' => $debitAccount->balance,
+                        ]);
+                    }
+                }
+                if ($paymentMode->credit_account_id) {
+                    $creditAccount = GeneralAccount::find($paymentMode->credit_account_id);
+                    if ($creditAccount) {
+                        $creditAccount->balance -= $amount; // ✅ Crédit diminue le solde
+                        $creditAccount->save();
+                        \Log::info('Credit account balance updated', [
+                            'account_id' => $creditAccount->id,
+                            'payment_id' => $payment->id,
+                            'amount' => $amount,
+                            'new_balance' => $creditAccount->balance,
                         ]);
                     }
                 }
@@ -107,7 +133,7 @@ class Payment extends Model
     public function generateLettrageCode()
     {
         $invoice = $this->payable;
-        $prefix = $invoice instanceof Invoice ? 'CL' : 'FR';
+        $prefix = $invoice instanceof Invoice ? 'CL' : ($invoice instanceof PurchaseInvoice ? 'FR' : ($invoice instanceof SalesNote ? 'AVCL' : 'AVFR'));
         return $prefix . '-' . $invoice->numdoc . '-' . $this->payment_date->format('Ymd') . '-' . str_pad($this->id, 4, '0', STR_PAD_LEFT);
     }
 }

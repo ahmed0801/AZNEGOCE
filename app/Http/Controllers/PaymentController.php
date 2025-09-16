@@ -109,7 +109,7 @@ class PaymentController extends Controller
         }
 
         $request->validate([
-            'amount' => 'required|numeric|min:0.01|max:' . $invoice->getRemainingBalanceAttribute(),
+            'amount' => 'required|numeric|min:0.01|max:' . abs($invoice->getRemainingBalanceAttribute()),
             'payment_date' => 'required|date',
             'payment_mode' => 'required|string|exists:payment_modes,name',
             'reference' => 'nullable|string|max:255',
@@ -131,7 +131,7 @@ class PaymentController extends Controller
             ]);
 
             $invoice->load('payments');
-            $remainingBalance = $invoice->total_ttc - $invoice->payments->sum('amount');
+            $remainingBalance = $invoice->getRemainingBalanceAttribute();
             $invoice->update(['paid' => abs($remainingBalance) <= 0.01]);
 
             \Log::info('Payment created for sales invoice', [
@@ -152,8 +152,6 @@ class PaymentController extends Controller
             return redirect()->back()->with('error', 'Erreur lors de l\'enregistrement du paiement: ' . $e->getMessage())->withInput();
         }
     }
-
-
 
     public function makePaymentPurchase(Request $request, $id)
     {
@@ -212,8 +210,6 @@ class PaymentController extends Controller
         }
     }
 
-
-
     public function markAsPaid(Request $request, $id)
     {
         $invoice = PurchaseInvoice::findOrFail($id);
@@ -271,7 +267,7 @@ class PaymentController extends Controller
             ]);
 
             $note->load('payments');
-            $remainingBalance = $note->total_ttc - $note->payments->sum('amount');
+            $remainingBalance = $note->getRemainingBalanceAttribute();
             $note->update(['paid' => abs($remainingBalance) <= 0.01]);
 
             \Log::info('Payment created for sales note', [

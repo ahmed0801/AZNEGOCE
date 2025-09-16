@@ -19,6 +19,7 @@ use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\TecdocController;
 use App\Http\Controllers\DevisController;
 use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\GeneralAccountsController;
 use App\Http\Controllers\PayementmodeController;
 use App\Http\Controllers\PayementtermController;
 use App\Http\Controllers\PaymentController;
@@ -445,6 +446,17 @@ Route::put('/purchaseinvoices/{id}/mark-as-paid', [PaymentController::class, 'ma
 
     Route::post('/salesnotes/{id}/make_payment', [PaymentController::class, 'makePaymentSalesNote'])->name('salesnotes.make_payment');
  Route::post('/notes/{id}/make_payment', [PaymentController::class, 'makePaymentPurchaseNote'])->name('notes.make_payment');
+
+
+ 
+// General Accounts Routes
+Route::get('/generalaccounts', [GeneralAccountsController::class, 'index'])->name('generalaccounts.index');
+Route::post('/generalaccounts', [GeneralAccountsController::class, 'store'])->name('generalaccounts.store');
+Route::put('/generalaccounts/{id}', [GeneralAccountsController::class, 'update'])->name('generalaccounts.update');
+Route::delete('/generalaccounts/{id}', [GeneralAccountsController::class, 'destroy'])->name('generalaccounts.destroy');
+
+
+
 
 
 // routes factures fournisseurs
