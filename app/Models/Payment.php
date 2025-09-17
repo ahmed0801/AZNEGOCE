@@ -130,6 +130,11 @@ class Payment extends Model
         return $this->belongsTo(Supplier::class);
     }
 
+        public function transfers()
+    {
+        return $this->hasMany(AccountTransfer::class);
+    }
+
     public function generateLettrageCode()
     {
         $invoice = $this->payable;

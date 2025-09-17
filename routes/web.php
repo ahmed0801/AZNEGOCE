@@ -448,6 +448,9 @@ Route::put('/purchaseinvoices/{id}/mark-as-paid', [PaymentController::class, 'ma
  Route::post('/notes/{id}/make_payment', [PaymentController::class, 'makePaymentPurchaseNote'])->name('notes.make_payment');
 
 
+ Route::post('/payments/{payment}/transfer', [PaymentController::class, 'transfer'])->name('payments.transfer');
+
+
  
 // General Accounts Routes
 Route::get('/generalaccounts', [GeneralAccountsController::class, 'index'])->name('generalaccounts.index');

@@ -13,6 +13,8 @@ use App\Models\SalesNote;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PaymentsExport;
+use App\Models\AccountTransfer;
+use App\Models\GeneralAccount;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -51,9 +53,79 @@ class PaymentController extends Controller
         $customers = Customer::all();
         $suppliers = Supplier::all();
         $paymentModes = PaymentMode::all();
+        $generalAccounts = GeneralAccount::orderBy('name')->get();
 
-        return view('payments.index', compact('payments', 'customers', 'suppliers', 'paymentModes'));
+
+        return view('payments.index', compact('payments', 'customers', 'suppliers', 'paymentModes','generalAccounts'));
     }
+
+
+
+
+
+
+
+    public function transfer(Request $request, $paymentId)
+    {
+        $payment = Payment::findOrFail($paymentId);
+        $paymentMode = PaymentMode::where('name', $payment->payment_mode)->first();
+
+        if (!$paymentMode || (!$paymentMode->debit_account_id && !$paymentMode->credit_account_id)) {
+            \Log::warning('Payment cannot be transferred, no associated accounts', [
+                'payment_id' => $payment->id,
+                'payment_mode' => $payment->payment_mode,
+            ]);
+            return redirect()->back()->with('error', 'Ce paiement ne peut pas être transféré car aucun compte général n\'est associé.');
+        }
+
+        $request->validate([
+            'to_account_id' => 'required|exists:general_accounts,id',
+            'transfer_date' => 'required|date',
+            'reference' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
+        ]);
+
+        // Determine the source account (use debit_account_id or credit_account_id)
+        $fromAccountId = $paymentMode->debit_account_id ?? $paymentMode->credit_account_id;
+        if ($fromAccountId == $request->to_account_id) {
+            return redirect()->back()->with('error', 'Le compte de destination doit être différent du compte source.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $transfer = AccountTransfer::create([
+                'payment_id' => $payment->id,
+                'from_account_id' => $fromAccountId,
+                'to_account_id' => $request->to_account_id,
+                'amount' => abs($payment->amount),
+                'transfer_date' => $request->transfer_date,
+                'reference' => $request->reference,
+                'notes' => $request->notes,
+            ]);
+
+            \Log::info('Account transfer created', [
+                'transfer_id' => $transfer->id,
+                'payment_id' => $payment->id,
+                'from_account_id' => $fromAccountId,
+                'to_account_id' => $request->to_account_id,
+                'amount' => $transfer->amount,
+            ]);
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Transfert effectué avec succès.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Account transfer failed', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Erreur lors du transfert: ' . $e->getMessage())->withInput();
+        }
+    }
+
+
+
+    
 
     public function exportPdf(Request $request)
     {
