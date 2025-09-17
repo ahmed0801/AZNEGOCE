@@ -135,6 +135,11 @@ class Payment extends Model
         return $this->hasMany(AccountTransfer::class);
     }
 
+     public function paymentMode()
+    {
+        return $this->belongsTo(PaymentMode::class, 'payment_mode', 'name');
+    }
+
     public function generateLettrageCode()
     {
         $invoice = $this->payable;

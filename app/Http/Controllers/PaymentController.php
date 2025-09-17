@@ -125,11 +125,72 @@ class PaymentController extends Controller
 
 
 
+
+
+
+
+    public function cancelTransfer($transferId)
+    {
+        $transfer = AccountTransfer::findOrFail($transferId);
+
+        DB::beginTransaction();
+        try {
+            // Reverse the balance adjustments
+            if ($transfer->from_account_id) {
+                $fromAccount = GeneralAccount::find($transfer->from_account_id);
+                if ($fromAccount) {
+                    $fromAccount->balance += abs($transfer->amount);
+                    $fromAccount->save();
+                    \Log::info('From account balance restored', [
+                        'account_id' => $fromAccount->id,
+                        'transfer_id' => $transfer->id,
+                        'amount' => $transfer->amount,
+                        'new_balance' => $fromAccount->balance,
+                    ]);
+                }
+            }
+
+            $toAccount = GeneralAccount::find($transfer->to_account_id);
+            if ($toAccount) {
+                $toAccount->balance -= abs($transfer->amount);
+                $toAccount->save();
+                \Log::info('To account balance adjusted', [
+                    'account_id' => $toAccount->id,
+                    'transfer_id' => $transfer->id,
+                    'amount' => $transfer->amount,
+                    'new_balance' => $toAccount->balance,
+                ]);
+            }
+
+            // Delete the transfer record
+            $transfer->delete();
+
+            \Log::info('Account transfer cancelled', [
+                'transfer_id' => $transferId,
+            ]);
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Transfert annulé avec succès.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Account transfer cancellation failed', [
+                'transfer_id' => $transferId,
+                'error' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Erreur lors de l\'annulation du transfert: ' . $e->getMessage());
+        }
+    }
+
+
+
+
+
+
     
 
     public function exportPdf(Request $request)
     {
-        $query = Payment::with(['payable', 'customer', 'supplier']);
+        $query = Payment::with(['payable', 'customer', 'supplier', 'paymentMode', 'transfers.toAccount']);
         
         if ($request->filled('date_from')) {
             $query->where('payment_date', '>=', $request->date_from);
@@ -151,6 +212,10 @@ class PaymentController extends Controller
             $query->where('supplier_id', $request->supplier_id);
         }
 
+        if ($request->filled('lettrage_code')) {
+            $query->where('lettrage_code', 'like', '%' . $request->lettrage_code . '%');
+        }
+
         $payments = $query->latest()->get();
         $company = \App\Models\CompanyInformation::first() ?? new \App\Models\CompanyInformation([
             'name' => 'AZ NEGOCE',
@@ -162,6 +227,8 @@ class PaymentController extends Controller
         $pdf = Pdf::loadView('pdf.payments_report', compact('payments', 'company', 'request'));
         return $pdf->download('payments_report_' . Carbon::now()->format('Ymd') . '.pdf');
     }
+
+
 
     public function exportExcel(Request $request)
     {
