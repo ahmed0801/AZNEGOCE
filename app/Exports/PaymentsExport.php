@@ -20,7 +20,7 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
 
     public function collection()
     {
-        $query = Payment::with(['payable', 'customer', 'supplier', 'paymentMode', 'transfers.toAccount']);
+        $query = Payment::with(['payable', 'customer', 'supplier', 'paymentMode', 'transfers.toAccount', 'account']);
 
         if ($this->request->filled('date_from')) {
             $query->where('payment_date', '>=', $this->request->date_from);
@@ -46,7 +46,7 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
             $query->where('lettrage_code', 'like', '%' . $this->request->lettrage_code . '%');
         }
 
-        return $query->latest()->get();
+        return $query->orderBy('updated_at', 'desc')->get();
     }
 
     public function headings(): array
@@ -54,7 +54,7 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
         return [
             'Date de Paiement',
             'Client/Fournisseur',
-            'Facture',
+            'Document',
             'Mode de Paiement',
             'Compte Associé',
             'Montant (€)',
@@ -67,7 +67,7 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
     public function map($payment): array
     {
         $paymentMode = $payment->paymentMode;
-        $account = $paymentMode ? ($paymentMode->debitAccount ?? $paymentMode->creditAccount) : null;
+        $account = $payment->account ?? ($paymentMode ? ($paymentMode->debitAccount ?? $paymentMode->creditAccount) : null);
         $transfer = $payment->transfers->first();
         $accountText = $account ? $account->name . ' (' . $account->account_number . ')' : '-';
         if ($transfer) {
@@ -76,8 +76,13 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
 
         return [
             \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y'),
-            $payment->customer ? $payment->customer->name . ' (Client)' : ($payment->supplier ? $payment->supplier->name . ' (Fournisseur)' : 'N/A'),
-            $payment->payable_type === 'App\\Models\\Invoice' ? 'Facture Vente: ' . ($payment->payable->numdoc ?? 'N/A') : ($payment->payable_type === 'App\\Models\\PurchaseInvoice' ? 'Facture Achat: ' . ($payment->payable->numdoc ?? 'N/A') : ($payment->payable_type === 'App\\Models\\SalesNote' ? 'Avoir Vente: ' . ($payment->payable->numdoc ?? 'N/A') : ($payment->payable_type === 'App\\Models\\PurchaseNote' ? 'Avoir Achat: ' . ($payment->payable->numdoc ?? 'N/A') : 'N/A'))),
+            $payment->customer ? $payment->customer->name . ' (Client)' : ($payment->supplier ? $payment->supplier->name . ' (Fournisseur)' : '-'),
+            $payment->payable ? (
+                $payment->payable_type === 'App\\Models\\Invoice' ? 'Facture Vente: ' . ($payment->payable->numdoc ?? 'N/A') :
+                ($payment->payable_type === 'App\\Models\\PurchaseInvoice' ? 'Facture Achat: ' . ($payment->payable->numdoc ?? 'N/A') :
+                ($payment->payable_type === 'App\\Models\\SalesNote' ? 'Avoir Vente: ' . ($payment->payable->numdoc ?? 'N/A') :
+                ($payment->payable_type === 'App\\Models\\PurchaseNote' ? 'Avoir Achat: ' . ($payment->payable->numdoc ?? 'N/A') : '-')))
+            ) : '-',
             $payment->payment_mode,
             $accountText,
             number_format($payment->amount, 2, ',', ' '),

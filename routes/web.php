@@ -450,6 +450,10 @@ Route::put('/purchaseinvoices/{id}/mark-as-paid', [PaymentController::class, 'ma
 
  Route::post('/payments/{payment}/transfer', [PaymentController::class, 'transfer'])->name('payments.transfer');
 Route::delete('/transfers/{transfer}/cancel', [PaymentController::class, 'cancelTransfer'])->name('payments.cancel_transfer');
+// New routes for deposit and withdraw
+Route::post('/payments/deposit', [PaymentController::class, 'deposit'])->name('payments.deposit');
+Route::post('/payments/withdraw', [PaymentController::class, 'withdraw'])->name('payments.withdraw');
+
 
  
 // General Accounts Routes

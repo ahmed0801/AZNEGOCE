@@ -86,7 +86,7 @@
             <tr>
                 <th>Date de Paiement</th>
                 <th>Client/Fournisseur</th>
-                <th>Facture</th>
+                <th>Document</th>
                 <th>Mode de Paiement</th>
                 <th>Compte Associé</th>
                 <th class="text-right">Montant (€)</th>
@@ -124,8 +124,7 @@
                     <td>{{ $payment->payment_mode }}</td>
                     <td>
                         @php
-                            $paymentMode = $payment->paymentMode;
-                            $account = $paymentMode ? ($paymentMode->debitAccount ?? $paymentMode->creditAccount) : null;
+                            $account = $payment->account ?? ($payment->paymentMode ? ($payment->paymentMode->debitAccount ?? $payment->paymentMode->creditAccount) : null);
                             $transfer = $payment->transfers->first();
                         @endphp
                         {{ $account ? $account->name . ' (' . $account->account_number . ')' : '-' }}

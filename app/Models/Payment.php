@@ -15,6 +15,7 @@ class Payment extends Model
         'payable_type',
         'customer_id',
         'supplier_id',
+        'account_id', // Add this
         'amount',
         'payment_date',
         'payment_mode',
@@ -139,6 +140,16 @@ class Payment extends Model
     {
         return $this->belongsTo(PaymentMode::class, 'payment_mode', 'name');
     }
+
+
+
+    // Add relationship to GeneralAccount
+    public function account()
+    {
+        return $this->belongsTo(GeneralAccount::class, 'account_id');
+    }
+
+    
 
     public function generateLettrageCode()
     {

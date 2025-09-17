@@ -69,11 +69,11 @@
                         <li class="nav-item"><a href="/returns"><i class="fas fa-undo-alt"></i><p>Retours Achat</p></a></li>
                         <li class="nav-item"><a href="/invoices"><i class="fas fa-file-invoice"></i><p>Factures Achat</p></a></li>
                         <li class="nav-item"><a href="/notes"><i class="fas fa-sticky-note"></i><p>Avoirs Achat</p></a></li>
-                      <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-credit-card"></i></span><h4 class="text-section">Comptabilité</h4></li>
-                                                <li class="nav-item {{ Route::is('generalaccounts.index') ? 'active' : '' }}">
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-credit-card"></i></span><h4 class="text-section">Comptabilité</h4></li>
+                        <li class="nav-item {{ Route::is('generalaccounts.index') ? 'active' : '' }}">
                             <a href="{{ route('generalaccounts.index') }}"><i class="fas fa-book"></i><p>Comptes Généraux</p></a>
                         </li>
-                                                <li class="nav-item {{ Route::is('payments.index') ? 'active' : '' }}">
+                        <li class="nav-item {{ Route::is('payments.index') ? 'active' : '' }}">
                             <a href="{{ route('payments.index') }}"><i class="fas fa-credit-card"></i><p>Règlements</p></a>
                         </li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
@@ -270,47 +270,126 @@
                                 </form>
 
                                 <div class="table-responsive">
-                                    <table class="table table-sm table-bordered align-items-center mb-0">
+                                    <table class="table table-striped table-sm table-bordered align-items-center mb-0" id="paymentsTable">
                                         <thead class="thead-light text-center">
                                             <tr>
                                                 <th>Date</th>
-                                                <th>Client/Fournisseur</th>
-                                                <th>Facture</th>
+                                                <th>Montant</th>
                                                 <th>Mode de Paiement</th>
-                                                <th class="text-end">Montant (€)</th>
-                                                <th>Code Lettrage</th>
+                                                <th>Compte Associé</th>
+                                                <th>Client/Fourn.</th>
+                                                <th>Document</th>
+                                                <th>Code de Lettrage</th>
                                                 <th>Référence</th>
                                                 <th>Notes</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach($payments as $payment)
+                                            @foreach ($payments as $payment)
                                                 <tr>
-                                                    <td>{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
-                                                    <td>
-                                                        @if($payment->customer)
-                                                            {{ $payment->customer->name }} (Client)
-                                                        @elseif($payment->supplier)
-                                                            {{ $payment->supplier->name }} (Fournisseur)
-                                                        @else
-                                                            N/A
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        @if($payment->payable_type === 'App\\Models\\Invoice')
-                                                            Facture Vente: {{ $payment->payable->numdoc ?? 'N/A' }}
-                                                        @elseif($payment->payable_type === 'App\\Models\\PurchaseInvoice')
-                                                            Facture Achat: {{ $payment->payable->numdoc ?? 'N/A' }}
-                                                        @else
-                                                            N/A
-                                                        @endif
-                                                    </td>
+                                                    <td>{{ $payment->payment_date->format('d/m/Y') }}</td>
+                                                    <td>{{ number_format($payment->amount, 2) }}</td>
                                                     <td>{{ $payment->payment_mode }}</td>
-                                                    <td class="text-end">{{ number_format($payment->amount, 2, ',', ' ') }}</td>
+                                                    <td>
+                                                        @php
+                                                            $paymentMode = \App\Models\PaymentMode::where('name', $payment->payment_mode)->first();
+                                                            $account = $paymentMode ? ($paymentMode->debitAccount ?? $paymentMode->creditAccount) : null;
+                                                            $transfer = $payment->transfers->first();
+                                                        @endphp
+                                                        {{ $account ? $account->name . ' (' . $account->account_number . ')' : '-' }}
+                                                        @if ($transfer)
+                                                            <br> <span class="text-success">Transféré vers {{ $transfer->toAccount->name }} ({{ $transfer->toAccount->account_number }})</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        {{ $payment->customer ? $payment->customer->name : ($payment->supplier ? $payment->supplier->name : '-') }}
+                                                    </td>
+                                                    <td>
+                                                        @if ($payment->payable)
+                                                            {{ $payment->payable_type == \App\Models\Invoice::class ? 'Facture Vente' : ($payment->payable_type == \App\Models\PurchaseInvoice::class ? 'Facture Achat' : ($payment->payable_type == \App\Models\SalesNote::class ? 'Avoir Vente' : 'Avoir Achat')) }}
+                                                            ({{ $payment->payable->numdoc }})
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
                                                     <td>{{ $payment->lettrage_code ?? '-' }}</td>
                                                     <td>{{ $payment->reference ?? '-' }}</td>
                                                     <td>{{ $payment->notes ?? '-' }}</td>
+                                                    <td>
+                                                        @if ($paymentMode && ($paymentMode->debit_account_id || $paymentMode->credit_account_id))
+                                                            @if ($transfer)
+                                                                <form action="{{ route('payments.cancel_transfer', $transfer->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Annuler ce transfert ?')">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button class="btn btn-sm btn-danger" title="Annuler le transfert">
+                                                                        <i class="fas fa-times"></i> Annuler
+                                                                    </button>
+                                                                </form>
+                                                            @else
+                                                                <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#transferModal{{ $payment->id }}">
+                                                                    <i class="fas fa-exchange-alt"></i> Transférer
+                                                                </button>
+                                                            @endif
+                                                        @endif
+                                                    </td>
                                                 </tr>
+
+                                                <!-- Modal Transfer -->
+                                                <div class="modal fade" id="transferModal{{ $payment->id }}" tabindex="-1" aria-labelledby="transferModalLabel{{ $payment->id }}" aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="transferModalLabel{{ $payment->id }}">Transférer le Paiement : {{ $payment->lettrage_code ?? $payment->id }}</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <form action="{{ route('payments.transfer', $payment->id) }}" method="POST">
+                                                                    @csrf
+                                                                    <div class="row">
+                                                                        <div class="mb-3 col-md-4">
+                                                                            <label for="to_account_id_{{ $payment->id }}" class="form-label">Compte Destination</label>
+                                                                            <select name="to_account_id" id="to_account_id_{{ $payment->id }}" class="form-select" required>
+                                                                                <option value="">Sélectionner un compte</option>
+                                                                                @foreach ($generalAccounts as $account)
+                                                                                    <option value="{{ $account->id }}">{{ $account->name }} ({{ $account->account_number }})</option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                            @error('to_account_id')
+                                                                                <span class="text-danger">{{ $message }}</span>
+                                                                            @enderror
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-4">
+                                                                            <label for="transfer_date_{{ $payment->id }}" class="form-label">Date de Transfert</label>
+                                                                            <input type="date" name="transfer_date" id="transfer_date_{{ $payment->id }}" class="form-control" value="{{ now()->format('Y-m-d') }}" required>
+                                                                            @error('transfer_date')
+                                                                                <span class="text-danger">{{ $message }}</span>
+                                                                            @enderror
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-4">
+                                                                            <label for="reference_{{ $payment->id }}" class="form-label">Référence</label>
+                                                                            <input type="text" name="reference" id="reference_{{ $payment->id }}" class="form-control" value="{{ old('reference') }}">
+                                                                            @error('reference')
+                                                                                <span class="text-danger">{{ $message }}</span>
+                                                                            @enderror
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-12">
+                                                                            <label for="notes_{{ $payment->id }}" class="form-label">Notes</label>
+                                                                            <textarea name="notes" id="notes_{{ $payment->id }}" class="form-control">{{ old('notes') }}</textarea>
+                                                                            @error('notes')
+                                                                                <span class="text-danger">{{ $message }}</span>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                                        <button type="submit" class="btn btn-success">Transférer</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             @endforeach
                                         </tbody>
                                     </table>
