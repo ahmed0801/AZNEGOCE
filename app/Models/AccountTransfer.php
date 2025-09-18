@@ -18,11 +18,13 @@ class AccountTransfer extends Model
         'transfer_date',
         'reference',
         'notes',
+        'reconciled', // Add this
     ];
 
     protected $casts = [
         'transfer_date' => 'datetime',
         'amount' => 'decimal:2',
+        'reconciled' => 'boolean', // Add this
     ];
 
     protected static function booted()

@@ -297,184 +297,94 @@
                     @endif
 
                     <div class="container mt-4">
-                        <h4>Comptes Généraux</h4>
+                        <h4>Rapprochement pour {{ $account->name }} ({{ $account->account_number }})</h4>
+                        <p>Solde actuel: {{ number_format($account->balance, 2, ',', ' ') }} €</p>
 
-                        <!-- Bouton pour ouvrir le modal -->
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAccountModal">
-                            Créer un Compte Général
-                        </button>
-
-                        <!-- Modal Créer -->
-                        <div class="modal fade" id="createAccountModal" tabindex="-1" aria-labelledby="createAccountModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="createAccountModalLabel">Créer un Compte Général</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form id="createAccountForm" action="{{ route('generalaccounts.store') }}" method="POST">
-                                            @csrf
-                                            <div class="row">
-                                                <!-- Numéro de Compte -->
-                                                <div class="mb-3 col-md-4">
-                                                    <label for="account_number" class="form-label">Numéro de Compte</label>
-                                                    <input type="text" class="form-control" id="account_number" name="account_number" value="{{ old('account_number') }}" required>
-                                                    @error('account_number')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-                                                <!-- Nom -->
-                                                <div class="mb-3 col-md-4">
-                                                    <label for="name" class="form-label">Nom</label>
-                                                    <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" required>
-                                                    @error('name')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-                                                <!-- Type -->
-                                                <div class="mb-3 col-md-4">
-                                                    <label for="type" class="form-label">Type</label>
-                                                    <select name="type" id="type" class="form-select" required>
-                                                        <option value="caisse" {{ old('type') == 'caisse' ? 'selected' : '' }}>Caisse</option>
-                                                        <option value="banque" {{ old('type') == 'banque' ? 'selected' : '' }}>Banque</option>
-                                                        <option value="coffre" {{ old('type') == 'coffre' ? 'selected' : '' }}>Coffre</option>
-                                                    </select>
-                                                    @error('type')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                                <button type="submit" class="btn btn-success">Créer</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
+                        <form action="{{ route('generalaccounts.storeReconciliation', $account->id) }}" method="POST">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="balance" class="form-label">Ajuster le solde (optionnel, en €)</label>
+                                <input type="number" step="0.01" name="balance" id="balance" class="form-control" value="{{ $account->balance }}" placeholder="Entrez un nouveau solde si nécessaire">
+                                @error('balance')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
-                        </div>
 
-                        <!-- Recherche -->
-                        <div class="mb-1 d-flex justify-content-center">
-                            <input type="text" id="searchAccountInput" class="form-control search-box" placeholder="🔍 Rechercher un Compte Général...">
-                        </div>
-
-                        @if ($generalAccounts->count() > 0)
                             <div class="table-responsive">
-                                <table class="table table-striped table-bordered table-hover table-text-small" id="accountsTable">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th>Numéro de Compte</th>
-                                            <th>Nom</th>
-                                            <th>Type</th>
-                                            <th>Solde</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($generalAccounts as $account)
+                                <h5>Paiements non rapprochés</h5>
+                                @if($payments->count() > 0)
+                                    <table class="table table-bordered table-hover table-text-small">
+                                        <thead class="table-dark">
                                             <tr>
-                                                <td>{{ $account->account_number }}</td>
-                                                <td>{{ $account->name }}</td>
-                                                <td>{{ ucfirst($account->type) }}</td>
-                                                <td>{{ number_format($account->balance, 2) }}</td>
-                                                <td>
-                                                    <!-- Rapprochement -->
-                                                    <a href="{{ route('generalaccounts.reconcile', $account->id) }}" class="btn btn-sm btn-info" title="Rapprochement">
-                                                        Rapprochement <i class="fas fa-check-circle"></i>
-                                                    </a> 
-                                                    <!-- Consultation des écritures -->
-                                                    <a href="{{ route('generalaccounts.transactions', $account->id) }}" class="btn btn-sm btn-info" title="Consultation des écritures">
-                                                        Ecritures comptables <i class="fas fa-list"></i>
-                                                    </a> <hr>
-                                                    <!-- Modifier -->
-                                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editAccountModal{{ $account->id }}">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <!-- Supprimer -->
-                                                    <form action="{{ route('generalaccounts.destroy', $account->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ce compte ?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button class="btn btn-sm btn-danger" title="Supprimer">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </button>
-                                                    </form>
-                                                </td>
+                                                <th><input type="checkbox" id="select-all-payments" onclick="document.querySelectorAll('input[name=\'payment_ids[]\']').forEach(cb => cb.checked = this.checked);"></th>
+                                                <th>Date</th>
+                                                <th>Type</th>
+                                                <th>Montant (€)</th>
+                                                <th>Code Lettrage</th>
+                                                <th>Notes</th>
                                             </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($payments as $payment)
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="payment_ids[]" value="{{ $payment->id }}">
+                                                    </td>
+                                                    <td>{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
+                                                    <td>{{ $payment->payment_mode }}</td>
+                                                    <td>{{ number_format($payment->amount, 2, ',', ' ') }}</td>
+                                                    <td>{{ $payment->lettrage_code ?? '-' }}</td>
+                                                    <td>{{ $payment->notes ?? '-' }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                @else
+                                    <p>Aucun paiement non rapproché trouvé.</p>
+                                @endif
 
-                                            <!-- Modal Modifier -->
-                                            <div class="modal fade" id="editAccountModal{{ $account->id }}" tabindex="-1" aria-labelledby="editAccountModalLabel{{ $account->id }}" aria-hidden="true">
-                                                <div class="modal-dialog modal-lg">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title">Modifier le Compte Général : {{ $account->name }}</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form action="{{ route('generalaccounts.update', $account->id) }}" method="POST">
-                                                                @csrf
-                                                                @method('PUT')
-                                                                <div class="row">
-                                                                    <!-- Numéro de Compte -->
-                                                                    <div class="mb-3 col-md-4">
-                                                                        <label class="form-label">Numéro de Compte</label>
-                                                                        <input type="text" name="account_number" class="form-control" value="{{ $account->account_number }}" required>
-                                                                        @error('account_number')
-                                                                            <span class="text-danger">{{ $message }}</span>
-                                                                        @enderror
-                                                                    </div>
-                                                                    <!-- Nom -->
-                                                                    <div class="mb-3 col-md-4">
-                                                                        <label class="form-label">Nom</label>
-                                                                        <input type="text" name="name" class="form-control" value="{{ $account->name }}" required>
-                                                                        @error('name')
-                                                                            <span class="text-danger">{{ $message }}</span>
-                                                                        @enderror
-                                                                    </div>
-                                                                    <!-- Type -->
-                                                                    <div class="mb-3 col-md-4">
-                                                                        <label for="type_{{ $account->id }}" class="form-label">Type</label>
-                                                                        <select name="type" id="type_{{ $account->id }}" class="form-select" required>
-                                                                            <option value="caisse" {{ $account->type == 'caisse' ? 'selected' : '' }}>Caisse</option>
-                                                                            <option value="banque" {{ $account->type == 'banque' ? 'selected' : '' }}>Banque</option>
-                                                                            <option value="coffre" {{ $account->type == 'coffre' ? 'selected' : '' }}>Coffre</option>
-                                                                        </select>
-                                                                        @error('type')
-                                                                            <span class="text-danger">{{ $message }}</span>
-                                                                        @enderror
-                                                                    </div>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                                                    <button type="submit" class="btn btn-success">Mettre à jour</button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                                <h5>Transferts non rapprochés</h5>
+                                @if($transfers->count() > 0)
+                                    <table class="table table-bordered table-hover table-text-small">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th><input type="checkbox" id="select-all-transfers" onclick="document.querySelectorAll('input[name=\'transfer_ids[]\']').forEach(cb => cb.checked = this.checked);"></th>
+                                                <th>Date</th>
+                                                <th>De</th>
+                                                <th>Vers</th>
+                                                <th>Montant (€)</th>
+                                                <th>Référence</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($transfers as $transfer)
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="transfer_ids[]" value="{{ $transfer->id }}">
+                                                    </td>
+                                                    <td>{{ \Carbon\Carbon::parse($transfer->transfer_date)->format('d/m/Y') }}</td>
+                                                    <td>{{ $transfer->fromAccount ? $transfer->fromAccount->name : '-' }}</td>
+                                                    <td>{{ $transfer->toAccount ? $transfer->toAccount->name : '-' }}</td>
+                                                    <td>{{ number_format($transfer->amount, 2, ',', ' ') }}</td>
+                                                    <td>{{ $transfer->reference ?? '-' }}</td>
+                                                    <td>{{ $transfer->notes ?? '-' }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                @else
+                                    <p>Aucun transfert non rapproché trouvé.</p>
+                                @endif
                             </div>
-                        @else
-                            <p class="text-center text-muted">Aucun compte général trouvé.</p>
-                        @endif
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-success">Marquer comme rapproché</button>
+                                <a href="{{ route('generalaccounts.index') }}" class="btn btn-secondary">Retour</a>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
-
-            <footer class="footer">
-                <div class="container-fluid d-flex justify-content-between">
-                    <div class="copyright">
-                        © AZ NEGOCE. All Rights Reserved.
-                    </div>
-                    <div>
-                        by <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.
-                    </div>
-                </div>
-            </footer>
         </div>
     </div>
 
@@ -484,33 +394,6 @@
     <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
     <script src="{{ asset('assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
     <script src="{{ asset('assets/js/plugin/datatables/datatables.min.js') }}"></script>
-    <script src="{{ asset('assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
-    <script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
-
-    <script>
-        $(document).ready(function () {
-            // Initialize DataTables
-            $('#accountsTable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json'
-                },
-                paging: true,
-                searching: false, // Disable DataTables search since we have custom search
-                info: true,
-                ordering: true
-            });
-
-            // Custom search functionality
-            document.getElementById("searchAccountInput").addEventListener("keyup", function() {
-                var input = this.value.toLowerCase();
-                var rows = document.querySelectorAll("#accountsTable tbody tr");
-
-                rows.forEach(function(row) {
-                    row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
-                });
-            });
-        });
-    </script>
 </body>
 </html>

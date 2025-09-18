@@ -29,4 +29,19 @@ class GeneralAccount extends Model
     {
         return $this->hasMany(PaymentMode::class, 'credit_account_id');
     }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'account_id');
+    }
+
+    public function fromTransfers()
+    {
+        return $this->hasMany(AccountTransfer::class, 'from_account_id');
+    }
+
+    public function toTransfers()
+    {
+        return $this->hasMany(AccountTransfer::class, 'to_account_id');
+    }
 }

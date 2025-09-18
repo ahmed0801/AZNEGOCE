@@ -22,11 +22,13 @@ class Payment extends Model
         'reference',
         'lettrage_code',
         'notes',
+        'reconciled', // Add this
     ];
 
     protected $casts = [
         'payment_date' => 'datetime',
         'amount' => 'decimal:2',
+        'reconciled' => 'boolean', // Add this
     ];
 
     protected static function booted()

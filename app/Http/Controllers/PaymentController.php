@@ -80,7 +80,7 @@ class PaymentController extends Controller
 {
     $request->validate([
         'account_id' => 'required|exists:general_accounts,id',
-        'amount' => 'required|numeric|min:0.01',
+        'amount' => 'required|numeric|min:0',
         'transaction_date' => 'required|date',
         'reference' => 'nullable|string|max:255',
         'notes' => 'nullable|string',
@@ -89,39 +89,30 @@ class PaymentController extends Controller
     DB::beginTransaction();
     try {
         $account = GeneralAccount::findOrFail($request->account_id);
+        
         $payment = Payment::create([
-            'payable_id' => null,
-            'payable_type' => null,
-            'customer_id' => null,
-            'supplier_id' => null,
-            'account_id' => $request->account_id, // Store the account_id
-            'amount' => abs($request->amount), // Ensure positive amount
+            'account_id' => $request->account_id,
+            'amount' => $request->amount,
             'payment_date' => $request->transaction_date,
             'payment_mode' => 'Direct',
             'reference' => $request->reference,
             'notes' => $request->notes,
-            'lettrage_code' => 'DEP-' . Carbon::parse($request->transaction_date)->format('Ymd') . '-' . str_pad((Payment::max('id') ?? 0) + 1, 4, '0', STR_PAD_LEFT),
+            'lettrage_code' => 'DEP-' . Carbon::parse($request->transaction_date)->format('Ymd') . '-TEMP',
         ]);
 
-        $account->balance += abs($request->amount);
+        $payment->lettrage_code = 'DEP-' . Carbon::parse($request->transaction_date)->format('Ymd') . '-' . str_pad($payment->id, 4, '0', STR_PAD_LEFT);
+        $payment->save();
+
+        // Update account balance (increase for deposit)
+        $account->balance += $request->amount;
         $account->save();
 
-        \Log::info('Account deposit created', [
-            'payment_id' => $payment->id,
-            'account_id' => $account->id,
-            'amount' => $payment->amount,
-            'new_balance' => $account->balance,
-        ]);
-
         DB::commit();
-        return redirect()->route('payments.index')->with('success', 'Alimentation de compte enregistrée avec succès.');
+        return redirect()->route('payments.index')->with('success', 'Dépôt effectué avec succès.');
     } catch (\Exception $e) {
         DB::rollBack();
-        \Log::error('Account deposit failed', [
-            'account_id' => $request->account_id,
-            'error' => $e->getMessage(),
-        ]);
-        return redirect()->back()->with('error', 'Erreur lors de l\'alimentation de compte: ' . $e->getMessage())->withInput();
+        \Log::error('Deposit failed', ['error' => $e->getMessage()]);
+        return back()->with('error', 'Erreur lors du dépôt: ' . $e->getMessage())->withInput();
     }
 }
 
@@ -129,7 +120,7 @@ public function withdraw(Request $request)
 {
     $request->validate([
         'account_id' => 'required|exists:general_accounts,id',
-        'amount' => 'required|numeric|min:0.01',
+        'amount' => 'required|numeric|min:0',
         'transaction_date' => 'required|date',
         'reference' => 'nullable|string|max:255',
         'notes' => 'nullable|string',
@@ -138,45 +129,35 @@ public function withdraw(Request $request)
     DB::beginTransaction();
     try {
         $account = GeneralAccount::findOrFail($request->account_id);
-
-        // Prevent withdrawal if balance is insufficient
+        
+        // Check if sufficient balance
         if ($account->balance < $request->amount) {
-            return redirect()->back()->with('error', 'Solde insuffisant pour effectuer ce retrait.')->withInput();
+            return back()->with('error', 'Solde insuffisant pour le retrait.');
         }
 
         $payment = Payment::create([
-            'payable_id' => null,
-            'payable_type' => null,
-            'customer_id' => null,
-            'supplier_id' => null,
-            'account_id' => $request->account_id, // Store the account_id
-            'amount' => -abs($request->amount), // Negative for withdrawals
+            'account_id' => $request->account_id,
+            'amount' => $request->amount,
             'payment_date' => $request->transaction_date,
             'payment_mode' => 'Direct',
             'reference' => $request->reference,
             'notes' => $request->notes,
-            'lettrage_code' => 'WDR-' . Carbon::parse($request->transaction_date)->format('Ymd') . '-' . str_pad((Payment::max('id') ?? 0) + 1, 4, '0', STR_PAD_LEFT),
+            'lettrage_code' => 'WTH-' . Carbon::parse($request->transaction_date)->format('Ymd') . '-TEMP',
         ]);
 
-        $account->balance -= abs($request->amount);
+        $payment->lettrage_code = 'WTH-' . Carbon::parse($request->transaction_date)->format('Ymd') . '-' . str_pad($payment->id, 4, '0', STR_PAD_LEFT);
+        $payment->save();
+
+        // Update account balance (decrease for withdrawal)
+        $account->balance -= $request->amount;
         $account->save();
 
-        \Log::info('Account withdrawal created', [
-            'payment_id' => $payment->id,
-            'account_id' => $account->id,
-            'amount' => $payment->amount,
-            'new_balance' => $account->balance,
-        ]);
-
         DB::commit();
-        return redirect()->route('payments.index')->with('success', 'Retrait de compte enregistré avec succès.');
+        return redirect()->route('payments.index')->with('success', 'Retrait effectué avec succès.');
     } catch (\Exception $e) {
         DB::rollBack();
-        \Log::error('Account withdrawal failed', [
-            'account_id' => $request->account_id,
-            'error' => $e->getMessage(),
-        ]);
-        return redirect()->back()->with('error', 'Erreur lors du retrait de compte: ' . $e->getMessage())->withInput();
+        \Log::error('Withdrawal failed', ['error' => $e->getMessage()]);
+        return back()->with('error', 'Erreur lors du retrait: ' . $e->getMessage())->withInput();
     }
 }
 

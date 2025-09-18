@@ -462,6 +462,13 @@ Route::post('/generalaccounts', [GeneralAccountsController::class, 'store'])->na
 Route::put('/generalaccounts/{id}', [GeneralAccountsController::class, 'update'])->name('generalaccounts.update');
 Route::delete('/generalaccounts/{id}', [GeneralAccountsController::class, 'destroy'])->name('generalaccounts.destroy');
 
+Route::get('/generalaccounts/{id}/reconcile', [GeneralAccountsController::class, 'reconcile'])->name('generalaccounts.reconcile');
+Route::post('/generalaccounts/{id}/reconcile', [GeneralAccountsController::class, 'storeReconciliation'])->name('generalaccounts.storeReconciliation');
+Route::get('/generalaccounts/{id}/transactions', [GeneralAccountsController::class, 'transactions'])->name('generalaccounts.transactions');
+
+
+
+
 
 
 
