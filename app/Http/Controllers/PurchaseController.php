@@ -1062,6 +1062,19 @@ public function storeInvoice(Request $request)
     $souche->last_number += 1;
     $souche->save();
 
+
+
+                            if ($request->action === 'validate') {
+                                
+// Update customer balance solde fournisseur
+$supplier = Supplier::with('tvaGroup')->findOrFail($request->supplier_id);
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $supplier->solde = ($supplier->solde ?? 0) + $totalTtc;
+                    $supplier->save();
+            }
+
+
+
     return redirect()->route('invoices.list')->with('success', 'Facture créée avec succès.');
 }
 
@@ -1134,6 +1147,16 @@ public function updateInvoice(Request $request, $numdoc)
         'total_ttc' => $totalHt * (1 + $tvaRate / 100),
         'status' => $request->input('action') === 'validate' ? 'validée' : 'brouillon',
     ]);
+
+
+                                if ($request->action === 'validate') {
+                                
+// Update customer balance solde fournisseur
+$supplier = Supplier::with('tvaGroup')->findOrFail($request->supplier_id);
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $supplier->solde = ($supplier->solde ?? 0) + $totalTtc;
+                    $supplier->save();
+            }
 
     return redirect()->route('invoices.list')->with('success', 'Facture mise à jour avec succès.');
 }
@@ -2003,6 +2026,19 @@ public function storeInvoiceNote(Request $request)
     $souche->last_number += 1;
     $souche->save();
 
+
+
+                                if ($request->action === 'validate') {
+                                
+// Update customer balance solde fournisseur
+$supplier = Supplier::with('tvaGroup')->findOrFail($request->supplier_id);
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $supplier->solde = ($supplier->solde ?? 0) + $totalTtc;
+                    $supplier->save();
+            }
+
+
+
     return redirect()->route('notes.list')->with('success', 'Avoir créé avec succès.');
 }
 
@@ -2080,6 +2116,18 @@ public function storeInvoiceNote(Request $request)
             'total_ttc' => $totalHt * (1 + $tvaRate / 100),
             'status' => $request->input('action') === 'validate' ? 'validée' : 'brouillon',
         ]);
+
+
+                                    if ($request->action === 'validate') {
+                                
+// Update customer balance solde fournisseur
+$supplier = Supplier::with('tvaGroup')->findOrFail($request->supplier_id);
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $supplier->solde = ($supplier->solde ?? 0) + $totalTtc;
+                    $supplier->save();
+            }
+
+            
 
         return redirect()->route('notes.list')->with('success', 'Avoir mis à jour avec succès.');
     }

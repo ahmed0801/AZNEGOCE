@@ -143,6 +143,12 @@ class SalesInvoicesController extends Controller
 
             if ($request->action === 'validate') {
                 $deliveryNote->update(['invoiced' => true]);
+
+                                                 // Update customer balance solde client
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                    $customer->save();
+
             }
 
             $souche->last_number += 1;
@@ -299,6 +305,12 @@ if (strpos($paymentTermLabel, 'fin du mois') !== false) {
                         ->where('customer_id', $request->customer_id)
                         ->update(['invoiced' => true]);
                 }
+
+                                                 // Update customer balance solde client
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                    $customer->save();
+
             }
 
             $souche->last_number += 1;
@@ -488,6 +500,13 @@ public function editInvoice($id)
                 foreach ($invoice->salesReturns as $salesReturn) {
                     $salesReturn->update(['invoiced' => true]);
                 }
+
+
+                                                 // Update customer balance solde client
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                    $customer->save();
+
             }
 
             return redirect()->route('salesinvoices.index')
@@ -1407,7 +1426,19 @@ public function notesList(Request $request)
                 $returnSouche->save();
 
                 $note->update(['sales_return_id' => $salesReturn->id]);
+
             }
+
+
+
+                        if ($request->action === 'validate') {
+// Update customer balance solde client
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                    $customer->save();
+            }
+
+
 
             if ($request->action === 'validate' && $request->source_type === 'return') {
                 SalesReturn::whereIn('id', $request->source_ids)
@@ -1685,6 +1716,15 @@ public function notesList(Request $request)
                 $returnSouche->save();
 
                 $salesNote->update(['sales_return_id' => $salesReturn->id]);
+            }
+
+
+
+            if ($request->action === 'validate') {
+// Update customer balance solde client
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                    $customer->save();
             }
 
             if ($request->action === 'validate' && $request->source_type === 'return') {
