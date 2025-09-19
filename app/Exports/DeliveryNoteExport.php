@@ -16,7 +16,7 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
 
     public function __construct(DeliveryNote $deliveryNote)
     {
-        // Toujours charger les relations pour éviter les arrays
+        // Charger les relations
         $this->deliveryNote = $deliveryNote->loadMissing(['lines.item', 'salesOrder']);
     }
 
@@ -32,7 +32,7 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
             'Numéro' => $this->deliveryNote->numdoc,
             'N° Client' => $this->deliveryNote->numclient ?? '-',
             'Client' => $this->deliveryNote->customer_name ?? '-',
-            'Date Livraison' => optional($this->deliveryNote->delivery_date)->format('d/m/Y') ?? '-',
+            'Date Livraison' => $this->deliveryNote->delivery_date ? $this->deliveryNote->delivery_date->format('d/m/Y') : '-',
             'Statut' => ucfirst($this->deliveryNote->status ?? '-'),
             'N° Commande' => $this->deliveryNote->salesOrder->numdoc ?? '-',
             'Total HT' => number_format($this->deliveryNote->total_ht, 2, ',', ' ') . ' €',
@@ -63,7 +63,7 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
                 'Total TVA' => '',
                 'Total TTC' => '',
                 'Code Article' => $line->article_code,
-                'Désignation' => $line->item->name ?? '-',
+                'Désignation' => $line->item ? $line->item->name : '-',
                 'Quantité' => $line->delivered_quantity,
                 'PU HT' => number_format($line->unit_price_ht, 2, ',', ' ') . ' €',
                 'Remise (%)' => $line->remise . '%',
@@ -71,7 +71,12 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
             ]);
         }
 
-        return $data;
+        // **Convertir tout en array simple** pour éviter method_exists sur un array
+        return $data->map(function($row) {
+            return collect($row)->map(function($value) {
+                return is_object($value) ? (string) $value : $value;
+            })->toArray();
+        });
     }
 
     public function headings(): array
