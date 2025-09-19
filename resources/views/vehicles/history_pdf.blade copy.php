@@ -5,22 +5,12 @@
     <title>Historique Véhicule #{{ $vehicle->license_plate }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 12px; color: #333; margin: 40px; line-height: 1.5; }
+        body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 12px; color: #333; margin: 40px; line-height: 1.4; }
         @page { margin: 15mm; }
-
         header { text-align: center; border: 4px double #007bff; background-color: #f8f9fa; padding: 10px; margin-bottom: 20px; }
         header img.logo { height: 85px; float: left; margin-left: 5px; }
         header h1 { font-size: 20px; color: #2c3e50; font-weight: bold; }
         header h4 { margin-top: 5px; font-size: 14px; color: #555; }
-
-        .intro-text {
-            margin: 20px 0;
-            font-size: 13px;
-            background-color: #e3f2fd;
-            padding: 10px;
-            border-left: 4px solid #007bff;
-        }
-
         footer { text-align: center; font-size: 10px; color: #555; border-top: 2px double #007bff; padding-top: 5px; margin-top: 30px; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
         th, td { border: 1px solid #2c3e50; padding: 6px; text-align: center; }
@@ -42,11 +32,6 @@
 </header>
 
 <main>
-    <div class="intro-text">
-        Ce document atteste de l'ensemble des réparations et interventions effectuées sur le véhicule mentionné ci-dessus. 
-        Il peut servir de preuve pour justifier l'historique technique du véhicule, notamment lors d'une vente ou d'une cession.
-    </div>
-
     @foreach($deliveryNotes as $bl)
         <table class="info-table">
             <tr>
