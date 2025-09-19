@@ -43,8 +43,8 @@
 
 <main>
     <div class="intro-text">
-        Ce document atteste de l'ensemble des réparations et interventions effectuées sur le véhicule mentionné ci-dessus. 
-        Il peut servir de preuve pour justifier l'historique technique du véhicule, notamment lors d'une vente ou d'une cession.
+        Ce document récapitule l’ensemble des pièces détachées fournies et des interventions réalisées sur le véhicule indiqué ci-dessus. 
+        Il constitue un justificatif de l’historique technique et peut être utilisé comme preuve lors d’une vente, d’une cession ou pour le suivi des réparations.
     </div>
 
     @foreach($deliveryNotes as $bl)
