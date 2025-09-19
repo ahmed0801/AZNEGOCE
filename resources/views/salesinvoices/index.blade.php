@@ -269,6 +269,20 @@
                                                         <i class="fas fa-edit"></i> Modifier
                                                     </a>
                                                 @endif
+
+                                                 @if($invoice->status === 'validée' && !$invoice->paid)
+                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#makePaymentModal{{ $invoice->id }}">
+                                                        <i class="fas fa-credit-card"></i> Faire un règlement
+                                                    </a>
+                                                    <!-- <form action="{{ route('salesinvoices.markAsPaid', $invoice->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Marquer cette facture comme payée ?')">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <button type="submit" class="dropdown-item">
+                                                            <i class="fas fa-check"></i> Marquer Payé
+                                                        </button>
+                                                    </form> -->
+                                                @endif
+
                                                 @if($invoice->status === 'validée')
                                                     <a class="dropdown-item" href="{{ route('salesinvoices.printduplicata', $invoice->id) }}" target="_blank">
                                                         <i class="fas fa-print"></i> imp. DUPLICATA
@@ -290,18 +304,7 @@
                                                         </a>
                                                     @endforeach
                                                 @endif
-                                                @if($invoice->status === 'validée' && !$invoice->paid)
-                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#makePaymentModal{{ $invoice->id }}">
-                                                        <i class="fas fa-credit-card"></i> Faire un règlement
-                                                    </a>
-                                                    <form action="{{ route('salesinvoices.markAsPaid', $invoice->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Marquer cette facture comme payée ?')">
-                                                        @csrf
-                                                        @method('PUT')
-                                                        <button type="submit" class="dropdown-item">
-                                                            <i class="fas fa-check"></i> Marquer Payé
-                                                        </button>
-                                                    </form>
-                                                @endif
+                                               
                                             </div>
                                         </div>
                                     </div>

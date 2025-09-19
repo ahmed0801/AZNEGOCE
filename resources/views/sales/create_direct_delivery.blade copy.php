@@ -352,6 +352,7 @@
                                                         data-address_delivery="{{ $customer->address_delivery ?? '' }}"
                                                         data-city="{{ $customer->city ?? '' }}"
                                                         data-country="{{ $customer->country ?? '' }}"
+                                                        data-solde="{{ $customer->solde ?? '' }}"
                                                         @if($customer->blocked) disabled @endif
                                                         >
                                                     {{ $customer->code ?? '' }} ⭆ {{ $customer->name }} 	
@@ -391,13 +392,13 @@
                                             <p>	&#128204<strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span></p>
                                             <p>&#10135<strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p>
                                             <p>&#9993<strong>Email:</strong> <span id="customer_email"></span></p>
-                                            <p>&#128222<strong>Téléphone 1:</strong> <span id="customer_phone1"></span></p>
+                                            <p>&#128222<strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span></p>
                                         </div>
                                         <div class="col-md-6">
-                                            <p>&#128222<strong>Téléphone 2:</strong> <span id="customer_phone2"></span></p>
                                             <p>	&#128681<strong>Adresse:</strong> <span id="customer_address"></span></p>
                                             <p>&#128666<strong>Adresse de livraison:</strong> <span id="customer_address_delivery"></span></p>
                                             <p>&#127988<strong>Ville & Pays:</strong> <span id="customer_city"></span>, <span id="customer_country"></span></p>
+                                            <p>&#128178<strong>Solde:</strong> <span id="customer_balance"></span></p>
                                         </div>
                                     </div>
                                 </div>
@@ -614,6 +615,7 @@
                     $('#customer_email').text($selectedOption.data('email') || 'N/A');
                     $('#customer_phone1').text($selectedOption.data('phone1') || 'N/A');
                     $('#customer_phone2').text($selectedOption.data('phone2') || 'N/A');
+                    $('#customer_balance').text($selectedOption.data('solde') || 'N/A');
                     $('#customer_address').text($selectedOption.data('address') || 'N/A');
                     $('#customer_address_delivery').text($selectedOption.data('address_delivery') || 'N/A');
                     $('#customer_city').text($selectedOption.data('city') || 'N/A');

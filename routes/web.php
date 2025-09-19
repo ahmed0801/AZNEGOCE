@@ -39,6 +39,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TvaController;
 use App\Http\Controllers\TvaGroupController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\VehicleController;
 use App\Models\Arrivage;
 use App\Models\Brand;
 use App\Models\Invoice;
@@ -506,6 +507,10 @@ Route::post('/salesnotes/store', [SalesInvoicesController::class, 'storeSalesNot
     Route::get('/salesnotes/export/{id}', [SalesInvoicesController::class, 'exportSingleNote'])->name('salesnotes.export_single');
     Route::get('/salesnotes/print/{id}', [SalesInvoicesController::class, 'printSingleNote'])->name('salesnotes.print_single');
 
+
+    Route::get('/vehicles/{vehicle}/history', [VehicleController::class, 'index'])
+     ->name('vehicles.history');
+Route::get('/vehicles/{vehicle}/history/pdf', [VehicleController::class, 'pdf'])->name('vehicles.history.pdf');
 
 
 

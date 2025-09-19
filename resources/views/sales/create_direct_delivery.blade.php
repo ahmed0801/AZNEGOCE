@@ -374,9 +374,10 @@
                                                     <i class="fas fa-list"></i> Charger le Catalogue
                                                 </a>
 
-                                                <a id="loadCatalogBtn" class="btn btn-outline-secondary btn-sm px-2 py-1" style="font-size: 0.90rem;" disabled>
-                                                    <i class="fas fa-list"></i> Voir l'historique
-                                                </a>
+                                                <a id="viewHistoryBtn" class="btn btn-outline-secondary btn-sm px-2 py-1" style="font-size: 0.90rem;" disabled>
+    <i class="fas fa-history"></i> Voir l'historique
+</a>
+
                                             </div>
                                         </div>
                                     </div>
@@ -917,6 +918,28 @@
                     el.blur();
                 });
             });
+
+
+            $('#vehicle_id').change(function () {
+    let vehicleId = $(this).val();
+    let customerId = $('#customer_id').val();
+    
+    let $historyBtn = $('#viewHistoryBtn');
+    
+    if (vehicleId && customerId) {
+        $historyBtn.removeAttr('disabled');
+        $historyBtn.off('click').on('click', function(e) {
+            e.preventDefault();
+            let url = `/vehicles/${vehicleId}/history`; // route pour récupérer l'historique
+            window.open(url, 'popupWindow', 'width=1000,height=700,scrollbars=yes');
+            return false;
+        });
+    } else {
+        $historyBtn.attr('disabled', 'disabled');
+    }
+});
+
+
         });
     </script>
 </body>

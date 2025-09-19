@@ -9,6 +9,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Font;
 
 class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles
 {
@@ -16,24 +17,24 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
 
     public function __construct(DeliveryNote $deliveryNote)
     {
-        // Charger les relations
-        $this->deliveryNote = $deliveryNote->loadMissing(['lines.item', 'salesOrder']);
+        $this->deliveryNote = $deliveryNote;
     }
 
     public function collection()
     {
         $data = collect();
 
+        // Calculate TVA
         $totalTva = $this->deliveryNote->total_ttc - $this->deliveryNote->total_ht;
 
-        // En-tête bon de livraison
+        // Delivery note details
         $data->push([
             'Type' => 'Bon de Livraison',
             'Numéro' => $this->deliveryNote->numdoc,
             'N° Client' => $this->deliveryNote->numclient ?? '-',
             'Client' => $this->deliveryNote->customer_name ?? '-',
-            'Date Livraison' => $this->deliveryNote->delivery_date ? $this->deliveryNote->delivery_date->format('d/m/Y') : '-',
-            'Statut' => ucfirst($this->deliveryNote->status ?? '-'),
+            'Date Livraison' => \Carbon\Carbon::parse($this->deliveryNote->delivery_date)->format('d/m/Y'),
+            'Statut' => ucfirst($this->deliveryNote->status),
             'N° Commande' => $this->deliveryNote->salesOrder->numdoc ?? '-',
             'Total HT' => number_format($this->deliveryNote->total_ht, 2, ',', ' ') . ' €',
             'Total TVA' => number_format($totalTva, 2, ',', ' ') . ' €',
@@ -46,10 +47,27 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
             'Total Ligne' => '',
         ]);
 
-        // Ligne vide
-        $data->push(array_fill_keys(array_keys($data->first()), ''));
+        // Blank row
+        $data->push([
+            'Type' => '',
+            'Numéro' => '',
+            'N° Client' => '',
+            'Client' => '',
+            'Date Livraison' => '',
+            'Statut' => '',
+            'N° Commande' => '',
+            'Total HT' => '',
+            'Total TVA' => '',
+            'Total TTC' => '',
+            'Code Article' => '',
+            'Désignation' => '',
+            'Quantité' => '',
+            'PU HT' => '',
+            'Remise (%)' => '',
+            'Total Ligne' => '',
+        ]);
 
-        // Lignes du bon de livraison
+        // Delivery note lines
         foreach ($this->deliveryNote->lines as $line) {
             $data->push([
                 'Type' => 'Ligne',
@@ -63,7 +81,7 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
                 'Total TVA' => '',
                 'Total TTC' => '',
                 'Code Article' => $line->article_code,
-                'Désignation' => $line->item ? $line->item->name : '-',
+                'Désignation' => $line->item->name ?? '-',
                 'Quantité' => $line->delivered_quantity,
                 'PU HT' => number_format($line->unit_price_ht, 2, ',', ' ') . ' €',
                 'Remise (%)' => $line->remise . '%',
@@ -71,12 +89,7 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
             ]);
         }
 
-        // **Convertir tout en array simple** pour éviter method_exists sur un array
-        return $data->map(function($row) {
-            return collect($row)->map(function($value) {
-                return is_object($value) ? (string) $value : $value;
-            })->toArray();
-        });
+        return $data;
     }
 
     public function headings(): array
@@ -105,8 +118,8 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
     {
         return [
             1 => ['font' => ['bold' => true], 'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]],
-            2 => ['borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]],
-            '3:' . (2 + count($this->deliveryNote->lines)) => ['borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]],
+            2 => ['font' => ['bold' => true], 'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]],
+            '3:' . (3 + count($this->deliveryNote->lines)) => ['borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]],
         ];
     }
 }
