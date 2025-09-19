@@ -37,7 +37,7 @@ class AuthController extends Controller
         // Formulaire de connexion pour les administrateurs
         public function loginFormAdmin()
         {
-            return view('admin.loginFormAdmin');
+            return view('admin.loginforadmin');
         }
 
 
