@@ -17,7 +17,8 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
 
     public function __construct(DeliveryNote $deliveryNote)
     {
-        $this->deliveryNote = $deliveryNote;
+        // Toujours charger les relations pour éviter les arrays
+        $this->deliveryNote = $deliveryNote->loadMissing(['lines.item', 'salesOrder']);
     }
 
     public function collection()
