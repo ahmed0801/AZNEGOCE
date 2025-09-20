@@ -79,72 +79,7 @@ Route::get('/items/search', [ItemController::class, 'search'])->name('items.sear
 Route::get('/dashboard', [AuthController::class, 'adminDashboard'])->name('dashboard');
 
 
-Route::get('/commande', [ItemController::class, 'commande'])->name('commande');
 
-Route::get('/commandetest', [ItemController::class, 'commandetest'])->name('commandetest');
-Route::post('/itemstest/search', [ItemController::class, 'searchtest'])->name('items.searchtest');
-
-
-Route::get('/commande/refresh-clients', function () {
-    session()->forget('clients');
-    return redirect('/commande');
-});
-
-Route::get('/actualiser', function () {
-    session()->forget('clients');
-    return redirect()->back();
-});
-
-
-
-Route::post('/client/selectionner', function (Request $request) {
-    $customerNo = $request->client;
-    $clients = session('clients', []);
-    $client = collect($clients)->where('CustomerNo', $customerNo)->first();
-
-    if ($client) {
-        session()->forget('selectedClient');
-        session()->put('selectedClient', $client);
-        session()->save();
-        
-
-        // Log pour vérifier la session
-        // \Log::info('Client sélectionné:', ['client' => $client]);
-        // \Log::info('Session après mise à jour:', ['selectedClient' => session('selectedClient')]);
-
-        return response()->json([
-            'success' => true,
-            'client' => $client,
-            'selectedClient' => session('selectedClient')
-        ]);
-    }
-
-    return response()->json(['success' => false]);
-})->name('client.selectionner');
-
-
-
-
-    Route::get('/contact', function () {
-        return view('contact');
-    });
-
-
-
-
-
-
-        Route::get('/articlesold', function () {
-            $categories = ItemCategory::all();
-$brands = Brand::all();
-$units = Unit::all();
-$stores = Store::all();
-$tvaGroups = TvaGroup::all();
-    $items = Item::with(['category', 'brand', 'tvaGroup'])->orderBy('name')->get();
-
-
-        return view('articles', compact('items','stores','categories', 'brands', 'units', 'tvaGroups'));
-    });
 
 Route::get('/articles', [ItemController::class, 'index'])->name('articles.index');
 
@@ -454,6 +389,15 @@ Route::delete('/transfers/{transfer}/cancel', [PaymentController::class, 'cancel
 // New routes for deposit and withdraw
 Route::post('/payments/deposit', [PaymentController::class, 'deposit'])->name('payments.deposit');
 Route::post('/payments/withdraw', [PaymentController::class, 'withdraw'])->name('payments.withdraw');
+
+
+
+
+// mail messages
+Route::post('/salesinvoices/{id}/send-email', [SalesInvoicesController::class, 'sendEmail'])->name('salesinvoices.sendEmail');
+
+
+
 
 
  
