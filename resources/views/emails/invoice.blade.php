@@ -31,6 +31,8 @@
         </div>
 
         <p>Le document PDF est joint à ce message. Merci pour votre confiance.</p>
+                <a href="#" class="btn">J'accède a mon espace client</a> <!-- lien décoratif, car le PDF est déjà attaché -->
+
 
         <div class="footer">
             <p>
