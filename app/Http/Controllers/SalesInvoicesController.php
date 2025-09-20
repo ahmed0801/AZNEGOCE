@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InvoiceMail;
+use App\Mail\OrderReadyMail;
 use App\Models\EmailMessage;
 
 class SalesInvoicesController extends Controller
@@ -2121,6 +2122,24 @@ public function sendEmail(Request $request, $id)
 
     return back()->with('success', 'Facture envoyée avec succès !');
 }
+
+
+
+
+
+public function sendOrderReadyEmail($id)
+{
+    $invoice = Invoice::with('customer')->findOrFail($id);
+    $company = CompanyInformation::first() ?? new CompanyInformation();
+
+    $messageText = "Votre commande est prête à retirer. Veuillez passer au magasin pour récupérer vos pièces.";
+
+    Mail::to($invoice->customer->email ?? 'test@mail.com')
+         ->send(new \App\Mail\OrderReadyMail($invoice, $company, $messageText));
+
+    return back()->with('success', 'Notification de retrait envoyée au client !');
+}
+
 
 
 

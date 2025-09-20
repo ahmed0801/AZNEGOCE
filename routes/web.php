@@ -395,7 +395,8 @@ Route::post('/payments/withdraw', [PaymentController::class, 'withdraw'])->name(
 
 // mail messages
 Route::post('/salesinvoices/{id}/send-email', [SalesInvoicesController::class, 'sendEmail'])->name('salesinvoices.sendEmail');
-
+Route::get('/salesinvoices/{id}/send-order-ready', [SalesInvoicesController::class, 'sendOrderReadyEmail'])
+    ->name('salesinvoices.sendOrderReadyEmail');
 
 
 

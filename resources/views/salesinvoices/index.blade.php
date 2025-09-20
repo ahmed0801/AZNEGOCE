@@ -289,6 +289,14 @@
 </a>
 
 
+<a class="dropdown-item" href="{{ route('salesinvoices.sendOrderReadyEmail', $invoice->id) }}" 
+   onclick="return confirm('Voulez-vous envoyer la notification de retrait au client ?');">
+    <i class="fas fa-bell"></i> Notification Retrait
+</a>
+
+
+
+
 
                                                 @if($invoice->status === 'validée')
                                                     <a class="dropdown-item" href="{{ route('salesinvoices.printduplicata', $invoice->id) }}" target="_blank">
