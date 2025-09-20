@@ -2127,18 +2127,21 @@ public function sendEmail(Request $request, $id)
 
 
 
-public function sendOrderReadyEmail($id)
+public function sendOrderReadyEmail(Request $request, $id)
 {
     $invoice = Invoice::with('customer')->findOrFail($id);
     $company = CompanyInformation::first() ?? new CompanyInformation();
 
-    $messageText = "Votre commande est prête à retirer. Veuillez passer au magasin pour récupérer vos pièces.";
+    $email = $request->input('email', $invoice->customer->email ?? 'test@mail.com');
 
-    Mail::to($invoice->customer->email ?? 'test@mail.com')
+    $messageText = "Votre commande est prête à retirer. Veuillez passer au magasin dans la journée pour récupérer vos pièces.";
+
+    Mail::to($email)
          ->send(new \App\Mail\OrderReadyMail($invoice, $company, $messageText));
 
     return back()->with('success', 'Notification de retrait envoyée au client !');
 }
+
 
 
 

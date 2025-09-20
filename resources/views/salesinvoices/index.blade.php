@@ -289,8 +289,7 @@
 </a>
 
 
-<a class="dropdown-item" href="{{ route('salesinvoices.sendOrderReadyEmail', $invoice->id) }}" 
-   onclick="return confirm('Voulez-vous envoyer la notification de retrait au client ?');">
+<a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#orderReadyModal-{{ $invoice->id }}">
     <i class="fas fa-bell"></i> Notification Retrait
 </a>
 
@@ -460,6 +459,36 @@ function addEmailField(id) {
 }
 </script>
 <!-- end mail  -->
+
+
+
+<!-- Modal mail retrait notif-->
+<div class="modal fade" id="orderReadyModal-{{ $invoice->id }}" tabindex="-1" aria-labelledby="orderReadyLabel-{{ $invoice->id }}" aria-hidden="true">
+  <div class="modal-dialog">
+    <form action="{{ route('salesinvoices.sendOrderReadyEmail', $invoice->id) }}" method="POST">
+      @csrf
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="orderReadyLabel-{{ $invoice->id }}">Notifier le client</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="customerEmail-{{ $invoice->id }}" class="form-label">Email du client</label>
+            <input type="email" class="form-control" id="customerEmail-{{ $invoice->id }}" name="email" 
+                   value="{{ $invoice->customer->email ?? '' }}" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Envoyer la notification</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- fin mail retrait notif-->
+
 
 
 
