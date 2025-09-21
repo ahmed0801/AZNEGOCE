@@ -76,16 +76,20 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
 
    public function map($payment): array
 {
+    // Relation mode de paiement
     $paymentMode = $payment->paymentMode;
+    $paymentModeName = $paymentMode ? $paymentMode->name : ($payment->payment_mode ?? '-');
+
+    // Relation compte
     $account = $payment->account ?? ($paymentMode ? ($paymentMode->debitAccount ?? $paymentMode->creditAccount) : null);
 
-    // Sécurisation ici
+    // Relation transfert sécurisée
     $transfer = ($payment->transfers instanceof \Illuminate\Support\Collection)
         ? $payment->transfers->first()
         : null;
 
     $accountText = $account ? $account->name . ' (' . $account->account_number . ')' : '-';
-    if ($transfer) {
+    if ($transfer && $transfer->toAccount) {
         $accountText .= ' | Transféré vers ' . $transfer->toAccount->name . ' (' . $transfer->toAccount->account_number . ')';
     }
 
@@ -98,7 +102,7 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
             ($payment->payable_type === 'App\\Models\\SalesNote' ? 'Avoir Vente: ' . ($payment->payable->numdoc ?? 'N/A') :
             ($payment->payable_type === 'App\\Models\\PurchaseNote' ? 'Avoir Achat: ' . ($payment->payable->numdoc ?? 'N/A') : '-'))))
          : '-',
-        $payment->payment_mode,
+        $paymentModeName,
         $accountText,
         number_format($payment->amount, 2, ',', ' '),
         $payment->lettrage_code ?? '-',
