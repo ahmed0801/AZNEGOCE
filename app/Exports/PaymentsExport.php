@@ -74,33 +74,39 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
         ];
     }
 
-    public function map($payment): array
-    {
-        $paymentMode = $payment->paymentMode;
-        $account = $payment->account ?? ($paymentMode ? ($paymentMode->debitAccount ?? $paymentMode->creditAccount) : null);
-        $transfer = $payment->transfers->first();
-        $accountText = $account ? $account->name . ' (' . $account->account_number . ')' : '-';
-        if ($transfer) {
-            $accountText .= ' | Transféré vers ' . $transfer->toAccount->name . ' (' . $transfer->toAccount->account_number . ')';
-        }
+   public function map($payment): array
+{
+    $paymentMode = $payment->paymentMode;
+    $account = $payment->account ?? ($paymentMode ? ($paymentMode->debitAccount ?? $paymentMode->creditAccount) : null);
 
-        return [
-            \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y'),
-            $payment->customer ? $payment->customer->name . ' (Client)' : ($payment->supplier ? $payment->supplier->name . ' (Fournisseur)' : '-'),
-            $payment->payable ? (
-                $payment->payable_type === 'App\\Models\\Invoice' ? 'Facture Vente: ' . ($payment->payable->numdoc ?? 'N/A') :
-                ($payment->payable_type === 'App\\Models\\PurchaseInvoice' ? 'Facture Achat: ' . ($payment->payable->numdoc ?? 'N/A') :
-                ($payment->payable_type === 'App\\Models\\SalesNote' ? 'Avoir Vente: ' . ($payment->payable->numdoc ?? 'N/A') :
-                ($payment->payable_type === 'App\\Models\\PurchaseNote' ? 'Avoir Achat: ' . ($payment->payable->numdoc ?? 'N/A') : '-')))
-            ) : '-',
-            $payment->payment_mode,
-            $accountText,
-            number_format($payment->amount, 2, ',', ' '),
-            $payment->lettrage_code ?? '-',
-            $payment->reference ?? '-',
-            $payment->notes ?? '-',
-        ];
+    // Sécurisation ici
+    $transfer = ($payment->transfers instanceof \Illuminate\Support\Collection)
+        ? $payment->transfers->first()
+        : null;
+
+    $accountText = $account ? $account->name . ' (' . $account->account_number . ')' : '-';
+    if ($transfer) {
+        $accountText .= ' | Transféré vers ' . $transfer->toAccount->name . ' (' . $transfer->toAccount->account_number . ')';
     }
+
+    return [
+        \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y'),
+        $payment->customer ? $payment->customer->name . ' (Client)' : ($payment->supplier ? $payment->supplier->name . ' (Fournisseur)' : '-'),
+        $payment->payable ? (
+            $payment->payable_type === 'App\\Models\\Invoice' ? 'Facture Vente: ' . ($payment->payable->numdoc ?? 'N/A') :
+            ($payment->payable_type === 'App\\Models\\PurchaseInvoice' ? 'Facture Achat: ' . ($payment->payable->numdoc ?? 'N/A') :
+            ($payment->payable_type === 'App\\Models\\SalesNote' ? 'Avoir Vente: ' . ($payment->payable->numdoc ?? 'N/A') :
+            ($payment->payable_type === 'App\\Models\\PurchaseNote' ? 'Avoir Achat: ' . ($payment->payable->numdoc ?? 'N/A') : '-'))))
+         : '-',
+        $payment->payment_mode,
+        $accountText,
+        number_format($payment->amount, 2, ',', ' '),
+        $payment->lettrage_code ?? '-',
+        $payment->reference ?? '-',
+        $payment->notes ?? '-',
+    ];
+}
+
 
     public function styles(Worksheet $sheet)
     {
