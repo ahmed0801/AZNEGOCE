@@ -3,12 +3,11 @@
 namespace App\Exports;
 
 use App\Models\Invoice;
+use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Illuminate\Support\Collection;
 
-
-class SalesInvoiceExport implements FromCollection, WithHeadings
+class SalesInvoiceExport implements FromArray, WithHeadings
 {
     protected $invoice;
 
@@ -17,19 +16,19 @@ class SalesInvoiceExport implements FromCollection, WithHeadings
         $this->invoice = $invoice;
     }
 
-    public function collection(): Collection
+    public function array(): array
     {
         return $this->invoice->lines->map(function ($line) {
             return [
-                'Article' => $line->item->name ?? $line->description ?? $line->article_code,
+                'Article' => $line->item->name?? $line->description?? $line->article_code,
                 'Quantité' => $line->quantity,
                 'Prix Unitaire HT' => $line->unit_price_ht,
-                'Remise (%)' => $line->remise ?? 0,
+                'Remise (%)' => $line->remise?? 0,
                 'Total HT' => $line->total_ligne_ht,
                 'Total TTC' => $line->total_ligne_ttc,
             ];
-        });
-    }
+})->toArray(); // 👈 important: convertir en tableau
+}
 
     public function headings(): array
     {
