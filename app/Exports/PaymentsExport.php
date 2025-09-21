@@ -74,13 +74,22 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
             $accountText.= ' | Transféré vers '. $transfer->toAccount->name. ' ('. $transfer->toAccount->account_number. ')';
 }
 
-        $document = match ($payment->payable_type) {
-            'App\\Models\\Invoice' => 'Facture Vente: '. ($payment->payable->numdoc?? 'N/A'),
-            'App\\Models\\PurchaseInvoice' => 'Facture Achat: '. ($payment->payable->numdoc?? 'N/A'),
-            'App\\Models\\SalesNote' => 'Avoir Vente: '. ($payment->payable->numdoc?? 'N/A'),
-            'App\\Models\\PurchaseNote' => 'Avoir Achat: '. ($payment->payable->numdoc?? 'N/A'),
-            default => '-',
-};
+$document = '-';
+
+switch ($payment->payable_type) {
+    case 'App\\Models\\Invoice':
+        $document = 'Facture Vente: '. ($payment->payable->numdoc?? 'N/A');
+        break;
+    case 'App\\Models\\PurchaseInvoice':
+        $document = 'Facture Achat: '. ($payment->payable->numdoc?? 'N/A');
+        break;
+    case 'App\\Models\\SalesNote':
+        $document = 'Avoir Vente: '. ($payment->payable->numdoc?? 'N/A');
+        break;
+    case 'App\\Models\\PurchaseNote':
+        $document = 'Avoir Achat: '. ($payment->payable->numdoc?? 'N/A');
+        break;
+}
 
         return [
             \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y'),
