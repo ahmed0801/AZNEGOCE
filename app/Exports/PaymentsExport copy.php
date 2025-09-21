@@ -20,43 +20,45 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
     }
 
     public function collection(): Collection
-    {
-        $query = Payment::with([
-            'payable',
-            'customer',
-            'supplier',
-            'paymentMode',
-            'transfers.toAccount',
-            'account'
-        ]);
+{
+    $query = Payment::with([
+        'payable',
+        'customer',
+        'supplier',
+        'paymentMode',
+        'transfers.toAccount',
+        'account'
+    ]);
 
-        if ($this->request->filled('date_from')) {
-            $query->where('payment_date', '>=', $this->request->date_from);
-        }
+    if ($this->request->filled('date_from')) {
+        $query->where('payment_date', '>=', $this->request->date_from);
+}
 
-        if ($this->request->filled('date_to')) {
-            $query->where('payment_date', '<=', $this->request->date_to);
-        }
+    if ($this->request->filled('date_to')) {
+        $query->where('payment_date', '<=', $this->request->date_to);
+}
 
-        if ($this->request->filled('customer_id')) {
-            $query->where('customer_id', $this->request->customer_id);
-        }
+    if ($this->request->filled('customer_id')) {
+        $query->where('customer_id', $this->request->customer_id);
+}
 
-        if ($this->request->filled('supplier_id')) {
-            $query->where('supplier_id', $this->request->supplier_id);
-        }
+    if ($this->request->filled('supplier_id')) {
+        $query->where('supplier_id', $this->request->supplier_id);
+}
 
-        if ($this->request->filled('payment_mode')) {
-            $query->where('payment_mode', $this->request->payment_mode);
-        }
+    if ($this->request->filled('payment_mode')) {
+        $query->where('payment_mode', $this->request->payment_mode);
+}
 
-        if ($this->request->filled('lettrage_code')) {
-            $query->where('lettrage_code', 'like', '%' . $this->request->lettrage_code . '%');
-        }
+    if ($this->request->filled('lettrage_code')) {
+        $query->where('lettrage_code', 'like', '%'. $this->request->lettrage_code. '%');
+}
 
-        // ✅ Retour direct des modèles Eloquent
-        return $query->orderBy('updated_at', 'desc')->get();
-    }
+    // 👇 Conversion explicite en objets
+    return $query->orderBy('updated_at', 'desc')->get()->map(function ($payment) {
+        return (object) $payment;
+});
+}
 
     public function headings(): array
     {
@@ -77,15 +79,14 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
     {
         $paymentMode = $payment->paymentMode;
         $account = $payment->account ?? ($paymentMode ? ($paymentMode->debitAccount ?? $paymentMode->creditAccount) : null);
-
         $transfer = $payment->transfers->first();
         $accountText = $account ? $account->name . ' (' . $account->account_number . ')' : '-';
-        if ($transfer && $transfer->toAccount) {
+        if ($transfer) {
             $accountText .= ' | Transféré vers ' . $transfer->toAccount->name . ' (' . $transfer->toAccount->account_number . ')';
         }
 
         return [
-            optional($payment->payment_date)->format('d/m/Y'),
+            \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y'),
             $payment->customer ? $payment->customer->name . ' (Client)' : ($payment->supplier ? $payment->supplier->name . ' (Fournisseur)' : '-'),
             $payment->payable ? (
                 $payment->payable_type === 'App\\Models\\Invoice' ? 'Facture Vente: ' . ($payment->payable->numdoc ?? 'N/A') :
@@ -105,13 +106,7 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
     public function styles(Worksheet $sheet)
     {
         return [
-            1 => [
-                'font' => ['bold' => true],
-                'fill' => [
-                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                    'startColor' => ['argb' => 'FFDDDDDD']
-                ]
-            ],
+            1 => ['font' => ['bold' => true], 'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFDDDDDD']]],
         ];
     }
 }
