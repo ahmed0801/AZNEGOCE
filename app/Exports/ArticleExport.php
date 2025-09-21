@@ -55,7 +55,7 @@ class ArticleExport implements FromCollection, WithHeadings
 
         // Mapper les données pour l'export
         return $items->map(function ($item) {
-            return [
+            return(object) [
                 'Code' => $item->code,
                 'Nom' => $item->name,
                 'Marque' => $item->brand ? $item->brand->name : '',
