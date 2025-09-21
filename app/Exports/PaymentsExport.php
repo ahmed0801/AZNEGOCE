@@ -20,35 +20,45 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
     }
 
     public function collection(): Collection
-    {
-        $query = Payment::with(['payable', 'customer', 'supplier', 'paymentMode', 'transfers.toAccount', 'account']);
+{
+    $query = Payment::with([
+        'payable',
+        'customer',
+        'supplier',
+        'paymentMode',
+        'transfers.toAccount',
+        'account'
+    ]);
 
-        if ($this->request->filled('date_from')) {
-            $query->where('payment_date', '>=', $this->request->date_from);
-        }
+    if ($this->request->filled('date_from')) {
+        $query->where('payment_date', '>=', $this->request->date_from);
+}
 
-        if ($this->request->filled('date_to')) {
-            $query->where('payment_date', '<=', $this->request->date_to);
-        }
+    if ($this->request->filled('date_to')) {
+        $query->where('payment_date', '<=', $this->request->date_to);
+}
 
-        if ($this->request->filled('customer_id')) {
-            $query->where('customer_id', $this->request->customer_id);
-        }
+    if ($this->request->filled('customer_id')) {
+        $query->where('customer_id', $this->request->customer_id);
+}
 
-        if ($this->request->filled('supplier_id')) {
-            $query->where('supplier_id', $this->request->supplier_id);
-        }
+    if ($this->request->filled('supplier_id')) {
+        $query->where('supplier_id', $this->request->supplier_id);
+}
 
-        if ($this->request->filled('payment_mode')) {
-            $query->where('payment_mode', $this->request->payment_mode);
-        }
+    if ($this->request->filled('payment_mode')) {
+        $query->where('payment_mode', $this->request->payment_mode);
+}
 
-        if ($this->request->filled('lettrage_code')) {
-            $query->where('lettrage_code', 'like', '%' . $this->request->lettrage_code . '%');
-        }
+    if ($this->request->filled('lettrage_code')) {
+        $query->where('lettrage_code', 'like', '%'. $this->request->lettrage_code. '%');
+}
 
-        return $query->orderBy('updated_at', 'desc')->get();
-    }
+    // 👇 Conversion explicite en objets
+    return $query->orderBy('updated_at', 'desc')->get()->map(function ($payment) {
+        return (object) $payment;
+});
+}
 
     public function headings(): array
     {

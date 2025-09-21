@@ -43,7 +43,7 @@ class PurchaseReturnsExport implements FromCollection, WithHeadings
         }
 
         return $query->get()->map(function ($return) {
-            return [
+            return(object) [
                 'numdoc' => $return->numdoc,
                 'commande' => $return->purchaseOrder->numdoc,
                 'fournisseur' => $return->purchaseOrder->supplier->name,

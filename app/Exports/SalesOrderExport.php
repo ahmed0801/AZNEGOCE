@@ -21,25 +21,24 @@ class SalesOrderExport implements FromCollection, WithHeadings, ShouldAutoSize, 
         $this->order = $order;
     }
 
-    public function collection() : Collection
+        public function collection(): Collection
     {
         $data = collect();
 
-        // Calculate TVA
         $totalTva = $this->order->total_ttc - $this->order->total_ht;
 
-        // Order details
-        $data->push([
+        // Détails de la commande
+        $data->push((object)[
             'Type' => 'Commande',
             'Numéro' => $this->order->numdoc,
-            'N° Client' => $this->order->customer->code ?? '-',
-            'Client' => $this->order->customer->name ?? '-',
+            'N° Client' => $this->order->customer->code?? '-',
+            'Client' => $this->order->customer->name?? '-',
             'Date Commande' => \Carbon\Carbon::parse($this->order->order_date)->format('d/m/Y'),
             'Statut' => ucfirst($this->order->status),
-            'Statut BL' => $this->order->deliveryNote ? ucfirst($this->order->deliveryNote->status) : 'Aucun BL',
-            'Total HT' => number_format($this->order->total_ht, 2) . ' €',
-            'Total TVA' => number_format($totalTva, 2) . ' €',
-            'Total TTC' => number_format($this->order->total_ttc, 2) . ' €',
+            'Statut BL' => $this->order->deliveryNote? ucfirst($this->order->deliveryNote->status): 'Aucun BL',
+            'Total HT' => number_format($this->order->total_ht, 2). ' €',
+            'Total TVA' => number_format($totalTva, 2). ' €',
+            'Total TTC' => number_format($this->order->total_ttc, 2). ' €',
             'Code Article' => '',
             'Désignation' => '',
             'Quantité' => '',
@@ -48,8 +47,8 @@ class SalesOrderExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             'Total Ligne' => '',
         ]);
 
-        // Blank row for separation
-        $data->push([
+        // Ligne vide
+        $data->push((object)[
             'Type' => '',
             'Numéro' => '',
             'N° Client' => '',
@@ -68,9 +67,9 @@ class SalesOrderExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             'Total Ligne' => '',
         ]);
 
-        // Order lines
+        // Lignes de commande
         foreach ($this->order->lines as $line) {
-            $data->push([
+            $data->push((object)[
                 'Type' => 'Ligne',
                 'Numéro' => '',
                 'N° Client' => '',
@@ -82,16 +81,16 @@ class SalesOrderExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 'Total TVA' => '',
                 'Total TTC' => '',
                 'Code Article' => $line->article_code,
-                'Désignation' => $line->item->name ?? '-',
+                'Désignation' => $line->item->name?? '-',
                 'Quantité' => $line->ordered_quantity,
-                'PU HT' => number_format($line->unit_price_ht, 2) . ' €',
-                'Remise (%)' => $line->remise . '%',
-                'Total Ligne' => number_format($line->total_ligne_ht, 2) . ' €',
+                'PU HT' => number_format($line->unit_price_ht, 2). ' €',
+                'Remise (%)' => $line->remise. '%',
+                'Total Ligne' => number_format($line->total_ligne_ht, 2). ' €',
             ]);
-        }
+}
 
         return $data;
-    }
+}
 
     public function headings(): array
     {

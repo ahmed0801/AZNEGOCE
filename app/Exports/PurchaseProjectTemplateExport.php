@@ -9,12 +9,20 @@ use Illuminate\Support\Collection;
 
 
 
-class PurchaseProjectTemplateExport implements FromArray, WithHeadings
+class PurchaseProjectTemplateExport implements FromCollection, WithHeadings
 {
-    public function array(): array
+    public function collection(): Collection
     {
-        return [];
-    }
+        // 👇 Une ligne vide convertie en objet pour éviter les erreurs PHP 8+
+        return collect([
+            (object)[
+                'article_code' => '',
+                'ordered_quantity' => '',
+                'unit_price_ht' => '',
+                'remise' => ''
+            ]
+        ]);
+}
 
     public function headings(): array
     {
@@ -24,7 +32,5 @@ class PurchaseProjectTemplateExport implements FromArray, WithHeadings
             'unit_price_ht',
             'remise'
         ];
-    }
 }
-
-
+}

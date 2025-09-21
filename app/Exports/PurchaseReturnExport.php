@@ -16,24 +16,24 @@ class PurchaseReturnExport implements FromCollection, WithHeadings
         $this->return = $return;
     }
 
-    public function collection(): Collection
+public function collection(): Collection
     {
         return $this->return->lines->map(function ($line) {
-            return [
+            return (object)[ // 👈 conversion en objet pour éviter method_exists sur array
                 'numdoc' => $this->return->numdoc,
                 'commande' => $this->return->purchaseOrder->numdoc,
                 'fournisseur' => $this->return->purchaseOrder->supplier->name,
                 'date' => \Carbon\Carbon::parse($this->return->return_date)->format('d/m/Y'),
                 'type' => ucfirst($this->return->type),
                 'article_code' => $line->article_code,
-                'designation' => $line->item->name ?? '-',
+                'designation' => $line->item->name?? '-',
                 'quantite' => $line->returned_quantity,
                 'pu_ht' => number_format($line->unit_price_ht, 2),
                 'remise' => $line->remise,
                 'total_ligne_ht' => number_format($line->total_ligne_ht, 2),
             ];
-        });
-    }
+});
+}
 
     public function headings(): array
     {

@@ -15,35 +15,40 @@ class PurchasesExport implements FromCollection, WithHeadings
         $this->filters = $filters;
     }
 
-    public function collection(): Collection
+      public function collection(): Collection
     {
         $query = PurchaseOrder::with('supplier');
 
-        // Appliquer les filtres si fournis
+        // Appliquer les filtres
         if (!empty($this->filters['status'])) {
             $query->where('status', $this->filters['status']);
-        }
+}
+
         if (!empty($this->filters['supplier_id'])) {
             $query->where('supplier_id', $this->filters['supplier_id']);
-        }
+}
+
         if (!empty($this->filters['date_from'])) {
             $query->whereDate('order_date', '>=', $this->filters['date_from']);
-        }
+}
+
         if (!empty($this->filters['date_to'])) {
             $query->whereDate('order_date', '<=', $this->filters['date_to']);
-        }
+}
 
         return $query->get()->map(function ($purchase) {
-            return [
+            return (object)[
                 'Numéro' => $purchase->numdoc,
-                'Fournisseur' => $purchase->supplier->name ?? '',
-        'Date' => $purchase->order_date ? \Carbon\Carbon::parse($purchase->order_date)->format('d/m/Y') : '',
+                'Fournisseur' => $purchase->supplier->name?? '-',
+                'Date' => $purchase->order_date
+? \Carbon\Carbon::parse($purchase->order_date)->format('d/m/Y')
+: '-',
                 'Statut' => ucfirst($purchase->status),
-                'Total HT' => $purchase->total_ht,
-                'Total TTC' => $purchase->total_ttc,
+                'Total HT' => number_format($purchase->total_ht, 2, ',', ' '). ' €',
+                'Total TTC' => number_format($purchase->total_ttc, 2, ',', ' '). ' €',
             ];
-        });
-    }
+});
+}
 
     public function headings(): array
     {

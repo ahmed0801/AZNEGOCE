@@ -21,25 +21,24 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
         $this->deliveryNote = $deliveryNote;
     }
 
-    public function collection(): Collection
+       public function collection(): Collection
     {
         $data = collect();
 
-        // Calculate TVA
         $totalTva = $this->deliveryNote->total_ttc - $this->deliveryNote->total_ht;
 
-        // Delivery note details
-        $data->push([
+        // Détails du bon de livraison
+        $data->push((object)[
             'Type' => 'Bon de Livraison',
             'Numéro' => $this->deliveryNote->numdoc,
-            'N° Client' => $this->deliveryNote->numclient ?? '-',
-            'Client' => $this->deliveryNote->customer_name ?? '-',
+            'N° Client' => $this->deliveryNote->numclient?? '-',
+            'Client' => $this->deliveryNote->customer_name?? '-',
             'Date Livraison' => \Carbon\Carbon::parse($this->deliveryNote->delivery_date)->format('d/m/Y'),
             'Statut' => ucfirst($this->deliveryNote->status),
-            'N° Commande' => $this->deliveryNote->salesOrder->numdoc ?? '-',
-            'Total HT' => number_format($this->deliveryNote->total_ht, 2, ',', ' ') . ' €',
-            'Total TVA' => number_format($totalTva, 2, ',', ' ') . ' €',
-            'Total TTC' => number_format($this->deliveryNote->total_ttc, 2, ',', ' ') . ' €',
+            'N° Commande' => $this->deliveryNote->salesOrder->numdoc?? '-',
+            'Total HT' => number_format($this->deliveryNote->total_ht, 2, ',', ' '). ' €',
+            'Total TVA' => number_format($totalTva, 2, ',', ' '). ' €',
+            'Total TTC' => number_format($this->deliveryNote->total_ttc, 2, ',', ' '). ' €',
             'Code Article' => '',
             'Désignation' => '',
             'Quantité' => '',
@@ -48,8 +47,8 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
             'Total Ligne' => '',
         ]);
 
-        // Blank row
-        $data->push([
+        // Ligne vide
+        $data->push((object)[
             'Type' => '',
             'Numéro' => '',
             'N° Client' => '',
@@ -68,9 +67,9 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
             'Total Ligne' => '',
         ]);
 
-        // Delivery note lines
+        // Lignes du bon de livraison
         foreach ($this->deliveryNote->lines as $line) {
-            $data->push([
+            $data->push((object)[
                 'Type' => 'Ligne',
                 'Numéro' => '',
                 'N° Client' => '',
@@ -82,16 +81,16 @@ class DeliveryNoteExport implements FromCollection, WithHeadings, ShouldAutoSize
                 'Total TVA' => '',
                 'Total TTC' => '',
                 'Code Article' => $line->article_code,
-                'Désignation' => $line->item->name ?? '-',
+                'Désignation' => $line->item->name?? '-',
                 'Quantité' => $line->delivered_quantity,
-                'PU HT' => number_format($line->unit_price_ht, 2, ',', ' ') . ' €',
-                'Remise (%)' => $line->remise . '%',
-                'Total Ligne' => number_format($line->total_ligne_ht, 2, ',', ' ') . ' €',
+                'PU HT' => number_format($line->unit_price_ht, 2, ',', ' '). ' €',
+                'Remise (%)' => $line->remise. '%',
+                'Total Ligne' => number_format($line->total_ligne_ht, 2, ',', ' '). ' €',
             ]);
-        }
+}
 
         return $data;
-    }
+}
 
     public function headings(): array
     {

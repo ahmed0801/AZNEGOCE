@@ -16,26 +16,27 @@ class SalesReturnExport implements FromCollection, WithHeadings
         $this->return = $return;
     }
 
-    public function collection(): Collection
+       public function collection(): Collection
     {
         return $this->return->lines->map(function ($line) {
-            return [
+            return (object)[ // 👈 conversion en objet pour éviter les erreurs PHP 8+
                 'numdoc' => $this->return->numdoc,
-                'delivery_note' => $this->return->deliveryNote->numdoc ?? '-',
-                'customer' => $this->return->customer->name ?? '-',
+                'delivery_note' => $this->return->deliveryNote->numdoc?? '-',
+                'customer' => $this->return->customer->name?? '-',
                 'return_date' => \Carbon\Carbon::parse($this->return->return_date)->format('d/m/Y'),
                 'type' => ucfirst($this->return->type),
                 'article_code' => $line->article_code,
-                'article_name' => $line->item->name ?? '-',
+                'article_name' => $line->item->name?? '-',
                 'returned_quantity' => $line->returned_quantity,
-                'unit_price_ht' => $line->unit_price_ht,
-                'remise' => $line->remise,
-                'total_ligne_ht' => $line->total_ligne_ht,
-                'total_ht' => $this->return->total_ht,
-                'total_ttc' => $this->return->total_ttc,
+                'unit_price_ht' => number_format($line->unit_price_ht, 2, ',', ' '). ' €',
+                'remise' => $line->remise. '%',
+                'total_ligne_ht' => number_format($line->total_ligne_ht, 2, ',', ' '). ' €',
+                'total_ht' => number_format($this->return->total_ht, 2, ',', ' '). ' €',
+                'total_ttc' => number_format($this->return->total_ttc, 2, ',', ' '). ' €',
             ];
-        });
-    }
+});
+}
+
 
     public function headings(): array
     {
