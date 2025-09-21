@@ -6,6 +6,7 @@ namespace App\Exports;
 use App\Models\PurchaseNote;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Support\Collection;
 
 class PurchaseNoteExport implements FromCollection, WithHeadings
 {
@@ -16,7 +17,7 @@ class PurchaseNoteExport implements FromCollection, WithHeadings
         $this->note = $note;
     }
 
-    public function collection()
+    public function collection(): Collection
     {
         $data = collect();
 

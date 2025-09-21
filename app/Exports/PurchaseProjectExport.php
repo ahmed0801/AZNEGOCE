@@ -6,6 +6,7 @@ namespace App\Exports;
 use App\Models\PurchaseProject;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Support\Collection;
 
 class PurchaseProjectExport implements FromArray, WithHeadings
 {

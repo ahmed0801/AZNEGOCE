@@ -6,6 +6,7 @@ namespace App\Exports;
 use App\Models\PurchaseInvoice;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Support\Collection;
 
 class PurchaseInvoiceExport implements FromCollection, WithHeadings
 {
@@ -16,7 +17,7 @@ class PurchaseInvoiceExport implements FromCollection, WithHeadings
         $this->invoice = $invoice;
     }
 
-    public function collection()
+    public function collection(): Collection
     {
         $data = collect();
 

@@ -5,6 +5,7 @@ namespace App\Exports;
 use App\Models\PurchaseReturn;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Support\Collection;
 
 class PurchaseReturnsExport implements FromCollection, WithHeadings
 {
@@ -15,7 +16,7 @@ class PurchaseReturnsExport implements FromCollection, WithHeadings
         $this->request = $request;
     }
 
-    public function collection()
+    public function collection(): Collection
     {
         $query = PurchaseReturn::with(['purchaseOrder.supplier', 'lines.item']);
 

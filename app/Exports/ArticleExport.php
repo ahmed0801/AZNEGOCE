@@ -6,6 +6,7 @@ use App\Models\Item;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Support\Collection;
 
 class ArticleExport implements FromCollection, WithHeadings
 {
@@ -16,7 +17,7 @@ class ArticleExport implements FromCollection, WithHeadings
         $this->request = $request;
     }
 
-    public function collection()
+    public function collection(): Collection
     {
         $query = Item::with(['category', 'brand', 'store', 'supplier', 'stocks']);
 

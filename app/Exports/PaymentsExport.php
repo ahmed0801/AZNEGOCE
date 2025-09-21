@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Illuminate\Support\Collection;
 
 class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
@@ -18,7 +19,7 @@ class PaymentsExport implements FromCollection, WithHeadings, WithMapping, WithS
         $this->request = $request;
     }
 
-    public function collection()
+    public function collection(): Collection
     {
         $query = Payment::with(['payable', 'customer', 'supplier', 'paymentMode', 'transfers.toAccount', 'account']);
 

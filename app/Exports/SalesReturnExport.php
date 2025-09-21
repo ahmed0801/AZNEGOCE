@@ -5,6 +5,7 @@ namespace App\Exports;
 use App\Models\SalesReturn;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Support\Collection;
 
 class SalesReturnExport implements FromCollection, WithHeadings
 {
@@ -15,7 +16,7 @@ class SalesReturnExport implements FromCollection, WithHeadings
         $this->return = $return;
     }
 
-    public function collection()
+    public function collection(): Collection
     {
         return $this->return->lines->map(function ($line) {
             return [

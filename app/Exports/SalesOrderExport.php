@@ -10,6 +10,7 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Font;
+use Illuminate\Support\Collection;
 
 class SalesOrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles
 {
@@ -20,7 +21,7 @@ class SalesOrderExport implements FromCollection, WithHeadings, ShouldAutoSize, 
         $this->order = $order;
     }
 
-    public function collection()
+    public function collection() : Collection
     {
         $data = collect();
 

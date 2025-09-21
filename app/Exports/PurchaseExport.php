@@ -6,6 +6,7 @@ use App\Models\Purchase;
 use App\Models\PurchaseOrder;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Support\Collection;
 
 class PurchaseExport implements FromCollection, WithHeadings
 {
@@ -16,7 +17,7 @@ class PurchaseExport implements FromCollection, WithHeadings
         $this->purchase = $purchase;
     }
 
-    public function collection()
+    public function collection(): Collection
     {
         $data = collect();
 

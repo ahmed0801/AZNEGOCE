@@ -6,6 +6,7 @@ namespace App\Exports;
 use App\Models\PurchaseNote;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Support\Collection;
 
 class PurchaseNotesExport implements FromCollection, WithHeadings
 {
@@ -16,7 +17,7 @@ class PurchaseNotesExport implements FromCollection, WithHeadings
         $this->filters = $filters;
     }
 
-    public function collection()
+    public function collection(): Collection
     {
         $query = PurchaseNote::with(['supplier', 'purchaseReturn', 'purchaseInvoice']);
 
