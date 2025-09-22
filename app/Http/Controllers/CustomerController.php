@@ -88,6 +88,9 @@ class CustomerController extends Controller
         ));
     }
 
+   
+    
+
     public function export(Request $request)
 {
     $query = Customer::with(['vehicles', 'tvaGroup', 'discountGroup', 'paymentMode', 'paymentTerm']);
@@ -120,7 +123,6 @@ class CustomerController extends Controller
         $query->where('solde', '<=', $request->max_solde);
     }
 
-    // Pour les filtres TVA et remise, il faut aussi charger les relations
     if ($request->filled('tva_group_id')) {
         $query->where('tva_group_id', $request->tva_group_id);
     }
@@ -129,10 +131,18 @@ class CustomerController extends Controller
         $query->where('discount_group_id', $request->discount_group_id);
     }
 
+    // Récupérer les customers avec leurs relations
     $customers = $query->get();
+    
+    // Si aucun customer trouvé, retourner une collection vide
+    if ($customers->isEmpty()) {
+        $customers = collect([]);
+    }
 
     return Excel::download(new CustomersExport($customers), 'clients_' . date('Y-m-d_H-i-s') . '.xlsx');
 }
+
+
 
     public function store(Request $request)
     {
