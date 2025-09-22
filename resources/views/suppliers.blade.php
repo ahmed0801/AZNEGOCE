@@ -534,12 +534,71 @@
         </div>
     </div>
 
-    <!-- Recherche -->
-    <div class="mb-2 d-flex justify-content-center">
-        <input type="text" id="searchItemInput" class="form-control search-box" placeholder="🔍 Rechercher un fournisseur...">
-    </div>
 
-    @if ($customers->count())
+    
+
+
+    <!-- Filtres -->
+<div class="mb-4">
+    <form method="GET" action="{{ route('supplier.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+        <!-- Recherche générale -->
+        <input type="text" name="search" class="form-control form-control-sm" 
+               style="width: 250px;" placeholder="🔍 Recherche (nom, code, téléphone, email...)" 
+               value="{{ request('search') }}">
+        
+        <!-- Statut -->
+        <select name="status" class="form-select form-select-sm" style="width: 150px;">
+            <option value="">Statut (Tous)</option>
+            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>🟢 Actif</option>
+            <option value="blocked" {{ request('status') == 'blocked' ? 'selected' : '' }}>🔴 Bloqué</option>
+        </select>
+        
+        <!-- Ville -->
+        <select name="city" class="form-select form-select-sm" style="width: 180px;">
+            <option value="">Ville (Toutes)</option>
+            @foreach($cities as $city)
+                <option value="{{ $city }}" {{ request('city') == $city ? 'selected' : '' }}>
+                    {{ $city }}
+                </option>
+            @endforeach
+        </select>
+        
+        <!-- Solde min -->
+        <input type="number" step="0.01" name="min_solde" class="form-control form-control-sm" 
+               style="width: 120px;" placeholder="Solde min" value="{{ request('min_solde') }}">
+        <span class="mx-1 text-muted">à</span>
+        
+        <!-- Solde max -->
+        <input type="number" step="0.01" name="max_solde" class="form-control form-control-sm" 
+               style="width: 120px;" placeholder="Solde max" value="{{ request('max_solde') }}">
+        
+        <!-- Actions -->
+        <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
+            <i class="fas fa-filter me-1"></i> Filtrer
+        </button>
+        
+        <button type="submit" name="action" value="export" 
+                formaction="{{ route('suppliers.export') . '?' . http_build_query(request()->query()) }}" 
+                class="btn btn-outline-success btn-sm px-3" target="_blank">
+            <i class="fas fa-file-excel me-1"></i> EXCEL
+        </button>
+        
+        <a href="{{ route('supplier.index') }}" class="btn btn-outline-secondary btn-sm px-3">
+            <i class="fas fa-undo me-1"></i> Réinitialiser
+        </a>
+    </form>
+</div>
+
+<!-- Recherche rapide (garder l'ancienne) -->
+<!-- <div class="mb-2 d-flex justify-content-center">
+    <input type="text" id="searchItemInput" class="form-control search-box" placeholder="🔍 Rechercher un fournisseur...">
+</div> -->
+
+
+
+
+
+    @if ($suppliers->count())
         <div class="table-responsive">
             <table class="table table-bordered table-hover table-text-small" id="itemsTable">
                 <thead class="table-dark">
@@ -554,7 +613,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($customers as $customer)
+                    @foreach ($suppliers as $customer)
                         <tr>
                             <td>🧑‍💼{{ $customer->code }}</td>
                             <td>{{ $customer->name }}</td>
@@ -840,20 +899,44 @@ document.addEventListener("DOMContentLoaded", function () {
                 </tbody>
             </table>
         </div>
-    @else
-        <p class="text-muted text-center">Aucun client trouvé.</p>
-    @endif
 
+
+        <!-- Pagination avec conservation des filtres -->
+    <div class="d-flex justify-content-center mt-3">
+        {{ $suppliers->appends(request()->query())->links() }}
+    </div>
+@else
+    <div class="text-center py-5">
+        <i class="fas fa-user-tie fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">Aucun fournisseur trouvé</h5>
+        <p class="text-muted">Essayez d'ajuster vos critères de recherche</p>
+        <a href="{{ route('supplier.index') }}" class="btn btn-primary">Réinitialiser les filtres</a>
+    </div>
+@endif
 </div>
 
 <!-- JS Recherche -->
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Recherche en temps réel sur le tableau
     document.getElementById("searchItemInput").addEventListener("keyup", function () {
         const input = this.value.toLowerCase();
         document.querySelectorAll("#itemsTable tbody tr").forEach(row => {
             row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
         });
     });
+
+    // Auto-submit des filtres après 1 seconde d'inactivité
+    let filterTimeout;
+    document.querySelectorAll('form.d-flex.flex-wrap.align-items-end input, form.d-flex.flex-wrap.align-items-end select').forEach(field => {
+        field.addEventListener('input', function() {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(() => {
+                this.closest('form').submit();
+            }, 1000);
+        });
+    });
+});
 </script>
 
 <style>

@@ -588,7 +588,10 @@
         </a>
     </form>
 </div>
-
+<!-- Recherche rapide (garder l'ancienne) -->
+<!-- <div class="mb-2 d-flex justify-content-center">
+    <input type="text" id="searchItemInput" class="form-control search-box" placeholder="🔍 Rechercher un client...">
+</div> -->
 
 
     @if ($customers->count())

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Exports\SuppliersExport;
 use App\Models\DiscountGroup;
 use App\Models\PaymentMode;
 use App\Models\PaymentTerm;
@@ -10,18 +10,73 @@ use App\Models\Souche;
 use App\Models\Supplier;
 use App\Models\TvaGroup;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SupplierController extends Controller
 {
-     public function index()
+public function index(Request $request)
     {
-        $tvaGroups = TvaGroup::all();
-$discountGroups = DiscountGroup::all();
-$paymentModes = PaymentMode::all();
-$paymentTerms = PaymentTerm::all();
- $customers = Supplier::all();
-return view('suppliers', compact('customers', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms'));
+        $query = Supplier::with(['tvaGroup', 'discountGroup', 'paymentMode', 'paymentTerm']);
 
+        // Filtres
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('code', 'LIKE', "%{$search}%")
+                  ->orWhere('phone1', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('city', 'LIKE', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('blocked', $request->status == 'blocked' ? 1 : 0);
+        }
+
+        if ($request->filled('city')) {
+            $query->where('city', 'LIKE', "%{$request->city}%");
+        }
+
+        if ($request->filled('min_solde')) {
+            $query->where('solde', '>=', $request->min_solde);
+        }
+
+        if ($request->filled('max_solde')) {
+            $query->where('solde', '<=', $request->max_solde);
+        }
+
+        if ($request->filled('tva_group_id')) {
+            $query->where('tva_group_id', $request->tva_group_id);
+        }
+
+        if ($request->filled('discount_group_id')) {
+            $query->where('discount_group_id', $request->discount_group_id);
+        }
+
+        $suppliers = $query->orderBy('name')->paginate(10);
+
+        $tvaGroups = TvaGroup::all();
+        $discountGroups = DiscountGroup::all();
+        $paymentModes = PaymentMode::all();
+        $paymentTerms = PaymentTerm::all();
+        
+        // Villes uniques pour le filtre
+        $cities = Supplier::distinct()->pluck('city')->filter()->sort()->values();
+
+        return view('suppliers', compact(
+            'suppliers', 
+            'tvaGroups', 
+            'discountGroups', 
+            'paymentModes', 
+            'paymentTerms',
+            'cities'
+        ));
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new SuppliersExport($request), 'fournisseurs_' . date('Y-m-d_H-i-s') . '.xlsx');
     }
 
     public function store(Request $request)
