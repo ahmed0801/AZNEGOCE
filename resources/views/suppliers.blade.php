@@ -658,9 +658,10 @@
         </div>
 
 <div class="mb-3 col-md-4">
-    <label class="form-label">Solde</label>
-    <input type="number" step="0.01" name="solde" class="form-control"
-           value="{{ old('solde', $customer->balance ?? 0) }}" readonly>
+    <label class="form-label">Solde :</label>
+    <!-- <input type="number" step="0.01" name="solde" class="form-control"
+           value="{{ old('solde', $customer->solde ?? 0) }}" readonly> -->
+           <h1><button type="button" class="btn btn-outline-dark">{{$customer->solde ?? 0 }} €</button></h1>
 </div>
 
 <div class="mb-3 col-md-4">

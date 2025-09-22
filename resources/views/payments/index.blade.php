@@ -217,7 +217,7 @@
 
                         @if($isLimited)
                             <div class="alert alert-info">
-                                Affichage des 50 derniers règlements. Utilisez les filtres pour voir plus de résultats.
+                                Affichage des 150 derniers règlements. Utilisez les filtres pour voir plus de résultats.
                             </div>
                         @endif
 
@@ -420,7 +420,6 @@
                                                 <th>Code de Lettrage</th>
                                                 <th>Référence</th>
                                                 <th>Notes</th>
-                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -436,9 +435,30 @@
         $transfer = $payment->transfers->first();
     @endphp
     {{ $account ? $account->name . ' (' . $account->account_number . ')' : '-' }}
+
     @if ($transfer)
         <br> <span class="text-success">Transféré vers {{ $transfer->toAccount->name }} ({{ $transfer->toAccount->account_number }})</span>
     @endif
+
+
+    @if ($paymentMode && ($paymentMode->debit_account_id || $paymentMode->credit_account_id))
+    <br>
+                                                            @if ($transfer)
+                                                                <form action="{{ route('payments.cancel_transfer', $transfer->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Annuler ce transfert ?')">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button class="btn btn-sm btn-danger" title="Annuler le transfert">
+                                                                        <i class="fas fa-times"></i> Annuler
+                                                                    </button>
+                                                                </form>
+                                                            @else
+                                                                <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#transferModal{{ $payment->id }}">
+                                                                    <i class="fas fa-exchange-alt"></i> Transférer
+                                                                </button>
+                                                            @endif
+                                                        @endif
+
+
 </td>
                                                     <td>
                                                         {{ $payment->customer ? $payment->customer->name : ($payment->supplier ? $payment->supplier->name : '-') }}
@@ -454,23 +474,7 @@
                                                     <td>{{ $payment->lettrage_code ?? '-' }}</td>
                                                     <td>{{ $payment->reference ?? '-' }}</td>
                                                     <td>{{ $payment->notes ?? '-' }}</td>
-                                                    <td>
-                                                        @if ($paymentMode && ($paymentMode->debit_account_id || $paymentMode->credit_account_id))
-                                                            @if ($transfer)
-                                                                <form action="{{ route('payments.cancel_transfer', $transfer->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Annuler ce transfert ?')">
-                                                                    @csrf
-                                                                    @method('DELETE')
-                                                                    <button class="btn btn-sm btn-danger" title="Annuler le transfert">
-                                                                        <i class="fas fa-times"></i> Annuler
-                                                                    </button>
-                                                                </form>
-                                                            @else
-                                                                <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#transferModal{{ $payment->id }}">
-                                                                    <i class="fas fa-exchange-alt"></i> Transférer
-                                                                </button>
-                                                            @endif
-                                                        @endif
-                                                    </td>
+                                                   
                                                 </tr>
 
                                                 <!-- Modal Transfer -->

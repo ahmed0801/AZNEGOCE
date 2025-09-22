@@ -183,8 +183,6 @@
 
 
 
-
-
     </style>
 
 
@@ -535,10 +533,63 @@
     </div>
     <!-- fin modal creation -->
 
-    <!-- Recherche -->
-    <div class="mb-2 d-flex justify-content-center">
-        <input type="text" id="searchItemInput" class="form-control search-box" placeholder="🔍 Rechercher un client...">
-    </div>
+
+    
+
+
+
+   <!-- Filtres -->
+<div class="mb-4">
+    <form method="GET" action="{{ route('customer.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+        <!-- Recherche générale -->
+        <input type="text" name="search" class="form-control form-control-sm" 
+               style="width: 250px;" placeholder="🔍 Recherche (nom, code, téléphone, email...)" 
+               value="{{ request('search') }}">
+        
+        <!-- Statut -->
+        <select name="status" class="form-select form-select-sm" style="width: 120px;">
+            <option value="">Statut (Tous)</option>
+            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>🟢 Actif</option>
+            <option value="blocked" {{ request('status') == 'blocked' ? 'selected' : '' }}>🔴 Bloqué</option>
+        </select>
+        
+        <!-- Ville -->
+        <select name="city" class="form-select form-select-sm" style="width: 160px;">
+            <option value="">Ville (Toutes)</option>
+            @foreach($cities as $city)
+                <option value="{{ $city }}" {{ request('city') == $city ? 'selected' : '' }}>
+                    {{ $city }}
+                </option>
+            @endforeach
+        </select>
+        
+        <!-- Solde min -->
+        <input type="number" step="0.01" name="min_solde" class="form-control form-control-sm" 
+               style="width: 110px;" placeholder="Solde min" value="{{ request('min_solde') }}">
+        <span class="mx-1 text-muted">à</span>
+        
+        <!-- Solde max -->
+        <input type="number" step="0.01" name="max_solde" class="form-control form-control-sm" 
+               style="width: 110px;" placeholder="Solde max" value="{{ request('max_solde') }}">
+        
+        <!-- Actions -->
+        <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
+            <i class="fas fa-filter me-1"></i> Filtrer
+        </button>
+        
+        <button type="submit" name="action" value="export" 
+                formaction="{{ route('customers.export') . '?' . http_build_query(request()->query()) }}" 
+                class="btn btn-outline-success btn-sm px-3" target="_blank">
+            <i class="fas fa-file-excel me-1"></i> EXCEL
+        </button>
+        
+        <a href="{{ route('customer.index') }}" class="btn btn-outline-secondary btn-sm px-3">
+            <i class="fas fa-undo me-1"></i> Réinitialiser
+        </a>
+    </form>
+</div>
+
+
 
     @if ($customers->count())
         <div class="table-responsive">
@@ -550,8 +601,9 @@
                         <th>Adresse & Ville</th>
                         <th>Contact</th>
                         <th>Solde</th>
-                        <th>Non.Fact</th>
+                        <!-- <th>Non.Fact</th> -->
                         <th>Plafond</th>
+                        <th>Véhicules</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -571,11 +623,21 @@
                           🏴󠁢󠁹󠁭󠁩󠁿{{ $customer->city }}</td>
                             <td>📞 {{ $customer->phone1 }} <br>
                          📧 {{ $customer->email }} </td>
+
+
+
                             <td>{{ $customer->solde }} €</td>
-                            <td>--- €</td>
+                            <!-- <td>--- €</td> -->
                             <td>
 {{ $customer->plafond }} €
 </td>
+
+                         <td>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewVehiclesModal{{ $customer->id }}">
+  <i class="fas fa-car"></i> <span class="badge bg-success">{{$customer->vehicles->count()}}</span>
+</button>
+                         </td>
+
 
                             <td>
                                 <!-- Bouton Modifier -->
@@ -583,10 +645,7 @@
                                     <i class="fas fa-edit"></i>
                                 </button>
 
-                                <!-- Bouton Véhicules associés -->
-<button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#viewVehiclesModal{{ $customer->id }}">
-    <i class="fas fa-car"></i>
-</button>
+
 
 
 
@@ -872,9 +931,10 @@
         </div>
 
 <div class="mb-3 col-md-4">
-    <label class="form-label">Solde</label>
-    <input type="number" step="0.01" name="solde" class="form-control"
-           value="{{ old('solde', $customer->balance ?? 0) }}" readonly>
+    <label class="form-label">Solde :</label>
+    <!-- <input type="number" step="0.01" name="solde" class="form-control"
+           value="{{ old('solde', $customer->solde ?? 0) }}" readonly> -->
+           <h1><button type="button" class="btn btn-outline-dark">{{$customer->solde ?? 0 }} €</button></h1>
 </div>
 
 <div class="mb-3 col-md-4">
@@ -1058,6 +1118,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination avec conservation des filtres -->
+    <div class="d-flex justify-content-center mt-3">
+        {{ $customers->appends(request()->query())->links() }}
+    </div>
+
     @else
         <p class="text-muted text-center">Aucun client trouvé.</p>
     @endif
@@ -1066,12 +1132,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <!-- JS Recherche -->
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Recherche en temps réel sur le tableau
     document.getElementById("searchItemInput").addEventListener("keyup", function () {
         const input = this.value.toLowerCase();
         document.querySelectorAll("#itemsTable tbody tr").forEach(row => {
             row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
         });
     });
+
+    // Auto-submit des filtres après 1 seconde d'inactivité
+    let filterTimeout;
+    document.getElementById('filterForm').addEventListener('input', function(e) {
+        clearTimeout(filterTimeout);
+        filterTimeout = setTimeout(() => {
+            this.submit();
+        }, 1000);
+    });
+});
 </script>
 
 <style>

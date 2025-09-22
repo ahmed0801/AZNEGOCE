@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\CustomersExport;
 use App\Models\Customer;
 use App\Models\DiscountGroup;
 use App\Models\PaymentMode;
@@ -11,18 +12,53 @@ use App\Models\TvaGroup;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = Customer::with(['vehicles', 'tvaGroup', 'discountGroup', 'paymentMode', 'paymentTerm']);
+
+        // Filtres
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('code', 'LIKE', "%{$search}%")
+                  ->orWhere('phone1', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('city', 'LIKE', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('blocked', $request->status == 'blocked' ? 1 : 0);
+        }
+
+        if ($request->filled('city')) {
+            $query->where('city', 'LIKE', "%{$request->city}%");
+        }
+
+        if ($request->filled('min_solde')) {
+            $query->where('solde', '>=', $request->min_solde);
+        }
+
+        if ($request->filled('max_solde')) {
+            $query->where('solde', '<=', $request->max_solde);
+        }
+
+        $customers = $query->orderBy('name')->paginate(20);
+
         $tvaGroups = TvaGroup::all();
         $discountGroups = DiscountGroup::all();
         $paymentModes = PaymentMode::all();
         $paymentTerms = PaymentTerm::all();
-        $customers = Customer::with('vehicles')->paginate(10); // Add pagination
 
-        // Fetch TecDoc brands for vehicle modal
+        // Villes uniques pour le filtre
+        $cities = Customer::distinct()->pluck('city')->filter()->sort()->values();
+
+        // Fetch TecDoc brands
         $response = Http::withHeaders([
             'X-Api-Key' => env('TECDOC_API_KEY', '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg')
         ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
@@ -41,8 +77,62 @@ class CustomerController extends Controller
             ? $response->json()['mfrFacets']['counts']
             : [];
 
-        return view('customers', compact('customers', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms', 'brands'));
+        return view('customers', compact(
+            'customers', 
+            'tvaGroups', 
+            'discountGroups', 
+            'paymentModes', 
+            'paymentTerms', 
+            'brands',
+            'cities'
+        ));
     }
+
+    public function export(Request $request)
+{
+    $query = Customer::with(['vehicles', 'tvaGroup', 'discountGroup', 'paymentMode', 'paymentTerm']);
+
+    // Appliquer les mêmes filtres que dans index
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('name', 'LIKE', "%{$search}%")
+              ->orWhere('code', 'LIKE', "%{$search}%")
+              ->orWhere('phone1', 'LIKE', "%{$search}%")
+              ->orWhere('email', 'LIKE', "%{$search}%")
+              ->orWhere('city', 'LIKE', "%{$search}%");
+        });
+    }
+
+    if ($request->filled('status')) {
+        $query->where('blocked', $request->status == 'blocked' ? 1 : 0);
+    }
+
+    if ($request->filled('city')) {
+        $query->where('city', 'LIKE', "%{$request->city}%");
+    }
+
+    if ($request->filled('min_solde')) {
+        $query->where('solde', '>=', $request->min_solde);
+    }
+
+    if ($request->filled('max_solde')) {
+        $query->where('solde', '<=', $request->max_solde);
+    }
+
+    // Pour les filtres TVA et remise, il faut aussi charger les relations
+    if ($request->filled('tva_group_id')) {
+        $query->where('tva_group_id', $request->tva_group_id);
+    }
+
+    if ($request->filled('discount_group_id')) {
+        $query->where('discount_group_id', $request->discount_group_id);
+    }
+
+    $customers = $query->get();
+
+    return Excel::download(new CustomersExport($customers), 'clients_' . date('Y-m-d_H-i-s') . '.xlsx');
+}
 
     public function store(Request $request)
     {

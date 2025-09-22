@@ -193,6 +193,12 @@
                                 <h6 class="op-7 mb-2">Liste des règlements clients et fournisseurs</h6>
                             </div>
                             <div class="ms-md-auto py-2 py-md-0">
+                                <button class="btn btn-label-primary btn-round me-2" data-bs-toggle="modal" data-bs-target="#depositModal">
+                                    <span class="btn-label"><i class="fas fa-plus-circle"></i></span> Alimentation Compte
+                                </button>
+                                <button class="btn btn-label-warning btn-round me-2" data-bs-toggle="modal" data-bs-target="#withdrawModal">
+                                    <span class="btn-label"><i class="fas fa-minus-circle"></i></span> Retrait Compte
+                                </button>
                                 <a href="{{ route('payments.export_pdf') }}?{{ request()->getQueryString() }}" class="btn btn-label-success btn-round me-2">
                                     <span class="btn-label"><i class="fas fa-file-pdf"></i></span> Exporter PDF
                                 </a>
@@ -208,6 +214,138 @@
                         @if(session('error'))
                             <div class="alert alert-danger">{{ session('error') }}</div>
                         @endif
+
+                        @if($isLimited)
+                            <div class="alert alert-info">
+                                Affichage des 50 derniers règlements. Utilisez les filtres pour voir plus de résultats.
+                            </div>
+                        @endif
+
+                        <!-- Deposit Modal -->
+                        <div class="modal fade" id="depositModal" tabindex="-1" aria-labelledby="depositModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="depositModalLabel">Alimentation Compte</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="{{ route('payments.deposit') }}" method="POST">
+                                            @csrf
+                                            <div class="row">
+                                                <div class="mb-3 col-md-4">
+                                                    <label for="account_id" class="form-label">Compte Destination</label>
+                                                    <select name="account_id" id="account_id" class="form-select" required>
+                                                        <option value="">Sélectionner un compte</option>
+                                                        @foreach ($generalAccounts as $account)
+                                                            <option value="{{ $account->id }}">{{ $account->name }} ({{ $account->account_number }})</option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('account_id')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                                <div class="mb-3 col-md-4">
+                                                    <label for="amount" class="form-label">Montant</label>
+                                                    <input type="number" name="amount" id="amount" class="form-control" step="0.01" min="0.01" required>
+                                                    @error('amount')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                                <div class="mb-3 col-md-4">
+                                                    <label for="transaction_date" class="form-label">Date</label>
+                                                    <input type="date" name="transaction_date" id="transaction_date" class="form-control" value="{{ now()->format('Y-m-d') }}" required>
+                                                    @error('transaction_date')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                                <div class="mb-3 col-md-4">
+                                                    <label for="reference" class="form-label">Référence</label>
+                                                    <input type="text" name="reference" id="reference" class="form-control" value="{{ old('reference') }}">
+                                                    @error('reference')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                                <div class="mb-3 col-md-12">
+                                                    <label for="notes" class="form-label">Notes</label>
+                                                    <textarea name="notes" id="notes" class="form-control">{{ old('notes') }}</textarea>
+                                                    @error('notes')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Withdraw Modal -->
+                        <div class="modal fade" id="withdrawModal" tabindex="-1" aria-labelledby="withdrawModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="withdrawModalLabel">Retrait Compte</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="{{ route('payments.withdraw') }}" method="POST">
+                                            @csrf
+                                            <div class="row">
+                                                <div class="mb-3 col-md-4">
+                                                    <label for="account_id_withdraw" class="form-label">Compte Source</label>
+                                                    <select name="account_id" id="account_id_withdraw" class="form-select" required>
+                                                        <option value="">Sélectionner un compte</option>
+                                                        @foreach ($generalAccounts as $account)
+                                                            <option value="{{ $account->id }}">{{ $account->name }} ({{ $account->account_number }})</option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('account_id')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                                <div class="mb-3 col-md-4">
+                                                    <label for="amount_withdraw" class="form-label">Montant</label>
+                                                    <input type="number" name="amount" id="amount_withdraw" class="form-control" step="0.01" min="0.01" required>
+                                                    @error('amount')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                                <div class="mb-3 col-md-4">
+                                                    <label for="transaction_date_withdraw" class="form-label">Date</label>
+                                                    <input type="date" name="transaction_date" id="transaction_date_withdraw" class="form-control" value="{{ now()->format('Y-m-d') }}" required>
+                                                    @error('transaction_date')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                                <div class="mb-3 col-md-4">
+                                                    <label for="reference_withdraw" class="form-label">Référence</label>
+                                                    <input type="text" name="reference" id="reference_withdraw" class="form-control" value="{{ old('reference') }}">
+                                                    @error('reference')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                                <div class="mb-3 col-md-12">
+                                                    <label for="notes_withdraw" class="form-label">Notes</label>
+                                                    <textarea name="notes" id="notes_withdraw" class="form-control">{{ old('notes') }}</textarea>
+                                                    @error('notes')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                <button type="submit" class="btn btn-warning">Enregistrer</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="card card-round">
                             <div class="card-body">
@@ -291,17 +429,18 @@
                                                     <td>{{ $payment->payment_date->format('d/m/Y') }}</td>
                                                     <td>{{ number_format($payment->amount, 2) }}</td>
                                                     <td>{{ $payment->payment_mode }}</td>
-                                                    <td>
-                                                        @php
-                                                            $paymentMode = \App\Models\PaymentMode::where('name', $payment->payment_mode)->first();
-                                                            $account = $paymentMode ? ($paymentMode->debitAccount ?? $paymentMode->creditAccount) : null;
-                                                            $transfer = $payment->transfers->first();
-                                                        @endphp
-                                                        {{ $account ? $account->name . ' (' . $account->account_number . ')' : '-' }}
-                                                        @if ($transfer)
-                                                            <br> <span class="text-success">Transféré vers {{ $transfer->toAccount->name }} ({{ $transfer->toAccount->account_number }})</span>
-                                                        @endif
-                                                    </td>
+<td>
+    @php
+        $paymentMode = $payment->paymentMode;
+        $account = $payment->account ?? ($paymentMode ? ($paymentMode->debitAccount ?? $paymentMode->creditAccount) : null);
+        $transfer = $payment->transfers->first();
+    @endphp
+    {{ $account ? $account->name . ' (' . $account->account_number . ')' : '-' }}
+    
+    @if ($transfer)
+        <br> <span class="text-success">Transféré vers {{ $transfer->toAccount->name }} ({{ $transfer->toAccount->account_number }})</span>
+    @endif
+</td>
                                                     <td>
                                                         {{ $payment->customer ? $payment->customer->name : ($payment->supplier ? $payment->supplier->name : '-') }}
                                                     </td>
@@ -442,7 +581,11 @@
                 paging: true,
                 searching: true,
                 info: true,
-                ordering: true
+                ordering: true,
+                order: [], // Disable default sorting to respect server-side order
+                columnDefs: [
+                    { orderable: false, targets: 9 } // Disable sorting on Action column
+                ]
             });
         });
     </script>

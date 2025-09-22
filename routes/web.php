@@ -416,7 +416,7 @@ Route::get('/generalaccounts/{id}/transactions', [GeneralAccountsController::cla
 
 
 
-
+Route::get('/customers/export', [CustomerController::class, 'export'])->name('customers.export');
 
 
 
