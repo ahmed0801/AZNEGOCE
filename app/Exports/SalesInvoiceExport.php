@@ -16,7 +16,6 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Events\AfterSheet;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 
 class SalesInvoiceExport implements 
     FromArray,
@@ -35,14 +34,17 @@ class SalesInvoiceExport implements
     public function array(): array
     {
         // Ligne 1: En-tête facture (gras et fusionnée)
+        $customerName = $this->invoice->customer ? $this->invoice->customer->name : 'N/A';
+        $invoiceDate = $this->invoice->invoice_date ? Carbon::parse($this->invoice->invoice_date)->format('d/m/Y') : 'N/A';
+        
         $headerText = 'FACTURE N° ' . ($this->invoice->numdoc ?? 'N/A') . 
-                     ' - Client: ' . ($this->invoice->customer ? $this->invoice->customer->name : 'N/A') .
-                     ' - Date: ' . ($this->invoice->invoice_date ? Carbon::parse($this->invoice->invoice_date)->format('d/m/Y') : 'N/A');
+                     ' - Client: ' . $customerName .
+                     ' - Date: ' . $invoiceDate;
         
         $data = [
-            [$headerText], // Ligne 1: En-tête fusionnée
+            [$headerText], // Ligne 1: En-tête fusionnée (string simple)
             [''],          // Ligne 2: Séparation
-            [              // Ligne 3: En-têtes des colonnes
+            [              // Ligne 3: En-têtes des colonnes (strings simples)
                 'Article',
                 'Quantité',
                 'Prix Unitaire HT',
@@ -52,58 +54,69 @@ class SalesInvoiceExport implements
             ],
         ];
         
-        // Lignes 4+: Données des articles (votre logique originale)
+        // Lignes 4+: Données des articles (valeurs scalaires)
         foreach ($this->invoice->lines as $line) {
             $data[] = [
-                $line->item ? $line->item->name : ($line->description ?? $line->article_code ?? '-'),
-                $line->quantity ?? 0,
-                $line->unit_price_ht ?? 0,
-                $line->remise ?? 0,
-                $line->total_ligne_ht ?? 0,
-                $line->total_ligne_ttc ?? 0,
+                $line->item ? $line->item->name : ($line->description ?? $line->article_code ?? '-'), // string
+                $line->quantity ?? 0, // int
+                $line->unit_price_ht ?? 0, // float
+                $line->remise ?? 0, // float
+                $line->total_ligne_ht ?? 0, // float
+                $line->total_ligne_ttc ?? 0, // float
             ];
         }
         
         // Ligne de séparation après les données
         $data[] = [''];
         
-        // Ligne de totaux
-        $totalHT = collect($this->invoice->lines)->sum('total_ligne_ht');
-        $totalTTC = collect($this->invoice->lines)->sum('total_ligne_ttc');
+        // Calcul des totaux
+        $totalHT = collect($this->invoice->lines)->sum(function ($line) {
+            return $line->total_ligne_ht ?? 0;
+        });
+        $totalTTC = collect($this->invoice->lines)->sum(function ($line) {
+            return $line->total_ligne_ttc ?? 0;
+        });
+        
+        // Ligne de totaux HT
         $data[] = [
-            '',
-            '',
-            'TOTAL HT',
-            '',
-            $totalHT,
-            '',
-        ];
-        $data[] = [
-            '',
-            '',
-            'TOTAL TTC',
-            '',
-            $totalTTC,
-            '',
+            '', // string vide
+            '', // string vide
+            'TOTAL HT', // string
+            '', // string vide
+            $totalHT, // float
+            '', // string vide
         ];
         
-        // Pied de page
+        // Ligne de totaux TTC
+        $data[] = [
+            '', // string vide
+            '', // string vide
+            'TOTAL TTC', // string
+            '', // string vide
+            $totalTTC, // float
+            '', // string vide
+        ];
+        
+        // Ligne de séparation
         $data[] = [''];
-        $data[] = ['AZ NEGOCE - Merci pour votre confiance'];
+        
+        // Pied de page
+        $data[] = ['AZ NEGOCE - Merci pour votre confiance']; // string simple
         
         return $data;
     }
 
     public function columnFormats(): array
     {
-        // Formats pour les colonnes numériques (à partir de la ligne 4)
         $linesCount = count($this->invoice->lines);
-        $totalRow = 4 + $linesCount + 1; // Position des totaux
+        $dataStartRow = 4;
+        $dataEndRow = $dataStartRow + $linesCount - 1;
         
         return [
-            'C' => '#,##0.00', // Prix Unitaire HT (colonnes C à partir ligne 4)
-            'E' => '#,##0.00', // Total HT (colonnes E à partir ligne 4)
-            'F' => '#,##0.00', // Total TTC (colonnes F à partir ligne 4)
+            // Formats pour les colonnes numériques (lignes de données uniquement)
+            'C' . $dataStartRow . ':C' . $dataEndRow => '#,##0.00', // Prix Unitaire HT
+            'E' . $dataStartRow . ':E' . $dataEndRow => '#,##0.00', // Total HT
+            'F' . $dataStartRow . ':F' . $dataEndRow => '#,##0.00', // Total TTC
         ];
     }
 
@@ -172,7 +185,7 @@ class SalesInvoiceExport implements
                 ],
             ],
             
-            // Ligne des totaux
+            // Ligne des totaux HT (ligne $totalRow)
             $totalRow => [
                 'font' => [
                     'bold' => true,
@@ -186,6 +199,32 @@ class SalesInvoiceExport implements
                 ],
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
+                ],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'F8F9FA'],
+                ],
+            ],
+            
+            // Ligne TOTAL TTC (ligne $totalRow + 1)
+            ($totalRow + 1) => [
+                'font' => [
+                    'bold' => true,
+                    'size' => 12,
+                    'color' => ['rgb' => '1F4E79'],
+                ],
+                'borders' => [
+                    'outline' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => '1F4E79'],
+                    ],
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
+                ],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'E7F3FF'],
                 ],
             ],
             
@@ -225,15 +264,16 @@ class SalesInvoiceExport implements
                 $sheet->mergeCells('A' . $footerRow . ':F' . $footerRow);
                 
                 // 3. HAUTEURS DES LIGNES
-                $sheet->getRowDimension($headerRow)->setRowHeight(30); // En-tête plus haut
-                $sheet->getRowDimension(2)->setRowHeight(5);           // Séparation fine
-                $sheet->getRowDimension($headersRow)->setRowHeight(25); // En-têtes tableau
+                $sheet->getRowDimension($headerRow)->setRowHeight(30);     // En-tête plus haut
+                $sheet->getRowDimension(2)->setRowHeight(5);               // Séparation fine
+                $sheet->getRowDimension($headersRow)->setRowHeight(25);    // En-têtes tableau
                 for ($i = $dataStartRow; $i <= $dataEndRow; $i++) {
-                    $sheet->getRowDimension($i)->setRowHeight(20);      // Lignes de données
+                    $sheet->getRowDimension($i)->setRowHeight(20);          // Lignes de données
                 }
-                $sheet->getRowDimension($totalRow)->setRowHeight(25);   // Ligne des totaux
-                $sheet->getRowDimension($totalRow + 1)->setRowHeight(5); // Séparation
-                $sheet->getRowDimension($footerRow)->setRowHeight(20);  // Pied de page
+                $sheet->getRowDimension($totalRow)->setRowHeight(25);      // Ligne des totaux
+                $sheet->getRowDimension($totalRow + 1)->setRowHeight(25);  // Ligne TOTAL TTC
+                $sheet->getRowDimension($totalRow + 2)->setRowHeight(5);   // Séparation
+                $sheet->getRowDimension($footerRow)->setRowHeight(20);     // Pied de page
                 
                 // 4. LARGEURS DES COLONNES
                 $sheet->getColumnDimension('A')->setWidth(15); // Article
@@ -254,21 +294,18 @@ class SalesInvoiceExport implements
                 ]);
                 
                 // 6. BORDURE AUTOUR DES TOTAUX
-                $sheet->getStyle('C' . $totalRow . ':F' . $totalRow)->applyFromArray([
+                $sheet->getStyle('C' . $totalRow . ':F' . ($totalRow + 1))->applyFromArray([
                     'borders' => [
                         'outline' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
                             'color' => ['rgb' => '1F4E79'],
                         ],
                     ],
-                    'fill' => [
-                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => 'F8F9FA'],
-                    ],
                 ]);
                 
-                // 7. GEL DES EN-TÊTES (optionnel)
-                // $sheet->freezePane('A4');
+                // 7. FORMAT NUMÉRIQUE POUR LES TOTAUX (appliqué directement)
+                $sheet->getStyle('E' . $totalRow . ':F' . ($totalRow + 1))->getNumberFormat()
+                    ->setFormatCode('#,##0.00');
             },
         ];
     }
