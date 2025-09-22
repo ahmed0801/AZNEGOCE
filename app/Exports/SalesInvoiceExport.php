@@ -34,7 +34,20 @@ class SalesInvoiceExport implements
 
     public function collection(): Collection
     {
-        // En-tête de facture en première ligne
+        // Ligne 1: Ligne vide pour espacement
+        $emptyRow = (object) [
+            'En-tête Facture' => '',
+            'Article' => '',
+            'Quantité' => '',
+            'Prix Unitaire HT' => '',
+            'Remise (%)' => '',
+            'Total HT' => '',
+            'Total TTC' => '',
+        ];
+
+        $data = collect([$emptyRow]);
+
+        // Ligne 2: En-tête de facture (avec fond bleu)
         $customerName = $this->invoice->customer ? $this->invoice->customer->name : 'N/A';
         $invoiceDate = $this->invoice->invoice_date ? Carbon::parse($this->invoice->invoice_date)->format('d/m/Y') : 'N/A';
         $invoiceNum = $this->invoice->numdoc ?? 'N/A';
@@ -49,9 +62,15 @@ class SalesInvoiceExport implements
             'Total TTC' => '',
         ];
 
-        $data = collect([$headerRow]);
+        $data->push($headerRow);
 
-        // Vos lignes de données (logique originale)
+        // Ligne 3: Séparation
+        $data->push($emptyRow);
+
+        // Ligne 4: Vos en-têtes de colonnes
+        // Les en-têtes seront ajoutés automatiquement par WithHeadings
+
+        // Vos lignes de données (logique originale) - commencent à la ligne 5
         $linesData = $this->invoice->lines->map(function ($line) {
             return (object) [
                 'En-tête Facture' => '',
@@ -66,17 +85,8 @@ class SalesInvoiceExport implements
 
         $data = $data->concat($linesData);
 
-        // Ligne de séparation
-        $separatorRow = (object) [
-            'En-tête Facture' => '',
-            'Article' => '',
-            'Quantité' => '',
-            'Prix Unitaire HT' => '',
-            'Remise (%)' => '',
-            'Total HT' => '',
-            'Total TTC' => '',
-        ];
-        $data->push($separatorRow);
+        // Ligne de séparation après les données
+        $data->push($emptyRow);
 
         // Calcul des totaux
         $totalHT = collect($this->invoice->lines)->sum(function ($line) {
@@ -111,7 +121,7 @@ class SalesInvoiceExport implements
         $data->push($totalTTCRow);
 
         // Ligne de séparation finale
-        $data->push($separatorRow);
+        $data->push($emptyRow);
 
         // Pied de page
         $footerRow = (object) [
@@ -130,7 +140,6 @@ class SalesInvoiceExport implements
 
     public function headings(): array
     {
-        // En-têtes alignés avec la structure des objets
         return [
             'En-tête Facture',
             'Article',
@@ -145,41 +154,92 @@ class SalesInvoiceExport implements
     public function styles(Worksheet $sheet)
     {
         $linesCount = count($this->invoice->lines);
-        $totalLines = $linesCount + 5; // En-tête + séparation + 2 totaux + séparation + footer
+        $headerRow = 2;        // Ligne 2: En-tête facture avec fond bleu
+        $separatorRow1 = 1;    // Ligne 1: Séparation
+        $separatorRow2 = 3;    // Ligne 3: Séparation
+        $headersRow = 4;       // Ligne 4: En-têtes colonnes (WithHeadings)
+        $dataStartRow = 5;     // Ligne 5: Première ligne de données
+        $dataEndRow = $dataStartRow + $linesCount - 1;
+        $separatorRow3 = $dataEndRow + 1;
+        $totalRow = $separatorRow3 + 1;
+        $totalTTCRow = $totalRow + 1;
+        $separatorRow4 = $totalTTCRow + 1;
+        $footerRow = $separatorRow4 + 1;
         
         return [
-            // Ligne 1: En-tête facture (taille réduite)
-            1 => [
-                'font' => [
-                    'bold' => true,
-                    'size' => 10, // Réduit de 14 à 10
-                    'color' => ['rgb' => '1F4E79'],
-                ],
-                'alignment' => [
-                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                    'wrapText' => true,
+            // Ligne 1: Séparation haute
+            $separatorRow1 => [
+                'borders' => [
+                    'bottom' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => '1F4E79'],
+                    ],
                 ],
             ],
             
-            // Ligne 3: En-têtes des colonnes (taille réduite)
-            3 => [
+            // Ligne 2: En-tête facture (FOND BLEU ICI)
+            $headerRow => [
                 'font' => [
                     'bold' => true,
-                    'size' => 9, // Réduit de 11 à 9
+                    'size' => 10,
                     'color' => ['rgb' => 'FFFFFF'],
                 ],
                 'fill' => [
                     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '1F4E79'],
+                    'startColor' => ['rgb' => '1F4E79'], // ← FOND BLEU SUR LA LIGNE 2
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ],
+                'borders' => [
+                    'outline' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => '1F4E79'],
+                    ],
+                ],
+            ],
+            
+            // Ligne 3: Séparation entre en-tête et tableau
+            $separatorRow2 => [
+                'borders' => [
+                    'top' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => '1F4E79'],
+                    ],
+                    'bottom' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => '1F4E79'],
+                    ],
+                ],
+            ],
+            
+            // Ligne 4: En-têtes des colonnes (fond gris clair)
+            $headersRow => [
+                'font' => [
+                    'bold' => true,
+                    'size' => 9,
+                    'color' => ['rgb' => '333333'],
+                ],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'F5F5F5'], // Fond gris clair pour différencier
                 ],
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                     'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                 ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => 'CCCCCC'],
+                    ],
+                ],
             ],
             
-            // Lignes 4 à N: Données des articles
-            'A4:F' . (3 + $linesCount) => [
+            // Lignes 5 à N: Données des articles (bordures fines)
+            'B5:F' . $dataEndRow => [
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -191,32 +251,48 @@ class SalesInvoiceExport implements
                     'wrapText' => true,
                 ],
                 'font' => [
-                    'size' => 9, // Taille réduite pour les données
+                    'size' => 8.5, // Taille encore plus petite
                 ],
             ],
             
             // Alignement des colonnes numériques (lignes de données)
-            'C4:C' . (3 + $linesCount) => [
+            'D5:D' . $dataEndRow => [
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
                 ],
             ],
             
-            'E4:F' . (3 + $linesCount) => [
+            'F5:F' . $dataEndRow => [
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
+                ],
+            ],
+            'G5:G' . $dataEndRow => [
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
                 ],
             ],
             
-            // Ligne Total HT (ligne 3 + linesCount + 2)
-            (3 + $linesCount + 2) => [
+            // Ligne de séparation après données
+            $separatorRow3 => [
+                'borders' => [
+                    'top' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_DOUBLE,
+                        'color' => ['rgb' => '1F4E79'],
+                        'width' => 2,
+                    ],
+                ],
+            ],
+            
+            // Ligne Total HT
+            $totalRow => [
                 'font' => [
                     'bold' => true,
-                    'size' => 10, // Taille réduite
+                    'size' => 9.5,
                     'color' => ['rgb' => '1F4E79'],
                 ],
                 'borders' => [
-                    'outline' => [
+                    'allBorders' => [
                         'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
                         'color' => ['rgb' => '1F4E79'],
                     ],
@@ -230,16 +306,16 @@ class SalesInvoiceExport implements
                 ],
             ],
             
-            // Ligne Total TTC (ligne 3 + linesCount + 3)
-            (3 + $linesCount + 3) => [
+            // Ligne Total TTC (mise en évidence)
+            $totalTTCRow => [
                 'font' => [
                     'bold' => true,
-                    'size' => 11, // Légèrement plus grand pour le total final
-                    'color' => ['rgb' => '1F4E79'],
+                    'size' => 10.5,
+                    'color' => ['rgb' => 'FFFFFF'],
                 ],
                 'borders' => [
-                    'outline' => [
-                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK,
                         'color' => ['rgb' => '1F4E79'],
                     ],
                 ],
@@ -248,19 +324,35 @@ class SalesInvoiceExport implements
                 ],
                 'fill' => [
                     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'E7F3FF'],
+                    'startColor' => ['rgb' => '1F4E79'],
                 ],
             ],
             
-            // Dernière ligne: Pied de page (taille réduite)
-            (3 + $linesCount + 6) => [
+            // Ligne de séparation avant footer
+            $separatorRow4 => [
+                'borders' => [
+                    'top' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => 'CCCCCC'],
+                    ],
+                ],
+            ],
+            
+            // Dernière ligne: Pied de page
+            $footerRow => [
                 'font' => [
                     'italic' => true,
-                    'size' => 8, // Réduit de 10 à 8
+                    'size' => 8,
                     'color' => ['rgb' => '666666'],
                 ],
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                ],
+                'borders' => [
+                    'outline' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => 'CCCCCC'],
+                    ],
                 ],
             ],
         ];
@@ -274,72 +366,141 @@ class SalesInvoiceExport implements
                 $invoice = $this->invoice;
                 $linesCount = count($this->invoice->lines);
                 
-                $headerRow = 1;
-                $headersRow = 3;
-                $dataStartRow = 4;
+                $headerRow = 2;        // ← LIGNE 2 : EN-TÊTE AVEC FOND BLEU
+                $separatorRow1 = 1;    // Ligne 1: Séparation
+                $separatorRow2 = 3;    // Ligne 3: Séparation
+                $headersRow = 4;       // Ligne 4: En-têtes colonnes
+                $dataStartRow = 5;     // Ligne 5: Données commencent
                 $dataEndRow = $dataStartRow + $linesCount - 1;
-                $separatorRow = $dataEndRow + 1;
-                $totalRow = $separatorRow + 2;
+                $separatorRow3 = $dataEndRow + 1;
+                $totalRow = $separatorRow3 + 1;
                 $totalTTCRow = $totalRow + 1;
-                $footerRow = $totalTTCRow + 3;
+                $separatorRow4 = $totalTTCRow + 1;
+                $footerRow = $separatorRow4 + 1;
                 
-                // 1. FUSION DE L'EN-TÊTE (ligne 1, colonnes A à G)
+                // 1. FUSION DE L'EN-TÊTE (ligne 2, colonnes A à G) ← FOND BLEU ICI
                 $sheet->mergeCells('A' . $headerRow . ':G' . $headerRow);
                 
-                // 2. FUSION DU PIED DE PAGE (dernière ligne, A à G)
+                // 2. FUSION DU PIED DE PAGE
                 $sheet->mergeCells('A' . $footerRow . ':G' . $footerRow);
                 
-                // 3. HAUTEURS DES LIGNES (réduites)
-                $sheet->getRowDimension($headerRow)->setRowHeight(25);        // En-tête (réduit de 30 à 25)
-                $sheet->getRowDimension(2)->setRowHeight(3);                   // Séparation fine (réduit de 5 à 3)
-                $sheet->getRowDimension($headersRow)->setRowHeight(20);        // En-têtes tableau (réduit de 25 à 20)
+                // 3. HAUTEURS DES LIGNES (compactes et organisées)
+                $sheet->getRowDimension($separatorRow1)->setRowHeight(3);      // Ligne 1: Séparation haute
+                $sheet->getRowDimension($headerRow)->setRowHeight(22);         // Ligne 2: En-tête bleu
+                $sheet->getRowDimension($separatorRow2)->setRowHeight(3);      // Ligne 3: Séparation
+                $sheet->getRowDimension($headersRow)->setRowHeight(18);        // Ligne 4: En-têtes colonnes
                 for ($i = $dataStartRow; $i <= $dataEndRow; $i++) {
-                    $sheet->getRowDimension($i)->setRowHeight(18);             // Lignes de données (réduit de 20 à 18)
+                    $sheet->getRowDimension($i)->setRowHeight(16);             // Lignes 5+: Données
                 }
-                $sheet->getRowDimension($separatorRow)->setRowHeight(3);       // Séparation (réduit de 5 à 3)
-                $sheet->getRowDimension($totalRow)->setRowHeight(20);          // Ligne TOTAL HT (réduit de 25 à 20)
-                $sheet->getRowDimension($totalTTCRow)->setRowHeight(22);       // Ligne TOTAL TTC (réduit de 25 à 22)
-                $sheet->getRowDimension($totalTTCRow + 1)->setRowHeight(3);    // Séparation (réduit de 5 à 3)
-                $sheet->getRowDimension($footerRow)->setRowHeight(15);         // Pied de page (réduit de 20 à 15)
+                $sheet->getRowDimension($separatorRow3)->setRowHeight(3);      // Séparation après données
+                $sheet->getRowDimension($totalRow)->setRowHeight(18);          // Total HT
+                $sheet->getRowDimension($totalTTCRow)->setRowHeight(20);       // Total TTC (plus haut)
+                $sheet->getRowDimension($separatorRow4)->setRowHeight(3);      // Séparation avant footer
+                $sheet->getRowDimension($footerRow)->setRowHeight(16);         // Footer
                 
                 // 4. LARGEURS DES COLONNES (optimisées)
-                $sheet->getColumnDimension('A')->setWidth(60); // En-tête (plus large pour texte long)
+                $sheet->getColumnDimension('A')->setWidth(55); // En-tête (texte long)
                 $sheet->getColumnDimension('B')->setWidth(0);  // Invisible
-                $sheet->getColumnDimension('C')->setWidth(8);  // Quantité (réduit de 10 à 8)
-                $sheet->getColumnDimension('D')->setWidth(12); // PU HT (réduit de 14 à 12)
-                $sheet->getColumnDimension('E')->setWidth(10); // Remise (réduit de 12 à 10)
-                $sheet->getColumnDimension('F')->setWidth(12); // Total HT (réduit de 14 à 12)
-                $sheet->getColumnDimension('G')->setWidth(12); // Total TTC (réduit de 14 à 12)
+                $sheet->getColumnDimension('C')->setWidth(8);  // Quantité
+                $sheet->getColumnDimension('D')->setWidth(12); // PU HT
+                $sheet->getColumnDimension('E')->setWidth(10); // Remise
+                $sheet->getColumnDimension('F')->setWidth(12); // Total HT
+                $sheet->getColumnDimension('G')->setWidth(12); // Total TTC
                 
-                // 5. BORDURE AUTOUR DU TABLEAU DES LIGNES (colonnes C à G)
+                // 5. FUSION DES CELLULES VIDES POUR L'EN-TÊTE (colonnes B à G ligne 2)
+                for ($col = 'B'; $col <= 'G'; $col++) {
+                    $sheet->mergeCells($col . $headerRow . ':' . $col . $headerRow);
+                }
+                
+                // 6. BORDURE PROFESSIONNELLE POUR LE TABLEAU (C à G)
                 $sheet->getStyle('C' . $headersRow . ':G' . $dataEndRow)->applyFromArray([
                     'borders' => [
                         'outline' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
                             'color' => ['rgb' => '1F4E79'],
                         ],
+                        'inside' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['rgb' => 'D3D3D3'],
+                        ],
                     ],
                 ]);
                 
-                // 6. BORDURE AUTOUR DES TOTAUX (colonnes E à G)
+                // 7. BORDURE PROFESSIONNELLE POUR LES TOTAUX (E à G)
                 $sheet->getStyle('E' . $totalRow . ':G' . $totalTTCRow)->applyFromArray([
                     'borders' => [
                         'outline' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
+                            'color' => ['rgb' => '1F4E79'],
+                        ],
+                        'inside' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['rgb' => 'D3D3D3'],
+                        ],
+                    ],
+                ]);
+                
+                // 8. SÉPARATIONS VISUELLES
+                // Séparation haute (ligne 1)
+                $sheet->getStyle('A' . $separatorRow1 . ':G' . $separatorRow1)->applyFromArray([
+                    'borders' => [
+                        'bottom' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
                             'color' => ['rgb' => '1F4E79'],
                         ],
                     ],
                 ]);
                 
-                // 7. FORMAT NUMÉRIQUE POUR LES TOTAUX
+                // Séparation entre en-tête et tableau (ligne 3)
+                $sheet->getStyle('A' . $separatorRow2 . ':G' . $separatorRow2)->applyFromArray([
+                    'borders' => [
+                        'top' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['rgb' => '1F4E79'],
+                        ],
+                        'bottom' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['rgb' => '1F4E79'],
+                        ],
+                    ],
+                ]);
+                
+                // Séparation après données (ligne N+1)
+                $sheet->getStyle('A' . $separatorRow3 . ':G' . $separatorRow3)->applyFromArray([
+                    'borders' => [
+                        'top' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_DOUBLE,
+                            'color' => ['rgb' => '1F4E79'],
+                            'width' => 2,
+                        ],
+                    ],
+                ]);
+                
+                // Séparation avant footer
+                $sheet->getStyle('A' . $separatorRow4 . ':G' . $separatorRow4)->applyFromArray([
+                    'borders' => [
+                        'top' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['rgb' => 'CCCCCC'],
+                        ],
+                    ],
+                ]);
+                
+                // 9. FORMAT NUMÉRIQUE POUR LES TOTAUX
                 $sheet->getStyle('F' . $totalRow . ':G' . $totalTTCRow)->getNumberFormat()
                     ->setFormatCode('#,##0.00');
                     
-                // 8. MASQUER LA COLONNE B (invisible)
+                // 10. MASQUER LA COLONNE B (invisible)
                 $sheet->getColumnDimension('B')->setVisible(false);
                 
-                // 9. AJUSTEMENT SPÉCIAL POUR L'EN-TÊTE (wrap text et centrage)
+                // 11. WRAP TEXT POUR L'EN-TÊTE
                 $sheet->getStyle('A' . $headerRow)->getAlignment()->setWrapText(true);
+                
+                // 12. GEL DES EN-TÊTES (ligne 4 figée)
+                $sheet->freezePane('A5');
+                
+                // 13. AUTO-AJUSTEMENT DE LA COLONNE A
+                $sheet->getColumnDimension('A')->setAutoSize(false);
             },
         ];
     }
