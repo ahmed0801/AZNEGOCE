@@ -658,11 +658,14 @@ public function editInvoice($id)
         return Excel::download(new \App\Exports\SalesInvoiceExport($invoice), 'facture_' . $invoice->numdoc . '.xlsx');
     }
 
-    public function exportInvoices()
-    {
-        $invoices = Invoice::with(['customer', 'lines.item'])->get();
-        return Excel::download(new \App\Exports\SalesInvoicesExport($invoices), 'factures_ventes.xlsx');
-    }
+public function exportInvoices(Request $request)
+{
+    // Passer la Request directement à l'export
+    return Excel::download(
+        new \App\Exports\SalesInvoicesExport($request), 
+        'factures_ventes_' . date('Y-m-d_H-i-s') . '.xlsx'
+    );
+}
 
     public function markAsPaid(Request $request, $id)
     {

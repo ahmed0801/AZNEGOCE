@@ -547,14 +547,14 @@
                value="{{ request('search') }}">
         
         <!-- Statut -->
-        <select name="status" class="form-select form-select-sm" style="width: 150px;">
+        <select name="status" class="form-select form-select-sm" style="width: 120px;">
             <option value="">Statut (Tous)</option>
             <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>🟢 Actif</option>
             <option value="blocked" {{ request('status') == 'blocked' ? 'selected' : '' }}>🔴 Bloqué</option>
         </select>
         
         <!-- Ville -->
-        <select name="city" class="form-select form-select-sm" style="width: 180px;">
+        <select name="city" class="form-select form-select-sm" style="width: 150px;">
             <option value="">Ville (Toutes)</option>
             @foreach($cities as $city)
                 <option value="{{ $city }}" {{ request('city') == $city ? 'selected' : '' }}>
