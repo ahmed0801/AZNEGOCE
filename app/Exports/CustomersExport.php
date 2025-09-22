@@ -3,7 +3,6 @@
 namespace App\Exports;
 
 use App\Models\Customer;
-use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -18,102 +17,128 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Events\AfterSheet;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Http\Request;
 use Maatwebsite\Excel\Events\AfterSheet as EventsAfterSheet;
 
 class CustomersExport implements 
     FromCollection, 
     WithHeadings, 
-    WithStyles, 
+    WithStyles,
     WithEvents,
     ShouldAutoSize,
     WithColumnFormatting
 {
-    protected $customers;
-    protected $exportDate;
+    protected $request;
 
-    public function __construct($customers)
+    public function __construct(Request $request)
     {
-        // S'assurer que $customers est une Collection
-        if (!($customers instanceof Collection)) {
-            if (is_array($customers)) {
-                $customers = collect($customers);
-            } else {
-                $customers = collect([$customers]);
-            }
-        }
-        
-        // Filtrer pour s'assurer que ce sont des objets Customer
-        $this->customers = $customers->filter(function ($item) {
-            return $item instanceof Customer;
-        })->values();
-        
-        $this->exportDate = Carbon::now()->format('d/m/Y à H:i');
+        $this->request = $request;
     }
 
-    /**
-     * @return \Illuminate\Support\Collection
-     */
-    public function collection()
+    public function collection(): Collection
     {
-        if ($this->customers->isEmpty()) {
-            return collect([]);
+        $query = Customer::with([
+            'vehicles',
+            'tvaGroup',
+            'discountGroup', 
+            'paymentMode',
+            'paymentTerm'
+        ]);
+
+        // Appliquer les filtres
+        if ($this->request->filled('search')) {
+            $search = $this->request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('code', 'LIKE', "%{$search}%")
+                  ->orWhere('phone1', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('city', 'LIKE', "%{$search}%");
+            });
         }
 
-        return $this->customers->map(function ($customer) {
-            // Vérification de sécurité : s'assurer que c'est un objet Customer
-            if (!($customer instanceof Customer)) {
-                return null; // Retourner null pour les éléments invalides
+        if ($this->request->filled('status')) {
+            $query->where('blocked', $this->request->status == 'blocked' ? 1 : 0);
+        }
+
+        if ($this->request->filled('city')) {
+            $query->where('city', 'LIKE', "%{$this->request->city}%");
+        }
+
+        if ($this->request->filled('min_solde')) {
+            $query->where('solde', '>=', $this->request->min_solde);
+        }
+
+        if ($this->request->filled('max_solde')) {
+            $query->where('solde', '<=', $this->request->max_solde);
+        }
+
+        if ($this->request->filled('tva_group_id')) {
+            $query->where('tva_group_id', $this->request->tva_group_id);
+        }
+
+        if ($this->request->filled('discount_group_id')) {
+            $query->where('discount_group_id', $this->request->discount_group_id);
+        }
+
+        return $query->orderBy('name')->get()->map(function ($customer) {
+            // TVA Group
+            $tvaGroupText = '-';
+            if ($customer->tvaGroup) {
+                $tvaGroupText = $customer->tvaGroup->name . ' (' . $customer->tvaGroup->rate . '%)';
             }
 
-            // Chargement des relations si elles n'existent pas
-            if (!$customer->relationLoaded('tvaGroup')) {
-                $customer->load('tvaGroup');
-            }
-            if (!$customer->relationLoaded('discountGroup')) {
-                $customer->load('discountGroup');
-            }
-            if (!$customer->relationLoaded('paymentMode')) {
-                $customer->load('paymentMode');
-            }
-            if (!$customer->relationLoaded('paymentTerm')) {
-                $customer->load('paymentTerm');
-            }
-            if (!$customer->relationLoaded('vehicles')) {
-                $customer->load('vehicles');
+            // Groupe Remise
+            $discountGroupText = '-';
+            if ($customer->discountGroup) {
+                $discountGroupText = $customer->discountGroup->name . ' (' . $customer->discountGroup->discount_rate . '%)';
             }
 
-            return [
-                'Code' => $customer->code ?? '',
-                'Nom' => $customer->name ?? '',
-                'Email' => $customer->email ?? '',
-                'Téléphone 1' => $customer->phone1 ?? '',
-                'Téléphone 2' => $customer->phone2 ?? '',
-                'Adresse' => $customer->address ?? '',
-                'Ville' => $customer->city ?? '',
-                'Pays' => $customer->country ?? '',
-                'Matricule Fiscale' => $customer->matfiscal ?? '',
-                'Compte Bancaire' => $customer->bank_no ?? '',
-                'Solde (€)' => $customer->solde ?? 0,
-                'Plafond (€)' => $customer->plafond ?? 0,
+            // Mode de paiement
+            $paymentModeText = '-';
+            if ($customer->paymentMode) {
+                $paymentModeText = $customer->paymentMode->name;
+            }
+
+            // Condition de paiement
+            $paymentTermText = '-';
+            if ($customer->paymentTerm) {
+                $paymentTermText = $customer->paymentTerm->label . ' (' . $customer->paymentTerm->days . ' jours)';
+            }
+
+            // Statut
+            $statusText = $customer->blocked ? '🔴 BLOQUÉ' : '🟢 ACTIF';
+
+            // Nombre de véhicules
+            $vehiclesCount = $customer->vehicles ? $customer->vehicles->count() : 0;
+
+            return (object) [
+                'Code' => $customer->code ?? '-',
+                'Nom' => $customer->name ?? '-',
+                'Email' => $customer->email ?? '-',
+                'Téléphone 1' => $customer->phone1 ?? '-',
+                'Téléphone 2' => $customer->phone2 ?? '-',
+                'Adresse' => $customer->address ?? '-',
+                'Ville' => $customer->city ?? '-',
+                'Pays' => $customer->country ?? '-',
+                'Matricule Fiscale' => $customer->matfiscal ?? '-',
+                'Compte Bancaire' => $customer->bank_no ?? '-',
+                'Solde (€)' => number_format($customer->solde ?? 0, 2, ',', ' '),
+                'Plafond (€)' => number_format($customer->plafond ?? 0, 2, ',', ' '),
                 'Risque' => $customer->risque ?? 0,
-                'Groupe TVA' => $customer->tvaGroup ? 
-                    ($customer->tvaGroup->name . ' (' . $customer->tvaGroup->rate . '%)') : '',
-                'Groupe Remise' => $customer->discountGroup ? 
-                    ($customer->discountGroup->name . ' (' . $customer->discountGroup->discount_rate . '%)') : '',
-                'Mode Paiement' => $customer->paymentMode ? $customer->paymentMode->name : '',
-                'Condition Paiement' => $customer->paymentTerm ? 
-                    ($customer->paymentTerm->label . ' (' . $customer->paymentTerm->days . ' jours)') : '',
-                'Statut' => $customer->blocked ? '🔴 BLOQUÉ' : '🟢 ACTIF',
-                'Nb Véhicules' => $customer->vehicles ? $customer->vehicles->count() : 0,
-                'Créé le' => $customer->created_at ? $customer->created_at->format('d/m/Y') : '',
-                'Mis à jour le' => $customer->updated_at ? $customer->updated_at->format('d/m/Y') : '',
+                'Groupe TVA' => $tvaGroupText,
+                'Groupe Remise' => $discountGroupText,
+                'Mode de Paiement' => $paymentModeText,
+                'Condition de Paiement' => $paymentTermText,
+                'Statut' => $statusText,
+                'Nb Véhicules' => $vehiclesCount,
+                'Créé le' => $customer->created_at ? \Carbon\Carbon::parse($customer->created_at)->format('d/m/Y') : '-',
+                'Mis à jour le' => $customer->updated_at ? \Carbon\Carbon::parse($customer->updated_at)->format('d/m/Y') : '-',
             ];
-        })->filter(); // Supprimer les éléments null
+        });
     }
 
-    /**
-     * En-têtes du tableau
-     */
     public function headings(): array
     {
         return [
@@ -141,9 +166,6 @@ class CustomersExport implements
         ];
     }
 
-    /**
-     * Formatage des colonnes monétaires
-     */
     public function columnFormats(): array
     {
         return [
@@ -153,12 +175,9 @@ class CustomersExport implements
         ];
     }
 
-    /**
-     * Styles du document
-     */
     public function styles(Worksheet $sheet)
     {
-        $lastRow = $this->customers->count() + 1;
+        $lastRow = $this->collection()->count() + 1;
         
         return [
             // En-tête principal
@@ -169,18 +188,18 @@ class CustomersExport implements
                     'size' => 12,
                 ],
                 'fill' => [
-                    'fillType' => Fill::FILL_GRADIENT_LINEAR,
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
                     'rotation' => 90,
                     'startColor' => ['rgb' => '1F4E79'],
                     'endColor' => ['rgb' => '4472C4'],
                 ],
                 'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                 ],
                 'borders' => [
                     'allBorders' => [
-                        'borderStyle' => Border::BORDER_THIN,
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
                         'color' => ['rgb' => 'FFFFFF'],
                     ],
                 ],
@@ -190,12 +209,12 @@ class CustomersExport implements
             'A2:U' . $lastRow => [
                 'borders' => [
                     'allBorders' => [
-                        'borderStyle' => Border::BORDER_THIN,
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
                         'color' => ['rgb' => 'D3D3D3'],
                     ],
                 ],
                 'alignment' => [
-                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                     'wrapText' => true,
                 ],
             ],
@@ -203,82 +222,37 @@ class CustomersExport implements
             // Colonnes monétaires - alignement à droite
             'K2:K' . $lastRow => [
                 'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_RIGHT,
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
                 ],
             ],
             
             'L2:L' . $lastRow => [
                 'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_RIGHT,
-                ],
-            ],
-            
-            // Colonne statut - couleur conditionnelle
-            'R2:R' . $lastRow => [
-                'font' => [
-                    'bold' => true,
-                ],
-            ],
-            
-            // Ligne de total (style de base)
-            $lastRow + 2 => [
-                'font' => [
-                    'bold' => true,
-                    'size' => 11,
-                ],
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'F2F2F2'],
-                ],
-                'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_RIGHT,
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
                 ],
             ],
         ];
     }
 
-    /**
-     * Événements après génération du sheet
-     */
     public function registerEvents(): array
     {
         return [
             EventsAfterSheet::class => function(EventsAfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
-                $lastRow = $this->customers->count() + 1;
+                $customers = $this->getCustomersForTotals(); // Méthode helper pour les totaux
+                $lastRow = $customers->count() + 1;
                 
-                // Vérifier s'il y a des données
-                if ($this->customers->isEmpty()) {
-                    // Message si aucune donnée
-                    $sheet->setCellValue('A3', 'Aucune donnée à exporter avec les filtres appliqués.');
-                    $sheet->mergeCells('A3:U3');
-                    $event->sheet->getStyle('A3')->applyFromArray([
-                        'font' => [
-                            'italic' => true,
-                            'size' => 12,
-                            'color' => ['rgb' => '666666'],
-                        ],
-                        'alignment' => [
-                            'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        ],
-                    ]);
-                    return;
-                }
-                
-                // Ligne de total
-                $totalSolde = $this->customers->sum(function ($customer) {
-                    return $customer instanceof Customer ? ($customer->solde ?? 0) : 0;
+                // Calculer les totaux
+                $totalSolde = $customers->sum(function ($customer) {
+                    return $customer->solde ?? 0;
                 });
                 
-                $totalPlafond = $this->customers->sum(function ($customer) {
-                    return $customer instanceof Customer ? ($customer->plafond ?? 0) : 0;
+                $totalPlafond = $customers->sum(function ($customer) {
+                    return $customer->plafond ?? 0;
                 });
                 
-                $totalVehicules = $this->customers->sum(function($customer) {
-                    if ($customer instanceof Customer && $customer->relationLoaded('vehicles')) {
-                        return $customer->vehicles->count();
-                    }
-                    return 0;
+                $totalVehicules = $customers->sum(function ($customer) {
+                    return $customer->vehicles_count ?? 0;
                 });
                 
                 // Ajouter ligne de total
@@ -289,7 +263,7 @@ class CustomersExport implements
                 $sheet->setCellValue('K' . ($lastRow + 1), $totalSolde);
                 $sheet->setCellValue('L' . ($lastRow + 1), $totalPlafond);
                 $sheet->setCellValue('S' . ($lastRow + 1), $totalVehicules);
-                $sheet->setCellValue('T' . ($lastRow + 1), $this->customers->count() . ' clients');
+                $sheet->setCellValue('T' . ($lastRow + 1), $customers->count() . ' clients');
                 
                 // Style ligne total
                 $event->sheet->getStyle('A' . ($lastRow + 1) . ':U' . ($lastRow + 1))->applyFromArray([
@@ -298,18 +272,18 @@ class CustomersExport implements
                         'color' => ['rgb' => '1F4E79'],
                     ],
                     'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'E7F3FF'],
                     ],
                     'borders' => [
                         'allBorders' => [
-                            'borderStyle' => Border::BORDER_MEDIUM,
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
                             'color' => ['rgb' => '1F4E79'],
                         ],
                     ],
                     'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_RIGHT,
-                        'vertical' => Alignment::VERTICAL_CENTER,
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                     ],
                 ]);
                 
@@ -333,6 +307,8 @@ class CustomersExport implements
                 $footerRow = $lastRow + 3;
                 $sheet->insertNewRowBefore($footerRow, 2);
                 
+                $exportDate = \Carbon\Carbon::now()->format('d/m/Y à H:i');
+                
                 $event->sheet->getStyle('A' . $footerRow . ':U' . ($footerRow + 1))->applyFromArray([
                     'font' => [
                         'italic' => true,
@@ -340,16 +316,16 @@ class CustomersExport implements
                         'color' => ['rgb' => '666666'],
                     ],
                     'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        'vertical' => Alignment::VERTICAL_CENTER,
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                     ],
                 ]);
                 
-                $sheet->setCellValue('A' . $footerRow, 'Exporté le ' . $this->exportDate . ' depuis AZ ERP');
+                $sheet->setCellValue('A' . $footerRow, 'Exporté le ' . $exportDate . ' depuis AZ ERP');
                 $sheet->mergeCells('A' . $footerRow . ':U' . $footerRow);
                 $sheet->getRowDimension($footerRow)->setRowHeight(20);
                 
-                $sheet->setCellValue('A' . ($footerRow + 1), 'Nombre total de clients exportés : ' . $this->customers->count());
+                $sheet->setCellValue('A' . ($footerRow + 1), 'Nombre total de clients : ' . $customers->count());
                 $sheet->mergeCells('A' . ($footerRow + 1) . ':U' . ($footerRow + 1));
                 $sheet->getRowDimension($footerRow + 1)->setRowHeight(18);
                 
@@ -358,20 +334,63 @@ class CustomersExport implements
                     $sheet->getRowDimension($i)->setRowHeight(25);
                 }
                 
-                // Colorer les lignes par statut pour une meilleure lisibilité
-                $this->customers->each(function ($customer, $index) use ($event, $sheet) {
-                    if ($customer instanceof Customer) {
-                        $row = $index + 2;
-                        $fillColor = $customer->blocked ? 'FFF2F2' : 'F8FFF8';
-                        $event->sheet->getStyle('A' . $row . ':U' . $row)->applyFromArray([
-                            'fill' => [
-                                'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => $fillColor],
-                            ],
-                        ]);
-                    }
+                // Colorer les lignes par statut
+                $customers->each(function ($customer, $index) use ($event) {
+                    $row = $index + 2;
+                    $fillColor = $customer->blocked ? 'FFF2F2' : 'F8FFF8';
+                    
+                    $event->sheet->getStyle('A' . $row . ':U' . $row)->applyFromArray([
+                        'fill' => [
+                            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => $fillColor],
+                        ],
+                    ]);
                 });
             },
         ];
+    }
+
+    /**
+     * Méthode helper pour récupérer les customers pour les totaux
+     */
+    private function getCustomersForTotals()
+    {
+        $query = Customer::with(['vehicles']);
+
+        // Réappliquer les mêmes filtres que dans collection()
+        if ($this->request->filled('search')) {
+            $search = $this->request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('code', 'LIKE', "%{$search}%")
+                  ->orWhere('phone1', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('city', 'LIKE', "%{$search}%");
+            });
+        }
+
+        if ($this->request->filled('status')) {
+            $query->where('blocked', $this->request->status == 'blocked' ? 1 : 0);
+        }
+
+        if ($this->request->filled('city')) {
+            $query->where('city', 'LIKE', "%{$this->request->city}%");
+        }
+
+        if ($this->request->filled('min_solde')) {
+            $query->where('solde', '>=', $this->request->min_solde);
+        }
+
+        if ($this->request->filled('max_solde')) {
+            $query->where('solde', '<=', $this->request->max_solde);
+        }
+
+        $customers = $query->get();
+        
+        // Ajouter vehicles_count à chaque customer
+        return $customers->map(function ($customer) {
+            $customer->vehicles_count = $customer->vehicles ? $customer->vehicles->count() : 0;
+            return $customer;
+        });
     }
 }

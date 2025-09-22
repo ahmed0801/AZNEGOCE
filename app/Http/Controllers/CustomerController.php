@@ -93,53 +93,11 @@ class CustomerController extends Controller
 
     public function export(Request $request)
 {
-    $query = Customer::with(['vehicles', 'tvaGroup', 'discountGroup', 'paymentMode', 'paymentTerm']);
-
-    // Appliquer les mêmes filtres que dans index
-    if ($request->filled('search')) {
-        $search = $request->search;
-        $query->where(function($q) use ($search) {
-            $q->where('name', 'LIKE', "%{$search}%")
-              ->orWhere('code', 'LIKE', "%{$search}%")
-              ->orWhere('phone1', 'LIKE', "%{$search}%")
-              ->orWhere('email', 'LIKE', "%{$search}%")
-              ->orWhere('city', 'LIKE', "%{$search}%");
-        });
-    }
-
-    if ($request->filled('status')) {
-        $query->where('blocked', $request->status == 'blocked' ? 1 : 0);
-    }
-
-    if ($request->filled('city')) {
-        $query->where('city', 'LIKE', "%{$request->city}%");
-    }
-
-    if ($request->filled('min_solde')) {
-        $query->where('solde', '>=', $request->min_solde);
-    }
-
-    if ($request->filled('max_solde')) {
-        $query->where('solde', '<=', $request->max_solde);
-    }
-
-    if ($request->filled('tva_group_id')) {
-        $query->where('tva_group_id', $request->tva_group_id);
-    }
-
-    if ($request->filled('discount_group_id')) {
-        $query->where('discount_group_id', $request->discount_group_id);
-    }
-
-    // Récupérer les customers avec leurs relations
-    $customers = $query->get();
-    
-    // Si aucun customer trouvé, retourner une collection vide
-    if ($customers->isEmpty()) {
-        $customers = collect([]);
-    }
-
-    return Excel::download(new CustomersExport($customers), 'clients_' . date('Y-m-d_H-i-s') . '.xlsx');
+    // Passer directement la Request à l'export
+    return \Maatwebsite\Excel\Facades\Excel::download(
+        new CustomersExport($request), 
+        'clients_' . date('Y-m-d_H-i-s') . '.xlsx'
+    );
 }
 
 
