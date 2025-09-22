@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Customer;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -32,7 +33,20 @@ class CustomersExport implements
 
     public function __construct($customers)
     {
-        $this->customers = $customers;
+        // S'assurer que $customers est une Collection
+        if (!($customers instanceof Collection)) {
+            if (is_array($customers)) {
+                $customers = collect($customers);
+            } else {
+                $customers = collect([$customers]);
+            }
+        }
+        
+        // Filtrer pour s'assurer que ce sont des objets Customer
+        $this->customers = $customers->filter(function ($item) {
+            return $item instanceof Customer;
+        })->values();
+        
         $this->exportDate = Carbon::now()->format('d/m/Y à H:i');
     }
 
@@ -41,10 +55,36 @@ class CustomersExport implements
      */
     public function collection()
     {
+        if ($this->customers->isEmpty()) {
+            return collect([]);
+        }
+
         return $this->customers->map(function ($customer) {
+            // Vérification de sécurité : s'assurer que c'est un objet Customer
+            if (!($customer instanceof Customer)) {
+                return null; // Retourner null pour les éléments invalides
+            }
+
+            // Chargement des relations si elles n'existent pas
+            if (!$customer->relationLoaded('tvaGroup')) {
+                $customer->load('tvaGroup');
+            }
+            if (!$customer->relationLoaded('discountGroup')) {
+                $customer->load('discountGroup');
+            }
+            if (!$customer->relationLoaded('paymentMode')) {
+                $customer->load('paymentMode');
+            }
+            if (!$customer->relationLoaded('paymentTerm')) {
+                $customer->load('paymentTerm');
+            }
+            if (!$customer->relationLoaded('vehicles')) {
+                $customer->load('vehicles');
+            }
+
             return [
-                'Code' => $customer->code,
-                'Nom' => $customer->name,
+                'Code' => $customer->code ?? '',
+                'Nom' => $customer->name ?? '',
                 'Email' => $customer->email ?? '',
                 'Téléphone 1' => $customer->phone1 ?? '',
                 'Téléphone 2' => $customer->phone2 ?? '',
@@ -53,23 +93,26 @@ class CustomersExport implements
                 'Pays' => $customer->country ?? '',
                 'Matricule Fiscale' => $customer->matfiscal ?? '',
                 'Compte Bancaire' => $customer->bank_no ?? '',
-                'Solde (€)' => $customer->solde,
-                'Plafond (€)' => $customer->plafond,
+                'Solde (€)' => $customer->solde ?? 0,
+                'Plafond (€)' => $customer->plafond ?? 0,
                 'Risque' => $customer->risque ?? 0,
-                'TVA Group' => $customer->tvaGroup ? $customer->tvaGroup->name . ' (' . $customer->tvaGroup->rate . '%)' : '',
-                'Groupe Remise' => $customer->discountGroup ? $customer->discountGroup->name . ' (' . $customer->discountGroup->discount_rate . '%)' : '',
+                'Groupe TVA' => $customer->tvaGroup ? 
+                    ($customer->tvaGroup->name . ' (' . $customer->tvaGroup->rate . '%)') : '',
+                'Groupe Remise' => $customer->discountGroup ? 
+                    ($customer->discountGroup->name . ' (' . $customer->discountGroup->discount_rate . '%)') : '',
                 'Mode Paiement' => $customer->paymentMode ? $customer->paymentMode->name : '',
-                'Condition Paiement' => $customer->paymentTerm ? $customer->paymentTerm->label . ' (' . $customer->paymentTerm->days . ' jours)' : '',
+                'Condition Paiement' => $customer->paymentTerm ? 
+                    ($customer->paymentTerm->label . ' (' . $customer->paymentTerm->days . ' jours)') : '',
                 'Statut' => $customer->blocked ? '🔴 BLOQUÉ' : '🟢 ACTIF',
-                'Nb Véhicules' => $customer->vehicles->count(),
+                'Nb Véhicules' => $customer->vehicles ? $customer->vehicles->count() : 0,
                 'Créé le' => $customer->created_at ? $customer->created_at->format('d/m/Y') : '',
                 'Mis à jour le' => $customer->updated_at ? $customer->updated_at->format('d/m/Y') : '',
             ];
-        });
+        })->filter(); // Supprimer les éléments null
     }
 
     /**
-     * En-têtes du tableau (SUPPRESSION DE LA COLONNE #)
+     * En-têtes du tableau
      */
     public function headings(): array
     {
@@ -99,19 +142,19 @@ class CustomersExport implements
     }
 
     /**
-     * Formatage des colonnes monétaires (CORRECTION DES LETTRES)
+     * Formatage des colonnes monétaires
      */
     public function columnFormats(): array
     {
         return [
-            'K' => '#,##0.00', // Solde (colonne K au lieu de L)
-            'L' => '#,##0.00', // Plafond (colonne L au lieu de M)
-            'M' => '#,##0',    // Risque (colonne M au lieu de N)
+            'K' => '#,##0.00', // Solde
+            'L' => '#,##0.00', // Plafond
+            'M' => '#,##0',    // Risque
         ];
     }
 
     /**
-     * Styles du document (CORRECTION DES RÉFÉRENCES DE COLONNES)
+     * Styles du document
      */
     public function styles(Worksheet $sheet)
     {
@@ -128,8 +171,8 @@ class CustomersExport implements
                 'fill' => [
                     'fillType' => Fill::FILL_GRADIENT_LINEAR,
                     'rotation' => 90,
-                    'startColor' => ['rgb' => '1F4E79'], // Bleu foncé
-                    'endColor' => ['rgb' => '4472C4'],   // Bleu moyen
+                    'startColor' => ['rgb' => '1F4E79'],
+                    'endColor' => ['rgb' => '4472C4'],
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -143,7 +186,7 @@ class CustomersExport implements
                 ],
             ],
             
-            // Données - bordures (A2:U au lieu de A2:V)
+            // Données - bordures
             'A2:U' . $lastRow => [
                 'borders' => [
                     'allBorders' => [
@@ -157,7 +200,7 @@ class CustomersExport implements
                 ],
             ],
             
-            // Colonnes monétaires - alignement à droite (CORRECTION DES LETTRES)
+            // Colonnes monétaires - alignement à droite
             'K2:K' . $lastRow => [
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_RIGHT,
@@ -170,7 +213,7 @@ class CustomersExport implements
                 ],
             ],
             
-            // Colonne statut - couleur conditionnelle (COLONNE R au lieu de S)
+            // Colonne statut - couleur conditionnelle
             'R2:R' . $lastRow => [
                 'font' => [
                     'bold' => true,
@@ -195,7 +238,7 @@ class CustomersExport implements
     }
 
     /**
-     * Événements après génération du sheet (CORRECTION DES RÉFÉRENCES)
+     * Événements après génération du sheet
      */
     public function registerEvents(): array
     {
@@ -204,24 +247,51 @@ class CustomersExport implements
                 $sheet = $event->sheet->getDelegate();
                 $lastRow = $this->customers->count() + 1;
                 
+                // Vérifier s'il y a des données
+                if ($this->customers->isEmpty()) {
+                    // Message si aucune donnée
+                    $sheet->setCellValue('A3', 'Aucune donnée à exporter avec les filtres appliqués.');
+                    $sheet->mergeCells('A3:U3');
+                    $event->sheet->getStyle('A3')->applyFromArray([
+                        'font' => [
+                            'italic' => true,
+                            'size' => 12,
+                            'color' => ['rgb' => '666666'],
+                        ],
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        ],
+                    ]);
+                    return;
+                }
+                
                 // Ligne de total
-                $totalSolde = $this->customers->sum('solde');
-                $totalPlafond = $this->customers->sum('plafond');
+                $totalSolde = $this->customers->sum(function ($customer) {
+                    return $customer instanceof Customer ? ($customer->solde ?? 0) : 0;
+                });
+                
+                $totalPlafond = $this->customers->sum(function ($customer) {
+                    return $customer instanceof Customer ? ($customer->plafond ?? 0) : 0;
+                });
+                
                 $totalVehicules = $this->customers->sum(function($customer) {
-                    return $customer->vehicles->count();
+                    if ($customer instanceof Customer && $customer->relationLoaded('vehicles')) {
+                        return $customer->vehicles->count();
+                    }
+                    return 0;
                 });
                 
                 // Ajouter ligne de total
                 $sheet->insertNewRowBefore($lastRow + 1, 1);
                 
-                // Écrire les totaux (CORRECTION DES LETTRES DE COLONNES)
+                // Écrire les totaux
                 $sheet->setCellValue('A' . ($lastRow + 1), 'TOTAL GÉNÉRAL');
-                $sheet->setCellValue('K' . ($lastRow + 1), $totalSolde);      // Solde en K
-                $sheet->setCellValue('L' . ($lastRow + 1), $totalPlafond);    // Plafond en L
-                $sheet->setCellValue('S' . ($lastRow + 1), $totalVehicules);  // Nb Véhicules en S
-                $sheet->setCellValue('T' . ($lastRow + 1), $this->customers->count() . ' clients'); // Total clients en T
+                $sheet->setCellValue('K' . ($lastRow + 1), $totalSolde);
+                $sheet->setCellValue('L' . ($lastRow + 1), $totalPlafond);
+                $sheet->setCellValue('S' . ($lastRow + 1), $totalVehicules);
+                $sheet->setCellValue('T' . ($lastRow + 1), $this->customers->count() . ' clients');
                 
-                // Style ligne total (A:U au lieu de A:V)
+                // Style ligne total
                 $event->sheet->getStyle('A' . ($lastRow + 1) . ':U' . ($lastRow + 1))->applyFromArray([
                     'font' => [
                         'bold' => true,
@@ -243,7 +313,7 @@ class CustomersExport implements
                     ],
                 ]);
                 
-                // Style spécifique pour les totaux (K:L au lieu de L:M)
+                // Style spécifique pour les totaux
                 $event->sheet->getStyle('K' . ($lastRow + 1) . ':L' . ($lastRow + 1))->applyFromArray([
                     'font' => [
                         'bold' => true,
@@ -251,7 +321,7 @@ class CustomersExport implements
                     ],
                 ]);
                 
-                // Auto-ajustement des largeurs (A:U au lieu de A:V)
+                // Auto-ajustement des largeurs
                 foreach (range('A', 'U') as $col) {
                     $sheet->getColumnDimension($col)->setAutoSize(true);
                 }
@@ -259,7 +329,7 @@ class CustomersExport implements
                 // Gel des premières lignes et colonnes
                 $sheet->freezePane('A2');
                 
-                // Ajouter informations en bas (A:U au lieu de A:V)
+                // Ajouter informations en bas
                 $footerRow = $lastRow + 3;
                 $sheet->insertNewRowBefore($footerRow, 2);
                 
@@ -279,7 +349,7 @@ class CustomersExport implements
                 $sheet->mergeCells('A' . $footerRow . ':U' . $footerRow);
                 $sheet->getRowDimension($footerRow)->setRowHeight(20);
                 
-                $sheet->setCellValue('A' . ($footerRow + 1), 'Nombre total de clients : ' . $this->customers->count());
+                $sheet->setCellValue('A' . ($footerRow + 1), 'Nombre total de clients exportés : ' . $this->customers->count());
                 $sheet->mergeCells('A' . ($footerRow + 1) . ':U' . ($footerRow + 1));
                 $sheet->getRowDimension($footerRow + 1)->setRowHeight(18);
                 
@@ -288,17 +358,19 @@ class CustomersExport implements
                     $sheet->getRowDimension($i)->setRowHeight(25);
                 }
                 
-                // Colorer les lignes par statut pour une meilleure lisibilité (A:U au lieu de A:V)
-                foreach ($this->customers as $index => $customer) {
-                    $row = $index + 2;
-                    $fillColor = $customer->blocked ? 'FFF2F2' : 'F8FFF8'; // Rouge clair pour bloqués, vert clair pour actifs
-                    $event->sheet->getStyle('A' . $row . ':U' . $row)->applyFromArray([
-                        'fill' => [
-                            'fillType' => Fill::FILL_SOLID,
-                            'startColor' => ['rgb' => $fillColor],
-                        ],
-                    ]);
-                }
+                // Colorer les lignes par statut pour une meilleure lisibilité
+                $this->customers->each(function ($customer, $index) use ($event, $sheet) {
+                    if ($customer instanceof Customer) {
+                        $row = $index + 2;
+                        $fillColor = $customer->blocked ? 'FFF2F2' : 'F8FFF8';
+                        $event->sheet->getStyle('A' . $row . ':U' . $row)->applyFromArray([
+                            'fill' => [
+                                'fillType' => Fill::FILL_SOLID,
+                                'startColor' => ['rgb' => $fillColor],
+                            ],
+                        ]);
+                    }
+                });
             },
         ];
     }
