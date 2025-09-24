@@ -183,6 +183,8 @@
 
 
 
+
+
     </style>
 
 
@@ -192,7 +194,7 @@
   </head>
   <body>
     <div class="wrapper">
-     <!-- Sidebar -->
+       <!-- Sidebar -->
         <div class="sidebar" data-background-color="dark">
             <div class="sidebar-logo">
                 <div class="logo-header" data-background-color="dark">
@@ -238,8 +240,8 @@
                         <li class="nav-item"><a href="/articles"><i class="fas fa-cubes"></i><p>Articles</p></a></li>
                         <li class="nav-item"><a href="/planification-tournee"><i class="fas fa-truck"></i><p>Suivi Livraisons</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fa fa-users"></i></span><h4 class="text-section">Référentiel</h4></li>
-                        <li class="nav-item active"><a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a></li>
-                        <li class="nav-item"><a href="/suppliers"><i class="fa fa-user-tie"></i><p>Fournisseurs</p></a></li>
+                        <li class="nav-item"><a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a></li>
+                        <li class="nav-item active"><a href="/suppliers"><i class="fa fa-user-tie"></i><p>Fournisseurs</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-cogs"></i></span><h4 class="text-section">Paramètres</h4></li>
                         <li class="nav-item"><a href="/setting"><i class="fas fa-sliders-h"></i><p>Paramètres</p></a></li>
                         <li class="nav-item"><a href="/tecdoc"><i class="fas fa-database"></i><p>TecDoc</p></a></li>
@@ -398,7 +400,7 @@
     
         <div class="container mt-4">
 
-       <h4>Liste des Clients :
+       <h4>Liste des Fournisseurs :
 
                   <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#createItemModal">Nouveau 
            <i class="fas fa-plus-circle ms-2"></i>
@@ -410,10 +412,10 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Créer un client</h5>
+                    <h5 class="modal-title">Créer un fournisseur</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                 </div>
-                <form action="{{ route('customer.store') }}" method="POST">
+                <form action="{{ route('supplier.store') }}" method="POST">
     @csrf
     <div class="modal-body row">
         <div class="mb-3 col-md-6">
@@ -423,12 +425,12 @@
 
         <div class="mb-3 col-md-6">
             <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control" required>
+            <input type="email" name="email" class="form-control">
         </div>
 
         <div class="mb-3 col-md-4">
             <label class="form-label">Téléphone 1</label>
-            <input type="text" name="phone1" class="form-control" required>
+            <input type="text" name="phone1" class="form-control">
         </div>
 
         <div class="mb-3 col-md-4">
@@ -443,7 +445,7 @@
 
         <div class="mb-3 col-md-6">
             <label class="form-label">Adresse</label>
-            <input type="text" name="address" class="form-control" required>
+            <input type="text" name="address" class="form-control">
         </div>
 
         <div class="mb-3 col-md-6">
@@ -453,7 +455,7 @@
 
         <div class="mb-3 col-md-4">
             <label class="form-label">Pays</label>
-            <input type="text" name="country" class="form-control" required>
+            <input type="text" name="country" class="form-control">
         </div>
 
         <div class="mb-3 col-md-4">
@@ -492,8 +494,8 @@
         </div>
 
         <div class="mb-3 col-md-6">
-            <label class="form-label">Groupe Remise</label>
-            <select name="discount_group_id" class="form-control" required>
+            <label class="form-label">Groupe Remise</label required>
+            <select name="discount_group_id" class="form-control">
                 <option value="">-- Choisir --</option>
                 @foreach($discountGroups as $group)
                     <option value="{{ $group->id }}">{{ $group->name }} : {{ $group->discount_rate }} %</option>
@@ -503,7 +505,7 @@
 
         <div class="mb-3 col-md-6">
             <label class="form-label">Mode de paiement</label>
-            <select name="payment_mode_id" class="form-control" required>
+            <select name="payment_mode_id" class="form-control">
                 <option value="">-- Choisir --</option>
                 @foreach($paymentModes as $mode)
                     <option value="{{ $mode->id }}">{{ $mode->name }}</option>
@@ -513,7 +515,7 @@
 
         <div class="mb-3 col-md-6">
             <label class="form-label">Condition de paiement</label>
-            <select name="payment_term_id" class="form-control" required>
+            <select name="payment_term_id" class="form-control">
                 <option value="">-- Choisir --</option>
                 @foreach($paymentTerms as $term)
                     <option value="{{ $term->id }}">{{ $term->label }} : {{ $term->days }} Jours</option>
@@ -531,16 +533,14 @@
             </div>
         </div>
     </div>
-    <!-- fin modal creation -->
 
 
     
 
 
-
-   <!-- Filtres -->
+    <!-- Filtres -->
 <div class="mb-4">
-    <form method="GET" action="{{ route('customer.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+    <form method="GET" action="{{ route('supplier.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
         <!-- Recherche générale -->
         <input type="text" name="search" class="form-control form-control-sm" 
                style="width: 250px;" placeholder="🔍 Recherche (nom, code, téléphone, email...)" 
@@ -554,7 +554,7 @@
         </select>
         
         <!-- Ville -->
-        <select name="city" class="form-select form-select-sm" style="width: 160px;">
+        <select name="city" class="form-select form-select-sm" style="width: 150px;">
             <option value="">Ville (Toutes)</option>
             @foreach($cities as $city)
                 <option value="{{ $city }}" {{ request('city') == $city ? 'selected' : '' }}>
@@ -565,12 +565,12 @@
         
         <!-- Solde min -->
         <input type="number" step="0.01" name="min_solde" class="form-control form-control-sm" 
-               style="width: 110px;" placeholder="Solde min" value="{{ request('min_solde') }}">
+               style="width: 120px;" placeholder="Solde min" value="{{ request('min_solde') }}">
         <span class="mx-1 text-muted">à</span>
         
         <!-- Solde max -->
         <input type="number" step="0.01" name="max_solde" class="form-control form-control-sm" 
-               style="width: 110px;" placeholder="Solde max" value="{{ request('max_solde') }}">
+               style="width: 120px;" placeholder="Solde max" value="{{ request('max_solde') }}">
         
         <!-- Actions -->
         <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
@@ -578,23 +578,27 @@
         </button>
         
         <button type="submit" name="action" value="export" 
-                formaction="{{ route('customers.export') . '?' . http_build_query(request()->query()) }}" 
+                formaction="{{ route('suppliers.export') . '?' . http_build_query(request()->query()) }}" 
                 class="btn btn-outline-success btn-sm px-3" target="_blank">
             <i class="fas fa-file-excel me-1"></i> EXCEL
         </button>
         
-        <a href="{{ route('customer.index') }}" class="btn btn-outline-secondary btn-sm px-3">
+        <a href="{{ route('supplier.index') }}" class="btn btn-outline-secondary btn-sm px-3">
             <i class="fas fa-undo me-1"></i> Réinitialiser
         </a>
     </form>
 </div>
+
 <!-- Recherche rapide (garder l'ancienne) -->
 <!-- <div class="mb-2 d-flex justify-content-center">
-    <input type="text" id="searchItemInput" class="form-control search-box" placeholder="🔍 Rechercher un client...">
+    <input type="text" id="searchItemInput" class="form-control search-box" placeholder="🔍 Rechercher un fournisseur...">
 </div> -->
 
 
-    @if ($customers->count())
+
+
+
+    @if ($suppliers->count())
         <div class="table-responsive">
             <table class="table table-bordered table-hover table-text-small" id="itemsTable">
                 <thead class="table-dark">
@@ -604,65 +608,31 @@
                         <th>Adresse & Ville</th>
                         <th>Contact</th>
                         <th>Solde</th>
-                        <!-- <th>Non.Fact</th> -->
-                        <th>Plafond</th>
-                        <th>Véhicules</th>
+                        <th>Statut</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($customers as $customer)
+                    @foreach ($suppliers as $customer)
                         <tr>
-                            <td>🧑‍💼{{ $customer->code }}
-                              <br>
-                                  @if ($customer->blocked)
-        <span class="badge bg-danger badge-very-sm">🔴 Bloqué</span>
-    @else
-        <span class="badge bg-success badge-very-sm">🟢 Actif</span>
-    @endif
-                            </td>
+                            <td>🧑‍💼{{ $customer->code }}</td>
                             <td>{{ $customer->name }}</td>
                             <td>{{ $customer->address }} <br>
                           🏴󠁢󠁹󠁭󠁩󠁿{{ $customer->city }}</td>
                             <td>📞 {{ $customer->phone1 }} <br>
                          📧 {{ $customer->email }} </td>
 
-
-
                              <td>
  <button type="button" class="btn btn-sm btn-outline-primary solde-btn" data-bs-toggle="modal" data-bs-target="#accountingModal{{ $customer->id }}" data-customer-id="{{ $customer->id }}">
                                                         {{ number_format($customer->solde, 2, ',', ' ') }} €
                                                     </button>
 
-</td>
-                            <td>
-{{ $customer->plafond }} €
-</td>
-
-                         <td>
-                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewVehiclesModal{{ $customer->id }}">
-  <i class="fas fa-car"></i> <span class="badge bg-success">{{$customer->vehicles->count()}}</span>
-</button>
-                         </td>
-
-
-                            <td>
-                                <!-- Bouton Modifier -->
-                                <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ $customer->id }}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
 
 
 
 
 
-
-
-
-
-
-
-                                 
+                                                                        
 
  <!-- Accounting Entries Modal -->
                  <!-- Accounting Entries Modal -->
@@ -670,7 +640,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="accountingModalLabel{{ $customer->id }}">Historique des écritures comptables - {{ $customer->name }}</h5>
+                <h5 class="modal-title" id="accountingModalLabel{{ $customer->id }}">Ecritures comptables Fournisseur : {{ $customer->code }} - {{ $customer->name }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div class="modal-body">
@@ -720,209 +690,25 @@
 
 
 
-  <!-- View Vehicles Modal -->
-<div class="modal fade" id="viewVehiclesModal{{ $customer->id }}" tabindex="-1" aria-labelledby="viewVehiclesModalLabel{{ $customer->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="viewVehiclesModalLabel{{ $customer->id }}">Véhicules associés à {{ $customer->name }}</h5>
-                <button type="button" class="btn btn-outline-success btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#addVehicleModal{{ $customer->id }}">
-                    <i class="fas fa-car"></i> Associer un véhicule
-                </button>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-            </div>
-            <div class="modal-body">
-                @if($customer->vehicles && $customer->vehicles->count())
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover table-text-small">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Immatriculation</th>
-                                    <th>Marque</th>
-                                    <th>Modèle</th>
-                                    <th>Motorisation</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($customer->vehicles as $vehicle)
-                                    <tr>
-                                        <td>{{ $vehicle->license_plate }}</td>
-                                        <td>{{ $vehicle->brand_name }}</td>
-                                        <td>{{ $vehicle->model_name }}</td>
-                                        <td>{{ $vehicle->engine_description }}</td>
-                                        <td>
-                                            <a href="{{ route('customer.vehicle.catalog', [$customer->id, $vehicle->id]) }}" class="btn btn-outline-primary btn-sm px-2 py-1" style="font-size: 0.90rem;"  onclick="window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); return false;">
-                                                <i class="fas fa-list"></i> Charger le Catalogue
-                                            </a>
-                                            <form action="{{ route('customer.vehicle.destroy', [$customer->id, $vehicle->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ce véhicule ?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt"></i>Supprimer le vehicule </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <p class="text-muted">Aucun véhicule associé.</p>
-                @endif
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-            </div>
-        </div>
-    </div>
-</div>
+</td>
 
 
-      <!-- Add Vehicle Modal -->
-<div class="modal fade" id="addVehicleModal{{ $customer->id }}" tabindex="-1" aria-labelledby="addVehicleModalLabel{{ $customer->id }}" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addVehicleModalLabel{{ $customer->id }}">Associer un véhicule à {{ $customer->name }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-            </div>
-            <form method="POST" action="{{ route('customer.vehicle.store', $customer->id) }}" id="vehicleForm{{ $customer->id }}">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="brand_id_{{ $customer->id }}" class="form-label">Marque :</label>
-                        <select id="brand_id_{{ $customer->id }}" name="brand_id" class="form-control" required>
-                            <option value="">Sélectionner une marque</option>
-                            @foreach($brands as $brand)
-                                <option value="{{ $brand['id'] }}" data-name="{{ $brand['name'] }}">{{ $brand['name'] }}</option>
-                            @endforeach
-                        </select>
-                        <input type="hidden" name="brand_name" id="brand_name_{{ $customer->id }}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="model_id_{{ $customer->id }}" class="form-label">Modèle :</label>
-                        <select id="model_id_{{ $customer->id }}" name="model_id" class="form-control" required>
-                            <option value="">Sélectionner un modèle</option>
-                        </select>
-                        <input type="hidden" name="model_name" id="model_name_{{ $customer->id }}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="engine_id_{{ $customer->id }}" class="form-label">Motorisation :</label>
-                        <select id="engine_id_{{ $customer->id }}" name="engine_id" class="form-control" required>
-                            <option value="">Sélectionner une motorisation</option>
-                        </select>
-                        <input type="hidden" name="engine_description" id="engine_description_{{ $customer->id }}">
-                        <input type="hidden" name="linkage_target_id" id="linkage_target_id_{{ $customer->id }}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="license_plate_{{ $customer->id }}" class="form-label">Immatriculation :</label>
-                        <input type="text" id="license_plate_{{ $customer->id }}" name="license_plate" class="form-control" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-success">Associer</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<!-- Script for Vehicle Modal -->
-                        <script>
-                            document.addEventListener("DOMContentLoaded", function () {
-                                // Ensure vehicles modal doesn't open automatically
-                                const vehiclesModal = document.getElementById('viewVehiclesModal{{ $customer->id }}');
-                                vehiclesModal.classList.remove('show');
-                                vehiclesModal.style.display = 'none';
+                            <td>
+    @if ($customer->blocked)
+        <span class="badge bg-danger">🔴 Bloqué</span>
+    @else
+        <span class="badge bg-success">🟢 Actif</span>
+    @endif
+</td>
 
-                                // Handle brand selection
-                                document.getElementById('brand_id_{{ $customer->id }}').addEventListener('change', function () {
-                                    const brandId = this.value;
-                                    const brandName = this.options[this.selectedIndex].dataset.name;
-                                    document.getElementById('brand_name_{{ $customer->id }}').value = brandName;
-                                    if (brandId) {
-                                        fetch("{{ route('getModels') }}?brand_id=" + brandId)
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                const modelSelect = document.getElementById('model_id_{{ $customer->id }}');
-                                                modelSelect.innerHTML = '<option value="">Sélectionner un modèle</option>';
-                                                data.forEach(model => {
-                                                    modelSelect.innerHTML += `<option value="${model.id}" data-name="${model.name}">${model.name}</option>`;
-                                                });
-                                            })
-                                            .catch(error => {
-                                                console.error('Error fetching models:', error);
-                                                alert('Erreur lors du chargement des modèles.');
-                                            });
-                                    } else {
-                                        document.getElementById('model_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner un modèle</option>';
-                                    }
-                                    document.getElementById('engine_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner une motorisation</option>';
-                                });
-
-                                // Handle model selection
-                                document.getElementById('model_id_{{ $customer->id }}').addEventListener('change', function () {
-                                    const modelId = this.value;
-                                    const modelName = this.options[this.selectedIndex].dataset.name;
-                                    document.getElementById('model_name_{{ $customer->id }}').value = modelName;
-                                    if (modelId) {
-                                        fetch("{{ route('getEngines') }}?model_id=" + modelId)
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                const engineSelect = document.getElementById('engine_id_{{ $customer->id }}');
-                                                engineSelect.innerHTML = '<option value="">Sélectionner une motorisation</option>';
-                                                data.forEach(engine => {
-                                                    engineSelect.innerHTML += `<option value="${engine.id}" data-description="${engine.description}" data-linking-target-id="${engine.linkageTargetId}">${engine.description}</option>`;
-                                                });
-                                            })
-                                            .catch(error => {
-                                                console.error('Error fetching engines:', error);
-                                                alert('Erreur lors du chargement des motorisations.');
-                                            });
-                                    } else {
-                                        document.getElementById('engine_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner une motorisation</option>';
-                                    }
-                                });
-
-                                // Handle engine selection
-                                document.getElementById('engine_id_{{ $customer->id }}').addEventListener('change', function () {
-                                    const engineDescription = this.options[this.selectedIndex].dataset.description;
-                                    const linkageTargetId = this.options[this.selectedIndex].dataset.linkingTargetId;
-                                    document.getElementById('engine_description_{{ $customer->id }}').value = engineDescription;
-                                    document.getElementById('linkage_target_id_{{ $customer->id }}').value = linkageTargetId;
-                                });
-
-                                // Clear vehicle modal fields when closed
-                                document.getElementById('addVehicleModal{{ $customer->id }}').addEventListener('hidden.bs.modal', function () {
-                                    document.getElementById('vehicleForm{{ $customer->id }}').reset();
-                                    document.getElementById('model_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner un modèle</option>';
-                                    document.getElementById('engine_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner une motorisation</option>';
-                                    document.getElementById('brand_name_{{ $customer->id }}').value = '';
-                                    document.getElementById('model_name_{{ $customer->id }}').value = '';
-                                    document.getElementById('engine_description_{{ $customer->id }}').value = '';
-                                    document.getElementById('linkage_target_id_{{ $customer->id }}').value = '';
-                                });
-                            });
-                        </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                            <td>
+                                <!-- Bouton Modifier -->
+                                <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ $customer->id }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
 
                                 <!-- Formulaire suppression -->
-                                <form action="{{ route('customer.destroy', $customer->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ce client ?')">
+                                <form action="{{ route('supplier.destroy', $customer->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ce fournisseur ?')">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-sm btn-danger">
@@ -938,7 +724,7 @@
                                 <div class="modal-content">
 
                                            <div class="modal-header">
-                <h5 class="modal-title">Client :  {{ $customer->code }} - {{ $customer->name }}</h5>
+                <h5 class="modal-title">Fournisseur :  {{ $customer->code }} - {{ $customer->name }}</h5>
                 <button type="button" class="btn btn-outline-primary btn-sm ms-2" id="editBtn{{ $customer->id }}">
                 <i class="fas fa-edit"></i> Modifier
                 </button>
@@ -946,7 +732,7 @@
             </div>
 
 
-                                    <form action="{{ route('customer.update', $customer->id) }}" method="POST">
+                                    <form action="{{ route('supplier.update', $customer->id) }}" method="POST">
     @csrf
     @method('PUT')
     <div id="editForm{{ $customer->id }}">
@@ -1077,7 +863,7 @@
 
         
 <div class="mb-3 col-md-6">
-    <label class="form-label d-block">Statut Client</label>
+    <label class="form-label d-block">Statut Fournisseur</label>
 
     <!-- Hidden input toujours envoyé -->
     <input type="hidden" name="blocked" value="0">
@@ -1087,7 +873,7 @@
         <input class="form-check-input" type="checkbox" id="blockedSwitch{{ $customer->id }}" name="blocked" value="1"
                {{ $customer->blocked ? 'checked' : '' }} onchange="toggleBlockedLabel({{ $customer->id }})" disabled>
         <label class="form-check-label fw-bold" id="blockedLabel{{ $customer->id }}" for="blockedSwitch{{ $customer->id }}">
-            {{ $customer->blocked ? 'Client Bloqué 🚫' : 'Client Actif ✅' }}
+            {{ $customer->blocked ? 'Fournisseur Bloqué 🚫' : 'Fournisseur Actif ✅' }}
         </label>
     </div>
 
@@ -1101,17 +887,11 @@ function toggleBlockedLabel(customerId) {
     const checkbox = document.getElementById('blockedSwitch' + customerId);
     const label = document.getElementById('blockedLabel' + customerId);
     if (checkbox.checked) {
-        label.innerText = 'Client Bloqué 🚫';
+        label.innerText = 'Fournisseur Bloqué 🚫';
     } else {
-        label.innerText = 'Client Actif ✅';
+        label.innerText = 'Fournisseur Actif ✅';
     }
 }
-
-
-
-             
-
-                
 </script>
 
 
@@ -1181,11 +961,6 @@ document.addEventListener("DOMContentLoaded", function () {
         background-color: #e9ecef;
         cursor: not-allowed;
     }
-        .badge-very-sm {
-    font-size: 0.7rem;
-    padding: 0.15em 0.3em;
-    vertical-align: middle;
-}
 </style>
 
 
@@ -1196,15 +971,19 @@ document.addEventListener("DOMContentLoaded", function () {
             </table>
         </div>
 
+
         <!-- Pagination avec conservation des filtres -->
     <div class="d-flex justify-content-center mt-3">
-        {{ $customers->appends(request()->query())->links() }}
+        {{ $suppliers->appends(request()->query())->links() }}
     </div>
-
-    @else
-        <p class="text-muted text-center">Aucun client trouvé.</p>
-    @endif
-
+@else
+    <div class="text-center py-5">
+        <i class="fas fa-user-tie fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">Aucun fournisseur trouvé</h5>
+        <p class="text-muted">Essayez d'ajuster vos critères de recherche</p>
+        <a href="{{ route('supplier.index') }}" class="btn btn-primary">Réinitialiser les filtres</a>
+    </div>
+@endif
 </div>
 
 <!-- JS Recherche -->
@@ -1220,11 +999,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Auto-submit des filtres après 1 seconde d'inactivité
     let filterTimeout;
-    document.getElementById('filterForm').addEventListener('input', function(e) {
-        clearTimeout(filterTimeout);
-        filterTimeout = setTimeout(() => {
-            this.submit();
-        }, 1000);
+    document.querySelectorAll('form.d-flex.flex-wrap.align-items-end input, form.d-flex.flex-wrap.align-items-end select').forEach(field => {
+        field.addEventListener('input', function() {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(() => {
+                this.closest('form').submit();
+            }, 1000);
+        });
     });
 });
 </script>
@@ -1341,6 +1122,12 @@ document.getElementById("searchItemInput").addEventListener("keyup", function() 
 
 
 
+
+
+
+
+
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     // Store entries for each customer to avoid refetching
@@ -1363,7 +1150,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Fetch entries if not cached
             tbody.innerHTML = '<tr><td colspan="5" class="text-center">Chargement...</td></tr>';
-            fetch(`/customers/${customerId}/accounting-entries`, {
+            fetch(`/suppliers/${customerId}/accounting-entries`, {
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
@@ -1458,11 +1245,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 </script>
-
-
-
-
-
 
 
 

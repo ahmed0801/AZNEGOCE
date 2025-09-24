@@ -232,6 +232,13 @@
                         </a>
                     </form>
 
+
+                                                                                                    <!-- Pagination avec conservation des filtres -->
+<div class="d-flex justify-content-center mt-3">
+    {{ $deliveryNotes->appends(request()->query())->links() }}
+</div>
+
+
                     @foreach ($deliveryNotes as $deliveryNote)
                         <div class="card mb-4 shadow-sm border-0">
                             <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
@@ -397,6 +404,13 @@
                         </div>
                     @endforeach
                 </div>
+
+                                                                                <!-- Pagination avec conservation des filtres -->
+<div class="d-flex justify-content-center mt-3">
+    {{ $deliveryNotes->appends(request()->query())->links() }}
+</div>
+
+
             </div>
 
 

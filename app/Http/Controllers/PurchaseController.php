@@ -62,7 +62,7 @@ public function list(Request $request)
         });
     }
 
-    $purchases = $query->get();
+    $purchases = $query->paginate(50);
     $suppliers = \App\Models\Supplier::orderBy('name')->get();
 
     return view('purchases', compact('purchases', 'suppliers'));
@@ -818,7 +818,7 @@ public function storeReturn(Request $request, $id)
             $query->whereDate('return_date', '<=', $request->date_to);
         }
 
-        $returns = $query->get();
+        $returns = $query->paginate(50);
         $suppliers = Supplier::orderBy('name')->get();
         $purchaseOrders = PurchaseOrder::has('returns')->orderBy('numdoc')->get();
 
@@ -886,7 +886,7 @@ public function storeReturn(Request $request, $id)
         $query->whereDate('invoice_date', '<=', $request->date_to);
     }
 
-    $invoices = $query->get();
+    $invoices = $query->paginate(50);
     $suppliers = Supplier::orderBy('name')->get();
 
     return view('invoices.list', compact('invoices', 'suppliers'));
@@ -1362,7 +1362,7 @@ public function search(Request $request)
         $query->whereDate('note_date', '<=', $request->date_to);
     }
 
-    $notes = $query->get();
+    $notes = $query->paginate(50);
     $suppliers = Supplier::orderBy('name')->get();
     $returns = PurchaseReturn::with('supplier')->where('invoiced', 0)->get(); // Only non-invoiced returns
     $invoices = PurchaseInvoice::with('supplier')->where('status', 'validée')->get(); // Only validated invoices
@@ -2127,7 +2127,7 @@ $supplier = Supplier::with('tvaGroup')->findOrFail($request->supplier_id);
                     $supplier->save();
             }
 
-            
+
 
         return redirect()->route('notes.list')->with('success', 'Avoir mis à jour avec succès.');
     }

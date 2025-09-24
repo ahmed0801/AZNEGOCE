@@ -44,7 +44,7 @@ $query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item','vehicle'])
             $query->whereDate('delivery_notes.delivery_date', '<=', $request->date_to);
         }
 
-        $deliveryNotes = $query->get();
+        $deliveryNotes = $query->paginate(50); // Pagination au lieu de get()
         $customers = Customer::orderBy('name')->get();
 
         return view('delivery_notes.list', compact('deliveryNotes', 'customers'));

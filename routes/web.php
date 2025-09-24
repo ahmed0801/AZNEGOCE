@@ -427,6 +427,12 @@ Route::get('/invoices/{id}/download_supplier_invoice', [PurchaseController::clas
 Route::delete('/invoices/{id}/delete_supplier_invoice', [PurchaseController::class, 'deleteSupplierInvoice'])->name('invoices.delete_supplier_invoice');
 
 
+// ecriture client historique client
+Route::get('/customers/{customer}/accounting-entries', [CustomerController::class, 'getAccountingEntries'])->name('customer.accounting-entries');
+// ecriture client historique fournisseurs
+Route::get('/suppliers/{customer}/accounting-entries', [SupplierController::class, 'getAccountingEntries'])->name('supplier.accounting-entries');
+
+
 
 
 // Sales Notes (Avoirs)

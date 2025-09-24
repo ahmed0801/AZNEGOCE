@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SalesNoteExport;
+use App\Exports\SalesNotesExport;
 use App\Models\Customer;
 use App\Models\DeliveryNote;
 use App\Models\Invoice;
@@ -52,7 +54,7 @@ class SalesInvoicesController extends Controller
             $query->whereDate('invoice_date', '<=', $request->date_to);
         }
 
-        $invoices = $query->get();
+        $invoices = $query->paginate(50);
         $customers = Customer::orderBy('name')->get();
 
         return view('salesinvoices.index', compact('invoices', 'customers'));
@@ -1191,11 +1193,12 @@ public function notesList(Request $request)
             $query->whereDate('note_date', '<=', $request->date_to);
         }
 
-        $notes = $query->get();
+        $notes = $query->paginate(50); // Pagination au lieu de get()
         $customers = Customer::orderBy('name')->get();
 
         return view('salesnotes.list', compact('notes', 'customers'));
     }
+
 
     public function createSalesNote()
     {
@@ -1981,30 +1984,14 @@ public function notesList(Request $request)
     public function exportSingleNote($id)
     {
         $note = SalesNote::with(['customer', 'lines.item', 'salesInvoice', 'salesReturn'])->findOrFail($id);
-        return Excel::download(new \App\Exports\SalesNoteExport($note), 'avoir_' . $note->numdoc . '.xlsx');
+        $filename = 'avoir_' . $note->numdoc . '_' . Carbon::now()->format('Y-m-d_H-i-s') . '.xlsx';
+        return Excel::download(new SalesNoteExport($note), $filename);
     }
 
     public function exportNotes(Request $request)
     {
-        $query = SalesNote::with(['customer', 'lines.item', 'salesInvoice', 'salesReturn']);
-
-        if ($request->filled('customer_id')) {
-            $query->where('customer_id', $request->customer_id);
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-        if ($request->filled('date_from')) {
-            $query->whereDate('note_date', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('note_date', '<=', $request->date_to);
-        }
-
-        $notes = $query->get();
-        return Excel::download(new \App\Exports\SalesNotesExport($notes), 'avoirs_ventes_' . Carbon::now()->format('YmdHis') . '.xlsx');
+        return Excel::download(new SalesNotesExport($request), 'avoirs_ventes_' . Carbon::now()->format('Y-m-d_H-i-s') . '.xlsx');
     }
-
 
 
 

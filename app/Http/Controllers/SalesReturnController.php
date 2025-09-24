@@ -45,7 +45,7 @@ class SalesReturnController extends Controller
             $query->whereDate('return_date', '<=', $request->date_to);
         }
 
-        $returns = $query->get();
+        $returns = $query->paginate(50);
         $customers = Customer::orderBy('name')->get();
         $deliveryNotes = DeliveryNote::orderBy('numdoc')->get();
 

@@ -400,6 +400,7 @@
 
 <h4>📋 Liste des retours d'achat</h4>
 
+
             <form method="GET" action="{{ route('returns.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
                 <select name="supplier_id" class="form-select form-select-sm" style="width: 150px;">
                     <option value="">Fournisseur (Tous)</option>
@@ -443,6 +444,10 @@ de
                     <i class="fas fa-undo me-1"></i> Réinitialiser
                 </a>
             </form>
+
+                      <div class="d-flex justify-content-center mt-3">
+    {{ $returns->appends(request()->query())->links() }}
+</div>
 
             @foreach ($returns as $return)
                 <div class="card mb-4 shadow-sm border-0">
@@ -536,7 +541,9 @@ Fournisseur : {{ $return->supplier ? $return->supplier->name : 'N/A' }}
 
 
 </div>
-
+                      <div class="d-flex justify-content-center mt-3">
+    {{ $returns->appends(request()->query())->links() }}
+</div>
          
             
            

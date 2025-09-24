@@ -5,14 +5,18 @@ namespace App\Http\Controllers;
 use App\Exports\CustomersExport;
 use App\Models\Customer;
 use App\Models\DiscountGroup;
+use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\PaymentMode;
 use App\Models\PaymentTerm;
+use App\Models\SalesNote;
 use App\Models\Souche;
 use App\Models\TvaGroup;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Log; // Added Log facade
 
 class CustomerController extends Controller
 {
@@ -231,6 +235,83 @@ class CustomerController extends Controller
                 'engine_description' => $vehicle->engine_description,
             ];
         }));
+    }
+
+
+
+
+
+  public function getAccountingEntries($customerId)
+    {
+        try {
+            Log::info("Fetching accounting entries for customer ID: $customerId");
+
+            // Check if customer exists
+            $customer = Customer::find($customerId);
+            if (!$customer) {
+                Log::warning("Customer not found for ID: $customerId");
+                return response()->json(['entries' => []], 200);
+            }
+
+            // Fetch invoices
+            $invoices = Invoice::where('customer_id', $customerId)
+                ->select('id', 'numdoc', 'invoice_date as date', 'total_ttc as amount', 'paid', 'numdoc as reference')
+                ->get()
+                ->map(function ($invoice) {
+                    return [
+                        'type' => 'Facture',
+                        'numdoc' => $invoice->numdoc ?? '-',
+                        'date' => $invoice->date ? \Carbon\Carbon::parse($invoice->date)->format('d/m/Y') : '-',
+                        'amount' => is_numeric($invoice->amount) ? (float) $invoice->amount : 0,
+                        'status' => $invoice->paid ? 'Payée' : 'Non payée',
+                        'reference' => $invoice->reference ?? '-'
+                    ];
+                });
+
+            // Fetch sales notes
+            $salesNotes = SalesNote::where('customer_id', $customerId)
+                ->select('id', 'numdoc', 'note_date as date', 'total_ttc as amount', 'paid', 'numdoc as reference')
+                ->get()
+                ->map(function ($note) {
+                    return [
+                        'type' => 'Avoir',
+                        'numdoc' => $note->numdoc ?? '-',
+                        'date' => $note->date ? \Carbon\Carbon::parse($note->date)->format('d/m/Y') : '-',
+                        'amount' => is_numeric($note->amount) ? -(float) $note->amount : 0,
+                        'status' => $note->paid ? 'Payée' : 'Non payée',
+                        'reference' => $note->reference ?? '-'
+                    ];
+                });
+
+            // Fetch payments
+            $payments = Payment::where('customer_id', $customerId)
+                ->select('id',  'payment_mode', 'reference', 'payment_date as date', 'amount', 'reconciled as status', 'lettrage_code as reference')
+                ->get()
+                ->map(function ($payment) {
+                    return [
+                        'type' => $payment->payment_mode,
+                        'numdoc' => $payment->reference ?? '-',
+                        'date' => $payment->date ? \Carbon\Carbon::parse($payment->date)->format('d/m/Y') : '-',
+                        'amount' => is_numeric($payment->amount) ? (float) $payment->amount : 0,
+                        'status' => $payment->status ? 'Validé' : 'Validé',
+                    ];
+                });
+
+            // Merge and sort entries
+            $entries = $invoices->merge($salesNotes)->merge($payments)->sortByDesc('date')->values();
+
+            Log::info("Successfully fetched accounting entries for customer ID: $customerId", ['entry_count' => $entries->count()]);
+
+            return response()->json(['entries' => $entries], 200);
+        } catch (\Exception $e) {
+            Log::error("Error fetching accounting entries for customer ID: $customerId", [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'Erreur serveur: Impossible de charger les écritures comptables'], 500);
+        }
     }
 
 

@@ -621,7 +621,105 @@
                           🏴󠁢󠁹󠁭󠁩󠁿{{ $customer->city }}</td>
                             <td>📞 {{ $customer->phone1 }} <br>
                          📧 {{ $customer->email }} </td>
-                            <td>{{ $customer->solde }} €</td>
+
+                             <td>
+ <button type="button" class="btn btn-sm btn-outline-primary solde-btn" data-bs-toggle="modal" data-bs-target="#accountingModal{{ $customer->id }}" data-customer-id="{{ $customer->id }}">
+                                                        {{ number_format($customer->solde, 2, ',', ' ') }} €
+                                                    </button>
+
+
+
+
+
+
+                                                                        
+
+ <!-- Accounting Entries Modal -->
+                   <!-- Accounting Entries Modal -->
+<div class="modal fade accounting-modal" id="accountingModal{{ $customer->id }}" tabindex="-1" aria-labelledby="accountingModalLabel{{ $customer->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="accountingModalLabel{{ $customer->id }}">Ecritures comptables Fournisseur : {{ $customer->name }}</h5>
+                <button type="button" class="btn btn-secondary btn-round ms-2 dropdown-toggle" onclick="showBalance({{ $customer->id }})">
+                    <i class="fas fa-balance-scale me-1"></i> Balance
+                </button>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Balance Summary (Hidden by Default) -->
+                <div id="balanceSummary{{ $customer->id }}" class="card mb-3" style="display: none;">
+                    <div class="card-body">
+                        <h6 class="card-title text-primary">Balance Comptable</h6>
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Total Débits</th>
+                                    <th>Total Crédits</th>
+                                    <th>Solde Net</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td id="debits{{ $customer->id }}">0,00 €</td>
+                                    <td id="credits{{ $customer->id }}">0,00 €</td>
+                                    <td id="balance{{ $customer->id }}">0,00 €</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Filter Form -->
+                <form id="accountingFilterForm{{ $customer->id }}" class="d-flex flex-wrap gap-2 mb-3">
+                    <select name="type" class="form-select form-select-sm" style="width: 200px;">
+                        <option value="">Type (Tous)</option>
+                        <option value="Factures">Factures</option>
+                        <option value="Avoirs">Avoirs</option>
+                        <option value="Règlements">Règlements</option>
+                    </select>
+                    <input type="date" name="start_date" class="form-control form-control-sm" style="width: 150px;" placeholder="Date début">
+                    <input type="date" name="end_date" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin">
+                    <button type="submit" class="btn btn-outline-primary btn-sm px-3">
+                        <i class="fas fa-filter me-1"></i> Filtrer
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="resetAccountingFilter({{ $customer->id }})">
+                        <i class="fas fa-undo me-1"></i> Réinitialiser
+                    </button>
+                </form>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover accounting-table">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Type</th>
+                                <th>Num Document / Lettrage</th>
+                                <th>Date</th>
+                                <th>Montant TTC</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accountingEntries{{ $customer->id }}">
+                            <tr>
+                                <td colspan="5" class="text-center">Chargement...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+</td>
+
+
                             <td>
     @if ($customer->blocked)
         <span class="badge bg-danger">🔴 Bloqué</span>
@@ -1057,6 +1155,155 @@ document.getElementById("searchItemInput").addEventListener("keyup", function() 
 
 
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Store entries for each customer to avoid refetching
+    const accountingEntriesCache = {};
+
+    // Accounting Entries Handler
+    document.querySelectorAll('.solde-btn').forEach(button => {
+        const modal = document.getElementById(`accountingModal${button.dataset.customerId}`);
+        const filterForm = document.getElementById(`accountingFilterForm${button.dataset.customerId}`);
+
+        modal.addEventListener('show.bs.modal', function () {
+            const customerId = button.dataset.customerId;
+            const tbody = document.getElementById(`accountingEntries${customerId}`);
+
+            // If entries are already cached, apply filters and render
+            if (accountingEntriesCache[customerId]) {
+                applyFilters(customerId);
+                return;
+            }
+
+            // Fetch entries if not cached
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">Chargement...</td></tr>';
+            fetch(`/suppliers/${customerId}/accounting-entries`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    accountingEntriesCache[customerId] = data.entries || [];
+                    applyFilters(customerId);
+                })
+                .catch(error => {
+                    console.error(`Error fetching accounting entries for customer ID ${customerId}:`, error);
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Erreur: Impossible de charger les écritures comptables. Veuillez réessayer plus tard.</td></tr>`;
+                });
+        });
+
+        // Handle filter form submission
+        if (filterForm) {
+            filterForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                applyFilters(button.dataset.customerId);
+            });
+        }
+    });
+
+    // Reset filter function
+    window.resetAccountingFilter = function (customerId) {
+        const filterForm = document.getElementById(`accountingFilterForm${customerId}`);
+        const balanceSummary = document.getElementById(`balanceSummary${customerId}`);
+        if (filterForm) {
+            filterForm.reset();
+            balanceSummary.style.display = 'none'; // Hide balance when resetting
+            applyFilters(customerId);
+        }
+    };
+
+    // Show balance summary
+    window.showBalance = function (customerId) {
+        const balanceSummary = document.getElementById(`balanceSummary${customerId}`);
+        balanceSummary.style.display = 'block'; // Show balance summary
+        applyFilters(customerId); // Reapply filters to ensure balance is updated
+    };
+
+    // Apply client-side filters and render table
+    function applyFilters(customerId) {
+        const tbody = document.getElementById(`accountingEntries${customerId}`);
+        const filterForm = document.getElementById(`accountingFilterForm${customerId}`);
+        const formData = new FormData(filterForm);
+        const typeFilter = formData.get('type') || '';
+        const startDate = formData.get('start_date') ? new Date(formData.get('start_date')) : null;
+        const endDate = formData.get('end_date') ? new Date(formData.get('end_date')) : null;
+
+        // Get cached entries
+        let entries = accountingEntriesCache[customerId] || [];
+
+        // Apply type filter
+        if (typeFilter) {
+            entries = entries.filter(entry => {
+                if (typeFilter === 'Factures') return entry.type === 'Facture';
+                if (typeFilter === 'Avoirs') return entry.type === 'Avoir';
+                if (typeFilter === 'Règlements') return entry.type !== 'Facture' && entry.type !== 'Avoir';
+                return true;
+            });
+        }
+
+        // Apply date filter
+        if (startDate || endDate) {
+            entries = entries.filter(entry => {
+                if (!entry.date || entry.date === '-') return false;
+                const entryDateParts = entry.date.split('/');
+                const entryDate = new Date(`${entryDateParts[2]}-${entryDateParts[1]}-${entryDateParts[0]}`);
+                if (startDate && entryDate < startDate) return false;
+                if (endDate && entryDate > endDate) return false;
+                return true;
+            });
+        }
+
+        // Calculate balance
+        let debits = 0;
+        let credits = 0;
+        entries.forEach(entry => {
+            if (entry.type === 'Facture') {
+                debits += parseFloat(entry.amount) || 0;
+            } else {
+                credits += parseFloat(entry.amount) || 0;
+            }
+        });
+        const balance = debits + credits;
+
+        // Update balance summary
+        const debitsElement = document.getElementById(`debits${customerId}`);
+        const creditsElement = document.getElementById(`credits${customerId}`);
+        const balanceElement = document.getElementById(`balance${customerId}`);
+        if (debitsElement && creditsElement && balanceElement) {
+            debitsElement.textContent = debits.toFixed(2).replace('.', ',') + ' €';
+            creditsElement.textContent = credits.toFixed(2).replace('.', ',') + ' €';
+            balanceElement.textContent = balance.toFixed(2).replace('.', ',') + ' €';
+            balanceElement.className = balance >= 0 ? 'text-success' : 'text-danger';
+        }
+
+        // Render filtered entries
+        tbody.innerHTML = '';
+        if (entries.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Aucune écriture comptable trouvée.</td></tr>';
+            return;
+        }
+
+        entries.forEach(entry => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${entry.type || '-'}</td>
+                <td>${entry.numdoc || entry.reference || '-'}</td>
+                <td>${entry.date || '-'}</td>
+                <td>${(entry.amount !== undefined && entry.amount !== null) ? Number(entry.amount).toFixed(2).replace('.', ',') : '-'} €</td>
+                <td>${entry.status || '-'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+});
+</script>
 
 
 
