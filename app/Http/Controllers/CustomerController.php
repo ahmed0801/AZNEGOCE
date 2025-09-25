@@ -316,4 +316,42 @@ class CustomerController extends Controller
 
 
 
+
+
+
+   public function search(Request $request)
+{
+    $query = $request->input('query');
+    $customers = Customer::with('tvaGroup')
+        ->where('name', 'LIKE', "%{$query}%")
+        ->orWhere('code', 'LIKE', "%{$query}%")
+        ->orWhere('email', 'LIKE', "%{$query}%")
+        ->take(50)
+        ->get()
+        ->map(function ($customer) {
+            return [
+                'id' => $customer->id,
+                'text' => ($customer->code ? $customer->code . ' ⭆ ' : '') . $customer->name . ($customer->blocked ? ' 🔒' : ''),
+                'tva' => $customer->tvaGroup->rate ?? 0,
+                'solde' => $customer->solde ?? 0,
+                'code' => $customer->code ?? '',
+                'name' => $customer->name,
+                'email' => $customer->email ?? '',
+                'phone1' => $customer->phone1 ?? '',
+                'phone2' => $customer->phone2 ?? '',
+                'address' => $customer->address ?? '',
+                'address_delivery' => $customer->address_delivery ?? '',
+                'city' => $customer->city ?? '',
+                'country' => $customer->country ?? '',
+                'blocked' => $customer->blocked,
+                'disabled' => $customer->blocked // Add disabled flag for Select2
+            ];
+        });
+
+    return response()->json($customers);
+}
+
+
+
+
 }

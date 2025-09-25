@@ -432,7 +432,8 @@ Route::get('/customers/{customer}/accounting-entries', [CustomerController::clas
 // ecriture client historique fournisseurs
 Route::get('/suppliers/{customer}/accounting-entries', [SupplierController::class, 'getAccountingEntries'])->name('supplier.accounting-entries');
 
-
+// recherche client 
+Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
 
 
 // Sales Notes (Avoirs)

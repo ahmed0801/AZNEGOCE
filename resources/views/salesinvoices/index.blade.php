@@ -187,9 +187,14 @@
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="{{ route('salesinvoices.create_grouped') }}">Facture groupée</a>
-                                    <a class="dropdown-item" href="{{ route('salesinvoices.create_free') }}">Facture libre</a>
+                                    <!-- <a class="dropdown-item" href="{{ route('salesinvoices.create_free') }}">Facture libre</a> -->
                                 </div>
                             </div>
+
+                            <a href="{{ route('sales.delivery.create') }}" class="btn btn-sm btn-success">
+                            Nouveau BL <i class="fas fa-plus-circle ms-2"></i>
+                        </a>
+
                         </h4>
 
                         <form method="GET" action="{{ route('salesinvoices.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">

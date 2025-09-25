@@ -363,7 +363,7 @@ protected function createDeliveryNoteFromOrder(SalesOrder $order, Request $reque
     /**
      * Create a direct delivery note (without a sales order).
      */
-    public function createDirectDeliveryNote()
+    public function createDirectDeliveryNote_withoutajax()
     {
         $customers = Customer::with(['tvaGroup', 'vehicles'])->get();
         $tvaRates = $customers->mapWithKeys(fn($c) => [$c->id => $c->tvaGroup->rate ?? 0])->toJson();
@@ -376,6 +376,17 @@ $paymentTerms = PaymentTerm::all();
 
         return view('sales.create_direct_delivery', compact('customers', 'tvaRates','tvaGroups','discountGroups','paymentModes','paymentTerms'));
     }
+
+    public function createDirectDeliveryNote()
+{
+    $tvaRates = []; // Empty since tvaRate is fetched via AJAX
+    $tvaGroups = TvaGroup::all();
+    $discountGroups = DiscountGroup::all();
+    $paymentModes = PaymentMode::all();
+    $paymentTerms = PaymentTerm::all();
+    return view('sales.create_direct_delivery', compact('tvaRates', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms'));
+}
+
 
     /**
      * Store a direct delivery note.

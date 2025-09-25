@@ -45,7 +45,7 @@
         .card-body {
             padding: 1.5rem;
         }
-        .btn-primary, .btn-success, .btn-danger, .btn-outline-primary {
+        .btn-primary, .btn-success, .btn-danger, .btn-outline-primary, .btn-outline-info {
             font-size: 0.9rem;
             padding: 0.5rem 1rem;
             border-radius: 6px;
@@ -67,6 +67,11 @@
             background-color: #007bff;
             color: #fff;
             box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+        }
+        .btn-outline-info:hover {
+            background-color: #17a2b8;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(23, 162, 184, 0.3);
         }
         .table {
             width: 100%;
@@ -176,7 +181,7 @@
                 width: 100%;
                 font-size: 0.8rem;
             }
-            .btn-primary, .btn-success, .btn-danger, .btn-outline-primary {
+            .btn-primary, .btn-success, .btn-danger, .btn-outline-primary, .btn-outline-info {
                 padding: 0.4rem 0.8rem;
                 font-size: 0.8rem;
             }
@@ -189,6 +194,16 @@
         }
         .small-text {
             font-size: 0.95em;
+        }
+        #balanceSummary .card {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #balanceSummary .card-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        .balance-btn {
+            min-width: 100px; /* Ensure button is wide enough for balance display */
         }
     </style>
 </head>
@@ -228,14 +243,14 @@
                         <li class="nav-item"><a href="/returns"><i class="fas fa-undo-alt"></i><p>Retours Achat</p></a></li>
                         <li class="nav-item"><a href="/invoices"><i class="fas fa-file-invoice"></i><p>Factures Achat</p></a></li>
                         <li class="nav-item"><a href="/notes"><i class="fas fa-sticky-note"></i><p>Avoirs Achat</p></a></li>
-                      <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-credit-card"></i></span><h4 class="text-section">Comptabilité</h4></li>
-                                                <li class="nav-item {{ Route::is('generalaccounts.index') ? 'active' : '' }}">
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-credit-card"></i></span><h4 class="text-section">Comptabilité</h4></li>
+                        <li class="nav-item {{ Route::is('generalaccounts.index') ? 'active' : '' }}">
                             <a href="{{ route('generalaccounts.index') }}"><i class="fas fa-book"></i><p>Comptes Généraux</p></a>
                         </li>
-                                                <li class="nav-item {{ Route::is('payments.index') ? 'active' : '' }}">
+                        <li class="nav-item {{ Route::is('payments.index') ? 'active' : '' }}">
                             <a href="{{ route('payments.index') }}"><i class="fas fa-credit-card"></i><p>Règlements</p></a>
                         </li>
-                                                <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
                         <li class="nav-item"><a href="/receptions"><i class="fas fa-truck-loading"></i><p>Réceptions</p></a></li>
                         <li class="nav-item"><a href="/articles"><i class="fas fa-cubes"></i><p>Articles</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fa fa-users"></i></span><h4 class="text-section">Référentiel</h4></li>
@@ -343,6 +358,7 @@
                                             @foreach ($customers as $customer)
                                                 <option value="{{ $customer->id }}"
                                                         data-tva="{{ $customer->tvaGroup->rate ?? 0 }}"
+                                                        data-solde="{{ $customer->solde ?? 0 }}"
                                                         data-code="{{ $customer->code ?? '' }}"
                                                         data-name="{{ $customer->name }}"
                                                         data-email="{{ $customer->email ?? '' }}"
@@ -352,10 +368,9 @@
                                                         data-address_delivery="{{ $customer->address_delivery ?? '' }}"
                                                         data-city="{{ $customer->city ?? '' }}"
                                                         data-country="{{ $customer->country ?? '' }}"
-                                                        data-solde="{{ $customer->solde ?? '' }}"
                                                         @if($customer->blocked) disabled @endif
                                                         >
-                                                    {{ $customer->code ?? '' }} ⭆ {{ $customer->name }} 	
+                                                    {{ $customer->code ?? '' }} ⭆ {{ $customer->name }}
                                                     @if($customer->blocked) <span class="badge bg-danger badge-very-sm"> &#x1F512;</span> @endif
                                                 </option>
                                             @endforeach
@@ -373,11 +388,9 @@
                                                 <a id="loadCatalogBtn" class="btn btn-outline-primary btn-sm px-2 py-1" style="font-size: 0.90rem;" disabled>
                                                     <i class="fas fa-list"></i> Charger le Catalogue
                                                 </a>
-
                                                 <a id="viewHistoryBtn" class="btn btn-outline-secondary btn-sm px-2 py-1" style="font-size: 0.90rem;" disabled>
-    <i class="fas fa-history"></i> Voir l'historique
-</a>
-
+                                                    <i class="fas fa-history"></i> Voir l'historique
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
@@ -387,7 +400,6 @@
                                     </div>
                                 </div>
                                 <div class="mb-3" id="customer_details" style="display: none;">
-                                    <!-- <h6 class="font-weight-bold mb-2">Détails du client</h6> -->
                                     <div class="row">
                                         <div class="col-md-6">
                                             <p>	&#128204<strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span></p>
@@ -399,7 +411,12 @@
                                             <p>	&#128681<strong>Adresse:</strong> <span id="customer_address"></span></p>
                                             <p>&#128666<strong>Adresse de livraison:</strong> <span id="customer_address_delivery"></span></p>
                                             <p>&#127988<strong>Ville & Pays:</strong> <span id="customer_city"></span>, <span id="customer_country"></span></p>
-                                            <p>&#128178<strong>Solde:</strong> <span id="customer_balance"></span></p>
+                                            <p>
+                                                &#128178<strong>Solde:</strong>
+                                                <button type="button" class="btn btn-outline-info btn-sm balance-btn" id="balanceBtn" data-customer-id="" data-customer-name="" disabled>
+                                                    <i class="fas fa-balance-scale me-1"></i> <span id="customer_balance">0,00 €</span>
+                                                </button>
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -495,7 +512,82 @@
                 </div>
             </div>
 
-           
+            <!-- Accounting Entries Modal -->
+            <div class="modal fade accounting-modal" id="accountingModal" tabindex="-1" aria-labelledby="accountingModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="accountingModalLabel">Historique des écritures comptables</h5>
+                            <button type="button" class="btn btn-outline-info btn-sm ms-2" onclick="showBalance()">
+                                <i class="fas fa-balance-scale me-1"></i> Balance
+                            </button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Balance Summary (Hidden by Default) -->
+                            <div id="balanceSummary" class="card mb-3" style="display: none;">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">Balance Comptable</h6>
+                                    <table class="table table-sm table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Total Débits</th>
+                                                <th>Total Crédits</th>
+                                                <th>Solde Net</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td id="debits">0,00 €</td>
+                                                <td id="credits">0,00 €</td>
+                                                <td id="balance">0,00 €</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- Filter Form -->
+                            <form id="accountingFilterForm" class="d-flex flex-wrap gap-2 mb-3">
+                                <select name="type" class="form-select form-select-sm" style="width: 200px;">
+                                    <option value="">Type (Tous)</option>
+                                    <option value="Factures">Factures</option>
+                                    <option value="Avoirs">Avoirs</option>
+                                    <option value="Règlements">Règlements</option>
+                                </select>
+                                <input type="date" name="start_date" class="form-control form-control-sm" style="width: 150px;" placeholder="Date début">
+                                <input type="date" name="end_date" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin">
+                                <button type="submit" class="btn btn-outline-primary btn-sm px-3">
+                                    <i class="fas fa-filter me-1"></i> Filtrer
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="resetAccountingFilter()">
+                                    <i class="fas fa-undo me-1"></i> Réinitialiser
+                                </button>
+                            </form>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover accounting-table">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Num Document / Lettrage</th>
+                                            <th>Date</th>
+                                            <th>Montant TTC</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="accountingEntries">
+                                        <tr>
+                                            <td colspan="5" class="text-center">Chargement...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <footer class="footer">
                 <div class="container-fluid d-flex justify-content-between">
@@ -524,6 +616,9 @@
             $('.select2').select2({ width: '100%' });
             let tvaRates = @json($tvaRates);
             let lineCount = 0;
+
+            // Store entries for the selected customer to avoid refetching
+            const accountingEntriesCache = {};
 
             function updateGlobalTotals() {
                 let totalHtGlobal = 0;
@@ -562,17 +657,55 @@
                 }
             }
 
+            function updateHistoryButton() {
+                let vehicleId = $('#vehicle_id').val();
+                let customerId = $('#customer_id').val();
+                let $historyBtn = $('#viewHistoryBtn');
+                
+                if (vehicleId && customerId) {
+                    $historyBtn.removeAttr('disabled');
+                    $historyBtn.off('click').on('click', function(e) {
+                        e.preventDefault();
+                        let url = `/vehicles/${vehicleId}/history`;
+                        window.open(url, 'popupWindow', 'width=1000,height=700,scrollbars=yes');
+                        return false;
+                    });
+                } else {
+                    $historyBtn.attr('disabled', 'disabled');
+                }
+            }
+
             $('#customer_id').change(function () {
                 let customerId = $(this).val();
                 let $selectedOption = $(this).find('option:selected');
                 let tvaRate = customerId ? parseFloat($selectedOption.data('tva') || 0) : 0;
                 let tvaRateFromObject = customerId ? parseFloat(tvaRates[customerId] || 0) : 0;
+                let solde = customerId ? parseFloat($selectedOption.data('solde') || 0) : 0;
 
                 if (customerId && isNaN(tvaRateFromObject)) {
                     console.warn('tvaRates[customerId] is NaN for Customer ID:', customerId, 'Using data-tva:', tvaRate);
                 }
                 if (customerId && tvaRate !== tvaRateFromObject && !isNaN(tvaRateFromObject)) {
                     console.warn('TVA Mismatch - Customer ID:', customerId, 'data-tva:', tvaRate, 'tvaRates[customerId]:', tvaRateFromObject);
+                }
+
+                // Update balance button with customer->solde
+                const $balanceBtn = $('#balanceBtn');
+                const $balanceSpan = $('#customer_balance');
+                if (customerId) {
+                    $balanceBtn
+                        .attr('data-customer-id', customerId)
+                        .attr('data-customer-name', $selectedOption.data('name') || 'N/A')
+                        .removeAttr('disabled');
+                    $balanceSpan.text(solde.toFixed(2).replace('.', ',') + ' €');
+                    $balanceSpan.removeClass('text-success text-danger').addClass(solde >= 0 ? 'text-success' : 'text-danger');
+                } else {
+                    $balanceBtn
+                        .attr('disabled', 'disabled')
+                        .removeAttr('data-customer-id')
+                        .removeAttr('data-customer-name');
+                    $balanceSpan.text('0,00 €').removeClass('text-success text-danger');
+                    accountingEntriesCache[customerId] = null; // Clear cache
                 }
 
                 // Fetch vehicles for the selected customer
@@ -597,12 +730,14 @@
                             }
                             $vehicleSelect.select2({ width: '100%' });
                             updateCatalogButton();
+                            updateHistoryButton();
                         },
                         error: function (xhr, status, error) {
                             console.error('AJAX Error fetching vehicles:', status, error, xhr.responseText);
                             $vehicleSelect.append('<option value="" disabled selected>Erreur lors du chargement des véhicules</option>');
                             Swal.fire('Erreur', 'Impossible de charger les véhicules pour ce client.', 'error');
                             updateCatalogButton();
+                            updateHistoryButton();
                         }
                     });
 
@@ -616,7 +751,6 @@
                     $('#customer_email').text($selectedOption.data('email') || 'N/A');
                     $('#customer_phone1').text($selectedOption.data('phone1') || 'N/A');
                     $('#customer_phone2').text($selectedOption.data('phone2') || 'N/A');
-                    $('#customer_balance').text($selectedOption.data('solde') || 'N/A');
                     $('#customer_address').text($selectedOption.data('address') || 'N/A');
                     $('#customer_address_delivery').text($selectedOption.data('address_delivery') || 'N/A');
                     $('#customer_city').text($selectedOption.data('city') || 'N/A');
@@ -629,6 +763,7 @@
                     $vehicleSelect.empty().append('<option value="" disabled selected>Sélectionner un véhicule</option>').prop('disabled', true);
                     $vehicleSelect.select2({ width: '100%' });
                     updateCatalogButton();
+                    updateHistoryButton();
                 }
 
                 $('#lines_body tr').each(function () {
@@ -639,13 +774,14 @@
                 });
 
                 updateGlobalTotals();
-                console.log('Customer ID:', customerId, 'TVA Rate (data-tva):', tvaRate, 'tvaRates[customerId]:', tvaRateFromObject, 'tvaRates:', tvaRates);
+                console.log('Customer ID:', customerId, 'TVA Rate (data-tva):', tvaRate, 'Solde:', solde, 'tvaRates[customerId]:', tvaRateFromObject, 'tvaRates:', tvaRates);
             });
 
             $('#vehicle_id').change(function () {
                 let vehicleId = $(this).val();
                 console.log('Vehicle selected:', vehicleId);
                 updateCatalogButton();
+                updateHistoryButton();
             });
 
             $('#search_item').on('input', function () {
@@ -723,9 +859,9 @@
                             </small>
                         </td>
                         <td>
-                            <button type="button" class="btn btn-outline-primary btn-sm stock-details-btn" 
-                                    data-toggle="modal" 
-                                    data-target="#stockDetailsModal" 
+                            <button type="button" class="btn btn-outline-primary btn-sm stock-details-btn"
+                                    data-toggle="modal"
+                                    data-target="#stockDetailsModal"
                                     data-code="${code}"
                                     data-name="${name}"
                                     title="Voir les détails du stock">
@@ -758,9 +894,9 @@
 
             $(document).on('input', '.quantity, .unit_price_ht, .remise', function () {
                 let row = $(this).closest('tr');
-                let unitPriceHt = parseFloat(row.find('.unit_price_ht').val()) || 0;
-                let quantity = parseFloat(row.find('.quantity').val()) || 0;
-                let remise = parseFloat(row.find('.remise').val()) || 0;
+                let unitPriceHt = parseFloat($(this).find('.unit_price_ht').val()) || 0;
+                let quantity = parseFloat($(this).find('.quantity').val()) || 0;
+                let remise = parseFloat($(this).find('.remise').val()) || 0;
                 let customerId = $('#customer_id').val();
                 let tvaRate = customerId ? parseFloat($('#customer_id').find('option:selected').data('tva') || 0) : 0;
                 if (customerId && $('#customer_id').find('option:selected').data('tva') == null) {
@@ -919,27 +1055,154 @@
                 });
             });
 
+            // Accounting Entries Handler
+            $(document).on('click', '.balance-btn', function () {
+                const customerId = $(this).data('customer-id');
+                const customerName = $(this).data('customer-name');
+                if (!customerId) {
+                    Swal.fire('Erreur', 'Veuillez sélectionner un client.', 'error');
+                    return;
+                }
 
-            $('#vehicle_id').change(function () {
-    let vehicleId = $(this).val();
-    let customerId = $('#customer_id').val();
-    
-    let $historyBtn = $('#viewHistoryBtn');
-    
-    if (vehicleId && customerId) {
-        $historyBtn.removeAttr('disabled');
-        $historyBtn.off('click').on('click', function(e) {
-            e.preventDefault();
-            let url = `/vehicles/${vehicleId}/history`; // route pour récupérer l'historique
-            window.open(url, 'popupWindow', 'width=1000,height=700,scrollbars=yes');
-            return false;
-        });
-    } else {
-        $historyBtn.attr('disabled', 'disabled');
-    }
-});
+                // Update modal title with customer name
+                $('#accountingModalLabel').text(`Historique des écritures comptables - ${customerName}`);
+                
+                // Clear previous entries and show loading
+                const tbody = $('#accountingEntries');
+                tbody.html('<tr><td colspan="5" class="text-center">Chargement...</td></tr>');
+                $('#balanceSummary').hide();
 
+                // Use cached entries if available
+                if (accountingEntriesCache[customerId]) {
+                    applyFilters(customerId);
+                    $('#accountingModal').modal('show');
+                } else {
+                    $.ajax({
+                        url: `/customers/${customerId}/accounting-entries`,
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        success: function (data) {
+                            accountingEntriesCache[customerId] = data.entries || [];
+                            applyFilters(customerId);
+                            $('#accountingModal').modal('show');
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(`Error fetching accounting entries for customer ID ${customerId}:`, error);
+                            tbody.html(`<tr><td colspan="5" class="text-center text-danger">Erreur: Impossible de charger les écritures comptables. Veuillez réessayer plus tard.</td></tr>`);
+                            Swal.fire('Erreur', 'Impossible de charger les écritures comptables.', 'error');
+                        }
+                    });
+                }
+            });
 
+            // Handle filter form submission
+            $('#accountingFilterForm').on('submit', function (e) {
+                e.preventDefault();
+                const customerId = $('#balanceBtn').data('customer-id');
+                if (customerId) {
+                    applyFilters(customerId);
+                }
+            });
+
+            // Reset filter function
+            window.resetAccountingFilter = function () {
+                const filterForm = $('#accountingFilterForm');
+                const customerId = $('#balanceBtn').data('customer-id');
+                if (filterForm && customerId) {
+                    filterForm[0].reset();
+                    $('#balanceSummary').hide();
+                    applyFilters(customerId);
+                }
+            };
+
+            // Show balance summary
+            window.showBalance = function () {
+                const customerId = $('#balanceBtn').data('customer-id');
+                if (customerId) {
+                    $('#balanceSummary').show();
+                    applyFilters(customerId);
+                }
+            };
+
+            // Apply client-side filters and render table
+            function applyFilters(customerId) {
+                const tbody = $('#accountingEntries');
+                const filterForm = $('#accountingFilterForm');
+                const formData = new FormData(filterForm[0]);
+                const typeFilter = formData.get('type') || '';
+                const startDate = formData.get('start_date') ? new Date(formData.get('start_date')) : null;
+                const endDate = formData.get('end_date') ? new Date(formData.get('end_date')) : null;
+
+                // Get cached entries
+                let entries = accountingEntriesCache[customerId] || [];
+
+                // Apply type filter
+                if (typeFilter) {
+                    entries = entries.filter(entry => {
+                        if (typeFilter === 'Factures') return entry.type === 'Facture';
+                        if (typeFilter === 'Avoirs') return entry.type === 'Avoir';
+                        if (typeFilter === 'Règlements') return entry.type !== 'Facture' && entry.type !== 'Avoir';
+                        return true;
+                    });
+                }
+
+                // Apply date filter
+                if (startDate || endDate) {
+                    entries = entries.filter(entry => {
+                        if (!entry.date || entry.date === '-') return false;
+                        const entryDateParts = entry.date.split('/');
+                        const entryDate = new Date(`${entryDateParts[2]}-${entryDateParts[1]}-${entryDateParts[0]}`);
+                        if (startDate && entryDate < startDate) return false;
+                        if (endDate && entryDate > endDate) return false;
+                        return true;
+                    });
+                }
+
+                // Calculate balance
+                let debits = 0;
+                let credits = 0;
+                entries.forEach(entry => {
+                    if (entry.type === 'Facture') {
+                        debits += parseFloat(entry.amount) || 0;
+                    } else {
+                        credits += parseFloat(entry.amount) || 0;
+                    }
+                });
+                const balance = debits - credits;
+
+                // Update balance summary
+                const debitsElement = $('#debits');
+                const creditsElement = $('#credits');
+                const balanceElement = $('#balance');
+                if (debitsElement && creditsElement && balanceElement) {
+                    debitsElement.text(debits.toFixed(2).replace('.', ',') + ' €');
+                    creditsElement.text(credits.toFixed(2).replace('.', ',') + ' €');
+                    balanceElement.text(balance.toFixed(2).replace('.', ',') + ' €');
+                    balanceElement.removeClass('text-success text-danger').addClass(balance >= 0 ? 'text-success' : 'text-danger');
+                }
+
+                // Render filtered entries
+                tbody.html('');
+                if (entries.length === 0) {
+                    tbody.html('<tr><td colspan="5" class="text-center text-muted">Aucune écriture comptable trouvée.</td></tr>');
+                    return;
+                }
+
+                entries.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${entry.type || '-'}</td>
+                        <td>${entry.numdoc || entry.reference || '-'}</td>
+                        <td>${entry.date || '-'}</td>
+                        <td>${(entry.amount !== undefined && entry.amount !== null) ? Number(entry.amount).toFixed(2).replace('.', ',') : '-'} €</td>
+                        <td>${entry.status || '-'}</td>
+                    `;
+                    tbody.append(row);
+                });
+            }
         });
     </script>
 </body>
