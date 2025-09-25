@@ -28,7 +28,6 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <style>
-        /* Existing styles unchanged */
         .card {
             border-radius: 8px;
             background: linear-gradient(135deg, #ffffff, #f8f9fa);
@@ -206,31 +205,32 @@
         .balance-btn {
             min-width: 100px;
         }
-        /* Style for blocked customers */
         .select2-results__option--disabled {
             color: #999 !important;
             background-color: #f8f9fa !important;
             cursor: not-allowed;
         }
-        /* Style for vehicle select when empty */
         .select2-container--default .select2-selection--single.vehicle-empty .select2-selection__rendered {
             color: #999;
             font-style: italic;
         }
-        /* New style to hide vehicle group by default */
         #vehicle_group {
             display: none;
         }
-        /* Ensure vehicle select aligns with other form controls */
         #vehicle_id.select2-container {
             width: 100% !important;
         }
         .select2-container--default .select2-selection--single {
-            height: 34px; /* Match height of other form controls */
+            height: 34px;
             line-height: 34px;
         }
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 34px;
+        }
+        /* Style for all customers option */
+        .select2-results__option--all-customers {
+            font-weight: bold;
+            color: #007bff;
         }
     </style>
 </head>
@@ -382,6 +382,7 @@
                                         </label>
                                         <select name="customer_id" id="customer_id" class="form-control select2" required>
                                             <option value="" disabled selected>Sélectionner un client</option>
+                                            <option value="%%%" data-select2-id="all-customers">Récupérer tous les clients</option>
                                         </select>
                                         <input type="hidden" name="tva_rate" id="tva_rate" value="0">
                                     </div>
@@ -410,17 +411,17 @@
                                 <div class="mb-3" id="customer_details" style="display: none;">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <p>	&#128204<strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span></p>
-                                            <p>&#10135<strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p>
-                                            <p>&#9993<strong>Email:</strong> <span id="customer_email"></span></p>
-                                            <p>&#128222<strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span></p>
+                                            <p><strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span></p>
+                                            <p><strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p>
+                                            <p><strong>Email:</strong> <span id="customer_email"></span></p>
+                                            <p><strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span></p>
                                         </div>
                                         <div class="col-md-6">
-                                            <p>	&#128681<strong>Adresse:</strong> <span id="customer_address"></span></p>
-                                            <p>&#128666<strong>Adresse de livraison:</strong> <span id="customer_address_delivery"></span></p>
-                                            <p>&#127988<strong>Ville & Pays:</strong> <span id="customer_city"></span>, <span id="customer_country"></span></p>
+                                            <p><strong>Adresse:</strong> <span id="customer_address"></span></p>
+                                            <p><strong>Adresse de livraison:</strong> <span id="customer_address_delivery"></span></p>
+                                            <p><strong>Ville & Pays:</strong> <span id="customer_city"></span>, <span id="customer_country"></span></p>
                                             <p>
-                                                &#128178<strong>Solde:</strong>
+                                                <strong>Solde:</strong>
                                                 <button type="button" class="btn btn-outline-info btn-sm balance-btn" id="balanceBtn" data-customer-id="" data-customer-name="" disabled>
                                                     <i class="fas fa-balance-scale me-1"></i> <span id="customer_balance">0,00 €</span>
                                                 </button>
@@ -532,7 +533,6 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                         </div>
                         <div class="modal-body">
-                            <!-- Balance Summary (Hidden by Default) -->
                             <div id="balanceSummary" class="card mb-3" style="display: none;">
                                 <div class="card-body">
                                     <h6 class="card-title text-primary">Balance Comptable</h6>
@@ -554,7 +554,6 @@
                                     </table>
                                 </div>
                             </div>
-                            <!-- Filter Form -->
                             <form id="accountingFilterForm" class="d-flex flex-wrap gap-2 mb-3">
                                 <select name="type" class="form-select form-select-sm" style="width: 200px;">
                                     <option value="">Type (Tous)</option>
@@ -626,15 +625,18 @@
                 width: '100%',
                 placeholder: 'Rechercher un client',
                 allowClear: true,
-                minimumInputLength: 2,
+                minimumInputLength: 0, // Allow search with empty input for "all customers"
                 ajax: {
                     url: '{{ route("customers.search") }}',
                     dataType: 'json',
                     delay: 250,
                     data: function (params) {
-                        return {
-                            query: params.term // Search term
-                        };
+                        // Use "%%%" for "Récupérer tous les clients" option
+                        let query = params.term || '';
+                        if ($('#customer_id').val() === '%%%') {
+                            query = '%%%';
+                        }
+                        return { query: query };
                     },
                     processResults: function (data) {
                         return {
@@ -654,7 +656,7 @@
                                     city: item.city,
                                     country: item.country,
                                     blocked: item.blocked,
-                                    disabled: item.disabled // Use disabled flag
+                                    disabled: item.disabled
                                 };
                             })
                         };
@@ -666,9 +668,10 @@
                         return data.text;
                     }
                     var $result = $(
-                        '<span' + (data.disabled ? ' class="select2-results__option--disabled"' : '') + '>' +
+                        '<span' + (data.disabled ? ' class="select2-results__option--disabled"' : '') + 
+                        (data.id === '%%%' ? ' class="select2-results__option--all-customers"' : '') + '>' +
                         data.text +
-                        (data.blocked ? ' <span class="badge bg-danger badge-very-sm"> &#x1F512;</span>' : '') +
+                        (data.blocked && data.id !== '%%%' ? ' <span class="badge bg-danger badge-very-sm"> &#x1F512;</span>' : '') +
                         '</span>'
                     );
                     return $result;
@@ -678,7 +681,7 @@
                         return data.text || 'Sélectionner un client';
                     }
                     return $('<span>' + (data.text || data.name) +
-                        (data.blocked ? ' <span class="badge bg-danger badge-very-sm"> &#x1F512;</span>' : '') +
+                        (data.blocked && data.id !== '%%%' ? ' <span class="badge bg-danger badge-very-sm"> &#x1F512;</span>' : '') +
                         '</span>');
                 }
             });
@@ -709,7 +712,7 @@
                 let vehicleId = $('#vehicle_id').val();
                 let $catalogBtn = $('#loadCatalogBtn');
                 
-                if (customerId && vehicleId && !$('#vehicle_id').prop('disabled')) {
+                if (customerId && vehicleId && !$('#vehicle_id').prop('disabled') && customerId !== '%%%') {
                     $catalogBtn
                         .attr('href', `/customers/${customerId}/vehicles/${vehicleId}/catalog`)
                         .removeAttr('disabled')
@@ -732,7 +735,7 @@
                 let customerId = $('#customer_id').val();
                 let $historyBtn = $('#viewHistoryBtn');
                 
-                if (vehicleId && customerId) {
+                if (vehicleId && customerId && customerId !== '%%%') {
                     $historyBtn.removeAttr('disabled');
                     $historyBtn.off('click').on('click', function(e) {
                         e.preventDefault();
@@ -749,12 +752,11 @@
                 let customerId = $(this).val();
                 let selectedData = $(this).select2('data')[0];
                 
-                // Update balance button with customer->solde
                 const $balanceBtn = $('#balanceBtn');
                 const $balanceSpan = $('#customer_balance');
                 let tvaRate, solde;
 
-                if (customerId && selectedData) {
+                if (customerId && selectedData && customerId !== '%%%') {
                     tvaRate = parseFloat(selectedData.tva || 0);
                     solde = parseFloat(selectedData.solde || 0);
                     $balanceBtn
@@ -776,10 +778,7 @@
                     $('#customer_details').show();
                     $('#tva_rate').val(tvaRate);
 
-                    // Show vehicle group when a customer is selected
                     $('#vehicle_group').show();
-
-                    // Fetch vehicles for the selected customer
                     let $vehicleSelect = $('#vehicle_id');
                     $vehicleSelect.empty().append('<option value="" disabled selected>Aucun véhicule disponible</option>');
                     $vehicleSelect.prop('disabled', true).addClass('vehicle-empty');
@@ -829,7 +828,6 @@
                     $('#tva_rate').val(0);
                     tvaRate = 0;
 
-                    // Hide vehicle group when no customer is selected
                     $('#vehicle_group').hide();
                     $('#vehicle_id').empty().append('<option value="" disabled selected>Aucun véhicule disponible</option>').addClass('vehicle-empty');
                     $('#vehicle_id').select2({ width: '100%' });
@@ -900,8 +898,8 @@
 
             $(document).on('click', '#search_results div', function () {
                 let customerId = $('#customer_id').val();
-                if (!customerId) {
-                    Swal.fire('Erreur', 'Veuillez sélectionner un client avant d\'ajouter un article.', 'error');
+                if (!customerId || customerId === '%%%') {
+                    Swal.fire('Erreur', 'Veuillez sélectionner un client valide avant d\'ajouter un article.', 'error');
                     return;
                 }
                 let tvaRate = parseFloat($('#customer_id').select2('data')[0]?.tva || 0);
@@ -959,7 +957,6 @@
                 $('#search_item').val('');
                 $('#search_results').empty();
                 updateGlobalTotals();
-
                 console.log('Added line - Code:', code, 'Price:', price, 'TVA Rate:', tvaRate, 'Customer ID:', customerId);
             });
 
@@ -974,15 +971,14 @@
                 let quantity = parseFloat($(this).find('.quantity').val()) || 0;
                 let remise = parseFloat($(this).find('.remise').val()) || 0;
                 let customerId = $('#customer_id').val();
-                let tvaRate = customerId ? parseFloat($('#customer_id').select2('data')[0]?.tva || 0) : 0;
-                if (customerId && $('#customer_id').select2('data')[0]?.tva == null) {
+                let tvaRate = customerId && customerId !== '%%%' ? parseFloat($('#customer_id').select2('data')[0]?.tva || 0) : 0;
+                if (customerId && customerId !== '%%%' && $('#customer_id').select2('data')[0]?.tva == null) {
                     Swal.fire('Erreur', 'Taux TVA non défini pour ce client.', 'error');
                     console.error('TVA Rate undefined for Customer ID:', customerId);
                     tvaRate = 0;
                 }
                 updateLineTotals(row, unitPriceHt, quantity, remise, tvaRate);
                 updateGlobalTotals();
-
                 console.log('Input changed - UnitPriceHt:', unitPriceHt, 'Quantity:', quantity, 'Remise:', remise, 'TVA Rate:', tvaRate, 'Customer ID:', customerId);
             });
 
@@ -991,35 +987,27 @@
                 quantity = parseFloat(quantity) || 0;
                 remise = parseFloat(remise) || 0;
                 tvaRate = parseFloat(tvaRate) || 0;
-
                 let totalHt = unitPriceHt * quantity * (1 - remise / 100);
                 let totalTtc = totalHt + (totalHt * tvaRate / 100);
-
                 row.find('.total_ht').text(totalHt.toFixed(2));
                 row.find('.total_ttc').text(totalTtc.toFixed(2));
-
                 console.log('Line Totals - HT:', totalHt, 'TTC:', totalTtc, 'TVA Rate:', tvaRate);
             }
 
-            // Stock Details Modal Handler (unchanged)
             $(document).on('click', '.stock-details-btn', function (event) {
                 event.preventDefault();
                 event.stopPropagation();
-
                 let code = $(this).data('code');
                 let name = $(this).data('name');
-
                 $('#stockDetailsModalLabel').text(`Détail du stock – ${code} : ${name}`);
                 $('#stockTableBody').empty();
                 $('#movementTableBody').empty();
-
                 $.ajax({
                     url: '{{ route("items.stock.details") }}',
                     method: 'GET',
                     data: { code: code },
                     success: function (data) {
                         console.log('AJAX Response:', data);
-
                         if (data.error) {
                             console.error('Server returned error:', data.error);
                             $('#stockTableBody').append(`
@@ -1030,7 +1018,6 @@
                             `);
                             return;
                         }
-
                         if (data.stocks && data.stocks.length > 0) {
                             data.stocks.forEach(stock => {
                                 $('#stockTableBody').append(`
@@ -1046,7 +1033,6 @@
                                 <tr><td colspan="3" class="text-center text-muted">Aucun stock trouvé</td></tr>
                             `);
                         }
-
                         if (data.movements && data.movements.length > 0) {
                             data.movements.forEach(movement => {
                                 let costPrice = parseFloat(movement.cost_price);
@@ -1089,7 +1075,6 @@
                         `);
                     }
                 });
-
                 $('#stockDetailsModal').modal('show');
             });
 
@@ -1105,14 +1090,12 @@
             document.getElementById('salesForm').addEventListener('submit', function (e) {
                 e.preventDefault();
                 const actionValue = e.submitter ? e.submitter.value : null;
-
                 let confirmMessage = '';
                 if (actionValue === 'validate') {
                     confirmMessage = 'Vous êtes sûr de valider ?';
                 } else if (actionValue === 'validate_and_invoice') {
                     confirmMessage = 'Vous êtes sûr de facturer ce bon de livraison ?';
                 }
-
                 if (confirmMessage && confirm(confirmMessage)) {
                     if (actionValue === 'validate_and_invoice') {
                         this.action = '{{ route("sales.delivery.store_and_invoice") }}';
@@ -1121,7 +1104,6 @@
                 }
             });
 
-            // Ensure modals are hidden on page load
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.classList.remove('show');
                 modal.style.display = 'none';
@@ -1131,20 +1113,17 @@
                 });
             });
 
-            // Accounting Entries Handler (unchanged)
             $(document).on('click', '.balance-btn', function () {
                 const customerId = $(this).data('customer-id');
                 const customerName = $(this).data('customer-name');
-                if (!customerId) {
-                    Swal.fire('Erreur', 'Veuillez sélectionner un client.', 'error');
+                if (!customerId || customerId === '%%%') {
+                    Swal.fire('Erreur', 'Veuillez sélectionner un client valide.', 'error');
                     return;
                 }
-
                 $('#accountingModalLabel').text(`Historique des écritures comptables - ${customerName}`);
                 const tbody = $('#accountingEntries');
                 tbody.html('<tr><td colspan="5" class="text-center">Chargement...</td></tr>');
                 $('#balanceSummary').hide();
-
                 if (accountingEntriesCache[customerId]) {
                     applyFilters(customerId);
                     $('#accountingModal').modal('show');
@@ -1205,7 +1184,6 @@
                 const endDate = formData.get('end_date') ? new Date(formData.get('end_date')) : null;
 
                 let entries = accountingEntriesCache[customerId] || [];
-
                 if (typeFilter) {
                     entries = entries.filter(entry => {
                         if (typeFilter === 'Factures') return entry.type === 'Facture';
@@ -1214,7 +1192,6 @@
                         return true;
                     });
                 }
-
                 if (startDate || endDate) {
                     entries = entries.filter(entry => {
                         if (!entry.date || entry.date === '-') return false;
@@ -1225,7 +1202,6 @@
                         return true;
                     });
                 }
-
                 let debits = 0;
                 let credits = 0;
                 entries.forEach(entry => {
@@ -1236,7 +1212,6 @@
                     }
                 });
                 const balance = debits - credits;
-
                 const debitsElement = $('#debits');
                 const creditsElement = $('#credits');
                 const balanceElement = $('#balance');
@@ -1246,13 +1221,11 @@
                     balanceElement.text(balance.toFixed(2).replace('.', ',') + ' €');
                     balanceElement.removeClass('text-success text-danger').addClass(balance >= 0 ? 'text-success' : 'text-danger');
                 }
-
                 tbody.html('');
                 if (entries.length === 0) {
                     tbody.html('<tr><td colspan="5" class="text-center text-muted">Aucune écriture comptable trouvée.</td></tr>');
                     return;
                 }
-
                 entries.forEach(entry => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
