@@ -45,7 +45,7 @@
         .card-body {
             padding: 1.5rem;
         }
-        .btn-primary, .btn-success, .btn-danger, .btn-outline-primary, .btn-outline-info {
+        .btn-primary, .btn-success, .btn-danger, .btn-warning, .btn-outline-primary, .btn-outline-info {
             font-size: 0.9rem;
             padding: 0.5rem 1rem;
             border-radius: 6px;
@@ -62,6 +62,10 @@
         .btn-danger:hover {
             background-color: #c82333;
             box-shadow: 0 4px 10px rgba(200, 35, 51, 0.3);
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+            box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
         }
         .btn-outline-primary:hover {
             background-color: #007bff;
@@ -181,7 +185,7 @@
                 width: 100%;
                 font-size: 0.8rem;
             }
-            .btn-primary, .btn-success, .btn-danger, .btn-outline-primary, .btn-outline-info {
+            .btn-primary, .btn-success, .btn-danger, .btn-warning, .btn-outline-primary, .btn-outline-info {
                 padding: 0.4rem 0.8rem;
                 font-size: 0.8rem;
             }
@@ -227,7 +231,6 @@
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 34px;
         }
-        /* Style for all customers option */
         .select2-results__option--all-customers {
             font-weight: bold;
             color: #007bff;
@@ -457,8 +460,8 @@
                                         </table>
                                     </div>
                                     <div class="total-display mt-2 text-end">
-                                        <h5 class="mb-1">Total HT : <span id="total_ht_global" class="text-success fw-bold">0.00</span> €</h5>
-                                        <h6 class="mb-0">Total TTC : <span id="total_ttc_global" class="text-danger fw-bold">0.00</span> €</h6>
+                                        <h5 class="mb-1">Total HT : <span id="total_ht_global" class="text-success fw-bold">0,00</span> €</h5>
+                                        <h6 class="mb-0">Total TTC : <span id="total_ttc_global" class="text-danger fw-bold">0,00</span> €</h6>
                                     </div>
                                     <a href="/articles" target="_blank" type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Aller a la Page Articles</a>
                                 </div>
@@ -469,6 +472,7 @@
                                 <div class="text-end">
                                     <button type="submit" name="action" value="validate" class="btn btn-success px-3 ms-2">✔️ Valider BL</button>
                                     <button type="submit" name="action" value="validate_and_invoice" class="btn btn-primary px-3 ms-2">📄 Valider et Facturer</button>
+                                    <button type="submit" name="action" value="save_draft" class="btn btn-warning px-3 ms-2">📝 Enregistrer Devis</button>
                                 </div>
                             </form>
                         </div>
@@ -476,7 +480,7 @@
                 </div>
             </div>
 
-            <!-- Stock Details Modal (unchanged) -->
+            <!-- Stock Details Modal -->
             <div class="modal fade" id="stockDetailsModal" tabindex="-1" aria-labelledby="stockDetailsModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-md">
                     <div class="modal-content">
@@ -521,7 +525,7 @@
                 </div>
             </div>
 
-            <!-- Accounting Entries Modal (unchanged) -->
+            <!-- Accounting Entries Modal -->
             <div class="modal fade accounting-modal" id="accountingModal" tabindex="-1" aria-labelledby="accountingModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
@@ -625,13 +629,12 @@
                 width: '100%',
                 placeholder: 'Rechercher un client',
                 allowClear: true,
-                minimumInputLength: 0, // Allow search with empty input for "all customers"
+                minimumInputLength: 0,
                 ajax: {
                     url: '{{ route("customers.search") }}',
                     dataType: 'json',
                     delay: 250,
                     data: function (params) {
-                        // Use "%%%" for "Récupérer tous les clients" option
                         let query = params.term || '';
                         if ($('#customer_id').val() === '%%%') {
                             query = '%%%';
@@ -702,8 +705,8 @@
                     totalHtGlobal += totalHt;
                     totalTtcGlobal += totalTtc;
                 });
-                $('#total_ht_global').text(totalHtGlobal.toFixed(2));
-                $('#total_ttc_global').text(totalTtcGlobal.toFixed(2));
+                $('#total_ht_global').text(totalHtGlobal.toFixed(2).replace('.', ','));
+                $('#total_ttc_global').text(totalTtcGlobal.toFixed(2).replace('.', ','));
                 console.log('Global Totals - HT:', totalHtGlobal, 'TTC:', totalTtcGlobal);
             }
 
@@ -946,8 +949,8 @@
                         <td><input type="number" name="lines[${lineCount}][ordered_quantity]" class="form-control quantity" value="1" min="0"></td>
                         <td><input type="number" name="lines[${lineCount}][unit_price_ht]" class="form-control unit_price_ht" value="${price.toFixed(2)}" step="0.01"></td>
                         <td><input type="number" name="lines[${lineCount}][remise]" class="form-control remise" value="0" min="0" max="100" step="0.01"></td>
-                        <td class="text-right total_ht">0.00</td>
-                        <td class="text-right total_ttc">0.00</td>
+                        <td class="text-right total_ht">0,00</td>
+                        <td class="text-right total_ttc">0,00</td>
                         <td><button type="button" class="btn btn-outline-danger btn-sm remove_line">×</button></td>
                     </tr>
                 `;
@@ -967,9 +970,9 @@
 
             $(document).on('input', '.quantity, .unit_price_ht, .remise', function () {
                 let row = $(this).closest('tr');
-                let unitPriceHt = parseFloat($(this).find('.unit_price_ht').val()) || 0;
-                let quantity = parseFloat($(this).find('.quantity').val()) || 0;
-                let remise = parseFloat($(this).find('.remise').val()) || 0;
+                let unitPriceHt = parseFloat(row.find('.unit_price_ht').val()) || 0;
+                let quantity = parseFloat(row.find('.quantity').val()) || 0;
+                let remise = parseFloat(row.find('.remise').val()) || 0;
                 let customerId = $('#customer_id').val();
                 let tvaRate = customerId && customerId !== '%%%' ? parseFloat($('#customer_id').select2('data')[0]?.tva || 0) : 0;
                 if (customerId && customerId !== '%%%' && $('#customer_id').select2('data')[0]?.tva == null) {
@@ -988,9 +991,9 @@
                 remise = parseFloat(remise) || 0;
                 tvaRate = parseFloat(tvaRate) || 0;
                 let totalHt = unitPriceHt * quantity * (1 - remise / 100);
-                let totalTtc = totalHt + (totalHt * tvaRate / 100);
-                row.find('.total_ht').text(totalHt.toFixed(2));
-                row.find('.total_ttc').text(totalTtc.toFixed(2));
+                let totalTtc = totalHt * (1 + tvaRate / 100);
+                row.find('.total_ht').text(totalHt.toFixed(2).replace('.', ','));
+                row.find('.total_ttc').text(totalTtc.toFixed(2).replace('.', ','));
                 console.log('Line Totals - HT:', totalHt, 'TTC:', totalTtc, 'TVA Rate:', tvaRate);
             }
 
@@ -1084,6 +1087,10 @@
                     e.preventDefault();
                     $(this).attr('action', '{{ route("sales.delivery.store_and_invoice") }}');
                     this.submit();
+                } else if (actionValue === 'save_draft') {
+                    e.preventDefault();
+                    $(this).attr('action', '{{ route("devis.store") }}');
+                    this.submit();
                 }
             });
 
@@ -1095,10 +1102,14 @@
                     confirmMessage = 'Vous êtes sûr de valider ?';
                 } else if (actionValue === 'validate_and_invoice') {
                     confirmMessage = 'Vous êtes sûr de facturer ce bon de livraison ?';
+                } else if (actionValue === 'save_draft') {
+                    confirmMessage = 'Vous êtes sûr d\'enregistrer ce devis ?';
                 }
                 if (confirmMessage && confirm(confirmMessage)) {
                     if (actionValue === 'validate_and_invoice') {
                         this.action = '{{ route("sales.delivery.store_and_invoice") }}';
+                    } else if (actionValue === 'save_draft') {
+                        this.action = '{{ route("devis.store") }}';
                     }
                     this.submit();
                 }

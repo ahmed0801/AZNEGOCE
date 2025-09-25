@@ -1155,4 +1155,124 @@ public function exportSingle($id)
         $invoice = SalesInvoice::with(['customer', 'lines.item'])->findOrFail($id);
         return Excel::download(new SalesInvoiceExport($invoice), "facture_vente_{$invoice->numdoc}.xlsx");
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public function storedevis(Request $request)
+{
+    $request->validate([
+        'customer_id' => 'required|exists:customers,id',
+        'order_date' => 'required|date',
+        'vehicle_id' => 'nullable|exists:vehicles,id',
+        'lines' => 'required|array',
+        'lines.*.article_code' => 'required|exists:items,code',
+        'lines.*.ordered_quantity' => 'required|numeric|min:0',
+        'lines.*.unit_price_ht' => 'required|numeric|min:0',
+        'lines.*.remise' => 'nullable|numeric|min:0|max:100',
+    ]);
+
+    return DB::transaction(function () use ($request) {
+        $customer = Customer::with('tvaGroup')->findOrFail($request->customer_id);
+        $tvaRate = $customer->tvaGroup->rate ?? 0;
+        $status = $request->input('action') === 'validate' ? 'validée' : 'Devis';
+
+        $maxRetries = 3;
+        $retryCount = 0;
+
+        while ($retryCount < $maxRetries) {
+            $souche = Souche::where('type', 'devis')->lockForUpdate()->first();
+            if (!$souche) {
+                \Log::error('Souche devis manquante');
+                throw new \Exception('Souche devis vente manquante');
+            }
+
+            $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
+            $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
+
+            \Log::info('Generating numdoc', ['numdoc' => $numdoc, 'last_number' => $souche->last_number, 'retry' => $retryCount]);
+
+            if (!SalesOrder::where('numdoc', $numdoc)->exists()) {
+                $order = SalesOrder::create([
+                    'customer_id' => $request->customer_id,
+                    'order_date' => $request->order_date,
+                    'numclient' => $customer->code,
+                    'vehicle_id' => $request->vehicle_id,
+                    'status' => $status,
+                    'total_ht' => 0,
+                    'total_ttc' => 0,
+                    'notes' => $request->notes,
+                    'numdoc' => $numdoc,
+                    'tva_rate' => $tvaRate,
+                    'store_id' => $request->store_id ?? 1,
+                ]);
+
+                $total = 0;
+                foreach ($request->lines as $line) {
+                    $item = Item::where('code', $line['article_code'])->first();
+                    if (!$item) {
+                        throw new \Exception("Article {$line['article_code']} introuvable.");
+                    }
+                    if ($status === 'validée' && $item->getStockQuantityAttribute() < $line['ordered_quantity']) {
+                        // throw new \Exception("Stock insuffisant pour l'article {$line['article_code']}.");
+                    }
+
+                    $ligne_total = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
+                    $unit_price_ttc = $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100) * (1 + $tvaRate / 100);
+                    $total_ligne_ttc = $ligne_total * (1 + $tvaRate / 100);
+                    $total += $ligne_total;
+
+                    SalesOrderLine::create([
+                        'sales_order_id' => $order->id,
+                        'article_code' => $line['article_code'],
+                        'ordered_quantity' => $line['ordered_quantity'],
+                        'unit_price_ht' => $line['unit_price_ht'],
+                        'unit_price_ttc' => $unit_price_ttc,
+                        'remise' => $line['remise'] ?? 0,
+                        'total_ligne_ht' => $ligne_total,
+                        'total_ligne_ttc' => $total_ligne_ttc,
+                    ]);
+                }
+
+                $order->update([
+                    'total_ht' => $total,
+                    'total_ttc' => $total * (1 + $tvaRate / 100),
+                ]);
+
+
+
+                $souche->last_number += 1;
+                $souche->save();
+                \Log::info('Souche updated', ['numdoc' => $numdoc, 'new_last_number' => $souche->last_number]);
+
+                return redirect()->route('sales.list')->with('success', 'Devis ' . ($status === 'validée' ? 'validée et créée' : 'créée'));
+            }
+
+            $souche->last_number += 1;
+            $souche->save();
+            $retryCount++;
+            \Log::warning('Duplicate numdoc detected, retrying', ['numdoc' => $numdoc, 'retry' => $retryCount]);
+        }
+
+        \Log::error('Failed to find unique numdoc after retries', ['last_numdoc' => $numdoc, 'retries' => $maxRetries]);
+        throw new \Exception('Impossible de générer un numéro de document unique après plusieurs tentatives.');
+    });
+}
+
+
+
 }

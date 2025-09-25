@@ -11,7 +11,7 @@ class SalesOrder extends Model
     use HasFactory;
 
     protected $fillable = [
-        'customer_id', 'numclient', 'order_date', 'status', 'total_ht', 'total_ttc', 'notes', 'numdoc', 'tva_rate', 'store_id', 'invoiced','vendeur',
+        'customer_id', 'numclient', 'vehicle_id', 'order_date', 'status', 'total_ht', 'total_ttc', 'notes', 'numdoc', 'tva_rate', 'store_id', 'invoiced','vendeur',
     ];
 
     public function customer()
@@ -34,6 +34,11 @@ class SalesOrder extends Model
         return $this->hasOne(SalesInvoice::class);
     }
 
+        public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class);
+    }
+    
 
         protected static function boot()
     {

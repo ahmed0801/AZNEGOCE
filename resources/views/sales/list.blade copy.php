@@ -209,8 +209,7 @@
                         </select>
 
                         <select name="status" class="form-select form-select-sm" style="width: 170px;">
-                            <option value="">Type/Statut</option>
-                            <option value="Devis" {{ request('status') == 'Devis' ? 'selected' : '' }}>Devis</option>
+                            <option value="">Statut Commande (Tous)</option>
                             <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
                             <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
                         </select>
@@ -245,8 +244,6 @@
                                     </h6>
                                     @if($order->status === 'brouillon')
                                         <span class="badge bg-secondary">{{ ucfirst($order->status) }}</span>
-                                        @elseif($order->status === 'Devis')
-                                        <span class="badge bg-dark">{{ ucfirst($order->status) }}</span>
                                     @elseif($order->status === 'validée')
                                         <span class="badge bg-success">{{ ucfirst($order->status) }}</span>
                                     @endif
@@ -272,7 +269,7 @@
                                             <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
                                         </button>
                                         <div class="dropdown-menu">
-                                            @if($order->status === 'brouillon' or $order->status === 'Devis')
+                                            @if($order->status === 'brouillon')
                                                 <a class="dropdown-item" href="{{ route('sales.edit', $order->id) }}">
                                                     <i class="fas fa-edit"></i> Modifier
                                                 </a>

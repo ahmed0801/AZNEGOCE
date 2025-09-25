@@ -308,6 +308,10 @@ Route::get('/export/{id}', [SalesController::class, 'exportSingle'])->name('sale
 
 
 
+        Route::post('/salesdevis', [SalesController::class, 'storedevis'])->name('devis.store');
+
+
+
 
 
 
