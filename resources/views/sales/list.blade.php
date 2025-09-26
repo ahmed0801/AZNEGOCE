@@ -82,9 +82,8 @@
                             <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
                         </li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
-                        <li class="nav-item"><a href="/sales/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
-                        <li class="nav-item active"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
-                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
+                        <li class="nav-item"><a href="/sales/delivery/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
+                        <li class="nav-item active"><a href="/sales"><i class="fas fa-file-alt"></i><p>Devis & Précommandes</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
                         <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
@@ -193,9 +192,16 @@
                     @endif
 
                     <h4>📋 Liste des commandes de vente :
-                        <a href="{{ route('sales.create') }}" class="btn btn-sm btn-success">
+
+                        <!-- <a href="{{ route('sales.create') }}" class="btn btn-sm btn-success">
                             Nouvelle <i class="fas fa-plus-circle ms-2"></i>
+                        </a> -->
+
+                                                <a href="{{ route('sales.delivery.create') }}" class="btn btn-sm btn-success">
+                            Nouvelle Commande <i class="fas fa-plus-circle ms-2"></i>
                         </a>
+
+
                     </h4>
 
                     <form method="GET" action="{{ route('sales.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
@@ -274,12 +280,12 @@
                                         <div class="dropdown-menu">
                                             @if($order->status === 'brouillon' or $order->status === 'Devis')
                                                 <a class="dropdown-item" href="{{ route('sales.edit', $order->id) }}">
-                                                    <i class="fas fa-edit"></i> Modifier
+                                                    <i class="fas fa-edit"></i> Modifier & valider
                                                 </a>
                                                 <form action="{{ route('sales.validate', $order->id) }}" method="POST" onsubmit="return confirm('Valider cette commande ?')" class="d-inline">
                                                     @csrf
                                                     <button type="submit" class="dropdown-item">
-                                                        <i class="fas fa-check"></i> Valider
+                                                        <i class="fas fa-check"></i> Générer BL
                                                     </button>
                                                 </form>
                                             @endif
