@@ -354,4 +354,88 @@ class CustomerController extends Controller
 
 
 
+
+
+
+
+
+
+
+
+ public function newforsale(Request $request)
+    {
+        $query = Customer::with(['vehicles', 'tvaGroup', 'discountGroup', 'paymentMode', 'paymentTerm']);
+
+        // Filtres
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('code', 'LIKE', "%{$search}%")
+                  ->orWhere('phone1', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('city', 'LIKE', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('blocked', $request->status == 'blocked' ? 1 : 0);
+        }
+
+        if ($request->filled('city')) {
+            $query->where('city', 'LIKE', "%{$request->city}%");
+        }
+
+        if ($request->filled('min_solde')) {
+            $query->where('solde', '>=', $request->min_solde);
+        }
+
+        if ($request->filled('max_solde')) {
+            $query->where('solde', '<=', $request->max_solde);
+        }
+
+        $customers = $query->orderBy('name')->paginate(20);
+
+        $tvaGroups = TvaGroup::all();
+        $discountGroups = DiscountGroup::all();
+        $paymentModes = PaymentMode::all();
+        $paymentTerms = PaymentTerm::all();
+
+        // Villes uniques pour le filtre
+        $cities = Customer::distinct()->pluck('city')->filter()->sort()->values();
+
+        // Fetch TecDoc brands
+        $response = Http::withHeaders([
+            'X-Api-Key' => env('TECDOC_API_KEY', '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg')
+        ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
+            "getLinkageTargets" => [
+                "provider" => env('TECDOC_PROVIDER_ID', 23454),
+                "linkageTargetCountry" => env('TECDOC_COUNTRY', 'TN'),
+                "lang" => env('TECDOC_LANG', 'fr'),
+                "linkageTargetType" => "P",
+                "perPage" => 0,
+                "page" => 1,
+                "includeMfrFacets" => true
+            ]
+        ]);
+
+        $brands = $response->successful() && isset($response->json()['mfrFacets']['counts'])
+            ? $response->json()['mfrFacets']['counts']
+            : [];
+
+        return view('customernew', compact(
+            'customers', 
+            'tvaGroups', 
+            'discountGroups', 
+            'paymentModes', 
+            'paymentTerms', 
+            'brands',
+            'cities'
+        ));
+    }
+
+
+
+
+
 }

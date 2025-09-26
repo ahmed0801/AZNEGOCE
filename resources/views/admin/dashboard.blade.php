@@ -200,11 +200,16 @@
                             </h6>
                         </div>
                         <div class="ms-md-auto py-2 py-md-0">
-                            <a href="/delivery_notes/list" class="btn btn-label-info btn-round me-2">
+                            <a href="/salesinvoices" class="btn btn-label-info btn-round me-2">
+                                <span class="btn-label"><i class="fas fa-list"></i></span> Voir Factures Ventes
+                            </a>
+
+                             <a href="/delivery_notes/list" class="btn btn-label-info btn-round me-2">
                                 <span class="btn-label"><i class="fas fa-list"></i></span> Voir Bons de Livraison
                             </a>
+
                             <a href="/sales/delivery/create" class="btn btn-primary btn-round">
-                                <span class="btn-label"><i class="fas fa-plus"></i></span> Nouveau Bon de Livraison
+                                <span class="btn-label"><i class="fas fa-plus"></i></span> Nouvelle Commande
                             </a>
                         </div>
                     </div>

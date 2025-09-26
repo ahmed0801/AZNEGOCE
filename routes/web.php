@@ -136,6 +136,9 @@ Route::put('/brand/{id}', [BrandController::class, 'update'])->name('brand.updat
 
 
 Route::get('/customers', [CustomerController::class, 'index'])->name('customer.index');
+// créer un client depuis la page vente
+Route::get('/newcustomer', [CustomerController::class, 'newforsale'])->name('customer.new');
+
 Route::post('/customer', [CustomerController::class, 'store'])->name('customer.store');
 Route::delete('/customer/{id}', [CustomerController::class, 'destroy'])->name('customer.destroy');
 Route::put('/customer/{id}', [CustomerController::class, 'update'])->name('customer.update');

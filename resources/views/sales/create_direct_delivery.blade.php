@@ -377,11 +377,13 @@
                                 @csrf
                                 <div class="row mb-3">
                                     <div class="col-md-4 col-12 mb-2">
-                                        <label class="form-label">Client
-                                            <a href="/customers" target="_blank">
-                                                <i class="fas fa-plus-circle ms-2"></i>
-                                            </a>
-                                        </label>
+<a href="/newcustomer"
+   onclick="window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); return false;"
+   class="btn btn-outline-secondary btn-sm px-2 py-1" style="font-size: 0.75rem;">
+  Créer & Modifier Client <i class="fas fa-plus-circle ms-1"></i>
+</a>
+
+                                                                                    
                                         <select name="customer_id" id="customer_id" class="form-control select2" required>
                                             <option value="" disabled selected>Sélectionner un client</option>
                                             <option value="%%%" data-select2-id="all-customers">Récupérer tous les clients</option>

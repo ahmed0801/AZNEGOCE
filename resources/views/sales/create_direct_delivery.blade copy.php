@@ -45,7 +45,7 @@
         .card-body {
             padding: 1.5rem;
         }
-        .btn-primary, .btn-success, .btn-danger, .btn-outline-primary, .btn-outline-info {
+        .btn-primary, .btn-success, .btn-danger, .btn-warning, .btn-outline-primary, .btn-outline-info {
             font-size: 0.9rem;
             padding: 0.5rem 1rem;
             border-radius: 6px;
@@ -62,6 +62,10 @@
         .btn-danger:hover {
             background-color: #c82333;
             box-shadow: 0 4px 10px rgba(200, 35, 51, 0.3);
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+            box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
         }
         .btn-outline-primary:hover {
             background-color: #007bff;
@@ -181,7 +185,7 @@
                 width: 100%;
                 font-size: 0.8rem;
             }
-            .btn-primary, .btn-success, .btn-danger, .btn-outline-primary, .btn-outline-info {
+            .btn-primary, .btn-success, .btn-danger, .btn-warning, .btn-outline-primary, .btn-outline-info {
                 padding: 0.4rem 0.8rem;
                 font-size: 0.8rem;
             }
@@ -256,10 +260,9 @@
                             <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
                         </li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
-                        <li class="nav-item"><a href="/sales/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
-                        <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
-                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
-                        <li class="nav-item active"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
+                        <li class="nav-item active"><a href="/sales/delivery/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
+                        <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Devis & Précommandes</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
                         <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
                         <li class="nav-item"><a href="/salesnotes/list"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
@@ -367,18 +370,20 @@
 
                     <div class="card shadow-sm">
                         <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">Créer un bon de livraison</h5>
+                            <h5 class="mb-0">Créer un Document de Vente</h5>
                         </div>
                         <div class="card-body">
                             <form action="{{ route('sales.delivery.store') }}" method="POST" id="salesForm">
                                 @csrf
                                 <div class="row mb-3">
                                     <div class="col-md-4 col-12 mb-2">
-                                        <label class="form-label">Client
-                                            <a href="/customers" target="_blank">
-                                                <i class="fas fa-plus-circle ms-2"></i>
-                                            </a>
-                                        </label>
+<a href="/newcustomer"
+   onclick="window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); return false;"
+   class="btn btn-outline-secondary btn-sm px-2 py-1" style="font-size: 0.75rem;">
+  Créer & Modifier Client <i class="fas fa-plus-circle ms-1"></i>
+</a>
+
+                                                                                    
                                         <select name="customer_id" id="customer_id" class="form-control select2" required>
                                             <option value="" disabled selected>Sélectionner un client</option>
                                             <option value="%%%" data-select2-id="all-customers">Récupérer tous les clients</option>
@@ -456,8 +461,8 @@
                                         </table>
                                     </div>
                                     <div class="total-display mt-2 text-end">
-                                        <h5 class="mb-1">Total HT : <span id="total_ht_global" class="text-success fw-bold">0.00</span> €</h5>
-                                        <h6 class="mb-0">Total TTC : <span id="total_ttc_global" class="text-danger fw-bold">0.00</span> €</h6>
+                                        <h5 class="mb-1">Total HT : <span id="total_ht_global" class="text-success fw-bold">0,00</span> €</h5>
+                                        <h6 class="mb-0">Total TTC : <span id="total_ttc_global" class="text-danger fw-bold">0,00</span> €</h6>
                                     </div>
                                     <a href="/articles" target="_blank" type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Aller a la Page Articles</a>
                                 </div>
@@ -468,6 +473,7 @@
                                 <div class="text-end">
                                     <button type="submit" name="action" value="validate" class="btn btn-success px-3 ms-2">✔️ Valider BL</button>
                                     <button type="submit" name="action" value="validate_and_invoice" class="btn btn-primary px-3 ms-2">📄 Valider et Facturer</button>
+                                    <button type="submit" name="action" value="save_draft" class="btn btn-warning px-3 ms-2">📝 Enregistrer Devis</button>
                                 </div>
                             </form>
                         </div>
@@ -944,8 +950,8 @@
                         <td><input type="number" name="lines[${lineCount}][ordered_quantity]" class="form-control quantity" value="1" min="0"></td>
                         <td><input type="number" name="lines[${lineCount}][unit_price_ht]" class="form-control unit_price_ht" value="${price.toFixed(2)}" step="0.01"></td>
                         <td><input type="number" name="lines[${lineCount}][remise]" class="form-control remise" value="0" min="0" max="100" step="0.01"></td>
-                        <td class="text-right total_ht">0.00</td>
-                        <td class="text-right total_ttc">0.00</td>
+                        <td class="text-right total_ht">0,00</td>
+                        <td class="text-right total_ttc">0,00</td>
                         <td><button type="button" class="btn btn-outline-danger btn-sm remove_line">×</button></td>
                     </tr>
                 `;
@@ -1082,6 +1088,10 @@
                     e.preventDefault();
                     $(this).attr('action', '{{ route("sales.delivery.store_and_invoice") }}');
                     this.submit();
+                } else if (actionValue === 'save_draft') {
+                    e.preventDefault();
+                    $(this).attr('action', '{{ route("devis.store") }}');
+                    this.submit();
                 }
             });
 
@@ -1093,10 +1103,14 @@
                     confirmMessage = 'Vous êtes sûr de valider ?';
                 } else if (actionValue === 'validate_and_invoice') {
                     confirmMessage = 'Vous êtes sûr de facturer ce bon de livraison ?';
+                } else if (actionValue === 'save_draft') {
+                    confirmMessage = 'Vous êtes sûr d\'enregistrer ce devis ?';
                 }
                 if (confirmMessage && confirm(confirmMessage)) {
                     if (actionValue === 'validate_and_invoice') {
                         this.action = '{{ route("sales.delivery.store_and_invoice") }}';
+                    } else if (actionValue === 'save_draft') {
+                        this.action = '{{ route("devis.store") }}';
                     }
                     this.submit();
                 }

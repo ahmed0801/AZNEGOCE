@@ -40,6 +40,15 @@
 </head>
 <body>
     <div class="container mt-5">
+
+    <!-- Bouton retour -->
+    <div class="mb-3">
+        <a href="/newcustomer" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left-circle"></i> Retour
+        </a>
+    </div>
+
+
         <div class="card">
             <div class="card-header text-noir">
                 Catalogue TecDoc pour le véhicule : {{ $vehicle->license_plate }} ({{ $vehicle->brand_name }} {{ $vehicle->model_name }})
