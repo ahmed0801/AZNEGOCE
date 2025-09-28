@@ -393,7 +393,7 @@
         @endif
 
         <h4>📋 Liste des commandes d'achat : 
-            <a href="/purchases" class="btn btn-sm btn-success">Nouveau 
+            <a href="/purchases" class="btn btn-outline-success btn-round ms-2">Nouvelle Commande Achat 
                 <i class="fas fa-plus-circle ms-2"></i>
             </a>
         </h4>

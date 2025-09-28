@@ -400,7 +400,7 @@
         <div class="container mt-4">
 
         <h4>Articles :                         
-          <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#createItemModal">Nouveau 
+          <button type="submit" class="btn btn-outline-success btn-round ms-2" data-bs-toggle="modal" data-bs-target="#createItemModal">Nouvel Article
            <i class="fas fa-plus-circle ms-2"></i>
           </button>
 </h4>

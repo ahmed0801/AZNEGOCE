@@ -180,17 +180,22 @@
 
                     <div class="container mt-4">
                         <h4>📋 Liste des factures de vente :
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <!-- <div class="btn-group">
+                                <button type="button" class="btn btn-outline-secondary btn-round ms-2 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Nouvelle facture <i class="fas fa-plus-circle ms-2"></i>
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="{{ route('salesinvoices.create_grouped') }}">Facture groupée</a>
-                                    <!-- <a class="dropdown-item" href="{{ route('salesinvoices.create_free') }}">Facture libre</a> -->
+                                    <a class="dropdown-item" href="{{ route('salesinvoices.create_free') }}">Facture libre</a>
                                 </div>
-                            </div>
+                            </div> -->
 
-                            <a href="{{ route('sales.delivery.create') }}" class="btn btn-sm btn-success">
+
+                            <a href="{{ route('salesinvoices.create_grouped') }}" class="btn btn-outline-success btn-round ms-2">
+                            Nouvelle Facture Groupée <i class="fas fa-plus-circle ms-2"></i>
+                        </a>
+
+                            <a href="{{ route('sales.delivery.create') }}" class="btn btn-outline-success btn-round ms-2">
                             Nouvelle Commande <i class="fas fa-plus-circle ms-2"></i>
                         </a>
 

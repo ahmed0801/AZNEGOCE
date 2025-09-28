@@ -413,10 +413,20 @@
                                     <label class="form-label">TVA %</label>
                                     <input type="text" id="tva_display" class="form-control" readonly value="0">
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-3">
                                     <label class="form-label">Date de commande</label>
-                                    <input type="date" name="order_date" class="form-control" required>
+                                    <input type="date" name="order_date" class="form-control" value="{{ now()->format('Y-m-d') }}" required>
                                 </div>
+
+                                <div class="col-md-3">
+                                        <label class="form-label">Type de commande</label>
+                                        <select name="type" class="form-control select2" required>
+                                            <option value="">Sélectionner le type</option>
+                                            <option value="Commande stock">Commande stock</option>
+                                            <option value="Commande sur demande">Commande sur demande</option>
+                                        </select>
+                                    </div>
+
                             </div>
 
                             <h6 class="mt-4 mb-2">Lignes de commande</h6>

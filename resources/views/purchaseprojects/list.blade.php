@@ -393,7 +393,7 @@
         @endif
 
         <h4>📋 Liste des projets de commande :
-                    <a href="{{ route('purchaseprojects.index') }}" class="btn btn-sm btn-success">Nouveau
+                    <a href="{{ route('purchaseprojects.index') }}" class="btn btn-outline-success btn-round ms-2">Nouveau Projet De Commande
                         <i class="fas fa-plus-circle ms-2"></i>
                     </a>
                 </h4>

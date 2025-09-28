@@ -247,7 +247,7 @@
                     @endif
                     <div class="card shadow-sm">
                         <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">Créer une Facture Groupée</h5>
+                            <h5 class="mb-0">Créer une Facture Vente Groupée</h5>
                         </div>
                         <div class="card-body">
                             <form method="POST" action="{{ route('salesinvoices.store_grouped') }}">
@@ -378,7 +378,7 @@
                     },
                     cache: true
                 },
-                placeholder: 'Sélectionner des bons de livraison ou retours',
+                placeholder: 'Sélect. Documents',
                 minimumInputLength: 0,
                 width: '100%'
             });

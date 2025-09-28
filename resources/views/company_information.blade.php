@@ -481,7 +481,7 @@
                                 @enderror
                             </div>
                             <div class="mb-3 col-md-6">
-                                <label for="matricule_fiscal" class="form-label">Matricule Fiscal</label>
+                                <label for="matricule_fiscal" class="form-label">siret / siren</label>
                                 <input type="text" class="form-control" id="matricule_fiscal" name="matricule_fiscal" value="{{ old('matricule_fiscal', $company ? $company->matricule_fiscal : '1234567ABC000') }}" required>
                                 @error('matricule_fiscal')
                                     <div class="text-danger">{{ $message }}</div>

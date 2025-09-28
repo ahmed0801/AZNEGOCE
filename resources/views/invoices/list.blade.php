@@ -396,12 +396,12 @@
         <div class="container mt-4">
             <h4>📄 Liste des factures d'achat :
                 <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Nouvelle facture <i class="fas fa-plus-circle ms-2"></i>
+                    <button type="button" class="btn btn-outline-success btn-round ms-2 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Nouvelle facture Achat <i class="fas fa-plus-circle ms-2"></i>
                     </button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="{{ route('invoices.create_free') }}">Facture libre</a>
-                        <a class="dropdown-item" href="{{ route('invoices.create_grouped') }}">Facture groupée</a>
+                        <a class="dropdown-item" href="{{ route('invoices.create_free') }}">Facture Achat Libre</a>
+                        <a class="dropdown-item" href="{{ route('invoices.create_grouped') }}">Facture Achat Groupée</a>
                     </div>
                 </div>
             </h4>

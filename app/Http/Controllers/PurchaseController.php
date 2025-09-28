@@ -110,6 +110,7 @@ public function list(Request $request)
         'notes' => $request->notes,
         'numdoc' => $numdoc,
         'tva_rate' => $tvaRate,
+        'type' => $request->type, // Added new field
     ]);
 
     $total = 0;

@@ -207,14 +207,20 @@
 
                     <div class="container mt-4">
                         <h4>📋 Liste des avoirs de vente :
-                            <div class="btn-group">
+                            <!-- <div class="btn-group">
                                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Nouvel avoir <i class="fas fa-plus-circle ms-2"></i>
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="{{ route('salesnotes.create') }}">Créer un avoir</a>
                                 </div>
-                            </div>
+                            </div> -->
+
+                                                        <a href="{{ route('salesnotes.create') }}" class="btn btn-outline-success btn-round ms-2">
+                            Nouvel avoir <i class="fas fa-plus-circle ms-2"></i>
+                        </a>
+
+
                         </h4>
 
                         <form method="GET" action="{{ route('salesnotes.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">

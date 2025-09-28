@@ -194,10 +194,11 @@
                     @endif
 
                     <h4>📋 Liste des bons de livraison :
-                        <a href="{{ route('sales.delivery.create') }}" class="btn btn-sm btn-success">
+                        <a href="{{ route('sales.delivery.create') }}" class="btn btn-outline-success btn-round ms-2">
                             Nouvelle Commande <i class="fas fa-plus-circle ms-2"></i>
                         </a>
-                        <a href="{{ route('salesinvoices.create_grouped') }}" class="btn btn-sm btn-success">Facture groupée <i class="fas fa-file-invoice ms-2"></i></a>
+                        
+                        <a href="{{ route('salesinvoices.create_grouped') }}" class="btn btn-outline-success btn-round ms-2">Nouvelle Facture groupée <i class="fas fa-file-invoice ms-2"></i></a>
                     </h4>
 
                     <form method="GET" action="{{ route('delivery_notes.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">

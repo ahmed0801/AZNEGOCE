@@ -399,8 +399,8 @@
                     <div class="container mt-4">
                         <h4>📄 Liste des avoirs d'achat :
                             <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    Nouvel avoir <i class="fas fa-plus-circle ms-2"></i>
+                                <button type="button" class="btn btn-outline-success btn-round ms-2 dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    Nouvel Avoir Achat <i class="fas fa-plus-circle ms-2"></i>
                                 </button>
                                 <div class="dropdown-menu">
                                     @if($returns->isEmpty())

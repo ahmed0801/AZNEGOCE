@@ -174,9 +174,11 @@ class SalesInvoicesController extends Controller
         $deliveryNotes = DeliveryNote::with(['customer', 'lines.item'])
             ->where('invoiced', false)
             ->whereIn('status', ['expédié', 'livré'])
+            ->orderBy('numdoc', 'DESC')
             ->get();
         $salesReturns = SalesReturn::with(['customer', 'lines.item'])
             ->where('invoiced', false)
+            ->orderBy('numdoc', 'DESC')
             ->get();
         $customers = Customer::orderBy('name')->get();
         return view('salesinvoices.create_grouped', compact('deliveryNotes', 'salesReturns', 'customers'));

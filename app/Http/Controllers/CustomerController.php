@@ -319,6 +319,90 @@ class CustomerController extends Controller
 
 
 
+
+
+     public function getAllAccountingEntries()
+{
+    try {
+        Log::info("Fetching all accounting entries");
+
+        // Fetch invoices with customer relation
+        $invoices = Invoice::with('customer')
+            ->select('id', 'customer_id', 'numdoc', 'invoice_date as date', 'total_ttc as amount', 'paid', 'numdoc as reference')
+            ->get()
+            ->map(function ($invoice) {
+                return [
+                    'type' => 'Facture',
+                    'customer_id' => $invoice->customer_id,
+                    'customer_name' => $invoice->customer ? $invoice->customer->name : '-',
+                    'numdoc' => $invoice->numdoc ?? '-',
+                    'date' => $invoice->date ? \Carbon\Carbon::parse($invoice->date)->format('d/m/Y') : '-',
+                    'amount' => is_numeric($invoice->amount) ? (float) $invoice->amount : 0,
+                    'status' => $invoice->paid ? 'Payée' : 'Non payée',
+                    'reference' => $invoice->reference ?? '-'
+                ];
+            });
+
+        // Fetch sales notes with customer relation
+        $salesNotes = SalesNote::with('customer')
+            ->select('id', 'customer_id', 'numdoc', 'note_date as date', 'total_ttc as amount', 'paid', 'numdoc as reference')
+            ->get()
+            ->map(function ($note) {
+                return [
+                    'type' => 'Avoir',
+                    'customer_id' => $note->customer_id,
+                    'customer_name' => $note->customer ? $note->customer->name : '-',
+                    'numdoc' => $note->numdoc ?? '-',
+                    'date' => $note->date ? \Carbon\Carbon::parse($note->date)->format('d/m/Y') : '-',
+                    'amount' => is_numeric($note->amount) ? -(float) $note->amount : 0,
+                    'status' => $note->paid ? 'Payée' : 'Non payée',
+                    'reference' => $note->reference ?? '-'
+                ];
+            });
+
+        // Fetch payments with customer relation
+        $payments = Payment::with('customer')
+        ->where('customer_id','!=',null)
+            ->select('id', 'customer_id', 'payment_mode', 'reference', 'payment_date as date', 'amount', 'reconciled as status', 'lettrage_code as reference')
+            ->get()
+            ->map(function ($payment) {
+                return [
+                    'type' => $payment->payment_mode,
+                    'customer_id' => $payment->customer_id,
+                    'customer_name' => $payment->customer ? $payment->customer->name : '-',
+                    'numdoc' => $payment->reference ?? '-',
+                    'date' => $payment->date ? \Carbon\Carbon::parse($payment->date)->format('d/m/Y') : '-',
+                    'amount' => is_numeric($payment->amount) ? (float) $payment->amount : 0,
+                    'status' => $payment->status ? 'Validé' : 'Validé',
+                    'reference' => $payment->reference ?? '-'
+                ];
+            });
+
+        // Merge and sort entries
+        $entries = $invoices->merge($salesNotes)->merge($payments)->sortByDesc('date')->values();
+
+        Log::info("Successfully fetched all accounting entries", ['entry_count' => $entries->count()]);
+
+        return response()->json(['entries' => $entries], 200);
+    } catch (\Exception $e) {
+        Log::error("Error fetching all accounting entries", [
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json(['error' => 'Erreur serveur: Impossible de charger les écritures comptables'], 500);
+    }
+}
+
+
+
+
+
+
+
+
+
    public function search(Request $request)
 {
     $query = $request->input('query');

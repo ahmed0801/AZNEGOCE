@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PurchaseOrder extends Model
 {
-    protected $fillable = ['supplier_id','numdoc', 'order_date', 'status', 'total_ht', 'total_ttc', 'notes','tva_rate','invoiced','status_livraison'];
+    protected $fillable = ['supplier_id','numdoc', 'order_date', 'status','type', 'total_ht', 'total_ttc', 'notes','tva_rate','invoiced','status_livraison'];
 
     public function supplier()
     {

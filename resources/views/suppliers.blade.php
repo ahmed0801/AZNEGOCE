@@ -401,9 +401,14 @@
 
        <h4>Liste des Fournisseurs :
 
-                  <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#createItemModal">Nouveau 
+                  <button type="submit" class="btn btn-outline-success btn-round ms-2" data-bs-toggle="modal" data-bs-target="#createItemModal">Nouveau Fournisseur 
            <i class="fas fa-plus-circle ms-2"></i>
           </button>
+
+          <button type="submit" class="btn btn-outline-secondary btn-round ms-2" data-bs-toggle="modal" data-bs-target="#allAccountingModal">
+                                Ecritures Comptables Achat <i class="fas fa-balance-scale me-1"></i>
+                            </button>
+
        </h4>
 
     <!-- Modal création -->
@@ -458,12 +463,12 @@
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Matricule fiscale</label>
+            <label class="form-label">SIRET</label>
             <input type="text" name="matfiscal" class="form-control">
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Identité bancaire</label>
+            <label class="form-label">IBAN</label>
             <input type="text" name="bank_no" class="form-control">
         </div>
 
@@ -804,12 +809,12 @@
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Matricule fiscale</label>
+            <label class="form-label">SIRET</label>
             <input type="text" name="matfiscal" class="form-control" value="{{ $customer->matfiscal }}" disabled>
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Identité bancaire</label>
+            <label class="form-label">IBAN</label>
             <input type="text" name="bank_no" class="form-control" value="{{ $customer->bank_no }}" disabled>
         </div>
 

@@ -221,7 +221,7 @@
 
                     <div class="card mt-4">
                         <div class="card-header bg-white border-start border-4 border-primary">
-                            <h3>📝 Créer une Facture Directe</h3>
+                            <h3>📝 Créer une Facture Vente Directe</h3>
                             <h6 class="text-muted">Bon de Livraison #{{ $deliveryNote->numdoc }}</h6>
                         </div>
                         <div class="card-body">

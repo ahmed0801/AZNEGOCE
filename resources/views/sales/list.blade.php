@@ -197,7 +197,7 @@
                             Nouvelle <i class="fas fa-plus-circle ms-2"></i>
                         </a> -->
 
-                                                <a href="{{ route('sales.delivery.create') }}" class="btn btn-sm btn-success">
+                                                <a href="{{ route('sales.delivery.create') }}" class="btn btn-outline-success btn-round ms-2">
                             Nouvelle Commande <i class="fas fa-plus-circle ms-2"></i>
                         </a>
 

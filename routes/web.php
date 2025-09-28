@@ -436,6 +436,9 @@ Route::delete('/invoices/{id}/delete_supplier_invoice', [PurchaseController::cla
 
 // ecriture client historique client
 Route::get('/customers/{customer}/accounting-entries', [CustomerController::class, 'getAccountingEntries'])->name('customer.accounting-entries');
+// ecriture toutes client historique client
+Route::get('/allcustomers/accounting-entries', [CustomerController::class, 'getAllAccountingEntries'])->name('allcustomer.accounting-entries');
+
 // ecriture client historique fournisseurs
 Route::get('/suppliers/{customer}/accounting-entries', [SupplierController::class, 'getAccountingEntries'])->name('supplier.accounting-entries');
 
