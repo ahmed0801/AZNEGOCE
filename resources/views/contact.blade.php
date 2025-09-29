@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Liste des Retours de Vente - AZ ERP</title>
+    <title>AZ ERP - Comptes Généraux</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
 
@@ -30,63 +30,143 @@
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}" />
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
+        #panierDropdown + .dropdown-menu {
+            width: 900px;
+            min-width: 350px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .panier-dropdown {
+            width: 100%;
+            min-width: 350px;
+        }
+
+        .panier-dropdown .notif-item {
+            padding: 10px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .dropdown-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .notif-scroll {
+            padding: 10px;
+        }
+
+        .notif-center {
+            padding: 5px 0;
+        }
+
+        .dropdown-footer {
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .table {
+            width: 100%;
+            margin-bottom: 0;
+        }
+
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .table-striped tbody tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .btn-sm {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .text-muted {
+            font-size: 0.85rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
         .card {
             border-radius: 12px;
             background: linear-gradient(135deg, #ffffff, #f8f9fa);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         .card h3 {
             font-size: 1.8rem;
             color: #007bff;
+            margin-bottom: 1rem;
             font-weight: 700;
         }
+
         .card h6 {
             font-size: 1rem;
             color: #6c757d;
         }
+
         .card-body {
             padding: 2rem;
         }
-        .table {
-            width: 100%;
-            margin-bottom: 0;
-        }
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
-        }
-        .table-striped tbody tr:nth-child(odd) {
-            background-color: #f2f2f2;
-        }
-        .btn-sm {
-            padding: 0.2rem 0.5rem;
-            font-size: 0.75rem;
-        }
-        .text-muted {
-            font-size: 0.85rem;
-        }
-        .text-info {
+
+        .card .text-info {
             color: #17a2b8 !important;
         }
+
         .btn-primary {
             font-size: 1.1rem;
             padding: 1rem 1.5rem;
             border-radius: 8px;
             transition: all 0.3s ease;
         }
+
         .btn-primary:hover {
             background-color: #0056b3;
             box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+        }
+
+        .search-box {
+            max-width: 400px;
+            height: 35px;
+            padding: 5px 12px;
+            border: 2px solid #007bff;
+            border-radius: 20px;
+            font-size: 14px;
+            transition: 0.3s ease-in-out;
+            box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-box:focus {
+            border-color: #0056b3;
+            box-shadow: 0 0 6px rgba(0, 123, 255, 0.5);
+        }
+
+        .table-text-small th,
+        .table-text-small td,
+        .table-text-small input,
+        .table-text-small button,
+        .table-text-small span,
+        .table-text-small svg {
+            font-size: 11px !important;
+        }
+
+        .table-text-small th {
+            font-size: 10px !important;
         }
     </style>
 </head>
 <body>
     <div class="wrapper">
         <!-- Sidebar -->
+       <!-- Sidebar -->
 <div class="sidebar" data-background-color="dark">
     <div class="sidebar-logo">
         <div class="logo-header" data-background-color="dark">
@@ -233,6 +313,8 @@
 </div>
 <!-- End Sidebar -->
 
+        <!-- End Sidebar -->
+
         <div class="main-panel">
             <div class="main-header">
                 <div class="main-header-logo">
@@ -250,6 +332,130 @@
                 <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
                     <div class="container-fluid">
                         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+
+
+                        <!-- test quick action  -->
+<li class="nav-item topbar-icon dropdown hidden-caret">
+                  <a
+                    class="nav-link"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <i class="fas fa-layer-group"></i>
+                  </a>
+                  <div class="dropdown-menu quick-actions animated fadeIn">
+                    <div class="quick-actions-header">
+                      <span class="title mb-1">Actions Rapides</span>
+                      <!-- <span class="subtitle op-7">Liens Utiles</span> -->
+                    </div>
+                    <div class="quick-actions-scroll scrollbar-outer">
+                      <div class="quick-actions-items">
+                        <div class="row m-0">
+
+                                                  <a class="col-6 col-md-4 p-0" href="/articles">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-success rounded-circle"
+                              >
+                                <i class="fas fa-sitemap"></i>
+                              </div>
+                              <span class="text">Articles</span>
+                            </div>
+                          </a>
+
+                                                                            <a class="col-6 col-md-4 p-0" href="/customers">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-primary rounded-circle"
+                              >
+                                <i class="fas fa-users"></i>
+                              </div>
+                              <span class="text">Clients</span>
+                            </div>
+                          </a>
+
+
+                                                                                                      <a class="col-6 col-md-4 p-0" href="/suppliers">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-secondary rounded-circle"
+                              >
+                                <i class="fas fa-user-tag"></i>
+                              </div>
+                              <span class="text">Fournisseurs</span>
+                            </div>
+                          </a>
+
+
+
+                          <a class="col-6 col-md-4 p-0" href="/delivery_notes/list">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-danger rounded-circle">
+                                <i class="fa fa-cart-plus"></i>
+                              </div>
+                              <span class="text">Commandes Ventes</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/salesinvoices">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-warning rounded-circle"
+                              >
+                                <i class="fas fa-file-invoice-dollar"></i>
+                              </div>
+                              <span class="text">Factures Ventes</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/generalaccounts">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-info rounded-circle">
+                                <i class="fas fa-money-check-alt"></i>
+                              </div>
+                              <span class="text">Plan Comptable</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/purchases/list">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-success rounded-circle"
+                              >
+                                <i class="fa fa-cart-plus"></i>
+                              </div>
+                              <span class="text">Commandes Achats</span>
+                            </div>
+                          </a>
+                          <a class="col-6 col-md-4 p-0" href="/invoices">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-primary rounded-circle"
+                              >
+                                <i class="fas fa-file-invoice-dollar"></i>
+                              </div>
+                              <span class="text">Factures Achats</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/paymentlist">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-secondary rounded-circle"
+                              >
+                                <i class="fas fa-credit-card"></i>
+                              </div>
+                              <span class="text">Paiements</span>
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                        <!-- fin test quick action  -->
+
                             <li class="nav-item topbar-user dropdown hidden-caret">
                                 <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
                                     <div class="avatar-sm">
@@ -288,141 +494,134 @@
                 </nav>
             </div>
 
-            <div class="container">
+
+
+                      <div class="container">
                 <div class="page-inner">
-                    <h4>📋 Liste des retours de vente</h4>
-                    @if(session('success'))
-                        <div class="alert alert-success">{{ session('success') }}</div>
-                    @endif
-                    @if(session('error'))
-                        <div class="alert alert-danger">{{ session('error') }}</div>
-                    @endif
-
-                    <form method="GET" action="{{ route('delivery_notes.salesreturns.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-                        <select name="customer_id" class="form-select form-select-sm select2" style="width: 150px;">
-                            <option value="">Client (Tous)</option>
-                            @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
-                                    {{ $customer->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <select name="delivery_note_id" class="form-select form-select-sm select2" style="width: 150px;">
-                            <option value="">Bon de livraison (Tous)</option>
-                            @foreach($deliveryNotes as $deliveryNote)
-                                <option value="{{ $deliveryNote->id }}" {{ request('delivery_note_id') == $deliveryNote->id ? 'selected' : '' }}>
-                                    {{ $deliveryNote->numdoc }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <select name="type" class="form-select form-select-sm" style="width: 150px;">
-                            <option value="">Type (Tous)</option>
-                            <option value="total" {{ request('type') == 'total' ? 'selected' : '' }}>Total</option>
-                            <option value="partiel" {{ request('type') == 'partiel' ? 'selected' : '' }}>Partiel</option>
-                        </select>
-                        <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" value="{{ request('date_from') }}">
-                        <span>à</span>
-                        <input type="date" name="date_to" class="form-control form-control-sm" style="width: 120px;" value="{{ request('date_to') }}">
-                        <button type="submit" class="btn btn-outline-primary btn-sm px-3">
-                            <i class="fas fa-filter me-1"></i> Filtrer
-                        </button>
-                        <a href="{{ route('delivery_notes.salesreturns.list') }}" class="btn btn-outline-secondary btn-sm px-3">
-                            <i class="fas fa-undo me-1"></i> Réinitialiser
-                        </a>
-                    </form>
 
 
-                                                                                                                        <!-- Pagination avec conservation des filtres -->
-<div class="d-flex justify-content-center mt-3">
-    {{ $returns->appends(request()->query())->links() }}
-</div>
 
 
-                    @foreach($returns as $return)
-                        <div class="card mb-4 shadow-sm border-0">
-                            <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
-                                <div>
-                                    <h6 class="mb-0">
-                                        <strong>Retour N° : {{ $return->numdoc }}</strong> –
-                                        Client : {{ $return->customer->name ?? 'Inconnu' }}
-                                        <span class="text-muted small">({{ \Carbon\Carbon::parse($return->return_date)->format('d/m/Y') }})</span>
-                                    </h6>
-                                    <span class="badge bg-primary">{{ ucfirst($return->type) }}</span>
-                                    <span class="badge bg-info">BL: {{ $return->deliveryNote->numdoc ?? '-' }}</span>
-                                    @if($return->invoiced)
-                                        <span class="badge bg-success">Facturé</span>
-                                    @endif
-                                </div>
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $return->id }})">
-                                        ➕ Détails
-                                    </button>
-
-                                    <a href="{{ route('delivery_notes.salesreturns.export_single', $return->id) }}" class="btn btn-sm btn-outline-success">
-                                        EXCEL <i class="fas fa-file-excel"></i>
-                                    </a>
-                                    <a href="{{ route('delivery_notes.salesreturns.print_single', $return->id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
-                                        PDF <i class="fas fa-print"></i>
-                                    </a>
-
-                                    <div class="btn-group">
-                                <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle dropdown-toggle-split"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="{{ route('delivery_notes.salesreturns.show', $return->id) }}">
-                                        <i class="fas fa-eye"></i> Voir détails
-                                    </a>
-                                </div>
-                            </div>
 
 
-                                </div>
-                            </div>
-                            <div id="lines-{{ $return->id }}" class="card-body d-none bg-light">
-                                <h6 class="fw-bold mb-3">🧾 Lignes du retour</h6>
-                                <table class="table table-sm table-bordered table-striped align-middle">
-                                    <thead class="table-light text-center">
-                                        <tr>
-                                            <th>Code Article</th>
-                                            <th>Désignation</th>
-                                            <th>Qté Retournée</th>
-                                            <th>PU HT</th>
-                                            <th>Remise (%)</th>
-                                            <th>Total Ligne</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($return->lines as $line)
-                                            <tr>
-                                                <td>{{ $line->article_code }}</td>
-                                                <td>{{ $line->item->name ?? '-' }}</td>
-                                                <td class="text-center">{{ $line->returned_quantity }}</td>
-                                                <td class="text-end">{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
-                                                <td class="text-end">{{ $line->remise }}%</td>
-                                                <td class="text-end">{{ number_format($line->total_ligne_ht, 2, ',', ' ') }} €</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                                <div class="text-end mt-3">
-                                    <div class="p-3 bg-white border rounded d-inline-block">
-                                        <strong>Total HT :</strong> {{ number_format($return->total_ht, 2, ',', ' ') }} €<br>
-                                        <strong>Total TTC :</strong> {{ number_format($return->total_ttc, 2, ',', ' ') }} €
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                                                                                                                                            <!-- Pagination avec conservation des filtres -->
-<div class="d-flex justify-content-center mt-3">
-    {{ $returns->appends(request()->query())->links() }}
-</div>
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        
+        <div class="card-header bg-dark text-white">
+            <h4><i class="fas fa-life-ring"></i> Assistance & Support</h4>
+        </div>
+        <div class="card-body">
+
+            {{-- Message de succès --}}
+            @if(session('success'))
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> {{ session('success') }}
                 </div>
-            </div>
+            @endif
 
-            <footer class="footer">
+            {{-- Formulaire --}}
+
+
+
+            <form action="{{ route('contact.send') }}" method="POST" class="mb-4">
+                @csrf
+                <div class="mb-3">
+                    <label for="name" class="form-label">Nom complet</label>
+                    <input type="text" name="name" class="form-control" required value="{{ old('name', auth()->user()->name ?? '') }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Adresse email</label>
+                    <input type="email" name="email" class="form-control" required value="{{ old('email', auth()->user()->email ?? '') }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="subject" class="form-label">Objet</label>
+                    <input type="text" name="subject" class="form-control" required value="{{ old('subject') }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="message" class="form-label">Votre message</label>
+                    <textarea name="message" rows="5" class="form-control" required>{{ old('message') }}</textarea>
+                </div>
+
+                <button type="submit" class="btn btn-dark">
+                    <i class="fas fa-paper-plane"></i> Envoyer
+                </button>
+            </form>
+
+            {{-- Historique des tickets --}}
+            @if(!empty($tickets) && count($tickets) > 0)
+                <h5 class="mt-4"><i class="fas fa-clipboard-list"></i> Vos tickets récents</h5>
+                  <table class="table table-striped table-bordered align-middle text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Sujet</th>
+                    <th>Message</th>
+                    <th>Statut</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($tickets as $ticket)
+                    <tr>
+                        <td>{{ $ticket->id }}</td>
+                        <td>{{ $ticket->name }}</td>
+                        <td>{{ $ticket->email }}</td>
+                        <td>{{ $ticket->subject }}</td>
+                        <td style="max-width: 250px; word-wrap: break-word;">
+                            {{ $ticket->message }}
+                        </td>
+                        <td>
+                            {{-- Affichage badge statut --}}
+@if($ticket->status == 'Ouvert')
+    <span class="badge bg-warning">Ouvert</span>
+@elseif($ticket->status == 'En cours')
+    <span class="badge bg-info">En cours</span>
+@elseif($ticket->status == 'Clôturé')
+    <span class="badge bg-success">Clôturé</span>
+@endif
+
+                        </td>
+                        <td>{{ $ticket->created_at->format('d/m/Y H:i') }}</td>
+                        <td>
+                            {{-- Formulaire changement de statut --}}
+<form action="{{ route('tickets.updateStatus', $ticket->id) }}" method="POST">
+    @csrf
+    @method('PUT')
+    <select name="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+        <option value="Ouvert" {{ $ticket->status == 'Ouvert' ? 'selected' : '' }}>Ouvert</option>
+        <option value="En cours" {{ $ticket->status == 'En cours' ? 'selected' : '' }}>En cours</option>
+        <option value="Clôturé" {{ $ticket->status == 'Clôturé' ? 'selected' : '' }}>Clôturé</option>
+    </select>
+</form>
+
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="8">Aucun ticket trouvé.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+            @else
+                <p class="text-muted">Aucun ticket pour l’instant.</p>
+            @endif
+
+        </div>
+    </div>
+</div>
+    </div>
+</div>
+
+
+
+        <footer class="footer">
                 <div class="container-fluid d-flex justify-content-between">
                     <div class="copyright">
                         © AZ NEGOCE. All Rights Reserved.
@@ -439,37 +638,8 @@
     <script src="{{ asset('assets/js/core/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
     <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
-    <!-- jQuery Scrollbar -->
     <script src="{{ asset('assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
-    <!-- Chart JS -->
-    <script src="{{ asset('assets/js/plugin/chart.js/chart.min.js') }}"></script>
-    <!-- jQuery Sparkline -->
-    <script src="{{ asset('assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js') }}"></script>
-    <!-- Chart Circle -->
-    <script src="{{ asset('assets/js/plugin/chart-circle/circles.min.js') }}"></script>
-    <!-- Datatables -->
     <script src="{{ asset('assets/js/plugin/datatables/datatables.min.js') }}"></script>
-    <!-- Bootstrap Notify -->
     <script src="{{ asset('assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
-    <!-- jQuery Vector Maps -->
-    <script src="{{ asset('assets/js/plugin/jsvectormap/jsvectormap.min.js') }}"></script>
-    <script src="{{ asset('assets/js/plugin/jsvectormap/world.js') }}"></script>
-    <!-- Sweet Alert -->
     <script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
-    <!-- Kaiadmin JS -->
-    <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
-    <!-- Select2 -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-    <script>
-        $(document).ready(function () {
-            $('.select2').select2({ width: '100%' });
-        });
-
-        function toggleLines(id) {
-            const section = document.getElementById('lines-' + id);
-            section.classList.toggle('d-none');
-        }
-    </script>
-</body>
-</html>
+    <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>    

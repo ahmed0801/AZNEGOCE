@@ -36,6 +36,7 @@ use App\Http\Controllers\StockController;
 use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\SupportController;
 use App\Http\Controllers\TvaController;
 use App\Http\Controllers\TvaGroupController;
 use App\Http\Controllers\UnitController;
@@ -438,9 +439,20 @@ Route::delete('/invoices/{id}/delete_supplier_invoice', [PurchaseController::cla
 Route::get('/customers/{customer}/accounting-entries', [CustomerController::class, 'getAccountingEntries'])->name('customer.accounting-entries');
 // ecriture toutes client historique client
 Route::get('/allcustomers/accounting-entries', [CustomerController::class, 'getAllAccountingEntries'])->name('allcustomer.accounting-entries');
+// ecriture toutes client historique client HT pour compte general vente marchandises
+Route::get('/allcustomers/accounting-entriesHT', [CustomerController::class, 'getAllAccountingEntriesHT'])->name('allcustomer.accounting-entriesHT');
+
 
 // ecriture client historique fournisseurs
 Route::get('/suppliers/{customer}/accounting-entries', [SupplierController::class, 'getAccountingEntries'])->name('supplier.accounting-entries');
+// ecriture toutes fournisseur historique client
+Route::get('/allcsuppliers/accounting-entries', [SupplierController::class, 'getAllAccountingEntries'])->name('allsupplier.accounting-entries');
+// ecriture toutes client historique client HT pour compte general vente marchandises
+Route::get('/allcsuppliers/accounting-entriesHT', [SupplierController::class, 'getAllAccountingEntriesHT'])->name('allsupplier.accounting-entriesHT');
+
+// ecriture compte tva collectée
+Route::get('/TVA/accounting-entries', [GeneralAccountsController::class, 'getAllAccountingEntriesTVA'])->name('TVA.accounting-entries');
+
 
 // recherche client 
 Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
@@ -560,7 +572,11 @@ Route::post('/sales/delivery/store-and-invoice', [SalesController::class, 'store
     Route::get('/get-article/{articleNumber}', [TecDocController::class,'getArticle']);
 
 
-    Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::get('/contact', [SupportController::class, 'index'])->name('contact');
+Route::post('/contact', [SupportController::class, 'send'])->name('contact.send');
+// Back-office (admin)
+Route::get('/tickets', [SupportController::class, 'list'])->name('tickets.list');
+Route::put('/tickets/{id}/status', [SupportController::class, 'updateStatus'])->name('tickets.updateStatus');
 
 
 

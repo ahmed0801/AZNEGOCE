@@ -194,71 +194,152 @@
   </head>
   <body>
     <div class="wrapper">
-       <!-- Sidebar -->
-        <div class="sidebar" data-background-color="dark">
-            <div class="sidebar-logo">
-                <div class="logo-header" data-background-color="dark">
-                    <a href="/" class="logo">
-                        <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
-                    </a>
-                    <div class="nav-toggle">
-                        <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
-                        <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
-                    </div>
-                    <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
-                </div>
-            </div>
-            <div class="sidebar-wrapper scrollbar scrollbar-inner">
-                <div class="sidebar-content">
-                    <ul class="nav nav-secondary">
-                        <li class="nav-item">
-                            <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
-                        </li>
-                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
-                        <li class="nav-item"><a href="/sales/delivery/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
-                        <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Devis & Précommandes</p></a></li>
-                        <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
-                        <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
-                        <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
-                        <li class="nav-item"><a href="/salesnotes/list"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
-                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
-                        <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
-                        <li class="nav-item"><a href="/purchaseprojects/list"><i class="fas fa-file-alt"></i><p>Projets de Commande</p></a></li>
-                        <li class="nav-item"><a href="/returns"><i class="fas fa-undo-alt"></i><p>Retours Achat</p></a></li>
-                        <li class="nav-item"><a href="/invoices"><i class="fas fa-file-invoice"></i><p>Factures Achat</p></a></li>
-                        <li class="nav-item"><a href="/notes"><i class="fas fa-sticky-note"></i><p>Avoirs Achat</p></a></li>
-                      <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-credit-card"></i></span><h4 class="text-section">Comptabilité</h4></li>
-                                                <li class="nav-item {{ Route::is('generalaccounts.index') ? 'active' : '' }}">
-                            <a href="{{ route('generalaccounts.index') }}"><i class="fas fa-book"></i><p>Comptes Généraux</p></a>
-                        </li>
-                                                <li class="nav-item {{ Route::is('payments.index') ? 'active' : '' }}">
-                            <a href="{{ route('payments.index') }}"><i class="fas fa-credit-card"></i><p>Règlements</p></a>
-                        </li>
-                                                <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
-                        <li class="nav-item"><a href="/receptions"><i class="fas fa-truck-loading"></i><p>Réceptions</p></a></li>
-                        <li class="nav-item"><a href="/articles"><i class="fas fa-cubes"></i><p>Articles</p></a></li>
-                        <li class="nav-item"><a href="/planification-tournee"><i class="fas fa-truck"></i><p>Suivi Livraisons</p></a></li>
-                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fa fa-users"></i></span><h4 class="text-section">Référentiel</h4></li>
-                        <li class="nav-item"><a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a></li>
-                        <li class="nav-item active"><a href="/suppliers"><i class="fa fa-user-tie"></i><p>Fournisseurs</p></a></li>
-                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-cogs"></i></span><h4 class="text-section">Paramètres</h4></li>
-                        <li class="nav-item"><a href="/setting"><i class="fas fa-sliders-h"></i><p>Paramètres</p></a></li>
-                        <li class="nav-item"><a href="/tecdoc"><i class="fas fa-database"></i><p>TecDoc</p></a></li>
-                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-robot"></i></span><h4 class="text-section">Autres</h4></li>
-                        <li class="nav-item"><a href="/voice"><i class="fas fa-robot"></i><p>NEGOBOT</p></a></li>
-                        <li class="nav-item">
-                            <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
-                            </a>
-                            <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
-                                @csrf
-                            </form>
-                        </li>
-                    </ul>
-                </div>
+      <!-- Sidebar -->
+<div class="sidebar" data-background-color="dark">
+    <div class="sidebar-logo">
+        <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
+            </a>
+            <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
             </div>
         </div>
-        <!-- End Sidebar -->
+    </div>
+
+    <div class="sidebar-wrapper scrollbar scrollbar-inner">
+        <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
+                </li>
+
+                <!-- Ventes -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#ventes" aria-expanded="false">
+                        <i class="fas fa-shopping-cart"></i><p>Ventes</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="ventes">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
+                            <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
+                            <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="/salesnotes/list"><span class="sub-item">Avoirs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Achats -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#achats" aria-expanded="false">
+                        <i class="fas fa-shopping-bag"></i><p>Achats</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="achats">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Comptabilité -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#compta" aria-expanded="false">
+                        <i class="fas fa-balance-scale"></i><p>Comptabilité</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="compta">
+                        <ul class="nav nav-collapse">
+                            <li><a href="{{ route('generalaccounts.index') }}"><span class="sub-item">Plan Comptable</span></a></li>
+                            <li><a href="{{ route('payments.index') }}"><span class="sub-item">Règlements</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Stock -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#stock" aria-expanded="false">
+                        <i class="fas fa-warehouse"></i><p>Stock</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="stock">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/receptions"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="/articles"><span class="sub-item">Articles</span></a></li>
+                            <li><a href="/planification-tournee"><span class="sub-item">Suivi Livraisons</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Référentiel -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#referentiel" aria-expanded="false">
+                        <i class="fas fa-users"></i><p>Référentiel</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="referentiel">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/customers"><span class="sub-item">Clients</span></a></li>
+                            <li><a href="/suppliers"><span class="sub-item">Fournisseurs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Paramètres -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#parametres" aria-expanded="false">
+                        <i class="fas fa-cogs"></i><p>Paramètres</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="parametres">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/setting"><span class="sub-item">Configuration</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Outils -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#outils" aria-expanded="false">
+                        <i class="fab fa-skyatlas"></i><p>Outils</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="outils">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/tecdoc"><span class="sub-item">TecDoc</span></a></li>
+                            <li><a href="/voice"><span class="sub-item">NEGOBOT</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Assistance -->
+<li class="nav-item">
+    <a href="/contact">
+        <i class="fas fa-headset"></i>
+        <p>Assistance</p>
+    </a>
+</li>
+
+
+                <!-- Déconnexion -->
+                <li class="nav-item">
+                    <a href="{{ route('logout.admin') }}" class="nav-link"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
+                    </a>
+                    <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Sidebar -->
 
       <div class="main-panel">
         <div class="main-header">
@@ -540,6 +621,101 @@
 
 
     
+
+
+
+
+
+    <!-- New Modal for All Accounting Entries -->
+                        <div class="modal fade" id="allAccountingModal" tabindex="-1" aria-labelledby="allAccountingModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="allAccountingModalLabel">Ecritures Comptables Achats</h5>
+                                        <button type="button" class="btn btn-secondary btn-round ms-2" onclick="showAllBalance()">
+                                            <i class="fas fa-balance-scale me-1"></i> Balance Générale
+                                        </button>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Balance Summary (Hidden by Default) -->
+                                        <div id="allBalanceSummary" class="card mb-3" style="display: none;">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-primary">Balance Générale des Achats</h6>
+                                                <table class="table table-sm table-bordered">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Total Débits</th>
+                                                            <th>Total Crédits</th>
+                                                            <th>Solde Net</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td id="allDebits">0,00 €</td>
+                                                            <td id="allCredits">0,00 €</td>
+                                                            <td id="allBalance">0,00 €</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <!-- Filter Form -->
+                                        <form id="allAccountingFilterForm" class="d-flex flex-wrap gap-2 mb-3">
+                                            <select name="type" class="form-select form-select-sm" style="width: 200px;">
+                                                <option value="">Type (Tous)</option>
+                                                <option value="Factures">Factures</option>
+                                                <option value="Avoirs">Avoirs</option>
+                                                <option value="Règlements">Règlements</option>
+                                            </select>
+<input type="date" name="start_date" class="form-control form-control-sm" style="width: 150px;" placeholder="Date début" value="{{ \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')}}">
+<input type="date" name="end_date" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin" value="{{ \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')}}">
+                                            <select name="customer_id" class="form-select form-select-sm" style="width: 200px;">
+                                                <option value="">Fournisseur (Tous)</option>
+                                                @foreach($suppliers as $customer)
+                                                    <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <button type="submit" class="btn btn-outline-primary btn-sm px-3">
+                                                <i class="fas fa-filter me-1"></i> Filtrer
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="resetAllAccountingFilter()">
+                                                <i class="fas fa-undo me-1"></i> Réinitialiser
+                                            </button>
+                                        </form>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover accounting-table">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th>Fourn.</th>
+                                                        <th>Type</th>
+                                                        <th>Num Document / Lettrage</th>
+                                                        <th>Date</th>
+                                                        <th>Montant TTC</th>
+                                                        <th>Statut</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="allAccountingEntries">
+                                                    <tr>
+                                                        <td colspan="6" class="text-center">Chargement...</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+
+
 
 
     <!-- Filtres -->
@@ -1297,6 +1473,182 @@ document.addEventListener("DOMContentLoaded", function () {
         entries.forEach(entry => {
             const row = document.createElement('tr');
             row.innerHTML = `
+                <td>${entry.type || '-'}</td>
+                <td>${entry.numdoc || entry.reference || '-'}</td>
+                <td>${entry.date || '-'}</td>
+                <td>${(entry.amount !== undefined && entry.amount !== null) ? Number(entry.amount).toFixed(2).replace('.', ',') : '-'} €</td>
+                <td>${entry.status || '-'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// balance total
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Cache for all accounting entries to avoid refetching
+    let allAccountingEntriesCache = [];
+
+    // All Accounting Entries Handler
+    const allAccountingModal = document.getElementById('allAccountingModal');
+    const allFilterForm = document.getElementById('allAccountingFilterForm');
+
+    if (allAccountingModal) {
+        allAccountingModal.addEventListener('show.bs.modal', function () {
+            const tbody = document.getElementById('allAccountingEntries');
+
+            // If entries are cached, apply filters and render
+            if (allAccountingEntriesCache.length > 0) {
+                applyAllFilters();
+                return;
+            }
+
+            // Fetch entries if not cached
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">Chargement...</td></tr>';
+            fetch("{{ route('allsupplier.accounting-entries') }}", {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    allAccountingEntriesCache = data.entries || [];
+                    applyAllFilters();
+                })
+                .catch(error => {
+                    console.error('Error fetching all accounting entries:', error);
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Erreur: Impossible de charger les écritures comptables.</td></tr>`;
+                });
+        });
+    }
+
+    // Handle filter form submission
+    if (allFilterForm) {
+        allFilterForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            applyAllFilters();
+        });
+    }
+
+    // Reset filter function
+    window.resetAllAccountingFilter = function () {
+        const filterForm = document.getElementById('allAccountingFilterForm');
+        const balanceSummary = document.getElementById('allBalanceSummary');
+        if (filterForm) {
+            filterForm.reset();
+            balanceSummary.style.display = 'none'; // Hide balance when resetting
+            applyAllFilters();
+        }
+    };
+
+    // Show balance summary
+    window.showAllBalance = function () {
+        const balanceSummary = document.getElementById('allBalanceSummary');
+        balanceSummary.style.display = 'block'; // Show balance summary
+        applyAllFilters(); // Reapply filters to ensure balance is updated
+    };
+
+    // Apply client-side filters and render table
+    function applyAllFilters() {
+        const tbody = document.getElementById('allAccountingEntries');
+        const filterForm = document.getElementById('allAccountingFilterForm');
+        const formData = new FormData(filterForm);
+        const typeFilter = formData.get('type') || '';
+        const startDate = formData.get('start_date') ? new Date(formData.get('start_date')) : null;
+        const endDate = formData.get('end_date') ? new Date(formData.get('end_date')) : null;
+        const customerIdFilter = formData.get('customer_id') || '';
+
+        // Get cached entries
+        let entries = allAccountingEntriesCache || [];
+
+        // Apply type filter
+        if (typeFilter) {
+            entries = entries.filter(entry => {
+                if (typeFilter === 'Factures') return entry.type === 'Facture';
+                if (typeFilter === 'Avoirs') return entry.type === 'Avoir';
+                if (typeFilter === 'Règlements') return entry.type !== 'Facture' && entry.type !== 'Avoir';
+                return true;
+            });
+        }
+
+        // Apply date filter
+        if (startDate || endDate) {
+            entries = entries.filter(entry => {
+                if (!entry.date || entry.date === '-') return false;
+                const entryDateParts = entry.date.split('/');
+                const entryDate = new Date(`${entryDateParts[2]}-${entryDateParts[1]}-${entryDateParts[0]}`);
+                if (startDate && entryDate < startDate) return false;
+                if (endDate && entryDate > endDate) return false;
+                return true;
+            });
+        }
+
+        // Apply customer filter
+        if (customerIdFilter) {
+            entries = entries.filter(entry => entry.customer_id === customerIdFilter);
+        }
+
+        // Calculate balance
+        let debits = 0;
+        let credits = 0;
+        entries.forEach(entry => {
+            if (entry.type === 'Facture') {
+                debits += parseFloat(entry.amount) || 0;
+            } else {
+                credits += parseFloat(entry.amount) || 0;
+            }
+        });
+        const balance = debits - credits;
+
+        // Update balance summary
+        const debitsElement = document.getElementById('allDebits');
+        const creditsElement = document.getElementById('allCredits');
+        const balanceElement = document.getElementById('allBalance');
+        if (debitsElement && creditsElement && balanceElement) {
+            debitsElement.textContent = debits.toFixed(2).replace('.', ',') + ' €';
+            creditsElement.textContent = credits.toFixed(2).replace('.', ',') + ' €';
+            balanceElement.textContent = balance.toFixed(2).replace('.', ',') + ' €';
+            balanceElement.className = balance >= 0 ? 'text-success' : 'text-danger';
+        }
+
+        // Render filtered entries
+        tbody.innerHTML = '';
+        if (entries.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Aucune écriture comptable trouvée.</td></tr>';
+            return;
+        }
+
+        entries.forEach(entry => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${entry.customer_name || '-'}</td>
                 <td>${entry.type || '-'}</td>
                 <td>${entry.numdoc || entry.reference || '-'}</td>
                 <td>${entry.date || '-'}</td>

@@ -52,33 +52,36 @@
             <div class="sidebar-wrapper scrollbar scrollbar-inner">
                 <div class="sidebar-content">
                     <ul class="nav nav-secondary">
-                        <li class="nav-item active">
+                        <li class="nav-item {{ Route::is('dashboard') ? 'active' : '' }}">
                             <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
                         </li>
-                        @if(Auth::user()->role !='livreur') 
+                        @if(Auth::user()->role != 'livreur')
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
-                        <li class="nav-item"><a href="/commande"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
-                        <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
-                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
+                        <li class="nav-item"><a href="/sales/delivery/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
+                        <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Devis & Précommandes</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
-                                                <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
+                        <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
                         <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
-                        <li class="nav-item"><a href="/avoirs"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
-                        <li class="nav-item"><a href="/reglement-client"><i class="fas fa-credit-card"></i><p>Règlement Client</p></a></li>
+                        <li class="nav-item"><a href="/salesnotes/list"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
                         <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
                         <li class="nav-item"><a href="/purchaseprojects/list"><i class="fas fa-file-alt"></i><p>Projets de Commande</p></a></li>
                         <li class="nav-item"><a href="/returns"><i class="fas fa-undo-alt"></i><p>Retours Achat</p></a></li>
                         <li class="nav-item"><a href="/invoices"><i class="fas fa-file-invoice"></i><p>Factures Achat</p></a></li>
                         <li class="nav-item"><a href="/notes"><i class="fas fa-sticky-note"></i><p>Avoirs Achat</p></a></li>
-                        <li class="nav-item"><a href="/reglement-fournisseur"><i class="fas fa-credit-card"></i><p>Règlement Fournisseur</p></a></li>
+                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-credit-card"></i></span><h4 class="text-section">Comptabilité</h4></li>
+                                                <li class="nav-item {{ Route::is('generalaccounts.index') ? 'active' : '' }}">
+                            <a href="{{ route('generalaccounts.index') }}"><i class="fas fa-book"></i><p>Comptes Généraux</p></a>
+                        </li>
+                        <li class="nav-item {{ Route::is('payments.index') ? 'active' : '' }}">
+                            <a href="{{ route('payments.index') }}"><i class="fas fa-credit-card"></i><p>Règlements</p></a>
+                        </li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
                         <li class="nav-item"><a href="/receptions"><i class="fas fa-truck-loading"></i><p>Réceptions</p></a></li>
                         <li class="nav-item"><a href="/articles"><i class="fas fa-cubes"></i><p>Articles</p></a></li>
-@endif
-         
-                                                <li class="nav-item"><a href="/planification-tournee"><i class="fas fa-truck"></i><p>Suivi Livraisons</p></a></li>
-@if(Auth::user()->role !='livreur') 
+                        @endif
+                        <li class="nav-item"><a href="/planification-tournee"><i class="fas fa-truck"></i><p>Suivi Livraisons</p></a></li>
+                        @if(Auth::user()->role != 'livreur')
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fa fa-users"></i></span><h4 class="text-section">Référentiel</h4></li>
                         <li class="nav-item"><a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a></li>
                         <li class="nav-item"><a href="/suppliers"><i class="fa fa-user-tie"></i><p>Fournisseurs</p></a></li>
@@ -89,8 +92,6 @@
                         <li class="nav-item"><a href="/voice"><i class="fas fa-robot"></i><p>NEGOBOT</p></a></li>
                         @endif
                         <li class="nav-item">
-
- 
                             <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
                             </a>
@@ -199,11 +200,16 @@
                             </h6>
                         </div>
                         <div class="ms-md-auto py-2 py-md-0">
-                            <a href="/delivery_notes/list" class="btn btn-label-info btn-round me-2">
+                            <a href="/salesinvoices" class="btn btn-label-info btn-round me-2">
+                                <span class="btn-label"><i class="fas fa-list"></i></span> Voir Factures Ventes
+                            </a>
+
+                             <a href="/delivery_notes/list" class="btn btn-label-info btn-round me-2">
                                 <span class="btn-label"><i class="fas fa-list"></i></span> Voir Bons de Livraison
                             </a>
+
                             <a href="/sales/delivery/create" class="btn btn-primary btn-round">
-                                <span class="btn-label"><i class="fas fa-plus"></i></span> Nouveau Bon de Livraison
+                                <span class="btn-label"><i class="fas fa-plus"></i></span> Nouvelle Commande
                             </a>
                         </div>
                     </div>
@@ -309,7 +315,7 @@
                                             </a>
                                         </div>
                                     </div>
-                                    <div class="card-category">Bons de livraison livrés et en cours</div>
+                                    <div class="card-category">Bons de livraison Expédiés et en cours</div>
                                 </div>
                                 @can('view_sales')
                                 <div class="card-body">
@@ -342,14 +348,14 @@
                             <div class="card card-round">
                                 <div class="card-header">
                                     <div class="card-head-row card-tools-still-right">
-                                        <h4 class="card-title">Top 5 Articles par Quantité Livrée</h4>
+                                        <h4 class="card-title">Top 5 Articles par Quantité Expédié</h4>
                                         <div class="card-tools">
                                             <a href="#" class="btn btn-label-info btn-round btn-sm">
                                                 <span class="btn-label"><i class="fa fa-download"></i></span> Exporter
                                             </a>
                                         </div>
                                     </div>
-                                    <p class="card-category">Articles les plus livrés (bons livrés et en cours)</p>
+                                    <p class="card-category">Articles les plus livrés (bons Expédiés et en cours)</p>
                                 </div>
                                 <div class="card-body">
                                     <canvas id="topArticlesChart"></canvas>
@@ -414,7 +420,7 @@
                                                         <td class="text-end">{{ $delivery->customer->name }}</td>
                                                         <td class="text-end">{{ number_format($delivery->total_ttc, 2, ',', ' ') }}</td>
                                                         <td class="text-end">
-                                                            <span class="badge bg-{{ $delivery->status === 'en_cours' ? 'warning' : ($delivery->status === 'livré' ? 'success' : 'danger') }}">
+                                                            <span class="badge bg-{{ $delivery->status === 'en_cours' ? 'warning' : ($delivery->status === 'expédié' ? 'success' : 'danger') }}">
                                                                 {{ ucfirst($delivery->status) }}
                                                             </span>
                                                         </td>
@@ -552,11 +558,11 @@
             new Chart(document.getElementById('deliveriesByStatusChart'), {
                 type: 'pie',
                 data: {
-                    labels: ['En Cours', 'Livré', 'Annulé'],
+                    labels: ['En Cours', 'Expédié', 'Annulé'],
                     datasets: [{
                         data: [
                             {!! json_encode($deliveriesByStatus['en_cours'] ?? 0) !!},
-                            {!! json_encode($deliveriesByStatus['livré'] ?? 0) !!},
+                            {!! json_encode($deliveriesByStatus['Expédié'] ?? 0) !!},
                             {!! json_encode($deliveriesByStatus['annulé'] ?? 0) !!}
                         ],
                         backgroundColor: ['#ffc107', '#28a745', '#dc3545'],

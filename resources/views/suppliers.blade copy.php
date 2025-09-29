@@ -215,9 +215,8 @@
                             <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
                         </li>
                         <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
-                        <li class="nav-item"><a href="/sales/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
-                        <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
-                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
+                        <li class="nav-item"><a href="/sales/delivery/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
+                        <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Devis & Précommandes</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
                         <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
                         <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
@@ -402,9 +401,14 @@
 
        <h4>Liste des Fournisseurs :
 
-                  <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#createItemModal">Nouveau 
+                  <button type="submit" class="btn btn-outline-success btn-round ms-2" data-bs-toggle="modal" data-bs-target="#createItemModal">Nouveau Fournisseur 
            <i class="fas fa-plus-circle ms-2"></i>
           </button>
+
+          <button type="submit" class="btn btn-outline-secondary btn-round ms-2" data-bs-toggle="modal" data-bs-target="#allAccountingModal">
+                                Ecritures Comptables Achat <i class="fas fa-balance-scale me-1"></i>
+                            </button>
+
        </h4>
 
     <!-- Modal création -->
@@ -459,12 +463,12 @@
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Matricule fiscale</label>
+            <label class="form-label">SIRET</label>
             <input type="text" name="matfiscal" class="form-control">
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Identité bancaire</label>
+            <label class="form-label">IBAN</label>
             <input type="text" name="bank_no" class="form-control">
         </div>
 
@@ -635,15 +639,41 @@
                                                                         
 
  <!-- Accounting Entries Modal -->
-                 <!-- Accounting Entries Modal -->
+                   <!-- Accounting Entries Modal -->
 <div class="modal fade accounting-modal" id="accountingModal{{ $customer->id }}" tabindex="-1" aria-labelledby="accountingModalLabel{{ $customer->id }}" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="accountingModalLabel{{ $customer->id }}">Ecritures comptables Fournisseur : {{ $customer->code }} - {{ $customer->name }}</h5>
+                <h5 class="modal-title" id="accountingModalLabel{{ $customer->id }}">Ecritures comptables Fournisseur : {{ $customer->name }}</h5>
+                <button type="button" class="btn btn-secondary btn-round ms-2 dropdown-toggle" onclick="showBalance({{ $customer->id }})">
+                    <i class="fas fa-balance-scale me-1"></i> Balance
+                </button>
+
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div class="modal-body">
+                <!-- Balance Summary (Hidden by Default) -->
+                <div id="balanceSummary{{ $customer->id }}" class="card mb-3" style="display: none;">
+                    <div class="card-body">
+                        <h6 class="card-title text-primary">Balance Comptable</h6>
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Total Débits</th>
+                                    <th>Total Crédits</th>
+                                    <th>Solde Net</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td id="debits{{ $customer->id }}">0,00 €</td>
+                                    <td id="credits{{ $customer->id }}">0,00 €</td>
+                                    <td id="balance{{ $customer->id }}">0,00 €</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 <!-- Filter Form -->
                 <form id="accountingFilterForm{{ $customer->id }}" class="d-flex flex-wrap gap-2 mb-3">
                     <select name="type" class="form-select form-select-sm" style="width: 200px;">
@@ -686,6 +716,7 @@
         </div>
     </div>
 </div>
+
 
 
 
@@ -778,12 +809,12 @@
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Matricule fiscale</label>
+            <label class="form-label">SIRET</label>
             <input type="text" name="matfiscal" class="form-control" value="{{ $customer->matfiscal }}" disabled>
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Identité bancaire</label>
+            <label class="form-label">IBAN</label>
             <input type="text" name="bank_no" class="form-control" value="{{ $customer->bank_no }}" disabled>
         </div>
 
@@ -1184,10 +1215,19 @@ document.addEventListener("DOMContentLoaded", function () {
     // Reset filter function
     window.resetAccountingFilter = function (customerId) {
         const filterForm = document.getElementById(`accountingFilterForm${customerId}`);
+        const balanceSummary = document.getElementById(`balanceSummary${customerId}`);
         if (filterForm) {
             filterForm.reset();
+            balanceSummary.style.display = 'none'; // Hide balance when resetting
             applyFilters(customerId);
         }
+    };
+
+    // Show balance summary
+    window.showBalance = function (customerId) {
+        const balanceSummary = document.getElementById(`balanceSummary${customerId}`);
+        balanceSummary.style.display = 'block'; // Show balance summary
+        applyFilters(customerId); // Reapply filters to ensure balance is updated
     };
 
     // Apply client-side filters and render table
@@ -1222,6 +1262,29 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (endDate && entryDate > endDate) return false;
                 return true;
             });
+        }
+
+        // Calculate balance
+        let debits = 0;
+        let credits = 0;
+        entries.forEach(entry => {
+            if (entry.type === 'Facture') {
+                debits += parseFloat(entry.amount) || 0;
+            } else {
+                credits += parseFloat(entry.amount) || 0;
+            }
+        });
+        const balance = debits + credits;
+
+        // Update balance summary
+        const debitsElement = document.getElementById(`debits${customerId}`);
+        const creditsElement = document.getElementById(`credits${customerId}`);
+        const balanceElement = document.getElementById(`balance${customerId}`);
+        if (debitsElement && creditsElement && balanceElement) {
+            debitsElement.textContent = debits.toFixed(2).replace('.', ',') + ' €';
+            creditsElement.textContent = credits.toFixed(2).replace('.', ',') + ' €';
+            balanceElement.textContent = balance.toFixed(2).replace('.', ',') + ' €';
+            balanceElement.className = balance >= 0 ? 'text-success' : 'text-danger';
         }
 
         // Render filtered entries

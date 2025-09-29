@@ -5,15 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\GeneralAccount;
 use App\Models\Payment;
 use App\Models\AccountTransfer;
+use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\SalesNote;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class GeneralAccountsController extends Controller
 {
     public function index()
     {
         $generalAccounts = GeneralAccount::orderBy('name')->get();
-        return view('generalaccounts', compact('generalAccounts'));
+                $customers = Customer::with(['vehicles', 'tvaGroup', 'discountGroup', 'paymentMode', 'paymentTerm']);
+                        $suppliers = Supplier::with(['tvaGroup', 'discountGroup', 'paymentMode', 'paymentTerm']);
+
+
+        return view('generalaccounts', compact('generalAccounts','customers','suppliers'));
     }
 
     public function store(Request $request)
@@ -193,4 +202,77 @@ class GeneralAccountsController extends Controller
 
         return view('generalaccounts.transactions', compact('account', 'payments', 'transfers'));
     }
+
+
+
+
+
+
+
+
+
+
+
+    
+public function getAllAccountingEntriesTVA()
+{
+    try {
+        Log::info("Fetching all accounting entries");
+
+        // Fetch invoices with customer relation
+        $invoices = Invoice::with('customer')
+            ->select('id', 'customer_id', 'numdoc', 'invoice_date as date', 'total_ht','total_ttc', 'paid', 'numdoc as reference')
+            ->get()
+            ->map(function ($invoice) {
+                return [
+                    'type' => 'Facture',
+                    'customer_id' => $invoice->customer_id,
+                    'customer_name' => $invoice->customer ? $invoice->customer->name : '-',
+                    'numdoc' => $invoice->numdoc ?? '-',
+                    'date' => $invoice->date ? \Carbon\Carbon::parse($invoice->date)->format('d/m/Y') : '-',
+                    'amount' => (abs($invoice->total_ttc) - abs($invoice->total_ht)),
+                    'status' => $invoice->paid ? 'Payée' : 'Non payée',
+                    'reference' => $invoice->reference ?? '-'
+                ];
+            });
+
+        // Fetch sales notes with customer relation
+        $salesNotes = SalesNote::with('customer')
+            ->select('id', 'customer_id', 'numdoc', 'note_date as date', 'total_ht','total_ttc', 'paid', 'numdoc as reference')
+            ->get()
+            ->map(function ($note) {
+                return [
+                    'type' => 'Avoir',
+                    'customer_id' => $note->customer_id,
+                    'customer_name' => $note->customer ? $note->customer->name : '-',
+                    'numdoc' => $note->numdoc ?? '-',
+                    'date' => $note->date ? \Carbon\Carbon::parse($note->date)->format('d/m/Y') : '-',
+                    'amount' => (abs($note->total_ttc) - abs($note->total_ht)),
+                    'status' => $note->paid ? 'Payée' : 'Non payée',
+                    'reference' => $note->reference ?? '-'
+                ];
+            });
+
+        
+
+        // Merge and sort entries
+        $entries = $invoices->merge($salesNotes)->sortByDesc('date')->values();
+
+        Log::info("Successfully fetched all accounting entries", ['entry_count' => $entries->count()]);
+
+        return response()->json(['entries' => $entries], 200);
+    } catch (\Exception $e) {
+        Log::error("Error fetching all accounting entries", [
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json(['error' => 'Erreur serveur: Impossible de charger les écritures comptables'], 500);
+    }
+}
+
+
+
+
 }
