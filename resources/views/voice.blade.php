@@ -189,8 +189,6 @@
 
 
 
-
-
   </head>
   <body>
     <div class="wrapper">
@@ -614,9 +612,12 @@ body {
 
 .chat-bot {
   padding: 1em;
-  background: linear-gradient(to left, #1238c2ff, #ffffffff);
+  background: linear-gradient(to left, #3b4052ff, #404b61e3);
   flex-direction: column;
+  justify-content: center;
   display: flex;
+  border: none;
+  opacity: 1;
   border-radius: 10px;
   width: 90%;
   max-width: 600px;
@@ -634,7 +635,7 @@ body {
   width: 100%;
   resize: none;
   background-color: transparent;
-  color: #282e42ff;
+  color: #ffffffff;
   border: none;
   font-family: 'Courier New', Courier, monospace;
   font-size: 16px;
@@ -648,15 +649,67 @@ body {
 
 .button-container {
   display: flex;
-  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: nowrap;
-  gap: 1vw;
+  margin-top: 1em;
+  flex-wrap: wrap;
+}
+
+.left-buttons {
+  display: flex;
+  gap: 22vw;
+}
+
+.nego-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  width: 35px;
+  height: 35px;
+  margin-right: 20px;
+  padding: 0;
+  justify-content: center;
+  align-items: center; 
+}
+
+.voice-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  width: 35px;
+  height: 35px;
+  margin-right: 20px;
+  margin-left: 10px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  fill: #1a2035;
+}
+
+.submit-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  fill: #1a2035;
+}
+
+.nego-button img,
+.voice-button svg,
+.submit-button svg {
+  width: 100%;
+  height: auto;
 }
 
 .submit-button:hover svg,
-.voice-button:hover svg {
+.voice-button:hover svg,
+.nego-button:hover img {
   transform: scale(1.3);
   transition: 0.3s ease;
 }
@@ -667,41 +720,6 @@ body {
   background: transparent;
 }
 
-.submit-button {
-  border: none;
-  background: transparent;
-  padding: 1vh 2vw 1vh 5vw;
-  cursor: auto;
-  fill: #1a2035;
-}
-
-.voice-button {
-  fill: #1a2035;
-  padding: 1.5vh 11.5vw 1.5vh 2vw;
-  border: none;
-  background: transparent;
-  cursor: auto;
-}
-
-.nego-button {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto;
-  width: 35px;
-  height: 35px;
-  padding: 0;
-}
-
-.nego-button img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-
 .typing {
     display: inline-block;
     overflow: hidden;
@@ -709,6 +727,87 @@ body {
     white-space: nowrap;
     animation: typing 2s steps(20, end), blink-caret 1s step-end infinite;
 }
+
+
+.conversation {
+	border: none;
+    border-radius: 10px;
+    background: transparent;
+    padding: 15px;
+    min-height: 400px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.user-message {
+    background-color: #e3f2fd;
+    padding: 10px 15px;
+    margin: 8px 0;
+    border-radius: 15px;
+	border: none;
+    border-bottom-left-radius: 5px;
+    align-self: flex-end;
+    max-width: 70%;
+    margin-left: auto;
+}
+
+.bot-message {
+    background-color: #f5f5f5;
+    padding: 10px 15px;
+    margin: 8px 0;
+    border-radius: 15px;
+    border-bottom-right-radius: 5px;
+	border: none;
+    align-self: flex-start;
+    max-width: 70%;
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 10px 15px;
+    margin: 8px 0;
+    border-radius: 15px;
+    font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .button-container {
+    flex-direction: row;
+    gap: 1em;
+  }
+
+  .nego-button,
+  .voice-button,
+  .submit-button {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 1px;
+}
+
+#container {
+  position: absolute;
+  justify-content: center;
+  transition: top 0.5s ease-out, left 0.5s ease-out;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  right: 35%;
+  top: 50%;
+}
+
+.loading-icon {
+  fill: #1a2035;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 
 @keyframes typing {
     from { width: 0 }
@@ -721,42 +820,140 @@ body {
 }
 </style>
 
-<div class="div-height"></div>
-<div class="col-md-4"></div>
-<div class="chat-bot">
-  <form id="chat-form" action="">
+<div class="conversation">
+	<hr>
+	<ul id="list">
+		<li></li>
+	</ul>
+</div>
+
+<div class="chat-bot" id="container">
+  <form id="chat-form">
+    @csrf
     <label hidden for="question">Pose ta question :</label>
     <textarea class="chat-text-area" id="question" name="question" placeholder="Entrez des questions sur les commandes "></textarea>
    </form>
    <div class="button-container">
+      <div class="left-buttons">
     <div class="btn-toolbar">
       <button class="nego-button">
         <img
-          src="{{ asset('assets/img/negobot_icone.png')}}"/>
+          src="{{ asset('assets/img/negobot_icone.png')}}" alt="NegoBot" />
       </button>
       <button class="voice-button" id="voice-button" onclick="startRecognition()">
         <svg
-          class="voice-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          height="20px"
-          viewBox="0 -960 960 960"
-          width="20px">
-          <path d="M480-400q-50 0-85-35t-35-85v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q0 50-35 85t-85 35Zm0-240Zm-40 520v-123q-104-14-172-93t-68-184h80q0 83 58.5 141.5T480-320q83 0 141.5-58.5T680-520h80q0 105-68 184t-172 93v123h-80Zm40-360q17 0 28.5-11.5T520-520v-240q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v240q0 17 11.5 28.5T480-480Z"/>
+			class="voice-icon"
+          	xmlns="http://www.w3.org/2000/svg"
+          	height="20px"
+          	viewBox="0 -960 960 960"
+          	width="20px">
+		<path d="M480-400q-50 0-85-35t-35-85v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q0 50-35 85t-85 35Zm0-240Zm-40 520v-123q-104-14-172-93t-68-184h80q0 83 58.5 141.5T480-320q83 0 141.5-58.5T680-520h80q0 105-68 184t-172 93v123h-80Zm40-360q17 0 28.5-11.5T520-520v-240q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v240q0 17 11.5 28.5T480-480Z"/>
         </svg>
       </button>
+        </div>
       <button class="submit-button" id="submit-button" type="submit" form="chat-form">
         <svg
-          xmlns="http://www.w3.org/2000/svg"
-          height="24px"
-          viewBox="0 -960 960 960"
-          width="24px"
-          fill="#0004ffff">
+			xmlns="http://www.w3.org/2000/svg"
+			height="24px"
+          	viewBox="0 -960 960 960"
+          	width="24px">
           <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"/>
         </svg>
       </button>
     </div>
   </div>
 </div>
+
+
+<script>
+  document.getElementById('chat-form').addEventListener('submit', function (e) {
+
+  e.preventDefault();
+
+  const questionField = document.getElementById('question');
+  const question = questionField.value.trim();
+  
+  if (question !== "") {
+    const target = document.getElementById('container');
+    target.style.right = "35%";
+    target.style.top = "75%";
+  }
+});
+
+</script>
+
+<script>
+
+function initChatBot(options) {
+    const formSelector = options.formSelector;
+    const inputSelector = options.inputSelector;
+    const responseSelector = options.responseSelector;
+    const routeUrl = options.url;
+    const csrfToken = options.csrfToken;
+    const list = document.getElementById('list');
+
+    $(document).ready(function () {
+        $(formSelector).on('submit', function (e) {
+            e.preventDefault();
+            let question = $(inputSelector).val().trim();
+            if (question == "")
+              return;
+            const userQuestionItem = document.createElement('li');
+            userQuestionItem.className = 'user-message';
+            userQuestionItem.textContent = "Vous: " + question;
+            list.appendChild(userQuestionItem);
+            let responseItem;
+            $(inputSelector).val('');
+            $.ajax({
+              url: routeUrl,
+              type: "POST",
+              data: {
+                _token: csrfToken,
+                question: question
+              },
+              beforeSend: function () {
+                responseItem = document.createElement('li');
+                responseItem.className = 'bot-message';
+                responseItem.innerHTML = `
+                <strong>
+                <svg
+                class="loading-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 -960 960 960"
+                  width="24px"
+                  fill="#e3e3e3">
+                  <path d="M360-80q-58 0-109-22t-89-60q-38-38-60-89T80-360q0-81 42-148t110-102q20-39 49.5-68.5T350-728q33-68 101-110t149-42q58 0 109 22t89 60q38 38 60 89t22 109q0 85-42 150T728-350q-20 39-49.5 68.5T610-232q-35 68-102 110T360-80Zm0-80q33 0 63.5-10t56.5-30q-58 0-109-22t-89-60q-38-38-60-89t-22-109q-20 26-30 56.5T160-360q0 42 16 78t43 63q27 27 63 43t78 16Zm120-120q33 0 64.5-10t57.5-30q-59 0-110-22.5T403-403q-38-38-60.5-89T320-602q-20 26-30 57.5T280-480q0 42 15.5 78t43.5 63q27 28 63 43.5t78 15.5Zm120-120q18 0 34.5-3t33.5-9q22-60 6.5-115.5T621-621q-38-38-93.5-53.5T412-668q-6 17-9 33.5t-3 34.5q0 42 15.5 78t43.5 63q27 28 63 43.5t78 15.5Zm160-78q20-26 30-57.5t10-64.5q0-42-15.5-78T741-741q-27-28-63-43.5T600-800q-35 0-65.5 10T478-760q59 0 110 22.5t89 60.5q38 38 60.5 89T760-478Z"/>
+                  <set attributeName="r" to="50" begin="3s" />
+                  </svg>
+                  </strong>
+                `;
+                list.appendChild(responseItem);
+              },
+              success: function (response) {
+                responseItem.innerHTML = '<strong>NegoBot:</strong> ' + response.response;
+                list.appendChild(responseItem);
+                list.scrollTop = list.scrollHeight;
+                responseItem = null;
+              },
+              error: function (xhr) {
+                console.error("Erreur AJAX :", xhr.responseText);
+                responseItem.className = 'error-message';
+                responseItem.textContent = "❌ Une erreur est survenue.";
+              }
+            });
+          });
+        });
+}
+
+initChatBot({
+    formSelector: "#chat-form",
+    inputSelector: "#question",
+    responseSelector: "#bot-response",
+    url: "{{ route('chat-bot') }}",
+    csrfToken: "{{ csrf_token() }}"
+});
+</script>
 
 <script>
 document.getElementById("question").addEventListener("keydown", function(event) {
@@ -814,24 +1011,14 @@ function startRecognition() {
     };
     recognition.start();
 }
-</script>
-
-           
+</script>  
                      </div>
 
           </div>
-
-
-
-
-
-  </div>
-    </div>
-
-
         </div>
         </div>
-
+    </body>
+  
         <footer class="footer">
           <div class="container-fluid d-flex justify-content-between">
             <nav class="pull-left">
@@ -909,20 +1096,4 @@ document.getElementById("searchItemInput").addEventListener("keyup", function() 
 });
 </script>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  </body>
 </html>
