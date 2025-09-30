@@ -379,6 +379,131 @@
 
 
               <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+
+
+                    <!-- test quick action  -->
+<li class="nav-item topbar-icon dropdown hidden-caret">
+                  <a
+                    class="nav-link"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <i class="fas fa-layer-group"></i>
+                  </a>
+                  <div class="dropdown-menu quick-actions animated fadeIn">
+                    <div class="quick-actions-header">
+                      <span class="title mb-1">Actions Rapides</span>
+                      <!-- <span class="subtitle op-7">Liens Utiles</span> -->
+                    </div>
+                    <div class="quick-actions-scroll scrollbar-outer">
+                      <div class="quick-actions-items">
+                        <div class="row m-0">
+
+                                                  <a class="col-6 col-md-4 p-0" href="/articles">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-success rounded-circle"
+                              >
+                                <i class="fas fa-sitemap"></i>
+                              </div>
+                              <span class="text">Articles</span>
+                            </div>
+                          </a>
+
+                                                                            <a class="col-6 col-md-4 p-0" href="/customers">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-primary rounded-circle"
+                              >
+                                <i class="fas fa-users"></i>
+                              </div>
+                              <span class="text">Clients</span>
+                            </div>
+                          </a>
+
+
+                                                                                                      <a class="col-6 col-md-4 p-0" href="/suppliers">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-secondary rounded-circle"
+                              >
+                                <i class="fas fa-user-tag"></i>
+                              </div>
+                              <span class="text">Fournisseurs</span>
+                            </div>
+                          </a>
+
+
+
+                          <a class="col-6 col-md-4 p-0" href="/delivery_notes/list">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-danger rounded-circle">
+                                <i class="fa fa-cart-plus"></i>
+                              </div>
+                              <span class="text">Commandes Ventes</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/salesinvoices">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-warning rounded-circle"
+                              >
+                                <i class="fas fa-file-invoice-dollar"></i>
+                              </div>
+                              <span class="text">Factures Ventes</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/generalaccounts">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-info rounded-circle">
+                                <i class="fas fa-money-check-alt"></i>
+                              </div>
+                              <span class="text">Plan Comptable</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/purchases/list">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-success rounded-circle"
+                              >
+                                <i class="fa fa-cart-plus"></i>
+                              </div>
+                              <span class="text">Commandes Achats</span>
+                            </div>
+                          </a>
+                          <a class="col-6 col-md-4 p-0" href="/invoices">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-primary rounded-circle"
+                              >
+                                <i class="fas fa-file-invoice-dollar"></i>
+                              </div>
+                              <span class="text">Factures Achats</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/paymentlist">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-secondary rounded-circle"
+                              >
+                                <i class="fas fa-credit-card"></i>
+                              </div>
+                              <span class="text">Paiements</span>
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                        <!-- fin test quick action  -->
+
+                        
                 
 
  

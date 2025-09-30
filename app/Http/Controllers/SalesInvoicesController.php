@@ -1785,6 +1785,7 @@ public function notesList(Request $request)
             if ($sourceType === 'return') {
                 $returns = SalesReturn::query()
                     ->where('invoiced', false)
+                    ->where('delivery_note_id','!=', null)
                     ->where('customer_id', $customerId)
                     ->with('customer')
                     ->latest()->get();

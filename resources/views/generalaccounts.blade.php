@@ -334,6 +334,131 @@
                         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
 
 
+                              <!-- test quick action  -->
+<li class="nav-item topbar-icon dropdown hidden-caret">
+                  <a
+                    class="nav-link"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <i class="fas fa-layer-group"></i>
+                  </a>
+                  <div class="dropdown-menu quick-actions animated fadeIn">
+                    <div class="quick-actions-header">
+                      <span class="title mb-1">Actions Rapides</span>
+                      <!-- <span class="subtitle op-7">Liens Utiles</span> -->
+                    </div>
+                    <div class="quick-actions-scroll scrollbar-outer">
+                      <div class="quick-actions-items">
+                        <div class="row m-0">
+
+                                                  <a class="col-6 col-md-4 p-0" href="/articles">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-success rounded-circle"
+                              >
+                                <i class="fas fa-sitemap"></i>
+                              </div>
+                              <span class="text">Articles</span>
+                            </div>
+                          </a>
+
+                                                                            <a class="col-6 col-md-4 p-0" href="/customers">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-primary rounded-circle"
+                              >
+                                <i class="fas fa-users"></i>
+                              </div>
+                              <span class="text">Clients</span>
+                            </div>
+                          </a>
+
+
+                                                                                                      <a class="col-6 col-md-4 p-0" href="/suppliers">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-secondary rounded-circle"
+                              >
+                                <i class="fas fa-user-tag"></i>
+                              </div>
+                              <span class="text">Fournisseurs</span>
+                            </div>
+                          </a>
+
+
+
+                          <a class="col-6 col-md-4 p-0" href="/delivery_notes/list">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-danger rounded-circle">
+                                <i class="fa fa-cart-plus"></i>
+                              </div>
+                              <span class="text">Commandes Ventes</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/salesinvoices">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-warning rounded-circle"
+                              >
+                                <i class="fas fa-file-invoice-dollar"></i>
+                              </div>
+                              <span class="text">Factures Ventes</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/generalaccounts">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-info rounded-circle">
+                                <i class="fas fa-money-check-alt"></i>
+                              </div>
+                              <span class="text">Plan Comptable</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/purchases/list">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-success rounded-circle"
+                              >
+                                <i class="fa fa-cart-plus"></i>
+                              </div>
+                              <span class="text">Commandes Achats</span>
+                            </div>
+                          </a>
+                          <a class="col-6 col-md-4 p-0" href="/invoices">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-primary rounded-circle"
+                              >
+                                <i class="fas fa-file-invoice-dollar"></i>
+                              </div>
+                              <span class="text">Factures Achats</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/paymentlist">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-secondary rounded-circle"
+                              >
+                                <i class="fas fa-credit-card"></i>
+                              </div>
+                              <span class="text">Paiements</span>
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                        <!-- fin test quick action  -->
+
+
+
+
                         <!-- test quick action  -->
 <li class="nav-item topbar-icon dropdown hidden-caret">
                   <a
@@ -504,12 +629,13 @@
                     @endif
 
                     <div class="container mt-4">
-                        <h4>Comptes Généraux</h4>
+                        <h4>Comptes Généraux :
 
-                        <!-- Bouton pour ouvrir le modal -->
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAccountModal">
-                            Créer un Compte Général
-                        </button>
+                                          <button type="submit" class="btn btn-outline-success btn-round ms-2" data-bs-toggle="modal" data-bs-target="#createAccountModal">Nouveau Compte Général
+           <i class="fas fa-plus-circle ms-2"></i>
+          </button>
+
+                        </h4>
 
                         <!-- Modal Créer -->
                         <div class="modal fade" id="createAccountModal" tabindex="-1" aria-labelledby="createAccountModalLabel" aria-hidden="true">
@@ -582,7 +708,7 @@
                                     <tbody>
 <!-- comptes par défaut -->
                                     <tr>
-                                                <td>70.</td>
+                                                <td>707.</td>
                                                 <td>Ventes de Marchandises</td>
                                                 <td><span class="badge rounded-pill text-bg-light">Compte Systéme</span>
 </td>
@@ -599,7 +725,7 @@
 
 
                                                                         <tr>
-                                                <td>60.</td>
+                                                <td>607.</td>
                                                 <td>Achat de Marchandises</td>
                                                  <td><span class="badge rounded-pill text-bg-light">Compte Systéme</span>
 </td>
@@ -619,7 +745,7 @@
 
 
                                      <tr>
-                                                <td>4457.</td>
+                                                <td>44571.</td>
                                                 <td>TVA Collectée</td>
                                                  <td><span class="badge rounded-pill text-bg-light">Compte Systéme</span>
 </td>
@@ -633,6 +759,27 @@
                                                     </a>
     </td>
                                     </tr>
+
+
+
+
+
+                                     <tr>
+                                                <td>44566.</td>
+                                                <td>TVA déductible</td>
+                                                 <td><span class="badge rounded-pill text-bg-light">Compte Systéme</span>
+</td>
+                                                <td>
+                                                 <a type="button" class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#TVADAccountingModal"> Champs Calculé <i class="fa fa-calculator" aria-hidden="true"></i></a>
+
+                                                </td>
+                                                <td>
+                                                    <a href="" class="btn btn-sm btn-info" title="Consultation des écritures" data-bs-toggle="modal" data-bs-target="#TVADAccountingModal">
+                                                        Ecritures comptables <i class="fas fa-list"></i>
+                                                    </a>
+    </td>
+                                    </tr>
+
 
 
 
@@ -1540,6 +1687,272 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 </script>
+<!-- fin tva collecté -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- New Modal for TVA collectée Accounting Entries -->
+                        <div class="modal fade" id="TVADAccountingModal" tabindex="-1" aria-labelledby="TVADAccountingModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="TVADAccountingModalLabel">Ecritures Compte : 44566. TVA Déductibles</h5>
+                                        <button type="button" class="btn btn-secondary btn-round ms-2" onclick="showTVADBalance()">
+                                            <i class="fas fa-balance-scale me-1"></i> Balance Générale
+                                        </button>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Balance Summary (Hidden by Default) -->
+                                        <div id="TVADBalanceSummary" class="card mb-3" style="display: none;">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-primary">Balance Générale des TVA Déductibles</h6>
+                                                <table class="table table-sm table-bordered">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Total Débits</th>
+                                                            <th>Total Crédits</th>
+                                                            <th>Solde Net</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td id="TVADDebits">0,00 €</td>
+                                                            <td id="TVADCredits">0,00 €</td>
+                                                            <td id="TVADBalance">0,00 €</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <!-- Filter Form -->
+                                        <form id="TVADAccountingFilterForm" class="d-flex flex-wrap gap-2 mb-3">
+                                            <select name="type" class="form-select form-select-sm" style="width: 200px;">
+                                                <option value="">Type (Tous)</option>
+                                                <option value="Factures">Factures</option>
+                                                <option value="Avoirs">Avoirs</option>
+                                                <!-- <option value="Règlements">Règlements</option> -->
+                                            </select>
+<input type="date" name="start_date" class="form-control form-control-sm" style="width: 150px;" placeholder="Date début" value="{{ \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')}}">
+<input type="date" name="end_date" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin" value="{{ \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')}}">
+                                            <!-- <select name="customer_id" class="form-select form-select-sm" style="width: 200px;">
+                                                <option value="">Client (Tous)</option>
+                                                @foreach($customers as $customer)
+                                                    <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+                                                @endforeach
+                                            </select> -->
+                                            <button type="submit" class="btn btn-outline-primary btn-sm px-3">
+                                                <i class="fas fa-filter me-1"></i> Filtrer
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="resetTVADAccountingFilter()">
+                                                <i class="fas fa-undo me-1"></i> Réinitialiser
+                                            </button>
+                                        </form>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover accounting-table">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th>Fourn.</th>
+                                                        <th>Type</th>
+                                                        <th>Num Document</th>
+                                                        <th>Date</th>
+                                                        <th>Total TVA</th>
+                                                        <th>Statut Doc.</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="TVADAccountingEntries">
+                                                    <tr>
+                                                        <td colspan="6" class="text-center">Chargement...</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+<script>
+
+    
+// balance total
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Cache for all accounting entries to avoid refetching
+    let allAccountingEntriesCache = [];
+
+    // All Accounting Entries Handler
+    const allAccountingModal = document.getElementById('TVADAccountingModal');
+    const allFilterForm = document.getElementById('TVADAccountingFilterForm');
+
+    if (allAccountingModal) {
+        allAccountingModal.addEventListener('show.bs.modal', function () {
+            const tbody = document.getElementById('TVADAccountingEntries');
+
+            // If entries are cached, apply filters and render
+            if (allAccountingEntriesCache.length > 0) {
+                applyAllFilters();
+                return;
+            }
+
+            // Fetch entries if not cached
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">Chargement...</td></tr>';
+            fetch("{{ route('TVAD.accounting-entries') }}", {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    allAccountingEntriesCache = data.entries || [];
+                    applyAllFilters();
+                })
+                .catch(error => {
+                    console.error('Error fetching all accounting entries:', error);
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Erreur: Impossible de charger les écritures comptables.</td></tr>`;
+                });
+        });
+    }
+
+    // Handle filter form submission
+    if (allFilterForm) {
+        allFilterForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            applyAllFilters();
+        });
+    }
+
+    // Reset filter function
+    window.resetAllAccountingFilter = function () {
+        const filterForm = document.getElementById('TVADAccountingFilterForm');
+        const balanceSummary = document.getElementById('TVADBalanceSummary');
+        if (filterForm) {
+            filterForm.reset();
+            balanceSummary.style.display = 'none'; // Hide balance when resetting
+            applyAllFilters();
+        }
+    };
+
+    // Show balance summary
+    window.showTVADBalance = function () {
+        const balanceSummary = document.getElementById('TVADBalanceSummary');
+        balanceSummary.style.display = 'block'; // Show balance summary
+        applyAllFilters(); // Reapply filters to ensure balance is updated
+    };
+
+    // Apply client-side filters and render table
+    function applyAllFilters() {
+        const tbody = document.getElementById('TVADAccountingEntries');
+        const filterForm = document.getElementById('TVADAccountingFilterForm');
+        const formData = new FormData(filterForm);
+        const typeFilter = formData.get('type') || '';
+        const startDate = formData.get('start_date') ? new Date(formData.get('start_date')) : null;
+        const endDate = formData.get('end_date') ? new Date(formData.get('end_date')) : null;
+        const customerIdFilter = formData.get('customer_id') || '';
+
+        // Get cached entries
+        let entries = allAccountingEntriesCache || [];
+
+        // Apply type filter
+        if (typeFilter) {
+            entries = entries.filter(entry => {
+                if (typeFilter === 'Factures') return entry.type === 'Facture';
+                if (typeFilter === 'Avoirs') return entry.type === 'Avoir';
+                if (typeFilter === 'Règlements') return entry.type !== 'Facture' && entry.type !== 'Avoir';
+                return true;
+            });
+        }
+
+        // Apply date filter
+        if (startDate || endDate) {
+            entries = entries.filter(entry => {
+                if (!entry.date || entry.date === '-') return false;
+                const entryDateParts = entry.date.split('/');
+                const entryDate = new Date(`${entryDateParts[2]}-${entryDateParts[1]}-${entryDateParts[0]}`);
+                if (startDate && entryDate < startDate) return false;
+                if (endDate && entryDate > endDate) return false;
+                return true;
+            });
+        }
+
+        // Apply customer filter
+        if (customerIdFilter) {
+            entries = entries.filter(entry => entry.customer_id === customerIdFilter);
+        }
+
+        // Calculate balance
+        let debits = 0;
+        let credits = 0;
+        entries.forEach(entry => {
+            if (entry.type === 'Facture') {
+                debits += parseFloat(entry.amount) || 0;
+            } else {
+                credits += parseFloat(entry.amount) || 0;
+            }
+        });
+        const balance = debits - credits;
+
+        // Update balance summary
+        const debitsElement = document.getElementById('TVADDebits');
+        const creditsElement = document.getElementById('TVADCredits');
+        const balanceElement = document.getElementById('TVADBalance');
+        if (debitsElement && creditsElement && balanceElement) {
+            debitsElement.textContent = debits.toFixed(2).replace('.', ',') + ' €';
+            creditsElement.textContent = credits.toFixed(2).replace('.', ',') + ' €';
+            balanceElement.textContent = balance.toFixed(2).replace('.', ',') + ' €';
+            balanceElement.className = balance >= 0 ? 'text-success' : 'text-danger';
+        }
+
+        // Render filtered entries
+        tbody.innerHTML = '';
+        if (entries.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Aucune écriture comptable trouvée.</td></tr>';
+            return;
+        }
+
+        entries.forEach(entry => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${entry.customer_name || '-'}</td>
+                <td>${entry.type || '-'}</td>
+                <td>${entry.numdoc || entry.reference || '-'}</td>
+                <td>${entry.date || '-'}</td>
+                <td>${(entry.amount !== undefined && entry.amount !== null) ? Number(entry.amount).toFixed(2).replace('.', ',') : '-'} €</td>
+                <td>${entry.status || '-'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+});
+</script>
+
+<!-- fin tva déductible -->
+
+
 
 
 
