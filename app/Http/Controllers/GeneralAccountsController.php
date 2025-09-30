@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\StockEntriesExport;
 use App\Models\GeneralAccount;
 use App\Models\Payment;
 use App\Models\AccountTransfer;
@@ -10,10 +11,13 @@ use App\Models\Invoice;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseNote;
 use App\Models\SalesNote;
+use App\Models\StockMovement;
 use App\Models\Supplier;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class GeneralAccountsController extends Controller
 {
@@ -345,6 +349,99 @@ public function getAllAccountingEntriesTVAD()
 
 
 
+
+
+
+
+ public function getAllAccountingEntriesStock()
+    {
+        try {
+            Log::info("Fetching stock accounting entries");
+
+            // Récupère et ordonne par date directement
+            $movements = StockMovement::with(['item', 'store'])
+                ->select('id','item_id','store_id','quantity','type','reference','note','cost_price','created_at')
+                ->orderBy('created_at','desc')
+                ->get();
+
+            $entries = $movements->map(function ($m) {
+                // coût unitaire : priorité movement.cost_price sinon prix article sinon 0
+                $unitCost = $m->cost_price ?? ($m->item->cost_price ?? 0);
+                $qty = (float) $m->quantity;
+                $amount = round(abs($qty * (float)$unitCost), 2); // montant positif
+
+                // Normalisation de la direction (Entrée / Sortie)
+                // Assomptions :
+                // - achat  => Entrée
+                // - vente  => Sortie
+                // - retour_vente => Entrée
+                // - retour_achat => Sortie (retour vers fournisseur)
+                // - annulation_expedition => Entrée (marchandises retournées)
+                // - ajustement => dépend du signe de quantity
+                $type = (string) $m->type;
+                $direction = 'Entrée';
+
+                switch ($type) {
+                    case 'achat':
+                        $direction = 'Entrée'; break;
+                    case 'retour_vente':
+                        $direction = 'Entrée'; break;
+                    case 'annulation_expedition':
+                        $direction = 'Entrée'; break;
+                    case 'vente':
+                        $direction = 'Sortie'; break;
+                    case 'retour_achat':
+                        $direction = 'Sortie'; break;
+                    case 'ajustement':
+                        $direction = $qty > 0 ? 'Entrée' : 'Sortie'; break;
+                    default:
+                        // fallback : quantité positive => entrée
+                        $direction = $qty >= 0 ? 'Entrée' : 'Sortie';
+                }
+
+                return [
+                    'id'         => $m->id,
+                    'type'       => $type,
+                    'direction'  => $direction,
+                    'item_id'    => $m->item_id,
+                    'item_name'  => $m->item->name ?? '-',
+                    'store_name' => $m->store->name ?? '-',
+                    'reference'  => $m->reference ?? '-',
+                    'date'       => $m->created_at ? Carbon::parse($m->created_at)->format('d/m/Y') : '-',
+                    'quantity'   => $qty,
+                    'unit_cost'  => round((float)$unitCost, 2),
+                    'amount'     => $amount,
+                    'note'       => $m->note ?? '-',
+                ];
+            })->values();
+
+            Log::info("Successfully fetched stock accounting entries", ['count' => $entries->count()]);
+
+            return response()->json(['entries' => $entries], 200);
+        } catch (\Exception $e) {
+            Log::error("Error fetching stock accounting entries", [
+                'error' => $e->getMessage(),
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['error' => 'Erreur serveur: Impossible de charger les écritures du compte stock'], 500);
+        }
+
+
+
+    }
+
+
+
+
+    public function exportStockEntries(Request $request)
+{
+    // Reprend les mêmes entrées que la méthode JSON
+    $entries = $this->getAllAccountingEntriesStock()->getData()->entries ?? [];
+
+    return Excel::download(new StockEntriesExport($entries), 'Ecritures_Stock.xlsx');
+}
 
 
 

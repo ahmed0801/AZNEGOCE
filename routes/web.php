@@ -454,6 +454,12 @@ Route::get('/allcsuppliers/accounting-entriesHT', [SupplierController::class, 'g
 Route::get('/TVA/accounting-entries', [GeneralAccountsController::class, 'getAllAccountingEntriesTVA'])->name('TVA.accounting-entries');
 // ecriture compte tva déductible
 Route::get('/TVAD/accounting-entries', [GeneralAccountsController::class, 'getAllAccountingEntriesTVAD'])->name('TVAD.accounting-entries');
+// ecriture compte stock
+Route::get('/stock/accounting-entries', [GeneralAccountsController::class, 'getAllAccountingEntriesStock'])->name('stock.accounting-entries');
+Route::get('/stock/accounting-entries/export', [GeneralAccountsController::class, 'exportStockEntries'])
+    ->name('stock.accounting-entries.export');
+
+
 
 
 // recherche client 
