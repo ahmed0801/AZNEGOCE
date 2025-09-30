@@ -223,15 +223,13 @@ $customer = Customer::with(['tvaGroup', 'paymentTerm'])->findOrFail($request->cu
                 $paymentTermLabel = strtolower($customer->paymentTerm->label ?? '');
 
 $invoiceDate = Carbon::parse($request->invoice_date);
-if (strpos($paymentTermLabel, 'fin du mois') !== false) {
-    // $dueDate = $invoiceDate->copy()->endOfMonth()->addDays($customer->paymentTerm->days);
-                    $dueDate = $invoiceDate->copy()->endOfMonth();
+$paymentTermLabel = strtolower($customer->paymentTerm->label); // pour éviter les majuscules
 
-} else {
-    // $dueDate = $invoiceDate->copy()->addDays($customer->paymentTerm->days);
-                    $dueDate = $invoiceDate->copy()->addDays($customer->paymentTerm->days);
+    // Exemple: "30 jours fin de mois", "45 jours fin de mois"
+    $days = $customer->paymentTerm->days?? 0;
+    $dueDate = $invoiceDate->copy()->endOfMonth()->addDays($days);
 
-}
+
 
 
             

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SalesNoteExport;
+use App\Exports\SalesNotesExport;
 use App\Models\Customer;
 use App\Models\DeliveryNote;
 use App\Models\Invoice;
@@ -14,6 +16,7 @@ use App\Models\Item;
 use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\CompanyInformation;
+use App\Models\Payment;
 use App\Models\SalesReturnLine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,12 +26,16 @@ use Picqer\Barcode\BarcodeGeneratorPNG;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InvoiceMail;
+use App\Mail\OrderReadyMail;
+use App\Models\EmailMessage;
 
 class SalesInvoicesController extends Controller
 {
     public function invoicesList(Request $request)
     {
-        $query = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns'])
+        $query = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])
             ->orderBy('updated_at', 'desc');
 
         if ($request->filled('customer_id')) {
@@ -47,7 +54,7 @@ class SalesInvoicesController extends Controller
             $query->whereDate('invoice_date', '<=', $request->date_to);
         }
 
-        $invoices = $query->get();
+        $invoices = $query->paginate(50);
         $customers = Customer::orderBy('name')->get();
 
         return view('salesinvoices.index', compact('invoices', 'customers'));
@@ -55,7 +62,7 @@ class SalesInvoicesController extends Controller
 
     public function createDirectInvoice($deliveryNoteId)
     {
-        $deliveryNote = DeliveryNote::with(['lines.item', 'customer'])
+        $deliveryNote = DeliveryNote::with(['lines.item', 'customer','vehicle'])
             ->whereIn('status', ['expédié', 'livré'])
             ->findOrFail($deliveryNoteId);
 
@@ -85,6 +92,7 @@ class SalesInvoicesController extends Controller
             }
 
             $customer = $deliveryNote->customer;
+            $vehicle_id = $deliveryNote->vehicle_id;
             $tvaRate = $deliveryNote->tva_rate ?? 0;
             $dueDate = $customer->paymentTerm
                 ? Carbon::parse($request->invoice_date)->addDays($customer->paymentTerm->days)
@@ -103,6 +111,7 @@ class SalesInvoicesController extends Controller
                 'type' => 'direct',
                 'numclient' => $customer->code ?? null,
                 'customer_id' => $customer->id,
+                'vehicle_id' => $vehicle_id,
                 'invoice_date' => $request->invoice_date,
                 'due_date' => $dueDate,
                 'status' => $request->action === 'validate' ? 'validée' : 'brouillon',
@@ -140,6 +149,12 @@ class SalesInvoicesController extends Controller
 
             if ($request->action === 'validate') {
                 $deliveryNote->update(['invoiced' => true]);
+
+                                                 // Update customer balance solde client
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                    $customer->save();
+
             }
 
             $souche->last_number += 1;
@@ -159,9 +174,11 @@ class SalesInvoicesController extends Controller
         $deliveryNotes = DeliveryNote::with(['customer', 'lines.item'])
             ->where('invoiced', false)
             ->whereIn('status', ['expédié', 'livré'])
+            ->orderBy('numdoc', 'DESC')
             ->get();
         $salesReturns = SalesReturn::with(['customer', 'lines.item'])
             ->where('invoiced', false)
+            ->orderBy('numdoc', 'DESC')
             ->get();
         $customers = Customer::orderBy('name')->get();
         return view('salesinvoices.create_grouped', compact('deliveryNotes', 'salesReturns', 'customers'));
@@ -296,6 +313,12 @@ if (strpos($paymentTermLabel, 'fin du mois') !== false) {
                         ->where('customer_id', $request->customer_id)
                         ->update(['invoiced' => true]);
                 }
+
+                                                 // Update customer balance solde client
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                    $customer->save();
+
             }
 
             $souche->last_number += 1;
@@ -485,6 +508,13 @@ public function editInvoice($id)
                 foreach ($invoice->salesReturns as $salesReturn) {
                     $salesReturn->update(['invoiced' => true]);
                 }
+
+
+                                                 // Update customer balance solde client
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                    $customer->save();
+
             }
 
             return redirect()->route('salesinvoices.index')
@@ -496,7 +526,7 @@ public function editInvoice($id)
 
     public function printSingleInvoice($id)
     {
-        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns'])->findOrFail($id);
+        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
         $company = CompanyInformation::first() ?? new CompanyInformation([
             'name' => 'Test Company S.A.R.L',
             'address' => '123 Rue Fictive, Tunis 1000',
@@ -523,7 +553,7 @@ public function editInvoice($id)
 
     public function printSingleInvoiceduplicata($id)
     {
-        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns'])->findOrFail($id);
+        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
         $company = CompanyInformation::first() ?? new CompanyInformation([
             'name' => 'Test Company S.A.R.L',
             'address' => '123 Rue Fictive, Tunis 1000',
@@ -547,7 +577,7 @@ public function editInvoice($id)
 
      public function printSingleInvoicesansref($id)
     {
-        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns'])->findOrFail($id);
+        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
         $company = CompanyInformation::first() ?? new CompanyInformation([
             'name' => 'Test Company S.A.R.L',
             'address' => '123 Rue Fictive, Tunis 1000',
@@ -572,7 +602,7 @@ public function editInvoice($id)
 
          public function printSingleInvoicesansrem($id)
     {
-        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns'])->findOrFail($id);
+        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
         // dd($invoice);
         $company = CompanyInformation::first() ?? new CompanyInformation([
             'name' => 'Test Company S.A.R.L',
@@ -599,7 +629,7 @@ public function editInvoice($id)
 
          public function printSingleInvoicesans2($id)
     {
-        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns'])->findOrFail($id);
+        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
         $company = CompanyInformation::first() ?? new CompanyInformation([
             'name' => 'Test Company S.A.R.L',
             'address' => '123 Rue Fictive, Tunis 1000',
@@ -632,11 +662,14 @@ public function editInvoice($id)
         return Excel::download(new \App\Exports\SalesInvoiceExport($invoice), 'facture_' . $invoice->numdoc . '.xlsx');
     }
 
-    public function exportInvoices()
-    {
-        $invoices = Invoice::with(['customer', 'lines.item'])->get();
-        return Excel::download(new \App\Exports\SalesInvoicesExport($invoices), 'factures_ventes.xlsx');
-    }
+public function exportInvoices(Request $request)
+{
+    // Passer la Request directement à l'export
+    return Excel::download(
+        new \App\Exports\SalesInvoicesExport($request), 
+        'factures_ventes_' . date('Y-m-d_H-i-s') . '.xlsx'
+    );
+}
 
     public function markAsPaid(Request $request, $id)
     {
@@ -1162,11 +1195,12 @@ public function notesList(Request $request)
             $query->whereDate('note_date', '<=', $request->date_to);
         }
 
-        $notes = $query->get();
+        $notes = $query->paginate(50); // Pagination au lieu de get()
         $customers = Customer::orderBy('name')->get();
 
         return view('salesnotes.list', compact('notes', 'customers'));
     }
+
 
     public function createSalesNote()
     {
@@ -1404,7 +1438,19 @@ public function notesList(Request $request)
                 $returnSouche->save();
 
                 $note->update(['sales_return_id' => $salesReturn->id]);
+
             }
+
+
+
+                        if ($request->action === 'validate') {
+// Update customer balance solde client
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                    $customer->save();
+            }
+
+
 
             if ($request->action === 'validate' && $request->source_type === 'return') {
                 SalesReturn::whereIn('id', $request->source_ids)
@@ -1430,6 +1476,10 @@ public function notesList(Request $request)
         });
     }
 
+
+
+
+    
   public function editSalesNote($id)
 {
     $salesNote = SalesNote::with(['customer', 'lines'])->findOrFail($id);
@@ -1680,6 +1730,15 @@ public function notesList(Request $request)
                 $salesNote->update(['sales_return_id' => $salesReturn->id]);
             }
 
+
+
+            if ($request->action === 'validate') {
+// Update customer balance solde client
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                    $customer->save();
+            }
+
             if ($request->action === 'validate' && $request->source_type === 'return') {
                 SalesReturn::whereIn('id', $request->source_ids)
                     ->where('invoiced', false)
@@ -1726,6 +1785,7 @@ public function notesList(Request $request)
             if ($sourceType === 'return') {
                 $returns = SalesReturn::query()
                     ->where('invoiced', false)
+                    ->where('delivery_note_id','!=', null)
                     ->where('customer_id', $customerId)
                     ->with('customer')
                     ->latest()->get();
@@ -1919,34 +1979,165 @@ public function notesList(Request $request)
             $generator->getBarcode($salesNote->numdoc, $generator::TYPE_CODE_128)
         );
 
-        $pdf = Pdf::loadView('salesnotes.pdf', compact('salesNote', 'company', 'barcode'));
-        return $pdf->download("avoir_{$salesNote->numdoc}.pdf");
+        $pdf = Pdf::loadView('pdf.salesnote', compact('salesNote', 'company', 'barcode'));
+        return $pdf->stream("avoir_{$salesNote->numdoc}.pdf");
+        
     }
 
     public function exportSingleNote($id)
     {
         $note = SalesNote::with(['customer', 'lines.item', 'salesInvoice', 'salesReturn'])->findOrFail($id);
-        return Excel::download(new \App\Exports\SalesNoteExport($note), 'avoir_' . $note->numdoc . '.xlsx');
+        $filename = 'avoir_' . $note->numdoc . '_' . Carbon::now()->format('Y-m-d_H-i-s') . '.xlsx';
+        return Excel::download(new SalesNoteExport($note), $filename);
     }
 
     public function exportNotes(Request $request)
     {
-        $query = SalesNote::with(['customer', 'lines.item', 'salesInvoice', 'salesReturn']);
-
-        if ($request->filled('customer_id')) {
-            $query->where('customer_id', $request->customer_id);
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-        if ($request->filled('date_from')) {
-            $query->whereDate('note_date', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('note_date', '<=', $request->date_to);
-        }
-
-        $notes = $query->get();
-        return Excel::download(new \App\Exports\SalesNotesExport($notes), 'avoirs_ventes_' . Carbon::now()->format('YmdHis') . '.xlsx');
+        return Excel::download(new SalesNotesExport($request), 'avoirs_ventes_' . Carbon::now()->format('Y-m-d_H-i-s') . '.xlsx');
     }
+
+
+
+
+
+
+
+
+
+
+
+  public function makePayment(Request $request, $id)
+{
+    $invoice = Invoice::findOrFail($id);
+    if ($invoice->status !== 'validée' || $invoice->paid) {
+        return redirect()->back()->with('error', 'Cette facture ne peut pas être payée.');
+    }
+
+    $request->validate([
+        'amount' => 'required|numeric|min:0.01|max:' . $invoice->getRemainingBalanceAttribute(),
+        'payment_date' => 'required|date',
+        'payment_mode' => 'required|string|exists:payment_modes,name',
+        'reference' => 'nullable|string|max:255',
+        'notes' => 'nullable|string',
+    ]);
+
+    DB::beginTransaction();
+    try {
+        // Create the payment
+        $payment = Payment::create([
+            'payable_id' => $invoice->id,
+            'payable_type' => Invoice::class,
+            'customer_id' => $invoice->customer_id,
+            'amount' => $request->amount,
+            'payment_date' => $request->payment_date,
+            'payment_mode' => $request->payment_mode,
+            'reference' => $request->reference,
+            'notes' => $request->notes,
+        ]);
+
+        // Generate lettrage code
+        $payment->lettrage_code = $payment->generateLettrageCode();
+        $payment->save();
+
+        // Refresh the invoice's payments relationship to include the new payment
+        $invoice->load('payments');
+
+        // Update paid status with floating-point tolerance
+        $remainingBalance = $invoice->total_ttc - $invoice->payments->sum('amount');
+        $invoice->update(['paid' => $remainingBalance <= 0.01]); // Tolerance for floating-point issues
+
+        DB::commit();
+
+        return redirect()->back()->with('success', 'Paiement enregistré avec succès.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->with('error', 'Erreur lors de l\'enregistrement du paiement: ' . $e->getMessage());
+    }
+}
+
+
+
+
+
+
+public function sendEmail(Request $request, $id)
+{
+    // Validation
+    $request->validate([
+        'emails' => 'required|array|min:1',
+        'emails.*' => 'required|email',
+        'message' => 'nullable|string',
+    ]);
+
+    // Récupérer la facture
+    $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
+
+    // Company fallback
+    $company = CompanyInformation::first() ?? new CompanyInformation([
+        'name' => 'Test Company S.A.R.L',
+        'address' => '123 Rue Fictive, Tunis 1000',
+        'phone' => '+216 12 345 678',
+        'email' => 'contact@testcompany.com',
+        'matricule_fiscal' => '1234567ABC000',
+        'swift' => 'TESTTNTT',
+        'rib' => '123456789012',
+        'iban' => 'TN59 1234 5678 9012 3456 7890',
+        'logo_path' => 'assets/img/test_logo.png',
+    ]);
+
+    // Message : soit celui passé par le form, soit la valeur par défaut en BDD
+    $defaultMessages = EmailMessage::first();
+    $messageText = $request->input('message')
+                 ?? ($defaultMessages->messagefacturevente ?? 'Veuillez trouver ci-joint votre facture de vente.');
+
+    // Générer le barcode (si utilisé dans la vue PDF)
+    $generator = new BarcodeGeneratorPNG();
+    $barcode = 'data:image/png;base64,' . base64_encode(
+        $generator->getBarcode($invoice->numdoc, $generator::TYPE_CODE_128)
+    );
+
+    // Générer le PDF en mémoire
+    $pdf = Pdf::loadView('pdf.invoice', compact('invoice', 'company', 'barcode'))->output();
+
+    // Destinataires : first -> To ; reste -> CC
+    $emails = $request->input('emails', []);
+    $primary = array_shift($emails); // premier email
+    $cc = $emails; // reste des adresses
+
+    try {
+        Mail::to($primary)
+            ->cc($cc)
+            ->send(new InvoiceMail($invoice, $company, $pdf, $messageText));
+    } catch (\Exception $e) {
+        // log si tu veux : \Log::error($e);
+        return back()->with('error', 'Erreur lors de l\'envoi du mail : ' . $e->getMessage());
+    }
+
+    return back()->with('success', 'Facture envoyée avec succès !');
+}
+
+
+
+
+
+public function sendOrderReadyEmail(Request $request, $id)
+{
+    $invoice = Invoice::with('customer')->findOrFail($id);
+    $company = CompanyInformation::first() ?? new CompanyInformation();
+
+    $email = $request->input('email', $invoice->customer->email ?? 'test@mail.com');
+
+    $messageText = "Votre commande est prête à retirer. Veuillez passer au magasin dans la journée pour récupérer vos pièces.";
+
+    Mail::to($email)
+         ->send(new \App\Mail\OrderReadyMail($invoice, $company, $messageText));
+
+    return back()->with('success', 'Notification de retrait envoyée au client !');
+}
+
+
+
+
+
+    
 }

@@ -505,7 +505,7 @@
                 </li>
                         <!-- fin test quick action  -->
 
-                        
+
                 
 
  
@@ -809,6 +809,15 @@ de
                                                             <label for="amount{{ $note->id }}" class="form-label">Montant (€)</label>
                                                             <input type="number" step="0.01" class="form-control" id="amount{{ $note->id }}" name="amount"  value="{{ old('amount') }}" required>
                                                             <small>Reste à payer : {{ number_format($note->getRemainingBalanceAttribute(), 2, ',', ' ') }} €</small>
+                                                                <!-- Bouton Lettrer -->
+                                                                <button 
+        type="button" 
+        class="btn btn-outline-danger btn-sm"
+        onclick="document.getElementById('amount{{ $note->id }}').value = '{{ abs($note->getRemainingBalanceAttribute()) }}'"
+    >
+        Lettrer
+    </button>
+
                                                         </div>
                                                         <div class="mb-3">
                                                             <label for="payment_date{{ $note->id }}" class="form-label">Date de paiement</label>
@@ -817,6 +826,7 @@ de
                                                         <div class="mb-3">
                                                             <label for="payment_mode{{ $note->id }}" class="form-label">Mode de paiement</label>
                                                             <select class="form-control select2" id="payment_mode{{ $note->id }}" name="payment_mode" required>
+                                                            <option value="">Sélectionner le mode de paiement</option>
                                                                 @foreach(\App\Models\PaymentMode::all() as $mode)
                                                                     <option value="{{ $mode->name }}" {{ old('payment_mode') == $mode->name ? 'selected' : '' }}>{{ $mode->name }}</option>
                                                                 @endforeach

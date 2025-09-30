@@ -340,7 +340,7 @@
                 </li>
                         <!-- fin test quick action  -->
 
-                        
+
                             <li class="nav-item topbar-user dropdown hidden-caret">
                                 <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
                                     <div class="avatar-sm">
@@ -472,6 +472,9 @@
                                             @endif
                                         @endif
                                         <span class="text-muted small">&#8594; type: {{ ucfirst($invoice->type ?? 'N/A') }}</span>
+                                        @if($invoice->due_date != $invoice->invoice_date)
+                                        <span class="badge rounded-pill text-bg-light"> &#10173;Echeance : {{ \Carbon\Carbon::parse($invoice->due_date)->format('d/m/Y') }}</span>
+                                        @endif
                                     </div>
                                     <div class="btn-group">
                                         <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $invoice->id }})">
@@ -596,11 +599,25 @@
                                         <form action="{{ route('salesinvoices.make_payment', $invoice->id) }}" method="POST">
                                             @csrf
                                             <div class="modal-body">
-                                                <div class="mb-3">
+
+                                            
+                                    
+
+<div class="mb-3">
                                                     <label for="amount{{ $invoice->id }}" class="form-label">Montant (€)</label>
                                                     <input type="number" step="0.01" class="form-control" id="amount{{ $invoice->id }}" name="amount" max="{{ $invoice->getRemainingBalanceAttribute() }}" required>
                                                     <small>Reste à payer : {{ number_format($invoice->getRemainingBalanceAttribute(), 2, ',', ' ') }} €</small>
+                                                        <!-- Bouton Lettrer -->
+    <button 
+        type="button" 
+        class="btn btn-outline-danger btn-sm"
+        onclick="document.getElementById('amount{{ $invoice->id }}').value = '{{ abs($invoice->getRemainingBalanceAttribute()) }}'"
+    >
+        Lettrer
+    </button>
                                                 </div>
+
+
                                                 <div class="mb-3">
                                                     <label for="payment_date{{ $invoice->id }}" class="form-label">Date de paiement</label>
                                                     <input type="date" class="form-control" id="payment_date{{ $invoice->id }}" name="payment_date" value="{{ now()->format('Y-m-d') }}" required>
@@ -608,6 +625,7 @@
                                                 <div class="mb-3">
                                                     <label for="payment_mode{{ $invoice->id }}" class="form-label">Mode de paiement</label>
                                                     <select class="form-control select2" id="payment_mode{{ $invoice->id }}" name="payment_mode" required>
+                                                        <option value="">Sélectionner le mode de paiement</option>
                                                         @foreach(\App\Models\PaymentMode::all() as $mode)
                                                             <option value="{{ $mode->name }}">{{ $mode->name }}</option>
                                                         @endforeach
