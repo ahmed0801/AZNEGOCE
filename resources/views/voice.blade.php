@@ -504,7 +504,7 @@
                 </li>
                         <!-- fin test quick action  -->
 
-                        
+
                 
 
  
@@ -595,29 +595,49 @@
 
 
 
-        <div class="container mt-4">
-        {{-- Affichage des messages d'erreur --}}
-        @if(session('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
-            </div>
-        @endif
+        
 
-    
-        <div class="container mt-4">
 
-        <h4>NEGOBOT :</h4>
-
+<div class="container mt-4">
 <style>
-.voice-assistant {
-    max-width: 450px;
-    margin: 30px auto;
-    padding: 20px;
-    background: linear-gradient(145deg, #ffffff, #f0f0f0);
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    text-align: center;
-    font-family: 'Public Sans', sans-serif;
+
+body {
+  background-color: #122386ff;
+  background: linear-gradient(to right, #1a2035, #122386ff);
+}
+
+.div-height {
+  height: 30vh;
+  width: 10vw;
+  background-color: transparent;
+}
+
+.chat-bot {
+  padding: 1em;
+  background: linear-gradient(to left, #1238c2ff, #ffffffff);
+  flex-direction: column;
+  display: flex;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 600px;
+  margin: auto;
+}
+
+#chat-form {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-text-area {
+  flex-grow: 1;
+  width: 100%;
+  resize: none;
+  background-color: transparent;
+  color: #282e42ff;
+  border: none;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 16px;
 }
 
 .voice-assistant h4 {
@@ -626,28 +646,60 @@
     color: #007bff;
 }
 
+.button-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 1vw;
+}
+
+.submit-button:hover svg,
+.voice-button:hover svg {
+  transform: scale(1.3);
+  transition: 0.3s ease;
+}
+
+.voice-icon {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+}
+
+.submit-button {
+  border: none;
+  background: transparent;
+  padding: 1vh 2vw 1vh 5vw;
+  cursor: auto;
+  fill: #1a2035;
+}
+
 .voice-button {
-    padding: 15px 30px;
-    font-size: 1rem;
-    background-color: #007bff;
-    color: white;
-    border-radius: 50px;
-    border: none;
-    cursor: pointer;
-    transition: 0.3s ease;
+  fill: #1a2035;
+  padding: 1.5vh 11.5vw 1.5vh 2vw;
+  border: none;
+  background: transparent;
+  cursor: auto;
 }
 
-.voice-button:hover {
-    background-color: #0056b3;
+.nego-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  width: 35px;
+  height: 35px;
+  padding: 0;
 }
 
-#voice-result {
-    margin-top: 20px;
-    font-family: 'Courier New', Courier, monospace;
-    white-space: pre-line;
-    font-size: 0.9rem;
-    color: #343a40;
-    text-align: left;
+.nego-button img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 .typing {
@@ -669,11 +721,62 @@
 }
 </style>
 
-<div class="voice-assistant">
-    <h4>🤖 Assistant Vocal AZ</h4>
-    <button class="voice-button" onclick="startRecognition()">🎙️ Cliquer et Parler</button>
-    <div id="voice-result" class="mt-3"></div>
+<div class="div-height"></div>
+<div class="col-md-4"></div>
+<div class="chat-bot">
+  <form id="chat-form" action="">
+    <label hidden for="question">Pose ta question :</label>
+    <textarea class="chat-text-area" id="question" name="question" placeholder="Entrez des questions sur les commandes "></textarea>
+   </form>
+   <div class="button-container">
+    <div class="btn-toolbar">
+      <button class="nego-button">
+        <img
+          src="{{ asset('assets/img/negobot_icone.png')}}"/>
+      </button>
+      <button class="voice-button" id="voice-button" onclick="startRecognition()">
+        <svg
+          class="voice-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          height="20px"
+          viewBox="0 -960 960 960"
+          width="20px">
+          <path d="M480-400q-50 0-85-35t-35-85v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q0 50-35 85t-85 35Zm0-240Zm-40 520v-123q-104-14-172-93t-68-184h80q0 83 58.5 141.5T480-320q83 0 141.5-58.5T680-520h80q0 105-68 184t-172 93v123h-80Zm40-360q17 0 28.5-11.5T520-520v-240q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v240q0 17 11.5 28.5T480-480Z"/>
+        </svg>
+      </button>
+      <button class="submit-button" id="submit-button" type="submit" form="chat-form">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          viewBox="0 -960 960 960"
+          width="24px"
+          fill="#0004ffff">
+          <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
 </div>
+
+<script>
+document.getElementById("question").addEventListener("keydown", function(event) {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    document.getElementById("chat-form").requestSubmit();
+  }
+});
+</script>
+
+<script>
+  const myText = document.getElementById("question");
+  myText.style.cssText = `height: ${myText.scrollHeight}px; overflow-y: hidden`;
+
+  myText.addEventListener("input", function(){
+    this.style.height = "auto";
+    this.style.height = `${this.scrollHeight}px`;
+  });
+
+</script>
 
 <script>
 function startRecognition() {
@@ -717,6 +820,15 @@ function startRecognition() {
                      </div>
 
           </div>
+
+
+
+
+
+  </div>
+    </div>
+
+
         </div>
         </div>
 

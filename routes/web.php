@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AvoirController;
+use App\Http\Controllers\BotController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
@@ -41,6 +42,7 @@ use App\Http\Controllers\TvaController;
 use App\Http\Controllers\TvaGroupController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\VoiceCommandController;
 use App\Models\Arrivage;
 use App\Models\Brand;
 use App\Models\Invoice;
@@ -464,6 +466,13 @@ Route::get('/stock/accounting-entries/export', [GeneralAccountsController::class
 
 // recherche client 
 Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
+
+
+
+
+//Routes pour Nego bot negobot
+Route::get('/voice-command', [VoiceCommandController::class, 'sendSentenceToModel'])->name('predict');
+Route::post('/chat-bot', [BotController::class, 'callBot'])->name('chat-bot');
 
 
 // Sales Notes (Avoirs)
