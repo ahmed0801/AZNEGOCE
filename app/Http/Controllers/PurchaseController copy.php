@@ -26,6 +26,9 @@ use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use PDF; 
@@ -59,7 +62,7 @@ public function list(Request $request)
         });
     }
 
-    $purchases = $query->get();
+    $purchases = $query->paginate(50);
     $suppliers = \App\Models\Supplier::orderBy('name')->get();
 
     return view('purchases', compact('purchases', 'suppliers'));
@@ -79,7 +82,8 @@ public function list(Request $request)
 
    
     
-public function store(Request $request)
+
+    public function store(Request $request)
 {
     $supplier = Supplier::with('tvaGroup')->findOrFail($request->supplier_id);
     $tvaRate = $supplier->tvaGroup->rate ?? 0;
@@ -105,7 +109,8 @@ public function store(Request $request)
         'total_ttc' => 0,
         'notes' => $request->notes,
         'numdoc' => $numdoc,
-        'tva_rate' => $tvaRate, // Enregistrer le taux de TVA
+        'tva_rate' => $tvaRate,
+        'type' => $request->type, // Added new field
     ]);
 
     $total = 0;
@@ -120,7 +125,7 @@ public function store(Request $request)
             'ordered_quantity' => $line['ordered_quantity'],
             'unit_price_ht' => $line['unit_price_ht'],
             'remise' => $line['remise'],
-            'total_ligne_ht' => $ligne_total
+            'total_ligne_ht' => $ligne_total,
         ]);
     }
 
@@ -133,45 +138,54 @@ public function store(Request $request)
     $souche->last_number += 1;
     $souche->save();
 
-if ($status === 'validée') {
-    $this->createReceptionFromOrder($order, $request);
+    if ($status === 'validée') {
+        $this->createReceptionFromOrder($order, $request);
 
-    // 🟡 Mise à jour du stock et création des mouvements
-    foreach ($order->lines as $line) {
-        // Trouver l'article lié
-        $item = $line->item ?? \App\Models\Item::where('code', $line->article_code)->first();
-        if (!$item) continue;
+        // Mise à jour du stock et création des mouvements
+        foreach ($order->lines as $index => $line) {
+            $item = \App\Models\Item::where('code', $line->article_code)->first();
+            if (!$item) continue;
 
-        // Déterminer le magasin : à adapter si tu veux rendre dynamique
-        $storeId = $order->store_id ?? 1;
+            // Update sale_price if provided
+            $salePrice = isset($request->lines[$index]['sale_price']) ? floatval($request->lines[$index]['sale_price']) : null;
+            if ($salePrice !== null) {
+                $item->sale_price = $salePrice;
+                $item->save();
+            }
 
-        // Mettre à jour ou créer le stock
-        $stock = \App\Models\Stock::firstOrNew([
-            'item_id' => $item->id,
-            'store_id' => $storeId,
-        ]);
-        $stock->quantity = ($stock->quantity ?? 0) + $line->ordered_quantity;
-        $stock->save();
-    $cost_price = $line->unit_price_ht * (1 - $line->remise / 100);
+            // Déterminer le magasin
+            $storeId = $order->store_id ?? 1;
 
-        // Créer le mouvement
-        \App\Models\StockMovement::create([
-            'item_id' => $item->id,
-            'store_id' => $storeId,
-            'type' => 'achat',
-            'quantity' => $line->ordered_quantity,
-                'cost_price' => $cost_price, // ✅ Ajout du prix d’achat HT ici
-                    'supplier_name' => $order->supplier->name,
+            // Mettre à jour ou créer le stock
+            $stock = \App\Models\Stock::firstOrNew([
+                'item_id' => $item->id,
+                'store_id' => $storeId,
+            ]);
+            $stock->quantity = ($stock->quantity ?? 0) + $line->ordered_quantity;
+            $stock->save();
 
-            'reason' => 'Validation commande achat #' . $order->numdoc,
-            'reference' => $order->numdoc,
-        ]);
+            $cost_price = $line->unit_price_ht * (1 - $line->remise / 100);
+
+            // Créer le mouvement
+            \App\Models\StockMovement::create([
+                'item_id' => $item->id,
+                'store_id' => $storeId,
+                'type' => 'achat',
+                'quantity' => $line->ordered_quantity,
+                'cost_price' => $cost_price,
+                'supplier_name' => $order->supplier->name,
+                'reason' => 'Validation commande achat #' . $order->numdoc,
+                'reference' => $order->numdoc,
+            ]);
+        }
     }
-}
-
 
     return redirect()->route('purchases.list')->with('success', 'Commande ' . ($status === 'validée' ? 'validée et créée' : 'créée'));
 }
+
+
+
+
 
 
 
@@ -223,7 +237,7 @@ protected function createReceptionFromOrder(PurchaseOrder $order, Request $reque
    
     
 
- public function update(Request $request, $numdoc)
+public function update(Request $request, $numdoc)
 {
     $request->validate([
         'supplier_id' => 'required|exists:suppliers,id',
@@ -247,7 +261,7 @@ protected function createReceptionFromOrder(PurchaseOrder $order, Request $reque
     $order->lines()->delete();
     $total = 0;
 
-    foreach ($request->lines as $line) {
+    foreach ($request->lines as $index => $line) {
         $ligne_total = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - $line['remise'] / 100);
         $total += $ligne_total;
 
@@ -269,9 +283,6 @@ protected function createReceptionFromOrder(PurchaseOrder $order, Request $reque
         'total_ttc' => $total * (1 + $tvaRate / 100),
     ]);
 
-
-
-    
     // 4. Si bouton "Mettre à jour & Valider"
     if ($request->input('action') === 'validate') {
         $order->update(['status' => 'validée']);
@@ -292,61 +303,64 @@ protected function createReceptionFromOrder(PurchaseOrder $order, Request $reque
                 'purchase_order_id' => $order->id,
                 'reception_date' => now(),
                 'status' => 'en_cours',
-                'total_received' => 0, // calculé ensuite
+                'total_received' => 0,
             ]);
         }
 
         $totalReceived = 0;
-        foreach ($order->lines as $line) {
+        foreach ($order->lines as $index => $line) {
             ReceptionLine::create([
                 'reception_id' => $reception->id,
                 'article_code' => $line->article_code,
                 'received_quantity' => 0,
             ]);
             $totalReceived += $line->ordered_quantity;
+
+            // Update sale_price if provided
+            $salePrice = isset($request->lines[$index]['sale_price']) ? floatval($request->lines[$index]['sale_price']) : null;
+            if ($salePrice !== null) {
+                $item = \App\Models\Item::where('code', $line->article_code)->first();
+                if ($item) {
+                    $item->sale_price = $salePrice;
+                    $item->save();
+                }
+            }
         }
 
         $reception->update(['total_received' => $totalReceived]);
 
-        // 🟡 Mise à jour des stocks et création des mouvements
-foreach ($order->lines as $line) {
-    // Trouver l'article correspondant
-    $item = $line->item ?? \App\Models\Item::where('code', $line->article_code)->first();
-    if (!$item) continue;
+        // Mise à jour des stocks et création des mouvements
+        foreach ($order->lines as $line) {
+            $item = $line->item ?? \App\Models\Item::where('code', $line->article_code)->first();
+            if (!$item) continue;
 
-    // Déterminer le magasin (fixé ici à 1, à adapter si nécessaire)
-    $storeId = $order->store_id ?? 1;
+            $storeId = $order->store_id ?? 1;
 
-    // Mettre à jour ou créer le stock
-    $stock = \App\Models\Stock::firstOrNew([
-        'item_id' => $item->id,
-        'store_id' => $storeId,
-    ]);
-    $stock->quantity = ($stock->quantity ?? 0) + $line->ordered_quantity;
-    $stock->save();
-    $cost_price = $line->unit_price_ht * (1 - $line->remise / 100);
+            $stock = \App\Models\Stock::firstOrNew([
+                'item_id' => $item->id,
+                'store_id' => $storeId,
+            ]);
+            $stock->quantity = ($stock->quantity ?? 0) + $line->ordered_quantity;
+            $stock->save();
 
+            $cost_price = $line->unit_price_ht * (1 - $line->remise / 100);
 
-    // Créer le mouvement
-    \App\Models\StockMovement::create([
-        'item_id' => $item->id,
-        'store_id' => $storeId,
-        'type' => 'achat',
-        'quantity' => $line->ordered_quantity,
-            'cost_price' => $cost_price, // ✅ Ajout du prix d’achat HT ici
+            \App\Models\StockMovement::create([
+                'item_id' => $item->id,
+                'store_id' => $storeId,
+                'type' => 'achat',
+                'quantity' => $line->ordered_quantity,
+                'cost_price' => $cost_price,
                 'supplier_name' => $order->supplier->name,
-        'reason' => 'Validation MAJ commande #' . $order->numdoc,
-        'reference' => $order->numdoc,
-    ]);
-}
-
-
-
+                'reason' => 'Validation MAJ commande #' . $order->numdoc,
+                'reference' => $order->numdoc,
+            ]);
+        }
     }
 
     return redirect()->route('purchases.list')
-        ->with('success', $request->input('action') === 'validate' 
-            ? 'Commande mise à jour et validée avec succès.' 
+        ->with('success', $request->input('action') === 'validate'
+            ? 'Commande mise à jour et validée avec succès.'
             : 'Commande mise à jour avec succès.');
 }
 
@@ -501,6 +515,50 @@ public function export(Request $request)
         return $pdf->stream("commande_{$purchase->numdoc}.pdf");
     }
     
+
+
+
+
+
+// imprimer avis de retrait
+
+public function withdrawalNotice(Request $request, $id)
+{
+    $purchase = PurchaseOrder::with(['supplier', 'lines.item'])
+        ->where('id', $id)
+        ->firstOrFail();
+
+    // Vérifiez que le statut de livraison est "non_récuperée"
+    if ($purchase->status_livraison !== 'non_récuperée') {
+        return redirect()->route('purchases.list')->with('error', 'L\'avis de retrait ne peut être généré que pour les commandes non récupérées.');
+    }
+
+    $company = CompanyInformation::first() ?? new CompanyInformation([
+        'name' => 'Test Company S.A.R.L',
+        'address' => '123 Rue Fictive, Tunis 1000',
+        'phone' => '+216 12 345 678',
+        'email' => 'contact@testcompany.com',
+        'matricule_fiscal' => '1234567ABC000',
+        'swift' => 'TESTTNTT',
+        'rib' => '123456789012',
+        'iban' => 'TN59 1234 5678 9012 3456 7890',
+        'logo_path' => 'assets/img/test_logo.png',
+    ]);
+
+    $generator = new BarcodeGeneratorPNG();
+    $barcode = 'data:image/png;base64,' . base64_encode(
+        $generator->getBarcode($purchase->numdoc, $generator::TYPE_CODE_128)
+    );
+
+    // Récupérer le commentaire depuis la requête
+    $comment = $request->input('comment');
+
+    $pdf = Pdf::loadView('pdf.withdrawal_notice', compact('purchase', 'company', 'barcode', 'comment'));
+    return $pdf->stream("avis_retrait_{$purchase->numdoc}.pdf");
+}
+
+
+
 
 
 
@@ -761,7 +819,7 @@ public function storeReturn(Request $request, $id)
             $query->whereDate('return_date', '<=', $request->date_to);
         }
 
-        $returns = $query->get();
+        $returns = $query->paginate(50);
         $suppliers = Supplier::orderBy('name')->get();
         $purchaseOrders = PurchaseOrder::has('returns')->orderBy('numdoc')->get();
 
@@ -808,13 +866,16 @@ public function storeReturn(Request $request, $id)
 
     public function invoicesList(Request $request)
 {
-    $query = PurchaseInvoice::with(['supplier', 'lines.item'])->orderBy('updated_at', 'desc');
+    $query = PurchaseInvoice::with(['supplier', 'lines.item','payments'])->orderBy('updated_at', 'desc');
 
     if ($request->filled('supplier_id')) {
         $query->where('supplier_id', $request->supplier_id);
     }
     if ($request->filled('status')) {
         $query->where('status', $request->status);
+    }
+    if ($request->filled('paid')) {
+        $query->where('paid', $request->paid === '1');
     }
     if ($request->filled('type')) {
         $query->where('type', $request->type);
@@ -826,7 +887,7 @@ public function storeReturn(Request $request, $id)
         $query->whereDate('invoice_date', '<=', $request->date_to);
     }
 
-    $invoices = $query->get();
+    $invoices = $query->paginate(50);
     $suppliers = Supplier::orderBy('name')->get();
 
     return view('invoices.list', compact('invoices', 'suppliers'));
@@ -1002,6 +1063,19 @@ public function storeInvoice(Request $request)
     $souche->last_number += 1;
     $souche->save();
 
+
+
+                            if ($request->action === 'validate') {
+                                
+// Update customer balance solde fournisseur
+$supplier = Supplier::with('tvaGroup')->findOrFail($request->supplier_id);
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $supplier->solde = ($supplier->solde ?? 0) + $totalTtc;
+                    $supplier->save();
+            }
+
+
+
     return redirect()->route('invoices.list')->with('success', 'Facture créée avec succès.');
 }
 
@@ -1074,6 +1148,16 @@ public function updateInvoice(Request $request, $numdoc)
         'total_ttc' => $totalHt * (1 + $tvaRate / 100),
         'status' => $request->input('action') === 'validate' ? 'validée' : 'brouillon',
     ]);
+
+
+                                if ($request->action === 'validate') {
+                                
+// Update customer balance solde fournisseur
+$supplier = Supplier::with('tvaGroup')->findOrFail($request->supplier_id);
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $supplier->solde = ($supplier->solde ?? 0) + $totalTtc;
+                    $supplier->save();
+            }
 
     return redirect()->route('invoices.list')->with('success', 'Facture mise à jour avec succès.');
 }
@@ -1279,7 +1363,7 @@ public function search(Request $request)
         $query->whereDate('note_date', '<=', $request->date_to);
     }
 
-    $notes = $query->get();
+    $notes = $query->paginate(50);
     $suppliers = Supplier::orderBy('name')->get();
     $returns = PurchaseReturn::with('supplier')->where('invoiced', 0)->get(); // Only non-invoiced returns
     $invoices = PurchaseInvoice::with('supplier')->where('status', 'validée')->get(); // Only validated invoices
@@ -1943,6 +2027,19 @@ public function storeInvoiceNote(Request $request)
     $souche->last_number += 1;
     $souche->save();
 
+
+
+                                if ($request->action === 'validate') {
+                                
+// Update customer balance solde fournisseur
+$supplier = Supplier::with('tvaGroup')->findOrFail($request->supplier_id);
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $supplier->solde = ($supplier->solde ?? 0) + $totalTtc;
+                    $supplier->save();
+            }
+
+
+
     return redirect()->route('notes.list')->with('success', 'Avoir créé avec succès.');
 }
 
@@ -2020,6 +2117,18 @@ public function storeInvoiceNote(Request $request)
             'total_ttc' => $totalHt * (1 + $tvaRate / 100),
             'status' => $request->input('action') === 'validate' ? 'validée' : 'brouillon',
         ]);
+
+
+                                    if ($request->action === 'validate') {
+                                
+// Update customer balance solde fournisseur
+$supplier = Supplier::with('tvaGroup')->findOrFail($request->supplier_id);
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $supplier->solde = ($supplier->solde ?? 0) + $totalTtc;
+                    $supplier->save();
+            }
+
+
 
         return redirect()->route('notes.list')->with('success', 'Avoir mis à jour avec succès.');
     }
@@ -2144,6 +2253,90 @@ public function searchReturns(Request $request)
     return response()->json($returns->toArray());
 }
 
+
+
+
+
+
+            public function markAsShipped(Request $request, $id)
+    {
+        return DB::transaction(function () use ($request, $id) {
+            $deliveryNote = PurchaseOrder::findOrFail($id);
+
+            $deliveryNote->update(['status_livraison' => 'Reçu']);
+
+            return redirect("/purchases/list")
+                ->with('success', 'Bon de livraison validé avec succès.');
+        });
+    }
+
+
+
+
+
+
+
+
+    // route joindre factures fournisseurs
+
+    public function uploadSupplierInvoice(Request $request, $id)
+    {
+        $request->validate([
+            'supplier_invoice_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB max, allow PDF and images
+        ]);
+
+        $invoice = PurchaseInvoice::findOrFail($id);
+
+        if ($invoice->supplier_invoice_file) {
+            Storage::delete($invoice->supplier_invoice_file);
+        }
+
+        $file = $request->file('supplier_invoice_file');
+        $fileName = 'supplier_invoices/purchase_invoice_' . $invoice->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('public', $fileName);
+
+        $invoice->update(['supplier_invoice_file' => $path]);
+
+        Log::info('Supplier invoice uploaded', [
+            'purchase_invoice_id' => $invoice->id,
+            'file_path' => $path,
+        ]);
+
+        return redirect()->route('invoices.list')
+            ->with('success', 'Facture fournisseur jointe avec succès.');
+    }
+
+    public function downloadSupplierInvoice($id)
+    {
+        $invoice = PurchaseInvoice::findOrFail($id);
+
+        if (!$invoice->supplier_invoice_file || !Storage::exists($invoice->supplier_invoice_file)) {
+            Log::warning('Supplier invoice file not found', ['purchase_invoice_id' => $invoice->id]);
+            return redirect()->route('invoices.list')
+                ->with('error', 'Fichier de la facture fournisseur non trouvé.');
+        }
+
+        return Storage::download($invoice->supplier_invoice_file, 'facture_fournisseur_' . $invoice->numdoc . '.' . pathinfo($invoice->supplier_invoice_file, PATHINFO_EXTENSION));
+    }
+
+    public function deleteSupplierInvoice($id)
+    {
+        $invoice = PurchaseInvoice::findOrFail($id);
+
+        if ($invoice->supplier_invoice_file && Storage::exists($invoice->supplier_invoice_file)) {
+            Storage::delete($invoice->supplier_invoice_file);
+            $invoice->update(['supplier_invoice_file' => null]);
+
+            Log::info('Supplier invoice deleted', ['purchase_invoice_id' => $invoice->id]);
+        }
+
+        return redirect()->route('invoices.list')
+            ->with('success', 'Facture fournisseur supprimée avec succès.');
+    }
+
+    
+
+    
 
 
     

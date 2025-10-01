@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;       // ⚡ Ajout
+use Illuminate\Support\Facades\Hash;     // ⚡ Ajout
 
 class CreateUsersTable extends Migration
 {
@@ -23,7 +25,20 @@ class CreateUsersTable extends Migration
             $table->rememberToken();
             $table->timestamps();
         });
+
+
+
+            // ⚡ Création du compte admin par défaut
+        DB::table('users')->insert([
+            'name' => 'Administrateur',
+            'email' => 'admin@az.com',
+            'role' => 'admin',
+            'password' => Hash::make('00000000'), // Hash du mot de passe
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
+    
 
     /**
      * Reverse the migrations.
@@ -34,4 +49,5 @@ class CreateUsersTable extends Migration
     {
         Schema::dropIfExists('users');
     }
-}
+    }
+

@@ -148,8 +148,12 @@ public function list(Request $request)
 
             // Update sale_price if provided
             $salePrice = isset($request->lines[$index]['sale_price']) ? floatval($request->lines[$index]['sale_price']) : null;
+            $cost_price = $line->unit_price_ht * (1 - $line->remise / 100);
+
             if ($salePrice !== null) {
                 $item->sale_price = $salePrice;
+                $item->cost_price = $cost_price;
+                $item->codefournisseur = $supplier->code;
                 $item->save();
             }
 
@@ -318,10 +322,14 @@ public function update(Request $request, $numdoc)
 
             // Update sale_price if provided
             $salePrice = isset($request->lines[$index]['sale_price']) ? floatval($request->lines[$index]['sale_price']) : null;
+                        $cost_price = $line->unit_price_ht * (1 - $line->remise / 100);
+
             if ($salePrice !== null) {
                 $item = \App\Models\Item::where('code', $line->article_code)->first();
                 if ($item) {
                     $item->sale_price = $salePrice;
+                    $item->cost_price = $cost_price;
+                $item->codefournisseur = $supplier->code;
                     $item->save();
                 }
             }
