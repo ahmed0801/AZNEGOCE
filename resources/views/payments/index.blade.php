@@ -322,7 +322,7 @@
                 </li>
                         <!-- fin test quick action  -->
 
-                        
+
                             <li class="nav-item topbar-user dropdown hidden-caret">
                                 <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
                                     <div class="avatar-sm">
@@ -621,6 +621,8 @@
                                                 <th>Code de Lettrage</th>
                                                 <th>Référence</th>
                                                 <th>Notes</th>
+                                                <th>Validation Comptable</th>
+
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -675,6 +677,21 @@
                                                     <td>{{ $payment->lettrage_code ?? '-' }}</td>
                                                     <td>{{ $payment->reference ?? '-' }}</td>
                                                     <td>{{ $payment->notes ?? '-' }}</td>
+                                                    <td class="text-center">
+    @if($payment->validation_comptable === 'en_attente')
+        <form action="{{ route('payments.validate', $payment->id) }}" method="POST" class="d-inline">
+            @csrf
+            <button class="btn btn-sm btn-success" type="submit">
+                <i class="fas fa-check"></i> Valider
+            </button>
+        </form>
+    @elseif($payment->validation_comptable === 'validé')
+        <span class="badge bg-success">Validé</span>
+    @else
+        <span class="badge bg-danger">Refusé</span>
+    @endif
+</td>
+
                                                    
                                                 </tr>
 

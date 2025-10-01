@@ -394,6 +394,8 @@ public function validateOrder($id)
     $item = $line->item ?? Item::where('code', $line->article_code)->first();
     if (!$item) continue;
 
+    
+
     // 2. Déterminer le magasin (store_id) — à adapter selon ton système
     $storeId = $order->store_id ?? 1; // ⚠️ Remplace 1 par ton store par défaut ou ajoute store_id dans ta table
 

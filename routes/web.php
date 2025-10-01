@@ -467,7 +467,9 @@ Route::get('/stock/accounting-entries/export', [GeneralAccountsController::class
 // recherche client 
 Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
 
-
+// validation comptable
+Route::post('/payments/{payment}/validate', [PaymentController::class, 'validatePayment'])
+    ->name('payments.validate');
 
 
 //Routes pour Nego bot negobot

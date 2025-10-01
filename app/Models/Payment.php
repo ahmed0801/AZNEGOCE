@@ -23,6 +23,7 @@ class Payment extends Model
         'lettrage_code',
         'notes',
         'reconciled', // Add this
+        'validation_comptable', // ✅
     ];
 
     protected $casts = [

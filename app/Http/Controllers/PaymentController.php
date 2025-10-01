@@ -586,4 +586,23 @@ public function exportPdf(Request $request)
             return redirect()->back()->with('error', 'Erreur lors de l\'enregistrement du paiement: ' . $e->getMessage())->withInput();
         }
     }
+
+
+
+
+
+
+    public function validatePayment(Payment $payment)
+{
+    if ($payment->validation_comptable === 'en_attente') {
+        $payment->update(['validation_comptable' => 'validé']);
+        return redirect()->back()->with('success', 'Paiement validé avec succès.');
+    }
+
+    return redirect()->back()->with('error', 'Ce paiement ne peut pas être validé.');
+}
+
+
+
+
 }
