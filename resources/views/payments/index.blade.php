@@ -681,7 +681,7 @@
     @if($payment->validation_comptable === 'en_attente')
         <form action="{{ route('payments.validate', $payment->id) }}" method="POST" class="d-inline">
             @csrf
-            <button class="btn btn-sm btn-success" type="submit">
+            <button class="btn btn-sm btn-outline-success" type="submit">
                 <i class="fas fa-check"></i> Valider
             </button>
         </form>

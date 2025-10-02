@@ -411,6 +411,12 @@
 
                         </h4>
 
+                        <div class="alert alert-primary" role="alert">
+  La création des factures Directes se fait à partir d’un <a href="/delivery_notes/list" class="alert-link">Bon de Livraison</a> non facturé.
+</div>
+
+
+
                         <form method="GET" action="{{ route('salesinvoices.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
                             <select name="customer_id" class="form-select form-select-sm select2" style="width: 150px;">
                                 <option value="">Client (Tous)</option>
@@ -472,9 +478,26 @@
                                             @endif
                                         @endif
                                         <span class="text-muted small">&#8594; type: {{ ucfirst($invoice->type ?? 'N/A') }}</span>
-                                        @if($invoice->due_date != $invoice->invoice_date)
-                                        <span class="badge rounded-pill text-bg-light"> &#10173;Echeance : {{ \Carbon\Carbon::parse($invoice->due_date)->format('d/m/Y') }}</span>
+
+
+                                                                                        @if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
+                                                   @php
+        $firstDeliveryNote = $invoice->deliveryNotes->first();
+    @endphp
+    @if($firstDeliveryNote)
+            <span class="badge rounded-pill text-bg-light"><i class="fas fa-user-tie"></i> Vendeur :  {{ $firstDeliveryNote->vendeur}}</span>
+
+    @endif
+                                                @endif
+
+
+                                                                                        @if($invoice->due_date != $invoice->invoice_date)
+                                        <span class="badge rounded-pill text-bg-light">
+                                             <i class="far fa-calendar-times"></i> Echeance : {{ \Carbon\Carbon::parse($invoice->due_date)->format('d/m/Y') }}</span>
                                         @endif
+
+
+
                                     </div>
                                     <div class="btn-group">
                                         <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $invoice->id }})">
@@ -599,11 +622,25 @@
                                         <form action="{{ route('salesinvoices.make_payment', $invoice->id) }}" method="POST">
                                             @csrf
                                             <div class="modal-body">
-                                                <div class="mb-3">
+
+                                            
+                                    
+
+<div class="mb-3">
                                                     <label for="amount{{ $invoice->id }}" class="form-label">Montant (€)</label>
                                                     <input type="number" step="0.01" class="form-control" id="amount{{ $invoice->id }}" name="amount" max="{{ $invoice->getRemainingBalanceAttribute() }}" required>
                                                     <small>Reste à payer : {{ number_format($invoice->getRemainingBalanceAttribute(), 2, ',', ' ') }} €</small>
+                                                        <!-- Bouton Lettrer -->
+    <button 
+        type="button" 
+        class="btn btn-outline-danger btn-sm"
+        onclick="document.getElementById('amount{{ $invoice->id }}').value = '{{ abs($invoice->getRemainingBalanceAttribute()) }}'"
+    >
+        Lettrer
+    </button>
                                                 </div>
+
+
                                                 <div class="mb-3">
                                                     <label for="payment_date{{ $invoice->id }}" class="form-label">Date de paiement</label>
                                                     <input type="date" class="form-control" id="payment_date{{ $invoice->id }}" name="payment_date" value="{{ now()->format('Y-m-d') }}" required>
@@ -611,6 +648,7 @@
                                                 <div class="mb-3">
                                                     <label for="payment_mode{{ $invoice->id }}" class="form-label">Mode de paiement</label>
                                                     <select class="form-control select2" id="payment_mode{{ $invoice->id }}" name="payment_mode" required>
+                                                        <option value="">Sélectionner le mode de paiement</option>
                                                         @foreach(\App\Models\PaymentMode::all() as $mode)
                                                             <option value="{{ $mode->name }}">{{ $mode->name }}</option>
                                                         @endforeach

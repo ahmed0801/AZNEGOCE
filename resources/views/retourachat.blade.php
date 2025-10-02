@@ -604,7 +604,10 @@
         @endif
         <div class="container mt-4">
 
-<h4>📋 Liste des retours d'achat</h4>
+<h4>📋 Liste des retours d'achat :</h4>
+<div class="alert alert-primary" role="alert">
+  La création d’un retour Achat se fait à partir d’une <a href="/purchases/list" class="alert-link">Commande Achat</a> non facturée, ou est générée automatiquement à partir d’un avoir Achat.
+</div>
 
 
             <form method="GET" action="{{ route('returns.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">

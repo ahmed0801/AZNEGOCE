@@ -48,6 +48,21 @@
         .btn-primary:hover { background-color: #0056b3; box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); }
         .form-select-sm { width: auto; display: inline-block; }
         .badge { font-size: 0.85rem; }
+
+
+
+        .clignote {
+    animation: clignoter 1s infinite;
+}
+
+@keyframes clignoter {
+    0% { opacity: 1;}
+    50% { opacity: 0.2;}
+    100% { opacity: 1;}
+}
+
+
+
     </style>
 </head>
 <body>
@@ -411,6 +426,12 @@
 
                         </h4>
 
+                        <div class="alert alert-primary" role="alert">
+  La création des factures Directes se fait à partir d’un <a href="/delivery_notes/list" class="alert-link">Bon de Livraison</a> non facturé.
+</div>
+
+
+
                         <form method="GET" action="{{ route('salesinvoices.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
                             <select name="customer_id" class="form-select form-select-sm select2" style="width: 150px;">
                                 <option value="">Client (Tous)</option>
@@ -472,9 +493,33 @@
                                             @endif
                                         @endif
                                         <span class="text-muted small">&#8594; type: {{ ucfirst($invoice->type ?? 'N/A') }}</span>
-                                        @if($invoice->due_date != $invoice->invoice_date)
-                                        <span class="badge rounded-pill text-bg-light"> &#10173;Echeance : {{ \Carbon\Carbon::parse($invoice->due_date)->format('d/m/Y') }}</span>
-                                        @endif
+
+
+                                                                                        @if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
+                                                   @php
+        $firstDeliveryNote = $invoice->deliveryNotes->first();
+    @endphp
+    @if($firstDeliveryNote)
+            <span class="badge rounded-pill text-bg-light"><i class="fas fa-user-tie"></i> Vendeur :  {{ $firstDeliveryNote->vendeur}}</span>
+
+    @endif
+                                                @endif
+
+
+                                                                                      @php
+    $dueDate = \Carbon\Carbon::parse($invoice->due_date);
+    $today = \Carbon\Carbon::today();
+    $isDueOrOverdue = $dueDate->lessThanOrEqualTo($today);
+@endphp
+
+@if($invoice->due_date!= $invoice->invoice_date)
+    <span class="badge rounded-pill text-bg-light {{ $isDueOrOverdue? 'clignote': ''}}">
+        <i class="far fa-calendar-times"></i> Échéance: {{ $dueDate->format('d/m/Y')}}
+    </span>
+@endif
+
+
+
                                     </div>
                                     <div class="btn-group">
                                         <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $invoice->id }})">
