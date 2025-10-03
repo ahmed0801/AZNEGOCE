@@ -460,11 +460,15 @@
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
                                     <div>
                                         <h6 class="mb-0">
-                                            <strong>Facture N° : {{ $invoice->numdoc }}</strong> –
+                                            <strong>Facture N° : {{ $invoice->numdoc }}</strong>
+                                            <span class="badge rounded-pill text-bg-secondary">{{ number_format($invoice->total_ttc, 2, ',', ' ') }} € TTC</span> –
                                             &#x1F482;{{ $invoice->customer->name ?? 'N/A' }}
                                             <span class="text-muted small">({{ $invoice->numclient ?? 'N/A' }})</span>
                                             <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</span>
-                                        </h6>
+
+                                             
+                                             
+                                        </h6><hr>
                                         @if($invoice->status === 'brouillon')
                                             <span class="badge bg-secondary">{{ ucfirst($invoice->status) }}</span>
                                         @else
@@ -543,7 +547,13 @@
     <i class="fas fa-bell"></i> Notification Retrait
 </a>
 
-
+@if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
+                                                    @foreach($invoice->deliveryNotes as $deliveryNote)
+                                                        <a class="dropdown-item" href="{{ route('delivery_notes.edit', $deliveryNote->id) }}">
+                                                            <i class="fas fa-eye"></i> Bon de livraison #{{ $deliveryNote->numdoc }}
+                                                        </a>
+                                                    @endforeach
+                                                @endif
 
 
 
@@ -561,13 +571,7 @@
                                                         <i class="fas fa-print"></i> imp. Sans Réf & Rém
                                                     </a>
                                                 @endif
-                                                @if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
-                                                    @foreach($invoice->deliveryNotes as $deliveryNote)
-                                                        <a class="dropdown-item" href="{{ route('delivery_notes.edit', $deliveryNote->id) }}">
-                                                            <i class="fas fa-eye"></i> Bon de livraison #{{ $deliveryNote->numdoc }}
-                                                        </a>
-                                                    @endforeach
-                                                @endif
+                                                
                                                
                                             </div>
                                         </div>

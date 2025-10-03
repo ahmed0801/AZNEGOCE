@@ -48,21 +48,6 @@
         .btn-primary:hover { background-color: #0056b3; box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); }
         .form-select-sm { width: auto; display: inline-block; }
         .badge { font-size: 0.85rem; }
-
-
-
-        .clignote {
-    animation: clignoter 1s infinite;
-}
-
-@keyframes clignoter {
-    0% { opacity: 1;}
-    50% { opacity: 0.2;}
-    100% { opacity: 1;}
-}
-
-
-
     </style>
 </head>
 <body>
@@ -479,12 +464,16 @@
                                             &#x1F482;{{ $invoice->customer->name ?? 'N/A' }}
                                             <span class="text-muted small">({{ $invoice->numclient ?? 'N/A' }})</span>
                                             <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</span>
+
+                                             
+                                             
                                         </h6>
                                         @if($invoice->status === 'brouillon')
                                             <span class="badge bg-secondary">{{ ucfirst($invoice->status) }}</span>
                                         @else
                                             <span class="badge bg-success">{{ ucfirst($invoice->status) }}</span>
                                         @endif
+                                        <span class="badge rounded-pill text-bg-secondary">Total  TTC : {{ number_format($invoice->total_ttc, 2, ',', ' ') }} €</span> 
                                         @if($invoice->status != 'brouillon')
                                             @if($invoice->paid)
                                                 <span class="badge bg-success">Payé</span>
@@ -506,17 +495,10 @@
                                                 @endif
 
 
-                                                                                      @php
-    $dueDate = \Carbon\Carbon::parse($invoice->due_date);
-    $today = \Carbon\Carbon::today();
-    $isDueOrOverdue = $dueDate->lessThanOrEqualTo($today);
-@endphp
-
-@if($invoice->due_date!= $invoice->invoice_date)
-    <span class="badge rounded-pill text-bg-light {{ $isDueOrOverdue? 'clignote': ''}}">
-        <i class="far fa-calendar-times"></i> Échéance: {{ $dueDate->format('d/m/Y')}}
-    </span>
-@endif
+                                                                                        @if($invoice->due_date != $invoice->invoice_date)
+                                        <span class="badge rounded-pill text-bg-light">
+                                             <i class="far fa-calendar-times"></i> Echeance : {{ \Carbon\Carbon::parse($invoice->due_date)->format('d/m/Y') }}</span>
+                                        @endif
 
 
 
@@ -565,7 +547,13 @@
     <i class="fas fa-bell"></i> Notification Retrait
 </a>
 
-
+@if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
+                                                    @foreach($invoice->deliveryNotes as $deliveryNote)
+                                                        <a class="dropdown-item" href="{{ route('delivery_notes.edit', $deliveryNote->id) }}">
+                                                            <i class="fas fa-eye"></i> Bon de livraison #{{ $deliveryNote->numdoc }}
+                                                        </a>
+                                                    @endforeach
+                                                @endif
 
 
 
@@ -583,13 +571,7 @@
                                                         <i class="fas fa-print"></i> imp. Sans Réf & Rém
                                                     </a>
                                                 @endif
-                                                @if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
-                                                    @foreach($invoice->deliveryNotes as $deliveryNote)
-                                                        <a class="dropdown-item" href="{{ route('delivery_notes.edit', $deliveryNote->id) }}">
-                                                            <i class="fas fa-eye"></i> Bon de livraison #{{ $deliveryNote->numdoc }}
-                                                        </a>
-                                                    @endforeach
-                                                @endif
+                                                
                                                
                                             </div>
                                         </div>

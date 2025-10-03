@@ -688,7 +688,10 @@ de
                         @endif
 
 
+    @if($purchase->acheteur)
+            <span class="badge rounded-pill text-bg-light"><i class="fas fa-user-tie"></i> Acheteur :  {{ $purchase->acheteur}}</span>
 
+    @endif
 
 
 

@@ -350,7 +350,7 @@
                 </li>
                         <!-- fin test quick action  -->
 
-                        
+
                             <li class="nav-item topbar-user dropdown hidden-caret">
                                 <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
                                     <div class="avatar-sm">
@@ -463,6 +463,11 @@
 
                                                                       <span class="badge bg-info">@if($deliveryNote->salesOrder) CMD: {{ $deliveryNote->salesOrder->numdoc ?? '-' }} 
                                                                          @endif</span>
+
+     <span class="badge rounded-pill text-bg-light"><i class="fas fa-user-tie"></i> Vendeur :  {{ $deliveryNote->vendeur}}</span>
+
+
+
 
                                                                                               <span class="text-muted small">
                                      @if($deliveryNote->invoiced)

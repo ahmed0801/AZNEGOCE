@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class PurchaseOrder extends Model
 {
-    protected $fillable = ['supplier_id','numdoc', 'order_date', 'status','type', 'total_ht', 'total_ttc', 'notes','tva_rate','invoiced','status_livraison'];
+    protected $fillable = ['supplier_id','numdoc', 'order_date', 'status','type', 'total_ht', 'total_ttc', 'notes','tva_rate','invoiced','status_livraison','acheteur'];
 
     public function supplier()
     {
@@ -27,6 +28,29 @@ public function reception() {
     {
         return $this->hasMany(PurchaseReturn::class, 'purchase_order_id');
     }
+
+
+
+
+
+     protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($PurchaseOrder) {
+            if (Auth::check()) {
+                $PurchaseOrder->acheteur = Auth::user()->name;
+            }
+        });
+
+        static::updating(function ($PurchaseOrder) {
+            if (Auth::check()) {
+                $PurchaseOrder->acheteur = Auth::user()->name;
+            }
+        });
+    }
+
+    
 
 }
 

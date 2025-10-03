@@ -607,9 +607,14 @@
                         Nouvelle facture Achat <i class="fas fa-plus-circle ms-2"></i>
                     </button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="{{ route('invoices.create_free') }}">Facture Achat Libre</a>
+                        <a class="dropdown-item" href="{{ route('invoices.create_free') }}">Facture Libre (hors stock)</a>
                         <a class="dropdown-item" href="{{ route('invoices.create_grouped') }}">Facture Achat Groupée</a>
                     </div>
+
+                    <a href="/purchases" class="btn btn-outline-success btn-round ms-2">Nouvelle Commande Achat 
+                <i class="fas fa-plus-circle ms-2"></i>
+            </a>
+
                 </div>
             </h4>
 
@@ -679,8 +684,10 @@ de
                         <div>
                             <h6 class="mb-0">
                                 <strong>Facture N° : {{ $invoice->numdoc }}</strong> –
+
                                 {{ $invoice->supplier->name }}
-                                <span class="text-muted small">({{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }})</span>
+                                <span class="text-muted small">({{ $invoice->supplier->code ?? 'N/A' }})</span>
+                                <span class="text-muted small">- 📆 ({{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }})</span>
                             </h6>
                             @if($invoice->status === 'brouillon')
                                 <span class="badge bg-secondary">{{ ucfirst($invoice->status) }}</span>
@@ -689,6 +696,7 @@ de
                             @endif
 
 
+                                <span class="badge rounded-pill text-bg-secondary">Total TTC : {{ number_format($invoice->total_ttc, 2, ',', ' ') }} €</span>
 @if($invoice->status != 'brouillon')
                                             @if($invoice->paid)
                                                 <span class="badge bg-success">Payé</span>
@@ -697,6 +705,13 @@ de
                                             @endif
                                         @endif
                                         <span class="text-muted small">&#8594; type: {{ ucfirst($invoice->type ?? 'N/A') }}</span>
+
+    @if($invoice->acheteur)
+            <span class="badge rounded-pill text-bg-light"><i class="fas fa-user-tie"></i> Facturée Par :  {{ $invoice->acheteur}}</span>
+
+    @endif
+
+
                                     
                                     </div>
                         <div class="btn-group">
