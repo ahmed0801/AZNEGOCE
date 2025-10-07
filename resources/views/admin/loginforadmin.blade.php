@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - TPG</title>
+    <title>NEGOCIX</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
         body {
@@ -100,6 +100,9 @@
             </div>
             <button type="submit" class="btn mt-3">Se connecter</button>
         </form>
+
+        <u> <small>Version: <b>1.0</b></small></u>
+
     </div>
 </body>
 </html>

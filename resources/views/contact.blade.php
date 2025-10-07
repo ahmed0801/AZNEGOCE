@@ -521,6 +521,7 @@
 
             {{-- Formulaire --}}
 
+            <h4><i class="fas fa-life-ring"></i> Lancer un Ticket</h4>
 
 
             <form action="{{ route('contact.send') }}" method="POST" class="mb-4">

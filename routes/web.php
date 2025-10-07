@@ -21,6 +21,7 @@ use App\Http\Controllers\TecdocController;
 use App\Http\Controllers\DevisController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\GeneralAccountsController;
+use App\Http\Controllers\ImmatController;
 use App\Http\Controllers\PayementmodeController;
 use App\Http\Controllers\PayementtermController;
 use App\Http\Controllers\PaymentController;
@@ -470,6 +471,12 @@ Route::get('/customers/search', [CustomerController::class, 'search'])->name('cu
 // validation comptable
 Route::post('/payments/{payment}/validate', [PaymentController::class, 'validatePayment'])
     ->name('payments.validate');
+
+
+
+    // routes pour test new recherche immatr
+    Route::get('/vehicle/catalog', [ImmatController::class, 'index'])->name('vehicle.catalog.form');
+Route::post('/vehicle/catalog/fetch', [ImmatController::class, 'fetchByPlate'])->name('vehicle.catalog.fetch');
 
 
 //Routes pour Nego bot negobot
