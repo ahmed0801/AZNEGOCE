@@ -1091,7 +1091,12 @@
                                              data-stock="${item.stock_quantity || 0}"
                                              data-location="${item.location || ''}"
                                              data-is-active="${item.is_active}">
-                                            ${item.name} (${item.code}) - ${item.sale_price} € -
+                                            ${item.name} (${item.code}) : ${item.sale_price} € HT
+
+                                                ${item.stock_quantity> 0
+? `🟢 ${item.stock_quantity} En Stock`
+: `🔴 À Commander Hors Stock`}
+
                                         </div>
                                     `);
                                 });

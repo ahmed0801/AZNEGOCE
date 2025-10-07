@@ -119,7 +119,8 @@
     </style>
 </head>
 <body>
-    <div class="wrapper">
+    <!-- masquer la navbar avec sidebar_minimize -->
+    <div class="wrapper sidebar_minimize">
         <!-- Sidebar -->
 <div class="sidebar" data-background-color="dark">
     <div class="sidebar-logo">

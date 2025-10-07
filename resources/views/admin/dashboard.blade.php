@@ -34,7 +34,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 </head>
 <body>
-    <div class="wrapper">
+    <div class="wrapper sidebar_minimize">
         <!-- Sidebar -->
          <!-- Sidebar -->
 <div class="sidebar" data-background-color="dark">

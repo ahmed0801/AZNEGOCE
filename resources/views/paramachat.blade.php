@@ -238,7 +238,7 @@
 
   </head>
   <body>
-    <div class="wrapper">
+    <div class="wrapper sidebar_minimize">
        <!-- Sidebar -->
 <div class="sidebar" data-background-color="dark">
     <div class="sidebar-logo">

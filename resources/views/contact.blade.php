@@ -164,7 +164,7 @@
     </style>
 </head>
 <body>
-    <div class="wrapper">
+    <div class="wrapper sidebar_minimize">
         <!-- Sidebar -->
        <!-- Sidebar -->
 <div class="sidebar" data-background-color="dark">
