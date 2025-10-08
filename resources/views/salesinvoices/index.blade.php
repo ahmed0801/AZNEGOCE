@@ -51,7 +51,7 @@
     </style>
 </head>
 <body>
-    <div class="wrapper sidebar_minimize">
+    <div class="wrapper">
        <!-- Sidebar -->
 <div class="sidebar" data-background-color="dark">
     <div class="sidebar-logo">
