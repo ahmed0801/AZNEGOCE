@@ -401,7 +401,8 @@ Route::delete('/transfers/{transfer}/cancel', [PaymentController::class, 'cancel
 Route::post('/payments/deposit', [PaymentController::class, 'deposit'])->name('payments.deposit');
 Route::post('/payments/withdraw', [PaymentController::class, 'withdraw'])->name('payments.withdraw');
 
-
+// annulation reglement 
+Route::post('/payments/{id}/cancel', [PaymentController::class, 'cancelPayment'])->name('payments.cancel');
 
 
 // mail messages

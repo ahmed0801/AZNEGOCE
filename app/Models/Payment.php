@@ -24,6 +24,7 @@ class Payment extends Model
         'notes',
         'reconciled', // Add this
         'validation_comptable', // ✅
+        'parent_payment_id', // Added
     ];
 
     protected $casts = [
@@ -152,6 +153,19 @@ class Payment extends Model
         return $this->belongsTo(GeneralAccount::class, 'account_id');
     }
 
+
+
+        public function parentPayment()
+    {
+        return $this->belongsTo(Payment::class, 'parent_payment_id');
+    }
+
+    public function childPayments()
+    {
+        return $this->hasMany(Payment::class, 'parent_payment_id');
+    }
+
+    
     
 
     public function generateLettrageCode()

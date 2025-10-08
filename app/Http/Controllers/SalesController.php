@@ -566,7 +566,7 @@ public function storedeliveryandinvoice(Request $request)
                         throw new \Exception("Article {$line['article_code']} introuvable.");
                     }
                     if ($item->getStockQuantityAttribute() < $line['ordered_quantity']) {
-                        throw new \Exception("Stock insuffisant pour l'article {$line['article_code']}.");
+                        // throw new \Exception("Stock insuffisant pour l'article {$line['article_code']}.");
                     }
 
                     $total_ligne_ht = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);

@@ -22,42 +22,145 @@ use Illuminate\Support\Facades\DB;
 class PaymentController extends Controller
 {
     public function index(Request $request)
-    {
-        $query = Payment::with(['payable', 'customer', 'supplier']);
-        
-        if ($request->filled('date_from')) {
-            $query->where('payment_date', '>=', $request->date_from);
-        }
-        
-        if ($request->filled('date_to')) {
-            $query->where('payment_date', '<=', $request->date_to);
-        }
-        
-        if ($request->filled('customer_id')) {
-            $query->where('customer_id', $request->customer_id);
-        }
-        
-        if ($request->filled('supplier_id')) {
-            $query->where('supplier_id', $request->supplier_id);
-        }
-        
-        if ($request->filled('payment_mode')) {
-            $query->where('payment_mode', $request->payment_mode);
-        }
-        
-        if ($request->filled('lettrage_code')) {
-            $query->where('lettrage_code', 'like', '%' . $request->lettrage_code . '%');
-        }
+{
+    $query = Payment::with(['payable', 'customer', 'supplier', 'paymentMode', 'transfers.toAccount', 'account']);
+    
+    // Apply filters only if they are provided
+    $hasFilters = $request->filled('date_from') || $request->filled('date_to') || 
+                  $request->filled('customer_id') || $request->filled('supplier_id') || 
+                  $request->filled('payment_mode') || $request->filled('lettrage_code');
 
-        $payments = $query->latest()->get();
-        $customers = Customer::all();
-        $suppliers = Supplier::all();
-        $paymentModes = PaymentMode::all();
-        $generalAccounts = GeneralAccount::orderBy('name')->get();
-
-
-        return view('payments.index', compact('payments', 'customers', 'suppliers', 'paymentModes','generalAccounts'));
+    if ($request->filled('date_from')) {
+        $query->where('payment_date', '>=', $request->date_from);
     }
+    
+    if ($request->filled('date_to')) {
+        $query->where('payment_date', '<=', $request->date_to);
+    }
+    
+    if ($request->filled('customer_id')) {
+        $query->where('customer_id', $request->customer_id);
+    }
+    
+    if ($request->filled('supplier_id')) {
+        $query->where('supplier_id', $request->supplier_id);
+    }
+    
+    if ($request->filled('payment_mode')) {
+        $query->where('payment_mode', $request->payment_mode);
+    }
+    
+    if ($request->filled('lettrage_code')) {
+        $query->where('lettrage_code', 'like', '%' . $request->lettrage_code . '%');
+    }
+
+    // Apply limit for initial load (no filters)
+    if (!$hasFilters) {
+        $query->take(150); // Limit to 150 recent payments
+    }
+
+    $payments = $query->orderBy('updated_at', 'desc')->get();
+    $customers = Customer::all();
+    $suppliers = Supplier::all();
+    $paymentModes = PaymentMode::all();
+    $generalAccounts = GeneralAccount::orderBy('name')->get();
+
+    // Pass a flag to indicate if initial load is limited
+    $isLimited = !$hasFilters;
+
+    return view('payments.index', compact('payments', 'customers', 'suppliers', 'paymentModes', 'generalAccounts', 'isLimited'));
+}
+
+
+
+
+
+
+   public function deposit(Request $request)
+{
+    $request->validate([
+        'account_id' => 'required|exists:general_accounts,id',
+        'amount' => 'required|numeric|min:0',
+        'transaction_date' => 'required|date',
+        'reference' => 'nullable|string|max:255',
+        'notes' => 'nullable|string',
+    ]);
+
+    DB::beginTransaction();
+    try {
+        $account = GeneralAccount::findOrFail($request->account_id);
+        
+        $payment = Payment::create([
+            'account_id' => $request->account_id,
+            'amount' => $request->amount,
+            'payment_date' => $request->transaction_date,
+            'payment_mode' => 'Direct',
+            'reference' => $request->reference,
+            'notes' => $request->notes,
+            'lettrage_code' => 'DEP-' . Carbon::parse($request->transaction_date)->format('Ymd') . '-TEMP',
+        ]);
+
+        $payment->lettrage_code = 'DEP-' . Carbon::parse($request->transaction_date)->format('Ymd') . '-' . str_pad($payment->id, 4, '0', STR_PAD_LEFT);
+        $payment->save();
+
+        // Update account balance (increase for deposit)
+        $account->balance += $request->amount;
+        $account->save();
+
+        DB::commit();
+        return redirect()->route('payments.index')->with('success', 'Dépôt effectué avec succès.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Deposit failed', ['error' => $e->getMessage()]);
+        return back()->with('error', 'Erreur lors du dépôt: ' . $e->getMessage())->withInput();
+    }
+}
+
+public function withdraw(Request $request)
+{
+    $request->validate([
+        'account_id' => 'required|exists:general_accounts,id',
+        'amount' => 'required|numeric|min:0',
+        'transaction_date' => 'required|date',
+        'reference' => 'nullable|string|max:255',
+        'notes' => 'nullable|string',
+    ]);
+
+    DB::beginTransaction();
+    try {
+        $account = GeneralAccount::findOrFail($request->account_id);
+        
+        // Check if sufficient balance
+        if ($account->balance < $request->amount) {
+            return back()->with('error', 'Solde insuffisant pour le retrait.');
+        }
+
+        $payment = Payment::create([
+            'account_id' => $request->account_id,
+            'amount' => $request->amount,
+            'payment_date' => $request->transaction_date,
+            'payment_mode' => 'Direct',
+            'reference' => $request->reference,
+            'notes' => $request->notes,
+            'lettrage_code' => 'WTH-' . Carbon::parse($request->transaction_date)->format('Ymd') . '-TEMP',
+        ]);
+
+        $payment->lettrage_code = 'WTH-' . Carbon::parse($request->transaction_date)->format('Ymd') . '-' . str_pad($payment->id, 4, '0', STR_PAD_LEFT);
+        $payment->save();
+
+        // Update account balance (decrease for withdrawal)
+        $account->balance -= $request->amount;
+        $account->save();
+
+        DB::commit();
+        return redirect()->route('payments.index')->with('success', 'Retrait effectué avec succès.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Withdrawal failed', ['error' => $e->getMessage()]);
+        return back()->with('error', 'Erreur lors du retrait: ' . $e->getMessage())->withInput();
+    }
+}
+
 
 
 
@@ -182,51 +285,55 @@ class PaymentController extends Controller
     }
 
 
+    
+
+    
+
+
 
 
 
 
     
-
-    public function exportPdf(Request $request)
-    {
-        $query = Payment::with(['payable', 'customer', 'supplier', 'paymentMode', 'transfers.toAccount']);
-        
-        if ($request->filled('date_from')) {
-            $query->where('payment_date', '>=', $request->date_from);
-        }
-        
-        if ($request->filled('date_to')) {
-            $query->where('payment_date', '<=', $request->date_to);
-        }
-        
-        if ($request->filled('payment_mode')) {
-            $query->where('payment_mode', $request->payment_mode);
-        }
-
-        if ($request->filled('customer_id')) {
-            $query->where('customer_id', $request->customer_id);
-        }
-        
-        if ($request->filled('supplier_id')) {
-            $query->where('supplier_id', $request->supplier_id);
-        }
-
-        if ($request->filled('lettrage_code')) {
-            $query->where('lettrage_code', 'like', '%' . $request->lettrage_code . '%');
-        }
-
-        $payments = $query->latest()->get();
-        $company = \App\Models\CompanyInformation::first() ?? new \App\Models\CompanyInformation([
-            'name' => 'AZ NEGOCE',
-            'address' => '123 Rue Fictive, Tunis 1000',
-            'phone' => '+216 12 345 678',
-            'email' => 'contact@aznegoce.com',
-        ]);
-
-        $pdf = Pdf::loadView('pdf.payments_report', compact('payments', 'company', 'request'));
-        return $pdf->download('payments_report_' . Carbon::now()->format('Ymd') . '.pdf');
+public function exportPdf(Request $request)
+{
+    $query = Payment::with(['payable', 'customer', 'supplier', 'paymentMode', 'transfers.toAccount', 'account']);
+    
+    if ($request->filled('date_from')) {
+        $query->where('payment_date', '>=', $request->date_from);
     }
+    
+    if ($request->filled('date_to')) {
+        $query->where('payment_date', '<=', $request->date_to);
+    }
+    
+    if ($request->filled('payment_mode')) {
+        $query->where('payment_mode', $request->payment_mode);
+    }
+
+    if ($request->filled('customer_id')) {
+        $query->where('customer_id', $request->customer_id);
+    }
+    
+    if ($request->filled('supplier_id')) {
+        $query->where('supplier_id', $request->supplier_id);
+    }
+
+    if ($request->filled('lettrage_code')) {
+        $query->where('lettrage_code', 'like', '%' . $request->lettrage_code . '%');
+    }
+
+    $payments = $query->latest()->get();
+    $company = \App\Models\CompanyInformation::first() ?? new \App\Models\CompanyInformation([
+        'name' => 'AZ NEGOCE',
+        'address' => '123 Rue Fictive, Tunis 1000',
+        'phone' => '+216 12 345 678',
+        'email' => 'contact@aznegoce.com',
+    ]);
+
+    $pdf = Pdf::loadView('pdf.payments_report', compact('payments', 'company', 'request'));
+    return $pdf->download('payments_report_' . Carbon::now()->format('Ymd') . '.pdf');
+}
 
 
 
@@ -484,4 +591,23 @@ class PaymentController extends Controller
             return redirect()->back()->with('error', 'Erreur lors de l\'enregistrement du paiement: ' . $e->getMessage())->withInput();
         }
     }
+
+
+
+
+
+
+    public function validatePayment(Payment $payment)
+{
+    if ($payment->validation_comptable === 'en_attente') {
+        $payment->update(['validation_comptable' => 'validé']);
+        return redirect()->back()->with('success', 'Paiement validé avec succès.');
+    }
+
+    return redirect()->back()->with('error', 'Ce paiement ne peut pas être validé.');
+}
+
+
+
+
 }

@@ -622,6 +622,7 @@
                                                 <th>Référence</th>
                                                 <th>Notes</th>
                                                 <th>Validation Comptable</th>
+                                                <th>Actions</th> <!-- New column -->
 
                                             </tr>
                                         </thead>
@@ -631,21 +632,18 @@
                                                     <td>{{ $payment->payment_date->format('d/m/Y') }}</td>
                                                     <td>{{ number_format($payment->amount, 2) }}</td>
                                                     <td>{{ $payment->payment_mode }}</td>
-<td>
-    @php
-        $paymentMode = $payment->paymentMode;
-        $account = $payment->account ?? ($paymentMode ? ($paymentMode->debitAccount ?? $paymentMode->creditAccount) : null);
-        $transfer = $payment->transfers->first();
-    @endphp
-    {{ $account ? $account->name . ' (' . $account->account_number . ')' : '-' }}
-
-    @if ($transfer)
-        <br> <span class="text-success">Transféré vers {{ $transfer->toAccount->name }} ({{ $transfer->toAccount->account_number }})</span>
-    @endif
-
-
-    @if ($paymentMode && ($paymentMode->debit_account_id || $paymentMode->credit_account_id))
-    <br>
+                                                    <td>
+                                                        @php
+                                                            $paymentMode = $payment->paymentMode;
+                                                            $account = $payment->account ?? ($paymentMode ? ($paymentMode->debitAccount ?? $paymentMode->creditAccount) : null);
+                                                            $transfer = $payment->transfers->first();
+                                                        @endphp
+                                                        {{ $account ? $account->name . ' (' . $account->account_number . ')' : '-' }}
+                                                        @if ($transfer)
+                                                            <br><span class="text-success">Transféré vers {{ $transfer->toAccount->name }} ({{ $transfer->toAccount->account_number }})</span>
+                                                        @endif
+                                                        @if ($paymentMode && ($paymentMode->debit_account_id || $paymentMode->credit_account_id))
+                                                            <br>
                                                             @if ($transfer)
                                                                 <form action="{{ route('payments.cancel_transfer', $transfer->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Annuler ce transfert ?')">
                                                                     @csrf
@@ -660,9 +658,7 @@
                                                                 </button>
                                                             @endif
                                                         @endif
-
-
-</td>
+                                                    </td>
                                                     <td>
                                                         {{ $payment->customer ? $payment->customer->name : ($payment->supplier ? $payment->supplier->name : '-') }}
                                                     </td>
@@ -678,24 +674,31 @@
                                                     <td>{{ $payment->reference ?? '-' }}</td>
                                                     <td>{{ $payment->notes ?? '-' }}</td>
                                                     <td class="text-center">
-    @if($payment->validation_comptable === 'en_attente')
-        <form action="{{ route('payments.validate', $payment->id) }}" method="POST" class="d-inline">
-            @csrf
-            <button class="btn btn-sm btn-outline-success" type="submit">
-                <i class="fas fa-check"></i> Valider
-            </button>
-        </form>
-    @elseif($payment->validation_comptable === 'validé')
-        <span class="badge bg-success">Validé</span>
-    @else
-        <span class="badge bg-danger">Refusé</span>
-    @endif
-</td>
+                                                        @if($payment->validation_comptable === 'en_attente')
+                                                            <form action="{{ route('payments.validate', $payment->id) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <button class="btn btn-sm btn-outline-success" type="submit">
+                                                                    <i class="fas fa-check"></i> Valider
+                                                                </button>
+                                                            </form>
+                                                        @elseif($payment->validation_comptable === 'validé')
+                                                            <span class="text-muted">Validé</span>
+                                                        @else
+                                                            <span class="text-muted">Refusé</span>
+                                                        @endif
+                                                       <hr>
+                                                         @if(!$payment->childPayments()->exists() && !$payment->parent_payment_id && $payment->validation_comptable === 'en_attente')
+                                                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#cancelPaymentModal{{ $payment->id }}" title="Annuler le règlement">
+                                                                <i class="fas fa-times"></i> Annuler
+                                                            </button>
+                                                        @else
+                                                            <!-- <span class="text-muted">Contrepassé</span> -->
+                                                        @endif
+                                                    </td>
 
-                                                   
                                                 </tr>
 
-                                                <!-- Modal Transfer -->
+                                                <!-- Transfer Modal (unchanged) -->
                                                 <div class="modal fade" id="transferModal{{ $payment->id }}" tabindex="-1" aria-labelledby="transferModalLabel{{ $payment->id }}" aria-hidden="true">
                                                     <div class="modal-dialog modal-lg">
                                                         <div class="modal-content">
@@ -747,6 +750,63 @@
                                                                     </div>
                                                                 </form>
                                                             </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Cancel Payment Modal -->
+                                                <div class="modal fade" id="cancelPaymentModal{{ $payment->id }}" tabindex="-1" aria-labelledby="cancelPaymentModalLabel{{ $payment->id }}" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="cancelPaymentModalLabel{{ $payment->id }}">Annuler le règlement : {{ $payment->lettrage_code ?? $payment->id }}</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                                            </div>
+                                                            <form action="{{ route('payments.cancel', $payment->id) }}" method="POST">
+                                                                @csrf
+                                                                <div class="modal-body">
+                                                                    <div class="mb-3">
+                                                                        <label for="payment_mode{{ $payment->id }}" class="form-label">Mode de paiement</label>
+                                                                        <select class="form-control select2" id="payment_mode{{ $payment->id }}" name="payment_mode" required>
+                                                                            <option value="">Sélectionner le mode de paiement</option>
+                                                                            @foreach(\App\Models\PaymentMode::where('type', 'décaissement')->get() as $mode)
+                                                                                <option value="{{ $mode->name }}">{{ $mode->name }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                        @error('payment_mode')
+                                                                            <span class="text-danger">{{ $message }}</span>
+                                                                        @enderror
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label for="payment_date{{ $payment->id }}" class="form-label">Date de paiement</label>
+                                                                        <input type="date" class="form-control" id="payment_date{{ $payment->id }}" name="payment_date" value="{{ now()->format('Y-m-d') }}" required>
+                                                                        @error('payment_date')
+                                                                            <span class="text-danger">{{ $message }}</span>
+                                                                        @enderror
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label for="reference{{ $payment->id }}" class="form-label">Référence (optionnel)</label>
+                                                                        <input type="text" class="form-control" id="reference{{ $payment->id }}" name="reference" value="{{ 'ANNULATION-' . ($payment->reference ?? $payment->id) }}">
+                                                                        @error('reference')
+                                                                            <span class="text-danger">{{ $message }}</span>
+                                                                        @enderror
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label for="notes{{ $payment->id }}" class="form-label">Notes (optionnel)</label>
+                                                                        <textarea class="form-control" id="notes{{ $payment->id }}" name="notes">Annulation du paiement #{{ $payment->id }}</textarea>
+                                                                        @error('notes')
+                                                                            <span class="text-danger">{{ $message }}</span>
+                                                                        @enderror
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <p><strong>Montant à annuler :</strong> {{ number_format(abs($payment->amount), 2, ',', ' ') }} €</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                                    <button type="submit" class="btn btn-danger">Confirmer l'annulation</button>
+                                                                </div>
+                                                            </form>
                                                         </div>
                                                     </div>
                                                 </div>

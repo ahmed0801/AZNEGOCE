@@ -285,6 +285,83 @@ public function withdraw(Request $request)
     }
 
 
+    
+
+
+public function cancelPayment(Request $request, $id)
+    {
+        $originalPayment = Payment::findOrFail($id);
+
+        // Prevent canceling an already canceled payment or a cancellation
+        if ($originalPayment->childPayments()->exists() || $originalPayment->parent_payment_id) {
+            return redirect()->back()->with('error', 'Ce règlement a déjà été annulé ou est une annulation.');
+        }
+
+        // Validate the submitted cancellation payment mode
+        $request->validate([
+            'payment_mode' => [
+                'required',
+                'exists:payment_modes,name',
+                function ($attribute, $value, $fail) {
+                    $mode = PaymentMode::where('name', $value)->first();
+                    if ($mode && $mode->type !== 'décaissement') {
+                        $fail('Le mode de paiement sélectionné doit être de type décaissement.');
+                    }
+                },
+            ],
+            'payment_date' => 'required|date',
+            'reference' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Create the cancellation payment
+            $cancellationPayment = Payment::create([
+                'payable_id' => $originalPayment->payable_id,
+                'payable_type' => $originalPayment->payable_type,
+                'customer_id' => $originalPayment->customer_id,
+                'supplier_id' => $originalPayment->supplier_id,
+                'account_id' => $originalPayment->account_id,
+                'amount' => -$originalPayment->amount, // Inverse the amount
+                'payment_date' => $request->payment_date,
+                'payment_mode' => $request->payment_mode,
+                'reference' => $request->reference ?: 'ANNULATION-' . ($originalPayment->reference ?? $originalPayment->id),
+                'notes' => $request->notes ?: 'Annulation du paiement #' . $originalPayment->id,
+                'parent_payment_id' => $originalPayment->id,
+                'reconciled' => $originalPayment->reconciled,
+                'validation_comptable' => 'Validé',
+            ]);
+
+            // Generate lettrage code for the cancellation payment
+            $cancellationPayment->lettrage_code = $cancellationPayment->generateLettrageCode();
+            $cancellationPayment->save();
+
+            // Update the original payment to mark it as canceled
+            $originalPayment->notes = ($originalPayment->notes ?? '') . "\nAnnulé par paiement #" . $cancellationPayment->id;
+            $originalPayment->validation_comptable = "Validé";
+            $originalPayment->save();
+
+            // Update the invoice's paid status
+            if ($originalPayment->payable) {
+                $payable = $originalPayment->payable;
+                $payable->load('payments');
+                $remainingBalance = $payable->total_ttc - $payable->payments->sum('amount');
+                $payable->update(['paid' => $remainingBalance <= 0.01]);
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Paiement annulé avec succès.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Erreur lors de l\'annulation du paiement : ' . $e->getMessage());
+        }
+    }
+
+
+    
+
+
 
 
 
