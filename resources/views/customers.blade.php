@@ -191,7 +191,7 @@
 
   </head>
   <body>
-    <div class="wrapper">
+    <div class="wrapper sidebar_minimize">
      <!-- Sidebar -->
 <div class="sidebar" data-background-color="dark">
     <div class="sidebar-logo">
@@ -660,7 +660,7 @@
 
         <div class="mb-3 col-md-4">
             <label class="form-label">Pays</label>
-            <input type="text" name="country" class="form-control" required>
+            <input type="text" name="country" class="form-control" value="France" required>
         </div>
 
         <div class="mb-3 col-md-4">
@@ -691,7 +691,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">TVA</label>
             <select name="tva_group_id" class="form-control" required>
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($tvaGroups as $group)
                     <option value="{{ $group->id }}">{{ $group->name }} : {{ $group->rate }} %</option>
                 @endforeach
@@ -701,7 +701,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">Groupe Remise</label>
             <select name="discount_group_id" class="form-control" required>
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($discountGroups as $group)
                     <option value="{{ $group->id }}">{{ $group->name }} : {{ $group->discount_rate }} %</option>
                 @endforeach
@@ -711,7 +711,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">Mode de paiement</label>
             <select name="payment_mode_id" class="form-control" required>
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($paymentModes as $mode)
                     <option value="{{ $mode->id }}">{{ $mode->name }}</option>
                 @endforeach
@@ -721,7 +721,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">Condition de paiement</label>
             <select name="payment_term_id" class="form-control" required>
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($paymentTerms as $term)
                     <option value="{{ $term->id }}">{{ $term->label }} : {{ $term->days }} Jours</option>
                 @endforeach

@@ -622,7 +622,6 @@
                                                 <th>Référence</th>
                                                 <th>Notes</th>
                                                 <th>Validation Comptable</th>
-                                                <th>Actions</th> <!-- New column -->
 
                                             </tr>
                                         </thead>
@@ -649,7 +648,7 @@
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <button class="btn btn-sm btn-danger" title="Annuler le transfert">
-                                                                        <i class="fas fa-times"></i> Annuler
+                                                                        <i class="fas fa-times"></i> Annuler le transfert
                                                                     </button>
                                                                 </form>
                                                             @else
@@ -688,9 +687,11 @@
                                                         @endif
                                                        <hr>
                                                          @if(!$payment->childPayments()->exists() && !$payment->parent_payment_id && $payment->validation_comptable === 'en_attente')
+                                                         @if (!$transfer)
                                                             <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#cancelPaymentModal{{ $payment->id }}" title="Annuler le règlement">
                                                                 <i class="fas fa-times"></i> Annuler
                                                             </button>
+                                                            @endif
                                                         @else
                                                             <!-- <span class="text-muted">Contrepassé</span> -->
                                                         @endif

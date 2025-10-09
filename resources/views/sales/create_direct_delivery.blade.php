@@ -624,15 +624,17 @@
                                 <div class="mb-3" id="customer_details" style="display: none;">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <p><strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span></p>
-                                            <p><strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p>
-                                            <p><strong>Email:</strong> <span id="customer_email"></span></p>
-                                            <p><strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span></p>
+                                            <p><strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span> 	&#8594; <strong>TVA:</strong> <span id="customer_tva"></span>%</p>
+                                            <!-- <p><strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p> -->
+                                            <p><strong>📧 :</strong> <span id="customer_email"></span> &#8594; <strong>📞 :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span> </p>
+                                            <!-- <p><strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span></p> -->
                                         </div>
                                         <div class="col-md-6">
                                             <p><strong>Adresse:</strong> <span id="customer_address"></span></p>
-                                            <p><strong>Adresse de livraison:</strong> <span id="customer_address_delivery"></span></p>
-                                            <p><strong>Ville & Pays:</strong> <span id="customer_city"></span>, <span id="customer_country"></span></p>
+
+                                            <!-- <p><strong>Adresse de livraison:</strong> <span id="customer_address_delivery"></span></p> -->
+
+                                            <!-- <p><strong>Ville & Pays:</strong> <span id="customer_city"></span>, <span id="customer_country"></span></p> -->
                                             <p>
                                                 <strong>Solde:</strong>
                                                 <button type="button" class="btn btn-outline-info btn-sm balance-btn" id="balanceBtn" data-customer-id="" data-customer-name="" disabled>
