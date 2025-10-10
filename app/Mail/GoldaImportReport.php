@@ -12,16 +12,28 @@ class GoldaImportReport extends Mailable
 
     public $report;
     public $totalActiveItems;
+    public $messageText;
 
-    public function __construct($report, $totalActiveItems)
+    public function __construct($report, $totalActiveItems, $messageText)
     {
         $this->report = $report;
         $this->totalActiveItems = $totalActiveItems;
+        $this->messageText = $messageText;
     }
 
     public function build()
     {
         return $this->subject('Rapport d\'importation GOLDA')
-            ->markdown('emails.golda_import_report');
+            ->view('emails.golda_import_report', [
+                'report' => $this->report,
+                'totalActiveItems' => $this->totalActiveItems,
+                'messageText' => $this->messageText,
+                'company' => (object) [
+                    'name' => 'Votre Entreprise',
+                    'address' => 'Adresse de l\'entreprise',
+                    'phone' => '+33 X XX XX XX XX',
+                    'email' => 'contact@votreentreprise.com'
+                ]
+            ]);
     }
 }
