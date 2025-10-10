@@ -691,8 +691,8 @@ body {
   border: none;
   background: transparent;
   cursor: pointer;
-  width: 35px;
-  height: 35px;
+  width: 2.5rem;
+  height: 2.5rem;
   padding: 0;
   display: flex;
   justify-content: center;
