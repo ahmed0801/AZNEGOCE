@@ -28,12 +28,6 @@ class GoldaImportReport extends Mailable
                 'report' => $this->report,
                 'totalActiveItems' => $this->totalActiveItems,
                 'messageText' => $this->messageText,
-                'company' => (object) [
-                    'name' => 'Votre Entreprise',
-                    'address' => 'Adresse de l\'entreprise',
-                    'phone' => '+33 X XX XX XX XX',
-                    'email' => 'contact@votreentreprise.com'
-                ]
             ]);
     }
 }

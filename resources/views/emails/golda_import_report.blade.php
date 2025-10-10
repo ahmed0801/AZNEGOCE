@@ -45,10 +45,7 @@
             @endforeach
         @endif
 
-      
-
         <p>Merci pour votre confiance.</p>
-      
 
         <div class="footer">
             <p>
