@@ -9,6 +9,8 @@ use App\Models\Item;
 use League\Csv\Reader;
 use League\Csv\Statement;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\GoldaImportReport;
 
 class ImportGoldaTarifs extends Command
 {
@@ -18,6 +20,13 @@ class ImportGoldaTarifs extends Command
     public function handle()
     {
         $this->info("🚀 Début de l’import GOLDA...");
+        
+        // Initialize report data
+        $report = [
+            'suppliers' => [],
+            'totalItems' => 0,
+            'errors' => []
+        ];
 
         // --- Connexion FTP ---
         $ftp = Storage::createFtpDriver([
@@ -35,9 +44,10 @@ class ImportGoldaTarifs extends Command
         $localInfoFile = storage_path('app/golda/infos_tarifs.csv');
         Storage::disk('local')->put('golda/infos_tarifs.csv', $ftp->get('infos_tarifs.csv'));
 
-        // --- Nettoyage du BOM éventuel ---
+        // --- Nettoyage du BOM et conversion UTF-8 ---
         $content = file_get_contents($localInfoFile);
         $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
+        $content = mb_convert_encoding($content, 'UTF-8', 'auto');
         file_put_contents($localInfoFile, $content);
 
         // --- Détection du délimiteur ---
@@ -67,68 +77,84 @@ class ImportGoldaTarifs extends Command
 
             if (empty($fournisseurName)) continue;
 
-            // --- Créer ou récupérer le fournisseur ---
             $supplier = Supplier::firstOrCreate(
                 ['name' => $fournisseurName],
                 ['code' => $prefixe]
             );
 
             $this->info("➡️ Traitement fournisseur : {$fournisseurName} ({$prefixe})");
-
-            $count = 0;
+            $supplierReport = [
+                'name' => $fournisseurName,
+                'imported' => 0,
+                'deactivated' => 0,
+                'errors' => []
+            ];
 
             // --- Import des articles ---
-           // --- Téléchargement du fichier CSV articles ---
-if ($fichierTarif) {
-    try {
-        $remoteFile = "csv/{$fichierTarif}";
-        $localFile = storage_path("app/golda/csv/{$fichierTarif}");
+            if ($fichierTarif) {
+                try {
+                    $remoteFile = "csv/{$fichierTarif}";
+                    $localFile = storage_path("app/golda/csv/{$fichierTarif}");
 
-        Storage::disk('local')->put("golda/csv/{$fichierTarif}", $ftp->get($remoteFile));
-        $this->info("📂 Fichier articles téléchargé : {$fichierTarif}");
+                    Storage::disk('local')->put("golda/csv/{$fichierTarif}", $ftp->get($remoteFile));
+                    $this->info("📂 Fichier articles téléchargé : {$fichierTarif}");
 
-        $csvItems = Reader::createFromPath($localFile, 'r');
-        $csvItems->setDelimiter(';'); // <-- Séparateur correct
-        $csvItems->setHeaderOffset(0);
+                    $csvItems = Reader::createFromPath($localFile, 'r');
+                    $csvItems->setDelimiter(';');
+                    $csvItems->setHeaderOffset(0);
 
-        // Nettoyage des entêtes
-        $headers = $csvItems->getHeader();
-        $cleanHeaders = array_map(fn($h) => trim(preg_replace('/[[:^print:]]/', '', $h)), $headers);
-        $this->info('🧾 Colonnes articles : ' . implode(' | ', $cleanHeaders));
+                    $recordsItems = Statement::create()->process($csvItems);
 
-        $recordsItems = Statement::create()->process($csvItems);
-        $count = 0;
+                    foreach ($recordsItems as $i) {
+                        $ref = trim($i['Ref_fournisseur'] ?? '');
+                        $name = trim($i['Description'] ?? '');
+                        $price = floatval(str_replace(',', '.', $i['Prix_euro'] ?? 0));
+                        $ean = trim($i['Code_EAN'] ?? '');
 
-        foreach ($recordsItems as $i) {
-            $ref = trim($i['Ref_fournisseur'] ?? '');
-            $name = trim($i['Description'] ?? '');
-            $price = floatval(str_replace(',', '.', $i['Prix_euro'] ?? 0));
-            $ean = trim($i['Code_EAN'] ?? '');
+                        if (!$ref || !$name) continue;
 
-            if (!$ref || !$name) continue;
+                        // Nettoyage UTF-8 + caractères spéciaux
+                        $name = iconv('UTF-8', 'UTF-8//IGNORE', $name);
+                        $name = str_replace(["\x92", "\x93", "\x94"], "'", $name);
+                        $name = str_replace(["\x96", "\x97"], "-", $name);
 
-            // Création ou mise à jour de l'article
-            $item = Item::updateOrCreate(
-                ['code' => $ref, 'codefournisseur' => $supplier->code],
-                [
-                    'name' => $name,
-                    'cost_price' => $price,
-                    'barcode' => $ean,
-                    'is_active' => true
-                ]
-            );
-            $count++;
-        }
+                        // Création ou mise à jour de l'article
+                        $item = Item::where('code', $ref)->first();
 
-        $this->info("✅ {$count} articles importés pour {$supplier->name}");
-        Log::info("GOLDA: {$count} articles importés pour {$supplier->name}");
+                        if ($item) {
+                            $item->update([
+                                'codefournisseur' => $supplier->code,
+                                'name' => $name,
+                                'cost_price' => $price,
+                                'barcode' => $ean,
+                                'is_active' => true
+                            ]);
+                        } else {
+                            Item::create([
+                                'code' => $ref,
+                                'codefournisseur' => $supplier->code,
+                                'name' => $name,
+                                'cost_price' => $price,
+                                'barcode' => $ean,
+                                'is_active' => true
+                            ]);
+                        }
 
-    } catch (\Exception $e) {
-        Log::error("Erreur import articles pour {$supplier->name}: {$e->getMessage()}");
-        $this->error("❌ Erreur import articles pour {$supplier->name}: {$e->getMessage()}");
-    }
-}
+                        $supplierReport['imported']++;
+                        $report['totalItems']++;
+                    }
 
+                    $this->info("✅ {$supplierReport['imported']} articles importés pour {$supplier->name}");
+                    Log::info("GOLDA: {$supplierReport['imported']} articles importés pour {$supplier->name}");
+
+                } catch (\Exception $e) {
+                    $errorMsg = "Erreur import articles pour {$supplier->name}: {$e->getMessage()}";
+                    Log::error($errorMsg);
+                    $this->error("❌ {$errorMsg}");
+                    $supplierReport['errors'][] = $errorMsg;
+                    $report['errors'][] = $errorMsg;
+                }
+            }
 
             // --- Désactiver les articles supprimés ---
             if ($fichierSupprimes) {
@@ -142,7 +168,6 @@ if ($fichierTarif) {
                     $csvSuppr->setHeaderOffset(0);
                     $supprList = Statement::create()->process($csvSuppr);
 
-                    $countSuppr = 0;
                     foreach ($supprList as $s) {
                         $refSup = trim($s['Ref_fournisseur'] ?? '');
                         if (!$refSup) continue;
@@ -150,16 +175,37 @@ if ($fichierTarif) {
                         Item::where('code', $refSup)
                             ->where('codefournisseur', $supplier->code)
                             ->update(['is_active' => false]);
-                        $countSuppr++;
+                        $supplierReport['deactivated']++;
                     }
 
-                    $this->info("🗑️ {$countSuppr} articles désactivés pour {$supplier->name}");
-                    Log::info("GOLDA: {$countSuppr} articles désactivés pour {$supplier->name}");
+                    $this->info("🗑️ {$supplierReport['deactivated']} articles désactivés pour {$supplier->name}");
+                    Log::info("GOLDA: {$supplierReport['deactivated']} articles désactivés pour {$supplier->name}");
 
                 } catch (\Exception $e) {
-                    Log::warning("Fichier supprimés introuvable pour {$supplier->name}");
+                    $errorMsg = "Fichier supprimés introuvable pour {$supplier->name}: {$e->getMessage()}";
+                    Log::warning($errorMsg);
+                    $supplierReport['errors'][] = $errorMsg;
+                    $report['errors'][] = $errorMsg;
                 }
             }
+
+            $report['suppliers'][] = $supplierReport;
+        }
+
+        // --- Calculate total active items in stock ---
+        $totalActiveItems = Item::where('is_active', true)->count();
+
+        // --- Send email report ---
+        try {
+            $messageText = "Hello, je suis un robot développé et programmé par votre développeur Ahmed pour que je tourne chaque soirée et j'intègre automatiquement toutes nouveaux articles dans GOLDA et les mises à jour des prix pour chaque fournisseur. Ahmed m'a programmé aussi pour vous envoyer ce rapport complet et détaillant du dernier résultat de l'importation.";
+            Mail::to(['ahmedarfaoui@gmail.com', 'labidi.mourad@orange.fr'])
+                ->send(new GoldaImportReport($report, $totalActiveItems, $messageText));
+            $this->info("📧 Rapport envoyé par email à ahmedarfaoui@gmail.com et labidi.mourad@orange.fr");
+        } catch (\Exception $e) {
+            $errorMsg = "Erreur lors de l'envoi de l'email: {$e->getMessage()}";
+            Log::error($errorMsg);
+            $this->error("❌ {$errorMsg}");
+            $report['errors'][] = $errorMsg;
         }
 
         $this->info('🎉 Import GOLDA terminé avec succès.');
