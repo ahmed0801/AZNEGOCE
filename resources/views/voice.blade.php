@@ -836,10 +836,6 @@ body {
    <div class="button-container">
       <div class="left-buttons">
     <div class="btn-toolbar">
-      <button class="nego-button">
-        <img
-          src="{{ asset('assets/img/negobot_icone.png')}}" alt="NegoBot" />
-      </button>
       <button class="voice-button" id="voice-button" onclick="startRecognition()">
         <svg
 			class="voice-icon"
