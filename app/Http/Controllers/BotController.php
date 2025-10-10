@@ -16,7 +16,7 @@ class BotController extends Controller
         $port = env('AI_PORT');
         $route = env('AI_ROUTE');
         $this->url = "{$host}:{$port}{$route}";
-        $this->url = "http://51.68.230.52:8010/predict";
+        $this->url = "http://51.77.159.113:8010/predict";
     }
     
     public function callBot(Request $request)
