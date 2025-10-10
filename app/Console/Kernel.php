@@ -13,10 +13,7 @@ class Kernel extends ConsoleKernel
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
-    protected function schedule(Schedule $schedule)
-    {
-        // $schedule->command('inspire')->hourly();
-    }
+
 
     /**
      * Register the commands for the application.
@@ -29,4 +26,13 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+
+
+
+    protected function schedule(\Illuminate\Console\Scheduling\Schedule $schedule)
+{
+    // Exécution chaque nuit à 02h00
+    $schedule->command('golda:import')->dailyAt('02:00');
+}
+
 }

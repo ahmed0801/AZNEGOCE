@@ -626,7 +626,7 @@
                                         <div class="col-md-6">
                                             <p><strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span> 	&#8594; <strong>TVA:</strong> <span id="customer_tva"></span>%</p>
                                             <!-- <p><strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p> -->
-                                            <p><strong>📧 :</strong> <span id="customer_email"></span> &#8594; <strong>📞 :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span> </p>
+                                            <p><strong>Email:</strong> <span id="customer_email"></span> &#8594; <strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span> </p>
                                             <!-- <p><strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span></p> -->
                                         </div>
                                         <div class="col-md-6">
