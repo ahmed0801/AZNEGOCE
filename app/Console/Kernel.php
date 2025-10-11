@@ -20,19 +20,18 @@ class Kernel extends ConsoleKernel
      *
      * @return void
      */
+    protected function schedule(Schedule $schedule)
+    {
+        // Test : exécution chaque minute + log
+        $schedule->command('golda:import')
+            ->everyMinute()
+            ->appendOutputTo(storage_path('logs/golda_schedule.log'));
+    }
+
     protected function commands()
     {
         $this->load(__DIR__.'/Commands');
-
         require base_path('routes/console.php');
     }
-
-
-
-    protected function schedule(\Illuminate\Console\Scheduling\Schedule $schedule)
-{
-    // Exécution chaque nuit à 02h00
-    $schedule->command('golda:import')->dailyAt('18:38');
-}
 
 }
