@@ -32,7 +32,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(\Illuminate\Console\Scheduling\Schedule $schedule)
 {
     // Exécution chaque nuit à 02h00
-    $schedule->command('golda:import')->dailyAt('02:21');
+    $schedule->command('golda:import')->dailyAt('18:38');
 }
 
 }

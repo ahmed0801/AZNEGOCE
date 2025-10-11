@@ -363,7 +363,7 @@ protected function createDeliveryNoteFromOrder(SalesOrder $order, Request $reque
     /**
      * Create a direct delivery note (without a sales order).
      */
-    public function createDirectDeliveryNote()
+    public function createDirectDeliveryNote_withoutajax()
     {
         $customers = Customer::with(['tvaGroup', 'vehicles'])->get();
         $tvaRates = $customers->mapWithKeys(fn($c) => [$c->id => $c->tvaGroup->rate ?? 0])->toJson();
@@ -376,6 +376,17 @@ $paymentTerms = PaymentTerm::all();
 
         return view('sales.create_direct_delivery', compact('customers', 'tvaRates','tvaGroups','discountGroups','paymentModes','paymentTerms'));
     }
+
+    public function createDirectDeliveryNote()
+{
+    $tvaRates = []; // Empty since tvaRate is fetched via AJAX
+    $tvaGroups = TvaGroup::all();
+    $discountGroups = DiscountGroup::all();
+    $paymentModes = PaymentMode::all();
+    $paymentTerms = PaymentTerm::all();
+    return view('sales.create_direct_delivery', compact('tvaRates', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms'));
+}
+
 
     /**
      * Store a direct delivery note.
@@ -555,7 +566,7 @@ public function storedeliveryandinvoice(Request $request)
                         throw new \Exception("Article {$line['article_code']} introuvable.");
                     }
                     if ($item->getStockQuantityAttribute() < $line['ordered_quantity']) {
-                        throw new \Exception("Stock insuffisant pour l'article {$line['article_code']}.");
+                        // throw new \Exception("Stock insuffisant pour l'article {$line['article_code']}.");
                     }
 
                     $total_ligne_ht = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
@@ -646,6 +657,24 @@ public function storedeliveryandinvoice(Request $request)
                         'total_ligne_ttc' => $line->total_ligne_ttc,
                     ]);
                 }
+
+
+                     // Update customer balance solde client
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                    $customer->save();
+
+                    // Log the balance update
+                    \Log::info('Customer balance updated', [
+                        'customer_id' => $customer->id,
+                        'invoice_id' => $invoice->id,
+                        'numdoc' => $numdocInvoice,
+                        'amount_added' => $totalTtc,
+                        'new_balance' => $customer->balance,
+                    ]);
+
+
+
 
                 $deliveryNote->update(['invoiced' => true]);
                 $invoice->deliveryNotes()->attach($deliveryNote->id);
@@ -955,260 +984,7 @@ public function validateOrder($id)
     });
 }
 
-    /**
-     * Create a direct invoice from a sales order.
-     */
-    public function createDirectInvoice($orderId)
-    {
-        $order = SalesOrder::with(['lines.item', 'customer'])
-            ->where('status', 'validée')
-            ->findOrFail($orderId);
-
-        if ($order->invoiced) {
-            return back()->with('error', 'Cette commande est déjà facturée.');
-        }
-
-        $customers = Customer::all();
-        return view('sales.invoices.create_direct', compact('order', 'customers'));
-    }
-
-    /**
-     * Create a grouped invoice.
-     */
-    public function createGroupedInvoice()
-    {
-        $orders = SalesOrder::where('status', 'validée')
-            ->where('invoiced', 0)
-            ->with(['lines.item', 'customer'])
-            ->get();
-        $customers = Customer::all();
-        return view('sales.invoices.create_grouped', compact('orders', 'customers'));
-    }
-
-    /**
-     * Create a free invoice.
-     */
-    public function createFreeInvoice()
-    {
-        $customers = Customer::with('tvaGroup')->get();
-        $tvaRates = $customers->mapWithKeys(fn($c) => [$c->id => $c->tvaGroup->rate ?? 0])->toJson();
-        $items = Item::with(['brand', 'supplier', 'tvaGroup'])->get();
-        return view('sales.invoices.create_free', compact('customers', 'tvaRates', 'items'));
-    }
-
-    /**
-     * Store an invoice.
-     */
-    public function storeInvoice(Request $request)
-    {
-        $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'invoice_date' => 'required|date',
-            'type' => 'required|in:direct,groupée,libre',
-            'lines' => 'required_if:type,direct,groupée|array',
-            'lines.*.article_code' => 'required_if:type,direct,groupée|exists:items,code',
-            'lines.*.quantity' => 'required_if:type,direct,groupée|numeric|min:0',
-            'lines.*.unit_price_ht' => 'required_if:type,direct,groupée|numeric|min:0',
-            'lines.*.remise' => 'nullable|numeric|min:0|max:100',
-            'lines.*.description' => 'required_if:type,libre|string|nullable',
-            'tva_rate' => 'required_if:type,groupée,libre|numeric|min:0',
-            'sales_order_id' => 'required_if:type,direct|exists:sales_orders,id',
-        ]);
-
-        return DB::transaction(function () use ($request) {
-            $souche = Souche::where('type', 'facture_vente')->lockForUpdate()->first();
-            if (!$souche) {
-                throw new \Exception('Souche facture vente manquante');
-            }
-
-            $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
-            $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
-
-            $tvaRate = 0;
-            if ($request->type === 'direct') {
-                $order = SalesOrder::findOrFail($request->sales_order_id);
-                if ($order->invoiced) {
-                    throw new \Exception('Cette commande est déjà facturée.');
-                }
-                $tvaRate = $order->tva_rate ?? 0;
-            } elseif ($request->type === 'groupée') {
-                $tvaRate = $request->tva_rate ?? 0;
-                $orderIds = array_unique(array_filter(array_column($request->lines, 'sales_order_id')));
-                $orders = SalesOrder::whereIn('id', $orderIds)->get();
-                $tvaRates = $orders->pluck('tva_rate')->unique();
-                if ($tvaRates->count() > 1 || $tvaRates->first() != $tvaRate) {
-                    throw new \Exception('Les commandes sélectionnées ont des taux de TVA différents ou incompatibles.');
-                }
-            } else {
-                $customer = Customer::with('tvaGroup')->findOrFail($request->customer_id);
-                $tvaRate = $request->tva_rate ?? $customer->tvaGroup->rate ?? 0;
-            }
-
-            $invoice = SalesInvoice::create([
-                'customer_id' => $request->customer_id,
-                'numdoc' => $numdoc,
-                'invoice_date' => $request->invoice_date,
-                'status' => $request->input('action') === 'validate' ? 'validée' : 'brouillon',
-                'total_ht' => 0,
-                'total_ttc' => 0,
-                'tva_rate' => $tvaRate,
-                'notes' => $request->notes,
-                'type' => $request->type,
-                'sales_order_id' => $request->type === 'direct' ? $request->sales_order_id : null,
-            ]);
-
-            $totalHt = 0;
-            $orderIds = [];
-            foreach ($request->lines as $line) {
-                $totalLigneHt = $line['quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
-                $totalHt += $totalLigneHt;
-
-                if ($request->type === 'groupée' && !empty($line['sales_order_id'])) {
-                    $orderIds[] = $line['sales_order_id'];
-                }
-
-                SalesInvoiceLine::create([
-                    'sales_invoice_id' => $invoice->id,
-                    'article_code' => $line['article_code'] ?? null,
-                    'sales_order_id' => $line['sales_order_id'] ?? null,
-                    'quantity' => $line['quantity'],
-                    'unit_price_ht' => $line['unit_price_ht'],
-                    'remise' => $line['remise'] ?? 0,
-                    'total_ligne_ht' => $totalLigneHt,
-                    'tva' => $tvaRate,
-                    'prix_ttc' => $totalLigneHt * (1 + $tvaRate / 100),
-                    'description' => $line['description'] ?? null,
-                ]);
-            }
-
-            $invoice->update([
-                'total_ht' => $totalHt,
-                'total_ttc' => $totalHt * (1 + $tvaRate / 100),
-            ]);
-
-            if ($request->type === 'direct') {
-                $order->invoiced = 1;
-                $order->save();
-            } elseif ($request->type === 'groupée') {
-                if (!empty($orderIds)) {
-                    SalesOrder::whereIn('id', array_unique($orderIds))->update(['invoiced' => 1]);
-                }
-            }
-
-            $souche->last_number += 1;
-            $souche->save();
-
-            return redirect()->route('sales.invoices.list')->with('success', 'Facture créée avec succès.');
-        });
-    }
-
-    /**
-     * List all invoices.
-     */
-    public function invoicesList(Request $request)
-    {
-        $query = SalesInvoice::with(['customer', 'lines.item'])->orderBy('updated_at', 'desc');
-
-        if ($request->filled('customer_id')) {
-            $query->where('customer_id', $request->customer_id);
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-        if ($request->filled('type')) {
-            $query->where('type', $request->type);
-        }
-        if ($request->filled('date_from')) {
-            $query->whereDate('invoice_date', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('invoice_date', '<=', $request->date_to);
-        }
-
-        $invoices = $query->get();
-        $customers = Customer::orderBy('name')->get();
-
-        return view('sales.invoices.list', compact('invoices', 'customers'));
-    }
-
-    /**
-     * Edit an invoice.
-     */
-    public function editInvoice($id)
-    {
-        $invoice = SalesInvoice::with(['lines.item', 'customer'])->findOrFail($id);
-        if ($invoice->status === 'validée') {
-            return back()->with('error', 'Impossible de modifier une facture validée.');
-        }
-        $customers = Customer::all();
-        $tvaRates = Customer::with('tvaGroup')
-            ->get()
-            ->mapWithKeys(fn($c) => [$c->id => $c->tvaGroup->rate ?? 0])
-            ->toJson();
-        $items = Item::with(['brand', 'supplier', 'tvaGroup'])->get();
-        return view('sales.invoices.edit', compact('invoice', 'customers', 'tvaRates', 'items'));
-    }
-
-    /**
-     * Update an invoice.
-     */
-    public function updateInvoice(Request $request, $numdoc)
-    {
-        $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'invoice_date' => 'required|date',
-            'lines' => 'required|array',
-            'lines.*.article_code' => 'required_if:type,direct,groupée|exists:items,code',
-            'lines.*.quantity' => 'required_if:type,direct,groupée|numeric|min:0',
-            'lines.*.unit_price_ht' => 'required_if:type,direct,groupée|numeric|min:0',
-            'lines.*.remise' => 'nullable|numeric|min:0|max:100',
-            'lines.*.description' => 'required_if:type,libre|string|nullable',
-        ]);
-
-        return DB::transaction(function () use ($request, $numdoc) {
-            $invoice = SalesInvoice::where('numdoc', $numdoc)->firstOrFail();
-            if ($invoice->status === 'validée') {
-                throw new \Exception('Impossible de modifier une facture validée.');
-            }
-
-            $customer = Customer::with('tvaGroup')->findOrFail($request->customer_id);
-            $tvaRate = $customer->tvaGroup->rate ?? 0;
-
-            $invoice->update([
-                'customer_id' => $request->customer_id,
-                'invoice_date' => $request->invoice_date,
-                'notes' => $request->notes,
-            ]);
-
-            $invoice->lines()->delete();
-            $totalHt = 0;
-            foreach ($request->lines as $line) {
-                $totalLigneHt = $line['quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
-                $totalHt += $totalLigneHt;
-
-                SalesInvoiceLine::create([
-                    'sales_invoice_id' => $invoice->id,
-                    'article_code' => $line['article_code'] ?? null,
-                    'sales_order_id' => $line['sales_order_id'] ?? null,
-                    'quantity' => $line['quantity'],
-                    'unit_price_ht' => $line['unit_price_ht'],
-                    'remise' => $line['remise'] ?? 0,
-                    'total_ligne_ht' => $totalLigneHt,
-                    'tva' => $tvaRate,
-                    'prix_ttc' => $totalLigneHt * (1 + $tvaRate / 100),
-                    'description' => $line['description'] ?? null,
-                ]);
-            }
-
-            $invoice->update([
-                'total_ht' => $totalHt,
-                'total_ttc' => $totalHt * (1 + $tvaRate / 100),
-                'status' => $request->input('action') === 'validate' ? 'validée' : 'brouillon',
-            ]);
-
-            return redirect()->route('sales.invoices.list')->with('success', 'Facture mise à jour avec succès.');
-        });
-    }
+   
 
     /**
      * Search sales orders for grouped invoices.
@@ -1379,4 +1155,124 @@ public function exportSingle($id)
         $invoice = SalesInvoice::with(['customer', 'lines.item'])->findOrFail($id);
         return Excel::download(new SalesInvoiceExport($invoice), "facture_vente_{$invoice->numdoc}.xlsx");
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public function storedevis(Request $request)
+{
+    $request->validate([
+        'customer_id' => 'required|exists:customers,id',
+        'order_date' => 'required|date',
+        'vehicle_id' => 'nullable|exists:vehicles,id',
+        'lines' => 'required|array',
+        'lines.*.article_code' => 'required|exists:items,code',
+        'lines.*.ordered_quantity' => 'required|numeric|min:0',
+        'lines.*.unit_price_ht' => 'required|numeric|min:0',
+        'lines.*.remise' => 'nullable|numeric|min:0|max:100',
+    ]);
+
+    return DB::transaction(function () use ($request) {
+        $customer = Customer::with('tvaGroup')->findOrFail($request->customer_id);
+        $tvaRate = $customer->tvaGroup->rate ?? 0;
+        $status = $request->input('action') === 'validate' ? 'validée' : 'Devis';
+
+        $maxRetries = 3;
+        $retryCount = 0;
+
+        while ($retryCount < $maxRetries) {
+            $souche = Souche::where('type', 'devis')->lockForUpdate()->first();
+            if (!$souche) {
+                \Log::error('Souche devis manquante');
+                throw new \Exception('Souche devis vente manquante');
+            }
+
+            $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
+            $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
+
+            \Log::info('Generating numdoc', ['numdoc' => $numdoc, 'last_number' => $souche->last_number, 'retry' => $retryCount]);
+
+            if (!SalesOrder::where('numdoc', $numdoc)->exists()) {
+                $order = SalesOrder::create([
+                    'customer_id' => $request->customer_id,
+                    'order_date' => $request->order_date,
+                    'numclient' => $customer->code,
+                    'vehicle_id' => $request->vehicle_id,
+                    'status' => $status,
+                    'total_ht' => 0,
+                    'total_ttc' => 0,
+                    'notes' => $request->notes,
+                    'numdoc' => $numdoc,
+                    'tva_rate' => $tvaRate,
+                    'store_id' => $request->store_id ?? 1,
+                ]);
+
+                $total = 0;
+                foreach ($request->lines as $line) {
+                    $item = Item::where('code', $line['article_code'])->first();
+                    if (!$item) {
+                        throw new \Exception("Article {$line['article_code']} introuvable.");
+                    }
+                    if ($status === 'validée' && $item->getStockQuantityAttribute() < $line['ordered_quantity']) {
+                        // throw new \Exception("Stock insuffisant pour l'article {$line['article_code']}.");
+                    }
+
+                    $ligne_total = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
+                    $unit_price_ttc = $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100) * (1 + $tvaRate / 100);
+                    $total_ligne_ttc = $ligne_total * (1 + $tvaRate / 100);
+                    $total += $ligne_total;
+
+                    SalesOrderLine::create([
+                        'sales_order_id' => $order->id,
+                        'article_code' => $line['article_code'],
+                        'ordered_quantity' => $line['ordered_quantity'],
+                        'unit_price_ht' => $line['unit_price_ht'],
+                        'unit_price_ttc' => $unit_price_ttc,
+                        'remise' => $line['remise'] ?? 0,
+                        'total_ligne_ht' => $ligne_total,
+                        'total_ligne_ttc' => $total_ligne_ttc,
+                    ]);
+                }
+
+                $order->update([
+                    'total_ht' => $total,
+                    'total_ttc' => $total * (1 + $tvaRate / 100),
+                ]);
+
+
+
+                $souche->last_number += 1;
+                $souche->save();
+                \Log::info('Souche updated', ['numdoc' => $numdoc, 'new_last_number' => $souche->last_number]);
+
+                return redirect()->route('sales.list')->with('success', 'Devis ' . ($status === 'validée' ? 'validée et créée' : 'créée'));
+            }
+
+            $souche->last_number += 1;
+            $souche->save();
+            $retryCount++;
+            \Log::warning('Duplicate numdoc detected, retrying', ['numdoc' => $numdoc, 'retry' => $retryCount]);
+        }
+
+        \Log::error('Failed to find unique numdoc after retries', ['last_numdoc' => $numdoc, 'retries' => $maxRetries]);
+        throw new \Exception('Impossible de générer un numéro de document unique après plusieurs tentatives.');
+    });
+}
+
+
+
 }
