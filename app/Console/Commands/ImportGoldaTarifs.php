@@ -47,7 +47,8 @@ class ImportGoldaTarifs extends Command
         // --- Nettoyage du BOM et conversion UTF-8 ---
         $content = file_get_contents($localInfoFile);
         $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
-        $content = mb_convert_encoding($content, 'UTF-8', 'auto');
+       $content = mb_convert_encoding($content, 'UTF-8', mb_detect_encoding($content, ['UTF-8', 'ISO-8859-1', 'Windows-1252'], true) ?: 'UTF-8');
+
         file_put_contents($localInfoFile, $content);
 
         // --- Détection du délimiteur ---
