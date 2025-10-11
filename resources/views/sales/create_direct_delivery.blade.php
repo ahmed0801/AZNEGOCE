@@ -646,7 +646,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Rechercher un article</label>
-                                    <input type="text" id="search_item" class="form-control" placeholder="Par code, nom, description ou barcode">
+                                    <input type="text" id="search_item" class="form-control" placeholder="Par réference ou description">
                                     <div id="search_results" class="mt-2"></div>
                                 </div>
                                 <div class="mb-3">
@@ -1075,7 +1075,7 @@
 
             $('#search_item').on('input', function () {
                 let query = $(this).val();
-                if (query.length > 2) {
+                if (query.length > 3) {
                     $.ajax({
                         url: '{{ route("sales.items.search") }}',
                         method: 'GET',
