@@ -20,19 +20,13 @@ class ImportGoldaTarifs extends Command
     public function handle()
     {
         $this->info("🚀 Début de l’import GOLDA...");
-
+        
         // Initialize report data
         $report = [
             'suppliers' => [],
             'totalItems' => 0,
             'errors' => []
         ];
-
-        // --- Fonction utilitaire pour convertir en UTF-8 ---
-        $toUTF8 = function($string) {
-            $encoding = mb_detect_encoding($string, ['UTF-8', 'ISO-8859-1', 'WINDOWS-1252'], true) ?: 'ISO-8859-1';
-            return mb_convert_encoding($string, 'UTF-8', $encoding);
-        };
 
         // --- Connexion FTP ---
         $ftp = Storage::createFtpDriver([
@@ -53,7 +47,7 @@ class ImportGoldaTarifs extends Command
         // --- Nettoyage du BOM et conversion UTF-8 ---
         $content = file_get_contents($localInfoFile);
         $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
-        $content = $toUTF8($content);
+        $content = mb_convert_encoding($content, 'UTF-8', 'auto');
         file_put_contents($localInfoFile, $content);
 
         // --- Détection du délimiteur ---
@@ -101,12 +95,14 @@ class ImportGoldaTarifs extends Command
                 try {
                     $remoteFile = "csv/{$fichierTarif}";
                     $localFile = storage_path("app/golda/csv/{$fichierTarif}");
+
                     Storage::disk('local')->put("golda/csv/{$fichierTarif}", $ftp->get($remoteFile));
                     $this->info("📂 Fichier articles téléchargé : {$fichierTarif}");
 
                     $csvItems = Reader::createFromPath($localFile, 'r');
                     $csvItems->setDelimiter(';');
                     $csvItems->setHeaderOffset(0);
+
                     $recordsItems = Statement::create()->process($csvItems);
 
                     foreach ($recordsItems as $i) {
@@ -117,15 +113,14 @@ class ImportGoldaTarifs extends Command
 
                         if (!$ref || !$name) continue;
 
-                        // Conversion UTF-8
-                        $name = $toUTF8($name);
-
-                        // Nettoyage caractères spéciaux
+                        // Nettoyage UTF-8 + caractères spéciaux
+                        $name = iconv('UTF-8', 'UTF-8//IGNORE', $name);
                         $name = str_replace(["\x92", "\x93", "\x94"], "'", $name);
                         $name = str_replace(["\x96", "\x97"], "-", $name);
 
                         // Création ou mise à jour de l'article
                         $item = Item::where('code', $ref)->first();
+
                         if ($item) {
                             $item->update([
                                 'codefournisseur' => $supplier->code,
@@ -200,17 +195,16 @@ class ImportGoldaTarifs extends Command
         // --- Calculate total active items in stock ---
         $totalActiveItems = Item::where('is_active', true)->count();
 
-        // --- Send email report ---
+// --- Send email report ---
         try {
             $messageText = "Hello, je suis un robot développé et programmé par votre développeur Ahmed pour que je tourne chaque soirée et j'intègre automatiquement toutes nouveaux articles dans GOLDA et les mises à jour des prix pour chaque fournisseur. Ahmed m'a programmé aussi pour vous envoyer ce rapport complet et détaillant du dernier résultat de l'importation.";
-            Mail::to(['ahmedarfaoui1600@gmail.com', 'abidi.mourad@orange.fr'])
-                ->send(new GoldaImportReport($report, $totalActiveItems, $messageText));
+            Mail::to(['ahmedarfaoui1600@gmail.com', 'abidi.mourad@orange.fr'])->send(new GoldaImportReport($report, $totalActiveItems, $messageText));
             $this->info("📧 Rapport envoyé par email à ahmedarfaoui@gmail.com et abidi.mourad@orange.fr");
         } catch (\Exception $e) {
             $errorMsg = "Erreur lors de l'envoi de l'email: {$e->getMessage()}";
             Log::error($errorMsg);
             $this->error("❌ {$errorMsg}");
-            throw new \Exception($errorMsg);
+            throw new \Exception($errorMsg); // Rethrow to make the error visible in console
         }
 
         $this->info('🎉 Import GOLDA terminé avec succès.');
