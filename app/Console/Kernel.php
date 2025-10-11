@@ -7,22 +7,9 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
 {
-    /**
-     * Define the application's command schedule.
-     *
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
-     * @return void
-     */
-
-
-    /**
-     * Register the commands for the application.
-     *
-     * @return void
-     */
-    protected function schedule(Schedule $schedule)
+ protected function schedule(Schedule $schedule)
     {
-        // Test : exécution chaque minute + log
+        // Exécution toutes les minutes pour le test
         $schedule->command('golda:import')
             ->everyMinute()
             ->appendOutputTo(storage_path('logs/golda_schedule.log'));
