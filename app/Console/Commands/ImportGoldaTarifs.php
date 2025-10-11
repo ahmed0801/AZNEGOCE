@@ -198,7 +198,7 @@ class ImportGoldaTarifs extends Command
 // --- Send email report ---
         try {
             $messageText = "Hello, je suis un robot développé et programmé par votre développeur Ahmed pour que je tourne chaque soirée et j'intègre automatiquement toutes nouveaux articles dans GOLDA et les mises à jour des prix pour chaque fournisseur. Ahmed m'a programmé aussi pour vous envoyer ce rapport complet et détaillant du dernier résultat de l'importation.";
-            Mail::to(['ahmedarfaoui@gmail.com', 'abidi.mourad@orange.fr'])->send(new GoldaImportReport($report, $totalActiveItems, $messageText));
+            Mail::to(['ahmedarfaoui1600@gmail.com', 'abidi.mourad@orange.fr'])->send(new GoldaImportReport($report, $totalActiveItems, $messageText));
             $this->info("📧 Rapport envoyé par email à ahmedarfaoui@gmail.com et abidi.mourad@orange.fr");
         } catch (\Exception $e) {
             $errorMsg = "Erreur lors de l'envoi de l'email: {$e->getMessage()}";
