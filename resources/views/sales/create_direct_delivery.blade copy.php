@@ -1073,9 +1073,12 @@
                 updateHistoryButton();
             });
 
+            let searchTimeout;
             $('#search_item').on('input', function () {
+                clearTimeout(searchTimeout);
                 let query = $(this).val();
                 if (query.length > 3) {
+                    searchTimeout = setTimeout(() => {
                     $.ajax({
                         url: '{{ route("sales.items.search") }}',
                         method: 'GET',
@@ -1095,11 +1098,11 @@
                                              data-stock="${item.stock_quantity || 0}"
                                              data-location="${item.location || ''}"
                                              data-is-active="${item.is_active}">
-                                            ${item.name} (${item.code}) : ${item.sale_price} € HT
+                                            <span class="badge rounded-pill text-bg-light">${item.code}</span> 	&#8660;  ${item.name} : ${item.sale_price} € HT
 
                                                 ${item.stock_quantity> 0
 ? `🟢 ${item.stock_quantity} En Stock`
-: `🔴 À Commander Hors Stock`}
+: `🔴 Disponible auprès de <span class="badge text-bg-secondary"> ${item.supplier} </span>  au prix de <span class="badge text-bg-success"> ${item.cost_price}  € HT </span>` }
 
                                         </div>
                                     `);
@@ -1111,6 +1114,8 @@
                             $('#search_results').empty().append('<div class="p-2 text-red-500">Erreur lors de la recherche.</div>');
                         }
                     });
+                            }, 300); // délai 300ms
+
                 } else {
                     $('#search_results').empty();
                 }
