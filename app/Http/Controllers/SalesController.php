@@ -1064,6 +1064,15 @@ public function validateOrder($id)
                 'stock_quantity' => $item->getStockQuantityAttribute(),
                 'cost_price' => $item->cost_price,
                 'sale_price' => $item->sale_price,
+
+                 // 🔹 Nouveaux champs importés depuis GOLDA
+            'Poids' => $item->Poids,
+            'Hauteur' => $item->Hauteur,
+            'Longueur' => $item->Longueur,
+            'Largeur' => $item->Largeur,
+            'Ref_TecDoc' => $item->Ref_TecDoc,
+            'Code_pays' => $item->Code_pays,
+            'Code_douane' => $item->Code_douane,
             ];
         });
 
