@@ -1053,7 +1053,7 @@ public function validateOrder($id)
                 ->orWhere('barcode', 'like', '%' . $request->input('reference') . '%');
         }
 
-        $items = $query->get()->map(function ($item) {
+        $items = $query->take(50)->get()->map(function ($item) {
             return [
                 'code' => $item->code,
                 'name' => $item->name,
