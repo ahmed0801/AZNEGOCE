@@ -1102,7 +1102,7 @@
 
                                                 ${item.stock_quantity> 0
 ? `🟢 ${item.stock_quantity} En Stock`
-: `🔴 À Commander Hors Stock`}
+: `🔴 À commander auprès du   ${item.supplier}  au prix de ${item.cost_price}  € HT` }
 
                                         </div>
                                     `);
@@ -1114,7 +1114,7 @@
                             $('#search_results').empty().append('<div class="p-2 text-red-500">Erreur lors de la recherche.</div>');
                         }
                     });
-                            }, 200); // délai 300ms
+                            }, 300); // délai 300ms
 
                 } else {
                     $('#search_results').empty();
