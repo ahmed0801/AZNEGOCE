@@ -655,32 +655,14 @@ body {
   flex-wrap: wrap;
 }
 
-.left-buttons {
-  display: flex;
-  gap: 22vw;
-}
-
-.nego-button {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  width: 35px;
-  height: 35px;
-  margin-right: 20px;
-  padding: 0;
-  justify-content: center;
-  align-items: center; 
-}
-
 .voice-button {
   border: none;
   background: transparent;
   cursor: pointer;
-  width: 35px;
-  height: 35px;
-  margin-right: 20px;
-  margin-left: 10px;
-  padding: 0;
+  width: 3rem;
+  height: 3rem;
+  margin-right: 1rem;
+  margin-left: 0.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -693,6 +675,8 @@ body {
   cursor: pointer;
   width: 2.5rem;
   height: 2.5rem;
+  margin-right: 1rem;
+  margin-left: 0.5rem;
   padding: 0;
   display: flex;
   justify-content: center;
@@ -834,7 +818,6 @@ body {
     <textarea class="chat-text-area" id="question" name="question" placeholder="Entrez des questions sur les commandes "></textarea>
    </form>
    <div class="button-container">
-      <div class="left-buttons">
     <div class="btn-toolbar">
       <button class="voice-button" id="voice-button" onclick="startRecognition()">
         <svg
@@ -856,7 +839,6 @@ body {
           <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"/>
         </svg>
       </button>
-    </div>
   </div>
 </div>
 
