@@ -1102,7 +1102,7 @@
 
                                                 ${item.stock_quantity> 0
 ? `🟢 ${item.stock_quantity} En Stock`
-: `🔴 Disponible chez  <span class="badge text-bg-secondary"> ${item.supplier} </span>  au prix de <span class="badge text-bg-success"> ${item.cost_price}  € HT </span>` }
+: `🔴 Disponible auprès de <span class="badge text-bg-secondary"> ${item.supplier} </span>  au prix de <span class="badge text-bg-success"> ${item.cost_price}  € HT </span>` }
 
                                         </div>
                                     `);
