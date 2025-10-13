@@ -11,7 +11,7 @@ class Item extends Model
         'code', 'name', 'description', 'category_id',
         'brand_id', 'unit_id', 'barcode',
         'cost_price', 'sale_price','tva_group_id',
-        'stock_min', 'stock_max', 'store_id', 'location', 'is_active','codefournisseur'
+        'stock_min', 'stock_max', 'store_id', 'location', 'is_active','codefournisseur','Poids','Hauteur','Longueur','Largeur','Ref_TecDoc','Code_pays','Code_douane'
     ];
 
     public function category()
