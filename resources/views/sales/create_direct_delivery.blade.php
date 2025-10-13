@@ -649,6 +649,32 @@
                                     <input type="text" id="search_item" class="form-control" placeholder="Par réference ou description, minimum 4 caratéres">
                                     <div id="search_results" class="mt-2"></div>
                                 </div>
+
+
+                                <!-- 🔹 Modal Détails Article -->
+<div class="modal fade" id="itemDetailsModal" tabindex="-1" aria-labelledby="itemDetailsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-3">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="itemDetailsLabel">Détails de l’article</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered table-striped mb-0">
+          <tbody id="itemDetailsBody"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
                                 <div class="mb-3">
                                     <h6 class="font-weight-bold mb-2">Lignes de commande</h6>
                                     <div class="table-responsive">
@@ -1104,6 +1130,13 @@
 ? `🟢 ${item.stock_quantity} En Stock`
 : `🔴 Disponible auprès de <span class="badge text-bg-secondary"> ${item.supplier} </span>  au prix de <span class="badge text-bg-success"> ${item.cost_price}  € HT </span>` }
 
+
+<button class="btn btn-sm btn-outline-primary voir-details" 
+                                            data-item='${JSON.stringify(item)}'>
+                                        Voir détails
+                                    </button>
+
+                                    
                                         </div>
                                     `);
                                 });
@@ -1120,6 +1153,35 @@
                     $('#search_results').empty();
                 }
             });
+
+
+
+            // 🔹 Ouvrir le modal de détails
+$(document).on('click', '.voir-details', function () {
+    let item = $(this).data('item');
+    let detailsHtml = `
+        <tr><th>Code</th><td>${item.code ?? ''}</td></tr>
+        <tr><th>Nom</th><td>${item.name ?? ''}</td></tr>
+        <tr><th>Prix Achat</th><td>${item.cost_price ?? '-'} € HT</td></tr>
+        <tr><th>Prix Vente</th><td>${item.sale_price ?? '-'} € HT</td></tr>
+        <tr><th>Stock</th><td>${item.stock_quantity ?? 0}</td></tr>
+        <tr><th>Poids</th><td>${item.Poids ?? '-'}</td></tr>
+        <tr><th>Hauteur</th><td>${item.Hauteur ?? '-'}</td></tr>
+        <tr><th>Longueur</th><td>${item.Longueur ?? '-'}</td></tr>
+        <tr><th>Largeur</th><td>${item.Largeur ?? '-'}</td></tr>
+        <tr><th>Réf TecDoc</th><td>${item.Ref_TecDoc ?? '-'}</td></tr>
+        <tr><th>Code Pays</th><td>${item.Code_pays ?? '-'}</td></tr>
+        <tr><th>Code Douane</th><td>${item.Code_douane ?? '-'}</td></tr>
+        <tr><th>Fournisseur</th><td>${item.supplier ?? '-'}</td></tr>
+        <tr><th>État</th><td>${item.is_active ? '✅ Actif' : '❌ Inactif'}</td></tr>
+    `;
+    $('#itemDetailsBody').html(detailsHtml);
+    $('#itemDetailsModal').modal('show');
+});
+
+
+
+
 
             $(document).on('click', '#search_results div', function () {
                 let customerId = $('#customer_id').val();
