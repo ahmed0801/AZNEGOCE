@@ -28,13 +28,6 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <style>
-
-
-#search_results { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-height: 300px; overflow-y: auto; border: 1px solid #e9ecef; } #search_results .hover-bg-light:hover { background: #f1f3f5; transition: background 0.2s; } #search_results .text-muted { font-size: 0.8rem; } #search_results .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.85rem; border-radius: 6px; }
-
-
-
-
         .card {
             border-radius: 8px;
             background: linear-gradient(135deg, #ffffff, #f8f9fa);
@@ -1121,9 +1114,32 @@
                             if (data.length === 0) {
                                 results.append('<div class="p-2 text-gray-500">Aucun article trouvé.</div>');
                             } else {
-                               data.forEach(item => {
-    results.append(`<div class="p-2 border-bottom d-flex justify-content-between align-items-center hover-bg-light cursor-pointer" data-code="${item.code}" data-name="${item.name}" data-price="${item.sale_price}" data-cost-price="${item.cost_price}" data-stock="${item.stock_quantity || 0}" data-location="${item.location || ''}" data-is-active="${item.is_active}"><div><span class="badge bg-light text-dark">${item.code}</span> <strong class="text-dark">${item.name}</strong> – ${item.sale_price ?? '-'} € HT <div class="mt-1 small text-muted">${item.stock_quantity > 0 ? `🟢 <strong class="text-success">${item.stock_quantity}</strong> en stock` : `🔴 Disponible chez <span class="badge bg-secondary">${item.supplier ?? 'N/A'}</span> à <span class="badge bg-success">${item.cost_price ?? '-'} € HT</span>`}${item.location ? ` | 📍 ${item.location}` : ''}</div></div><button class="btn btn-sm btn-outline-primary voir-details" data-item='${JSON.stringify(item)}'><i class="fas fa-eye me-1"></i>Voir détails</button></div>`);
-});
+                                data.forEach(item => {
+                                    results.append(`
+                                        <div class="p-2 border-b cursor-pointer hover:bg-gray-100"
+                                             data-code="${item.code}"
+                                             data-name="${item.name}"
+                                             data-price="${item.sale_price}"
+                                             data-cost-price="${item.cost_price}"
+                                             data-stock="${item.stock_quantity || 0}"
+                                             data-location="${item.location || ''}"
+                                             data-is-active="${item.is_active}">
+                                            <span class="badge rounded-pill text-bg-light">${item.code}</span> 	&#8660;  ${item.name} : ${item.sale_price} € HT
+
+                                                ${item.stock_quantity> 0
+? `<br> 🟢 ${item.stock_quantity} En Stock`
+: `<br> 🔴 Disponible auprès de <span class="badge text-bg-secondary"> ${item.supplier} </span>  au prix de <span class="badge text-bg-success"> ${item.cost_price}  € HT </span>` }
+
+
+<button class="btn btn-sm btn-outline-primary voir-details" 
+                                            data-item='${JSON.stringify(item)}'>
+                                        Voir détails
+                                    </button>
+
+                                    
+                                        </div>
+                                    `);
+                                });
                             }
                         },
                         error: function (xhr, status, error) {
