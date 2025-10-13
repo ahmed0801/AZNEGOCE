@@ -222,7 +222,7 @@ public function search(Request $request)
     $items = Item::query()
         ->where('code', 'like', "%{$search}%")
         ->orWhere('name', 'like', "%{$search}%")
-        ->limit(20)
+        ->limit(100)
         ->get();
 
     return response()->json(

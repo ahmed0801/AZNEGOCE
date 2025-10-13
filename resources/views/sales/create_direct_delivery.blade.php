@@ -646,7 +646,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Rechercher un article</label>
-                                    <input type="text" id="search_item" class="form-control" placeholder="Par réference ou description">
+                                    <input type="text" id="search_item" class="form-control" placeholder="Par réference ou description, minimum 4 caratéres">
                                     <div id="search_results" class="mt-2"></div>
                                 </div>
                                 <div class="mb-3">
@@ -1073,9 +1073,12 @@
                 updateHistoryButton();
             });
 
+            let searchTimeout;
             $('#search_item').on('input', function () {
+                clearTimeout(searchTimeout);
                 let query = $(this).val();
                 if (query.length > 3) {
+                    searchTimeout = setTimeout(() => {
                     $.ajax({
                         url: '{{ route("sales.items.search") }}',
                         method: 'GET',
@@ -1111,6 +1114,8 @@
                             $('#search_results').empty().append('<div class="p-2 text-red-500">Erreur lors de la recherche.</div>');
                         }
                     });
+                            }, 200); // délai 300ms
+
                 } else {
                     $('#search_results').empty();
                 }

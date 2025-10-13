@@ -624,15 +624,17 @@
                                 <div class="mb-3" id="customer_details" style="display: none;">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <p><strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span></p>
-                                            <p><strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p>
-                                            <p><strong>Email:</strong> <span id="customer_email"></span></p>
-                                            <p><strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span></p>
+                                            <p><strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span> 	&#8594; <strong>TVA:</strong> <span id="customer_tva"></span>%</p>
+                                            <!-- <p><strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p> -->
+                                            <p><strong>Email:</strong> <span id="customer_email"></span> &#8594; <strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span> </p>
+                                            <!-- <p><strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span></p> -->
                                         </div>
                                         <div class="col-md-6">
                                             <p><strong>Adresse:</strong> <span id="customer_address"></span></p>
-                                            <p><strong>Adresse de livraison:</strong> <span id="customer_address_delivery"></span></p>
-                                            <p><strong>Ville & Pays:</strong> <span id="customer_city"></span>, <span id="customer_country"></span></p>
+
+                                            <!-- <p><strong>Adresse de livraison:</strong> <span id="customer_address_delivery"></span></p> -->
+
+                                            <!-- <p><strong>Ville & Pays:</strong> <span id="customer_city"></span>, <span id="customer_country"></span></p> -->
                                             <p>
                                                 <strong>Solde:</strong>
                                                 <button type="button" class="btn btn-outline-info btn-sm balance-btn" id="balanceBtn" data-customer-id="" data-customer-name="" disabled>
@@ -644,7 +646,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Rechercher un article</label>
-                                    <input type="text" id="search_item" class="form-control" placeholder="Par code, nom, description ou barcode">
+                                    <input type="text" id="search_item" class="form-control" placeholder="Par réference ou description, minimum 4 caratéres">
                                     <div id="search_results" class="mt-2"></div>
                                 </div>
                                 <div class="mb-3">
@@ -1073,7 +1075,7 @@
 
             $('#search_item').on('input', function () {
                 let query = $(this).val();
-                if (query.length > 2) {
+                if (query.length > 3) {
                     $.ajax({
                         url: '{{ route("sales.items.search") }}',
                         method: 'GET',

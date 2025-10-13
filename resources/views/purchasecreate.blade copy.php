@@ -193,191 +193,153 @@
 
   </head>
   <body>
-    <div class="wrapper">
+    <div class="wrapper sidebar_minimize">
       <!-- Sidebar -->
-      <div class="sidebar" data-background-color="dark">
-        <div class="sidebar-logo">
-          <!-- Logo Header -->
-          <div class="logo-header" data-background-color="dark">
+<div class="sidebar" data-background-color="dark">
+    <div class="sidebar-logo">
+        <div class="logo-header" data-background-color="dark">
             <a href="/" class="logo">
-              <img
-                src="{{ asset('assets/img/logop.png')}}"
-                alt="navbar brand"-9
-                class="navbar-brand"
-                height="40"
-              />
+                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
             </a>
             <div class="nav-toggle">
-              <button class="btn btn-toggle toggle-sidebar">
-                <i class="gg-menu-right"></i>
-              </button>
-              <button class="btn btn-toggle sidenav-toggler">
-                <i class="gg-menu-left"></i>
-              </button>
+                <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
             </div>
-            <button class="topbar-toggler more">
-              <i class="gg-more-vertical-alt"></i>
-            </button>
-          </div>
-          <!-- End Logo Header -->
         </div>
-        <div class="sidebar-wrapper scrollbar scrollbar-inner">
-          <div class="sidebar-content">
+    </div>
+
+    <div class="sidebar-wrapper scrollbar scrollbar-inner">
+        <div class="sidebar-content">
             <ul class="nav nav-secondary">
-              
 
-            <li class="nav-item">
-                <a href="/dashboard">
-                  <i class="fas fa-home"></i>
-                  <p>Dashboard</p>
-                </a>
-              </li>
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
+                </li>
 
-              <li class="nav-item">
-                <a  href="/commande">
-                  <i class="fas fa-shopping-cart"></i>
-                  <p>Nouvelle Commande</p>
-                </a>
-              </li>
+                <!-- Ventes -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#ventes" aria-expanded="false">
+                        <i class="fas fa-shopping-cart"></i><p>Ventes</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="ventes">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
+                            <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
+                            <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="/salesnotes/list"><span class="sub-item">Avoirs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
-              <li class="nav-item">
-                <a  href="/orders">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <p>Mes BL</p>
-                </a>
-              </li>
+                <!-- Achats -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#achats" aria-expanded="false">
+                        <i class="fas fa-shopping-bag"></i><p>Achats</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="achats">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
-              <li class="nav-item">
-                <a  href="/listdevis">
-                <i class="fas fa-file-alt"></i>
-                  <p>Mes Devis</p>
-                </a>
-              </li>
+                <!-- Comptabilité -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#compta" aria-expanded="false">
+                        <i class="fas fa-balance-scale"></i><p>Comptabilité</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="compta">
+                        <ul class="nav nav-collapse">
+                            <li><a href="{{ route('generalaccounts.index') }}"><span class="sub-item">Plan Comptable</span></a></li>
+                            <li><a href="{{ route('payments.index') }}"><span class="sub-item">Règlements</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
-              <li class="nav-item">
-              <a href="/listbrouillon">
-              <i class="fas fa-reply-all"></i>
-              <p>Brouillons</p>
-                </a>
-              </li>
+                <!-- Stock -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#stock" aria-expanded="false">
+                        <i class="fas fa-warehouse"></i><p>Stock</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="stock">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/receptions"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="/articles"><span class="sub-item">Articles</span></a></li>
+                            <li><a href="/planification-tournee"><span class="sub-item">Suivi Livraisons</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
-              <li class="nav-item">
-              <a href="/invoices">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Mes Factures</p>
-                </a>
-              </li>
+                <!-- Référentiel -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#referentiel" aria-expanded="false">
+                        <i class="fas fa-users"></i><p>Référentiel</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="referentiel">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/customers"><span class="sub-item">Clients</span></a></li>
+                            <li><a href="/suppliers"><span class="sub-item">Fournisseurs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
-              <li class="nav-item">
-              <a href="/avoirs">
-              <i class="fas fa-reply-all"></i>
-              <p>Mes Avoirs</p>
-                </a>
-              </li>
+                <!-- Paramètres -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#parametres" aria-expanded="false">
+                        <i class="fas fa-cogs"></i><p>Paramètres</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="parametres">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/setting"><span class="sub-item">Configuration</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
+                <!-- Outils -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#outils" aria-expanded="false">
+                        <i class="fab fa-skyatlas"></i><p>Outils</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="outils">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/tecdoc"><span class="sub-item">TecDoc</span></a></li>
+                            <li><a href="/voice"><span class="sub-item">NEGOBOT</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
-                                          <li class="nav-item">
-              <a href="/purchases/list">
-                <i class="fas fa-file-alt"></i>
-              <p>Commandes Achat</p>
-                </a>
-              </li>
-
-              
-                   <li class="nav-item">
-              <a href="/returns">
-                <i class="fas fa-file-alt"></i>
-              <p>Retours Achat</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item">
-              <a href="/invoices">
-                <i class="fas fa-money-bill-wave"></i>
-              <p>Factures Achat</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item">
-              <a href="/notes">
-              <i class="fas fa-reply-all"></i>
-              <p>Avoirs Achat</p>
-                </a>
-              </li>
-
-
-              <li class="nav-item">
-              <a href="/receptions">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Réception</p>
-                </a>
-              </li>
-
-
-              <li class="nav-item">
-              <a href="/articles">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Articles</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item">
-              <a href="/customers">
-              <i class="fa fa-user"></i>
-              <p>Clients</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item">
-              <a href="/suppliers">
-              <i class="fa fa-user"></i>
-              <p>Fournisseurs</p>
-                </a>
-              </li>
-              
-
-              <li class="nav-item active">
-              <a href="/setting">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Paramétres</p>
-                </a>
-              </li>
-
-
-
-              <li class="nav-item">
-  <a href="/tecdoc">
-    <i class="fas fa-cogs"></i> 
-    <p>TecDoc</p>
-  </a>
-</li>    
-
-
+                <!-- Assistance -->
 <li class="nav-item">
-  <a href="/voice">
-    <i class="fas fa-robot"></i>
-    <p>NEGOBOT</p>
-  </a>
+    <a href="/contact">
+        <i class="fas fa-headset"></i>
+        <p>Assistance</p>
+    </a>
 </li>
 
-              
-  <!-- Lien de déconnexion -->
-  <li class="nav-item">
-        <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="fas fa-sign-out-alt"></i>
-            <p>Déconnexion</p>
-        </a>
-        <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
-            @csrf
-        </form>
-    </li>             
 
+                <!-- Déconnexion -->
+                <li class="nav-item">
+                    <a href="{{ route('logout.admin') }}" class="nav-link"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
+                    </a>
+                    <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
+                </li>
 
             </ul>
-          </div>
         </div>
-      </div>
-      <!-- End Sidebar -->
+    </div>
+</div>
+<!-- End Sidebar -->
 
       <div class="main-panel">
         <div class="main-header">
@@ -417,6 +379,130 @@
 
 
               <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+
+
+
+                    <!-- test quick action  -->
+<li class="nav-item topbar-icon dropdown hidden-caret">
+                  <a
+                    class="nav-link"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <i class="fas fa-layer-group"></i>
+                  </a>
+                  <div class="dropdown-menu quick-actions animated fadeIn">
+                    <div class="quick-actions-header">
+                      <span class="title mb-1">Actions Rapides</span>
+                      <!-- <span class="subtitle op-7">Liens Utiles</span> -->
+                    </div>
+                    <div class="quick-actions-scroll scrollbar-outer">
+                      <div class="quick-actions-items">
+                        <div class="row m-0">
+
+                                                  <a class="col-6 col-md-4 p-0" href="/articles">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-success rounded-circle"
+                              >
+                                <i class="fas fa-sitemap"></i>
+                              </div>
+                              <span class="text">Articles</span>
+                            </div>
+                          </a>
+
+                                                                            <a class="col-6 col-md-4 p-0" href="/customers">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-primary rounded-circle"
+                              >
+                                <i class="fas fa-users"></i>
+                              </div>
+                              <span class="text">Clients</span>
+                            </div>
+                          </a>
+
+
+                                                                                                      <a class="col-6 col-md-4 p-0" href="/suppliers">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-secondary rounded-circle"
+                              >
+                                <i class="fas fa-user-tag"></i>
+                              </div>
+                              <span class="text">Fournisseurs</span>
+                            </div>
+                          </a>
+
+
+
+                          <a class="col-6 col-md-4 p-0" href="/delivery_notes/list">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-danger rounded-circle">
+                                <i class="fa fa-cart-plus"></i>
+                              </div>
+                              <span class="text">Commandes Ventes</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/salesinvoices">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-warning rounded-circle"
+                              >
+                                <i class="fas fa-file-invoice-dollar"></i>
+                              </div>
+                              <span class="text">Factures Ventes</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/generalaccounts">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-info rounded-circle">
+                                <i class="fas fa-money-check-alt"></i>
+                              </div>
+                              <span class="text">Plan Comptable</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/purchases/list">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-success rounded-circle"
+                              >
+                                <i class="fa fa-cart-plus"></i>
+                              </div>
+                              <span class="text">Commandes Achats</span>
+                            </div>
+                          </a>
+                          <a class="col-6 col-md-4 p-0" href="/invoices">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-primary rounded-circle"
+                              >
+                                <i class="fas fa-file-invoice-dollar"></i>
+                              </div>
+                              <span class="text">Factures Achats</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/paymentlist">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-secondary rounded-circle"
+                              >
+                                <i class="fas fa-credit-card"></i>
+                              </div>
+                              <span class="text">Paiements</span>
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                        <!-- fin test quick action  -->
                 
 
  
@@ -517,77 +603,130 @@
             </div>
             <div class="card-body">
 
-                <form action="{{ route('purchases.store') }}" method="POST">
-                    @csrf
+               <form action="{{ route('purchases.store') }}" method="POST">
+                            @csrf
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Fournisseur</label>
+                                    <select name="supplier_id" class="form-control select2" required>
+                                        @foreach($suppliers as $supplier)
+                                            <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">TVA %</label>
+                                    <input type="text" id="tva_display" class="form-control" readonly value="0">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Date de commande</label>
+                                    <input type="date" name="order_date" class="form-control" value="{{ now()->format('Y-m-d') }}" required>
+                                </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Fournisseur</label>
-                            <select name="supplier_id" class="form-control select2" required>
-                                @foreach($suppliers as $supplier)
-                                    <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">TVA %</label>
-                            <input type="text" id="tva_display" class="form-control" readonly value="0">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Date de commande</label>
-                            <input type="date" name="order_date" class="form-control" required>
-                        </div>
-                    </div>
+                                <div class="col-md-3">
+                                        <label class="form-label">Type de commande</label>
+                                        <select name="type" class="form-control select2" required>
+                                            <option value="">Sélectionner le type</option>
+                                            <option value="Commande stock">Commande stock</option>
+                                            <option value="Commande sur demande">Commande sur demande</option>
+                                        </select>
+                                    </div>
 
-                    <h6 class="mt-4 mb-2">Lignes de commande</h6>
-                    <table class="table table-bordered" id="linesTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Article</th>
-                                <th>Qté</th>
-                                <th>PU HT</th>
-                                <th>Remise %</th>
-                                <th>TVA %</th>
-                                <th>Total HT</th>
-                                <th>Total TTC</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                          <tbody id="lines">
-
-                        </tbody>
-                    </table>
-
-                    <div class="mb-3 text-end">
-                        <button type="button" class="btn btn-outline-secondary" id="addLine">+ Ajouter une ligne</button>
-                    </div>
-
-                    <div class="row align-items-center mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label">Notes / Commentaire</label>
-                            <textarea name="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de livraison, etc."></textarea>
-                        </div>
-
-                        <div class="col-md-6 text-end">
-                            <div class="p-3 bg-light border rounded shadow-sm">
-                                <h5 class="mb-1">Total HT : <span id="grandTotal" class="text-success fw-bold">0.00</span> €</h5>
-                                <h6 class="mb-0">Total TTC : <span id="grandTotalTTC" class="text-danger fw-bold">0.00</span> €</h6>
                             </div>
-                        </div>
-                    </div>
 
-<div class="text-end">
-    <button type="submit" name="action" value="save" class="btn btn-primary px-4">✅ Enregistrer Brouillon</button>
-    <button type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2">✔️ Valider la Commande</button>
-</div>
+                            <h6 class="mt-4 mb-2">Lignes de commande</h6>
+                            <table class="table table-bordered" id="linesTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Article</th>
+                                        <th>Qté</th>
+                                        <th>PU HT</th>
+                                        <th>Remise %</th>
+                                        <th>TVA %</th>
+                                        <th>Total HT</th>
+                                        <th>Total TTC</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lines"></tbody>
+                            </table>
 
-                </form>
+                            <div class="mb-3 text-end">
+                                <button type="button" class="btn btn-outline-secondary" id="addLine">+ Ajouter une ligne</button>
+                            </div>
+
+                            <div class="row align-items-center mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Notes / Commentaire</label>
+                                    <textarea name="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de livraison, etc."></textarea>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <div class="p-3 bg-light border rounded shadow-sm">
+                                        <h5 class="mb-1">Total HT : <span id="grandTotal" class="text-success fw-bold">0.00</span> €</h5>
+                                        <h6 class="mb-0">Total TTC : <span id="grandTotalTTC" class="text-danger fw-bold">0.00</span> €</h6>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-end">
+                                <button type="submit" name="action" value="save" class="btn btn-primary px-4">✅ Enregistrer Brouillon</button>
+                                <button type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2">✔️ Valider la Commande</button>
+                            </div>
+                        </form>
 
             </div>
         </div>
 
     </div>
 </div>
+
+
+
+
+
+
+
+<!-- Modal for Sale Price -->
+        <div class="modal fade" id="salePriceModal" tabindex="-1" aria-labelledby="salePriceModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="salePriceModalLabel">Modifier le prix de vente</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Article</label>
+                            <input type="text" id="modalArticle" class="form-control" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Prix d'achat HT (actuel)</label>
+                            <input type="number" step="0.01" id="modalPurchasePrice" class="form-control" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Prix de vente actuel</label>
+                            <input type="number" step="0.01" id="modalCurrentSalePrice" class="form-control" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nouveau prix de vente</label>
+                            <input type="number" step="0.01" id="modalNewSalePrice" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ou définir par marge (%)</label>
+                            <input type="number" step="0.01" id="modalMargin" class="form-control" placeholder="Ex: 30 pour 30%">
+                        </div>
+                        <input type="hidden" id="modalLineIndex">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-primary" id="saveSalePrice">Enregistrer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
 
         <footer class="footer">
           <div class="container-fluid d-flex justify-content-between">
@@ -660,107 +799,151 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 
-<script>
-let lineIndex = 1;
-const tvaMap = {!! $tvaRates !!};
 
-$(document).ready(function () {
-  // Ajoute une ligne au chargement
-      // $('#addLine').trigger('click'); 
 
-  initSelect2(0); // première ligne
-    $('.select2').select2();
 
-    function getTVA() {
-        const supplierId = $('select[name="supplier_id"]').val();
-        return parseFloat(tvaMap[supplierId]) || 0;
-    }
 
-    function recalculate() {
-        let totalHT = 0;
-        const tva = getTVA();
+ <script>
+        let lineIndex = 0;
+        const tvaMap = {!! $tvaRates !!};
 
-        $('#lines tr').each(function () {
-            const qty = parseFloat($(this).find('.qty').val()) || 0;
-            const pu = parseFloat($(this).find('.pu').val()) || 0;
-            const remise = parseFloat($(this).find('.remise').val()) || 0;
-            const lineHT = qty * pu * (1 - remise / 100);
-            const lineTTC = lineHT * (1 + tva / 100);
+        $(document).ready(function () {
+            $('.select2').select2({ width: '100%' });
 
-            $(this).find('.tva_ligne').val(tva.toFixed(2));
-            $(this).find('.total').val(lineHT.toFixed(2));
-            $(this).find('.totalttc').val(lineTTC.toFixed(2));
+            function getTVA() {
+                const supplierId = $('select[name="supplier_id"]').val();
+                return parseFloat(tvaMap[supplierId]) || 0;
+            }
 
-            totalHT += lineHT;
+            function recalculate() {
+                let totalHT = 0;
+                const tva = getTVA();
+
+                $('#lines tr').each(function () {
+                    const qty = parseFloat($(this).find('.qty').val()) || 0;
+                    const pu = parseFloat($(this).find('.pu').val()) || 0;
+                    const remise = parseFloat($(this).find('.remise').val()) || 0;
+                    const lineHT = qty * pu * (1 - remise / 100);
+                    const lineTTC = lineHT * (1 + tva / 100);
+
+                    $(this).find('.tva_ligne').val(tva.toFixed(2));
+                    $(this).find('.total').val(lineHT.toFixed(2));
+                    $(this).find('.totalttc').val(lineTTC.toFixed(2));
+
+                    totalHT += lineHT;
+                });
+
+                const totalTTC = totalHT * (1 + tva / 100);
+                $('#grandTotal').text(totalHT.toFixed(2));
+                $('#grandTotalTTC').text(totalTTC.toFixed(2));
+                $('#tva_display').val(tva.toFixed(2));
+            }
+
+            $('select[name="supplier_id"]').on('change', function () {
+                recalculate();
+            });
+
+            $('#lines').on('input', '.qty, .pu, .remise', recalculate);
+
+            $('#addLine').click(function () {
+                const tva = getTVA();
+                const newRow = `
+                    <tr>
+                        <td>
+                            <select name="lines[${lineIndex}][article_code]" class="form-control select2-article" required></select>
+                        </td>
+                        <td><input type="number" name="lines[${lineIndex}][ordered_quantity]" class="form-control qty" required></td>
+                        <td><input type="number" step="0.01" name="lines[${lineIndex}][unit_price_ht]" class="form-control pu" required></td>
+                        <td><input type="number" step="0.01" name="lines[${lineIndex}][remise]" class="form-control remise" value="0"></td>
+                        <td><input type="text" name="lines[${lineIndex}][tva]" class="form-control tva_ligne" value="${tva.toFixed(2)}" readonly></td>
+                        <td><input type="text" class="form-control total" readonly></td>
+                        <td><input type="text" class="form-control totalttc" readonly></td>
+                        <td>
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-line">×</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm edit-sale-price" data-index="${lineIndex}"><i class="fas fa-euro-sign"></i></button>
+                            <input type="hidden" name="lines[${lineIndex}][sale_price]" class="sale-price">
+                        </td>
+                    </tr>`;
+                $('#lines').append(newRow);
+                initSelect2(lineIndex);
+                lineIndex++;
+                recalculate();
+            });
+
+            $('#lines').on('click', '.remove-line', function () {
+                $(this).closest('tr').remove();
+                recalculate();
+            });
+
+            $('#lines').on('click', '.edit-sale-price', function () {
+                const $row = $(this).closest('tr');
+                const index = $(this).data('index');
+                const articleCode = $row.find('.select2-article').val();
+                const articleText = $row.find('.select2-article').select2('data')[0]?.text || '';
+                const purchasePrice = parseFloat($row.find('.pu').val()) || 0;
+                const salePrice = parseFloat($row.find('.sale-price').val()) || 0;
+
+                $('#modalArticle').val(articleText);
+                $('#modalPurchasePrice').val(purchasePrice.toFixed(2));
+                $('#modalCurrentSalePrice').val(salePrice.toFixed(2));
+                $('#modalNewSalePrice').val(salePrice ? salePrice.toFixed(2) : '');
+                $('#modalMargin').val('');
+                $('#modalLineIndex').val(index);
+                $('#salePriceModal').modal('show');
+            });
+
+            $('#modalMargin').on('input', function () {
+                const purchasePrice = parseFloat($('#modalPurchasePrice').val()) || 0;
+                const margin = parseFloat($(this).val()) || 0;
+                if (margin > 0) {
+                    const newSalePrice = purchasePrice * (1 + margin / 100);
+                    $('#modalNewSalePrice').val(newSalePrice.toFixed(2));
+                }
+            });
+
+            $('#modalNewSalePrice').on('input', function () {
+                $('#modalMargin').val('');
+            });
+
+            $('#saveSalePrice').click(function () {
+                const index = $('#modalLineIndex').val();
+                const newSalePrice = parseFloat($('#modalNewSalePrice').val()) || 0;
+                $(`input[name="lines[${index}][sale_price]"]`).val(newSalePrice.toFixed(2));
+                $('#salePriceModal').modal('hide');
+            });
+
+            function initSelect2(index) {
+                const selector = `select[name="lines[${index}][article_code]"]`;
+                $(selector).select2({
+                    ajax: {
+                        url: "{{ route('items.search') }}",
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return { term: params.term };
+                        },
+                        processResults: function (data) {
+                            return { results: data };
+                        },
+                        cache: true
+                    },
+                    placeholder: 'Rechercher un article',
+                    minimumInputLength: 2,
+                    width: '100%',
+                    templateResult: function (data) { return data.text; },
+                    templateSelection: function (data) { return data.text || data.id; }
+                }).on('select2:select', function (e) {
+                    const data = e.params.data;
+                    const $row = $(this).closest('tr');
+                    $row.find('.pu').val(parseFloat(data.price || 0).toFixed(2));
+                    $row.find('.sale-price').val(parseFloat(data.sale_price || 0).toFixed(2));
+                    recalculate();
+                });
+            }
+
+            $('select[name="supplier_id"]').trigger('change');
         });
-
-        const totalTTC = totalHT * (1 + tva / 100);
-        $('#grandTotal').text(totalHT.toFixed(2));
-        $('#grandTotalTTC').text(totalTTC.toFixed(2));
-    }
-
-    $('select[name="supplier_id"]').on('change', function () {
-        $('#tva_display').val(getTVA().toFixed(2));
-        recalculate();
-    });
-
-    $('#lines').on('input', '.qty, .pu, .remise', recalculate);
-
-   $('#addLine').click(function () {
-    const newRow = `
-    <tr>
-        <td>
-            <select name="lines[${lineIndex}][article_code]" class="form-control select2-article" required></select>
-        </td>
-        <td><input type="number" name="lines[${lineIndex}][ordered_quantity]" class="form-control qty" required></td>
-        <td><input type="number" step="0.01" name="lines[${lineIndex}][unit_price_ht]" class="form-control pu" required></td>
-        <td><input type="number" step="0.01" name="lines[${lineIndex}][remise]" class="form-control remise" value="0"></td>
-        <td><input type="text" class="form-control tva_ligne" readonly></td>
-        <td><input type="text" class="form-control total" readonly></td>
-        <td><input type="text" class="form-control totalttc" readonly></td>
-        <td><button type="button" class="btn btn-outline-danger btn-sm remove-line">×</button></td>
-    </tr>`;
-    $('#lines').append(newRow);
-
-    // Initialiser uniquement le nouveau champ avec la classe spécifique
-    initSelect2(lineIndex);
-    lineIndex++;
-});
-
-
-    $('#lines').on('click', '.remove-line', function () {
-        $(this).closest('tr').remove();
-        recalculate();
-    });
-
-    $('select[name="supplier_id"]').trigger('change');
-});
-
-function initSelect2(index) {
-    const selector = `select[name="lines[${index}][article_code]"]`;
-    $(selector).select2({
-        ajax: {
-            url: "{{ route('items.search') }}",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {
-                return { term: params.term };
-            },
-            processResults: function (data) {
-                return { results: data };
-            },
-            cache: true
-        },
-        placeholder: 'Rechercher un article',
-        minimumInputLength: 2,
-        width: '100%'
-    });
-}
-
-
-
-
-</script>
+    </script>
 
 
 
