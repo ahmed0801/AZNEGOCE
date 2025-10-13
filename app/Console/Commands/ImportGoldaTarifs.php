@@ -112,6 +112,16 @@ class ImportGoldaTarifs extends Command
                         $price = floatval(str_replace(',', '.', $i['Prix_euro'] ?? 0));
                         $ean = trim($i['Code_EAN'] ?? '');
 
+                        $poids = isset($i['Poids']) ? floatval(str_replace(',', '.', $i['Poids'])) : null;
+$hauteur = isset($i['Hauteur']) ? floatval(str_replace(',', '.', $i['Hauteur'])) : null;
+$longueur = isset($i['Longueur']) ? floatval(str_replace(',', '.', $i['Longueur'])) : null;
+$largeur = isset($i['Largeur']) ? floatval(str_replace(',', '.', $i['Largeur'])) : null;
+$refTecDoc = trim($i['Ref_TecDoc'] ?? '');
+$codePays = trim($i['Code_pays'] ?? '');
+$codeDouane = trim($i['Code_douane'] ?? '');
+
+
+
                         if (!$ref || !$name) continue;
 
                         // Nettoyage UTF-8 + caractères spéciaux
@@ -124,20 +134,41 @@ class ImportGoldaTarifs extends Command
 
                         if ($item) {
                             $item->update([
-                                'codefournisseur' => $supplier->code,
-                                'name' => $name,
-                                'cost_price' => $price,
-                                'barcode' => $ean,
-                                'is_active' => true
+    'codefournisseur' => $supplier->code,
+    'name' => $name,
+    'cost_price' => $price,
+    'barcode' => $ean,
+    'Poids' => $poids,
+    'Hauteur' => $hauteur,
+    'Longueur' => $longueur,
+    'Largeur' => $largeur,
+    'Ref_TecDoc' => $refTecDoc,
+    'Code_pays' => $codePays,
+    'Code_douane' => $codeDouane,
+    'is_active' => true,
+    'unit_id' => 1,
+    'tva_group_id' => 1,
+    'store_id' => 1
                             ]);
                         } else {
                             Item::create([
-                                'code' => $ref,
-                                'codefournisseur' => $supplier->code,
-                                'name' => $name,
-                                'cost_price' => $price,
-                                'barcode' => $ean,
-                                'is_active' => true
+    'code' => $ref,
+    'codefournisseur' => $supplier->code,
+    'name' => $name,
+    'cost_price' => $price,
+    'barcode' => $ean,
+    'Poids' => $poids,
+    'Hauteur' => $hauteur,
+    'Longueur' => $longueur,
+    'Largeur' => $largeur,
+    'Ref_TecDoc' => $refTecDoc,
+    'Code_pays' => $codePays,
+    'Code_douane' => $codeDouane,
+    'is_active' => true,
+    'unit_id' => 1,
+    'tva_group_id' => 1,
+    'store_id' => 1
+                                
                             ]);
                         }
 
