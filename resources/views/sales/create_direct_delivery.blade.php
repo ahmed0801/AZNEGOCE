@@ -1098,7 +1098,7 @@
                                              data-stock="${item.stock_quantity || 0}"
                                              data-location="${item.location || ''}"
                                              data-is-active="${item.is_active}">
-                                            ${item.name} (${item.code}) : ${item.sale_price} € HT
+                                            <span class="badge rounded-pill text-bg-light">${item.code}</span> 	&#8660;  ${item.name} : ${item.sale_price} € HT
 
                                                 ${item.stock_quantity> 0
 ? `🟢 ${item.stock_quantity} En Stock`
