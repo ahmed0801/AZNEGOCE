@@ -17,7 +17,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Fonts and icons -->
-    <script src="{{ asset('assets/js/plugin/webfont/webfont.min.js') }}"></script>
+    <script src="https://conflans.destockpa.fr/assets/js/plugin/webfont/webfont.min.js"></script>
     <script>
       WebFont.load({
         google: { families: ["Public Sans:300,400,500,600,700"] },
@@ -28,7 +28,7 @@
             "Font Awesome 5 Brands",
             "simple-line-icons",
           ],
-          urls: ["{{ asset('assets/css/fonts.min.css') }}"],
+          urls: ["https://conflans.destockpa.fr/assets/css/fonts.min.css"],
         },
         active: function () {
           sessionStorage.fonts = true;
@@ -37,9 +37,9 @@
     </script>
 
     <!-- CSS Files -->
-    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}" />
+    <link rel="stylesheet" href="https://conflans.destockpa.fr/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://conflans.destockpa.fr/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="https://conflans.destockpa.fr/assets/css/kaiadmin.min.css" />
 
 
 
@@ -179,12 +179,6 @@
 }
 
 
-
-
-
-
-
-
     </style>
 
 
@@ -197,7 +191,7 @@
     <div class="sidebar-logo">
         <div class="logo-header" data-background-color="dark">
             <a href="/" class="logo">
-                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
+                <img src="https://conflans.destockpa.fr/assets/img/logop.png" alt="navbar brand" class="navbar-brand" height="40" />
             </a>
             <div class="nav-toggle">
                 <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
@@ -255,8 +249,8 @@
                     </a>
                     <div class="collapse" id="compta">
                         <ul class="nav nav-collapse">
-                            <li><a href="{{ route('generalaccounts.index') }}"><span class="sub-item">Plan Comptable</span></a></li>
-                            <li><a href="{{ route('payments.index') }}"><span class="sub-item">Règlements</span></a></li>
+                            <li><a href="https://conflans.destockpa.fr/generalaccounts"><span class="sub-item">Plan Comptable</span></a></li>
+                            <li><a href="https://conflans.destockpa.fr/paymentlist"><span class="sub-item">Règlements</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -324,13 +318,12 @@
 
                 <!-- Déconnexion -->
                 <li class="nav-item">
-                    <a href="{{ route('logout.admin') }}" class="nav-link"
+                    <a href="https://conflans.destockpa.fr/admin/logout" class="nav-link"
                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
                     </a>
-                    <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
-                        @csrf
-                    </form>
+                    <form id="logout-form" action="https://conflans.destockpa.fr/admin/logout" method="POST" style="display: none;">
+                        <input type="hidden" name="_token" value="XIUoU2K4zT9itGFmb5D4QcTLFVTcZ7CIrnb8yohl">                    </form>
                 </li>
 
             </ul>
@@ -346,7 +339,7 @@
             <div class="logo-header" data-background-color="dark">
               <a href="index.html" class="logo">
                 <img
-                  src="{{ asset('assets/img/logop.png')}}"
+                  src="https://conflans.destockpa.fr/assets/img/logop.png"
                   alt="navbar brand"
                   class="navbar-brand"
                   height="20"
@@ -528,14 +521,14 @@
                   >
                     <div class="avatar-sm">
                       <img
-                        src="{{ asset('assets/img/avatar.png')}}"
+                        src="https://conflans.destockpa.fr/assets/img/avatar.png"
                         alt="..."
                         class="avatar-img rounded-circle"
                       />
                     </div>
                     <span class="profile-username">
                       <!-- <span class="op-7">Hi,</span> -->
-                      <span class="fw-bold">{{ Auth::user()->name}}</span>
+                      <span class="fw-bold">Administrateur</span>
                     </span>
                   </a>
                   <ul class="dropdown-menu dropdown-user animated fadeIn">
@@ -544,15 +537,15 @@
                         <div class="user-box">
                           <div class="avatar-lg">
                             <img
-                              src="{{ asset('assets/img/avatar.png')}}"
+                              src="https://conflans.destockpa.fr/assets/img/avatar.png"
                               alt="image profile"
                               class="avatar-img rounded"
                             />
                           </div>
 <div class="u-text">
-                            <h4>{{ Auth::user()->name}}</h4>
+                            <h4>Administrateur</h4>
 
-                            <p class="text-muted">{{ Auth::user()->email}}</p>
+                            <p class="text-muted">admin@az.com</p>
                             <a
                               href="/setting"
                               class="btn btn-xs btn-secondary btn-sm"
@@ -568,9 +561,8 @@
                         <!-- <div class="dropdown-divider"></div> -->
 
     <!-- Formulaire de déconnexion -->
-    <form action="{{ route('logout.admin') }}" method="POST" style="display: inline;">
-        @csrf
-        <button type="submit" class="dropdown-item">Déconnexion</button>
+    <form action="https://conflans.destockpa.fr/admin/logout" method="POST" style="display: inline;">
+        <input type="hidden" name="_token" value="XIUoU2K4zT9itGFmb5D4QcTLFVTcZ7CIrnb8yohl">        <button type="submit" class="dropdown-item">Déconnexion</button>
     </form>
                          
  </li>
@@ -585,12 +577,7 @@
 
         <div class="container">
           <div class="page-inner">
-          @if(session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
-
+          
 
 
         
@@ -655,11 +642,6 @@ body {
   flex-wrap: wrap;
 }
 
-.left-buttons {
-  display: flex;
-  gap: 22vw;
-}
-
 .nego-button {
   border: none;
   background: transparent;
@@ -676,11 +658,10 @@ body {
   border: none;
   background: transparent;
   cursor: pointer;
-  width: 35px;
-  height: 35px;
-  margin-right: 20px;
-  margin-left: 10px;
-  padding: 0;
+  width: 3rem;
+  height: 3rem;
+  margin-right: 1rem;
+  margin-left: 0.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -693,12 +674,15 @@ body {
   cursor: pointer;
   width: 2.5rem;
   height: 2.5rem;
+  margin-right: 1rem;
+  margin-left: 0.5rem;
   padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
   fill: #1a2035;
 }
+
 
 .nego-button img,
 .voice-button svg,
@@ -803,18 +787,18 @@ body {
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
+@keyframes  spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
 
-@keyframes typing {
+@keyframes  typing {
     from { width: 0 }
     to { width: 100% }
 }
 
-@keyframes blink-caret {
+@keyframes  blink-caret {
     from, to { border-color: transparent }
     50% { border-color: #007bff; }
 }
@@ -829,12 +813,10 @@ body {
 
 <div class="chat-bot" id="container">
   <form id="chat-form">
-    @csrf
-    <label hidden for="question">Pose ta question :</label>
+    <input type="hidden" name="_token" value="XIUoU2K4zT9itGFmb5D4QcTLFVTcZ7CIrnb8yohl">    <label hidden for="question">Pose ta question :</label>
     <textarea class="chat-text-area" id="question" name="question" placeholder="Entrez des questions sur les commandes "></textarea>
    </form>
    <div class="button-container">
-      <div class="left-buttons">
     <div class="btn-toolbar">
       <button class="voice-button" id="voice-button" onclick="startRecognition()">
         <svg
@@ -856,7 +838,6 @@ body {
           <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"/>
         </svg>
       </button>
-    </div>
   </div>
 </div>
 
@@ -946,8 +927,8 @@ initChatBot({
     formSelector: "#chat-form",
     inputSelector: "#question",
     responseSelector: "#bot-response",
-    url: "{{ route('chat-bot') }}",
-    csrfToken: "{{ csrf_token() }}"
+    url: "https://conflans.destockpa.fr/chat-bot",
+    csrfToken: "XIUoU2K4zT9itGFmb5D4QcTLFVTcZ7CIrnb8yohl"
 });
 </script>
 
@@ -1047,37 +1028,37 @@ function startRecognition() {
       
     </div>
    <!-- Core JS Files -->
-<script src="{{ asset('assets/js/core/jquery-3.7.1.min.js') }}"></script>
-<script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
-<script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
+<script src="https://conflans.destockpa.fr/assets/js/core/jquery-3.7.1.min.js"></script>
+<script src="https://conflans.destockpa.fr/assets/js/core/popper.min.js"></script>
+<script src="https://conflans.destockpa.fr/assets/js/core/bootstrap.min.js"></script>
 
 <!-- jQuery Scrollbar -->
-<script src="{{ asset('assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
+<script src="https://conflans.destockpa.fr/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
 
 <!-- Chart JS -->
-<script src="{{ asset('assets/js/plugin/chart.js/chart.min.js') }}"></script>
+<script src="https://conflans.destockpa.fr/assets/js/plugin/chart.js/chart.min.js"></script>
 
 <!-- jQuery Sparkline -->
-<script src="{{ asset('assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js') }}"></script>
+<script src="https://conflans.destockpa.fr/assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
 
 <!-- Chart Circle -->
-<script src="{{ asset('assets/js/plugin/chart-circle/circles.min.js') }}"></script>
+<script src="https://conflans.destockpa.fr/assets/js/plugin/chart-circle/circles.min.js"></script>
 
 <!-- Datatables -->
-<script src="{{ asset('assets/js/plugin/datatables/datatables.min.js') }}"></script>
+<script src="https://conflans.destockpa.fr/assets/js/plugin/datatables/datatables.min.js"></script>
 
 <!-- Bootstrap Notify -->
-<script src="{{ asset('assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
+<script src="https://conflans.destockpa.fr/assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
 
 <!-- jQuery Vector Maps -->
-<script src="{{ asset('assets/js/plugin/jsvectormap/jsvectormap.min.js') }}"></script>
-<script src="{{ asset('assets/js/plugin/jsvectormap/world.js') }}"></script>
+<script src="https://conflans.destockpa.fr/assets/js/plugin/jsvectormap/jsvectormap.min.js"></script>
+<script src="https://conflans.destockpa.fr/assets/js/plugin/jsvectormap/world.js"></script>
 
 <!-- Sweet Alert -->
-<script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
+<script src="https://conflans.destockpa.fr/assets/js/plugin/sweetalert/sweetalert.min.js"></script>
 
 <!-- Kaiadmin JS -->
-<script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
+<script src="https://conflans.destockpa.fr/assets/js/kaiadmin.min.js"></script>
 
     
 
