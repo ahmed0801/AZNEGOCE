@@ -18,8 +18,10 @@ class CreateItemsTable extends Migration
             $table->string('code')->unique();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->foreignId('category_id')->nullable()->constrained('item_categories')->nullOnDelete();
-            $table->foreignId('brand_id')->nullable()->constrained('brands')->nullOnDelete();
+ // Clés étrangères en string
+            $table->string('category_id')->nullable();
+            $table->foreign('category_id')->references('id')->on('item_categories')->nullOnDelete();
+                        $table->foreignId('brand_id')->nullable()->constrained('brands')->nullOnDelete();
             $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
             $table->string('barcode')->nullable();
             $table->decimal('cost_price', 10, 2)->default(0.00);

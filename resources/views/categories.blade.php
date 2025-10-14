@@ -615,40 +615,35 @@
 </button>
 
 <!-- Modal -->
+<!-- Modal for Creating Category -->
 <div class="modal fade" id="createItemModal" tabindex="-1" aria-labelledby="createItemModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-
             <div class="modal-header">
-                <h5 class="modal-title" id="createItemModalLabel">Créer un Article</h5>
+                <h5 class="modal-title" id="createItemModalLabel">Créer une Catégorie</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
-
             <div class="modal-body">
                 <form id="createItemForm" action="{{ route('category.store') }}" method="POST">
                     @csrf
-
                     <div class="row">
-                        <!-- Code -->
+                        <div class="mb-3 col-md-4">
+                            <label for="id" class="form-label">ID Catégorie</label>
+                            <input type="text" class="form-control" id="id" name="id" required>
+                        </div>
                         <div class="mb-3 col-md-4">
                             <label for="name" class="form-label">Nom</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
-
-                        <!-- Nom -->
-                        <div class="mb-3 col-md-8">
-                            <label for="name" class="form-label">Description</label>
-                            <input type="text" class="form-control" id="description" name="description" required>
+                        <div class="mb-3 col-md-4">
+                            <label for="description" class="form-label">Description</label>
+                            <input type="text" class="form-control" id="description" name="description">
                         </div>
-
-                        
                     </div>
-
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                         <button type="submit" class="btn btn-success">Créer</button>
                     </div>
-
                 </form>
             </div>
         </div>
@@ -702,12 +697,13 @@
 
 <!-- fin recherche dans le tableau -->
 
-
-  @if ($categories->count() > 0)
+<!-- Table -->
+@if ($categories->count() > 0)
     <div class="table-responsive">
         <table class="table table-bordered table-hover table-text-small" id="itemsTable">
             <thead class="table-dark">
                 <tr>
+                    <th>ID</th> <!-- Changed from Code Famille -->
                     <th>Nom</th>
                     <th>Description</th>
                     <th>Actions</th>
@@ -716,18 +712,14 @@
             <tbody>
                 @foreach ($categories as $category)
                     <tr>
+                        <td>{{ $category->id }}</td> <!-- Changed from code_famille -->
                         <td>{{ $category->name }}</td>
                         <td>{{ $category->description }}</td>
                         <td>
-                            <!-- Modifier -->
-<!-- Modifier -->
-<button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ $category->id }}">
-    <i class="fas fa-edit"></i>
-</button>
-
-
-                            <!-- Supprimer -->
-                            <form action="{{ route('category.destroy', $category->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer cette Categorie ?')">
+                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ $category->id }}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <form action="{{ route('category.destroy', $category->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer cette Catégorie ?')">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-sm btn-danger" title="Supprimer">
@@ -736,57 +728,41 @@
                             </form>
                         </td>
                     </tr>
-
-
-
-
-
-
-                    <!-- Modal Modifier Article -->
-<div class="modal fade" id="editItemModal{{ $category->id }}" tabindex="-1" aria-labelledby="editItemModalLabel{{ $category->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <h5 class="modal-title">Modifier la Catégorie : {{ $category->code }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-            </div>
-
-            <div class="modal-body">
-                <form action="{{ route('category.update', $category->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-
-                    <div class="row">
-                        <!-- Exemple champ désignation -->
-                        <div class="mb-3 col-md-8">
-                            <label class="form-label">Nom</label>
-                            <input type="text" name="name" class="form-control" value="{{ $category->name }}" required>
+                    <!-- Modal for Editing Category -->
+                    <div class="modal fade" id="editItemModal{{ $category->id }}" tabindex="-1" aria-labelledby="editItemModalLabel{{ $category->id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Modifier la Catégorie : {{ $category->id }}</h5> <!-- Changed from code_famille -->
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="{{ route('category.update', $category->id) }}" method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="row">
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label">ID Catégorie</label>
+                                                <input type="text" name="id" class="form-control" value="{{ $category->id }}" required>
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label">Nom</label>
+                                                <input type="text" name="name" class="form-control" value="{{ $category->name }}" required>
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label">Description</label>
+                                                <input type="text" name="description" class="form-control" value="{{ $category->description }}">
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                            <button type="submit" class="btn btn-success">Mettre à jour</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
-
-                        <!-- Code -->
-                        <div class="mb-3 col-md-4">
-                            <label class="form-label">Description</label>
-                            <input type="text" name="description" class="form-control" value="{{ $category->code }}" required>
-                        </div>
-
-                       
                     </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-success">Mettre à jour</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-
-
                 @endforeach
             </tbody>
         </table>
@@ -794,8 +770,6 @@
 @else
     <p class="text-center text-muted">Aucun article trouvé.</p>
 @endif
-
-</div>
 
          
             
