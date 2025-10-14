@@ -119,6 +119,7 @@ $largeur = isset($i['Largeur']) ? floatval(str_replace(',', '.', $i['Largeur']))
 $refTecDoc = trim($i['Ref_TecDoc'] ?? '');
 $codePays = trim($i['Code_pays'] ?? '');
 $codeDouane = trim($i['Code_douane'] ?? '');
+$category_id = trim($i['Code_famille_NU'] ?? '');
 
 
 
@@ -145,6 +146,7 @@ $codeDouane = trim($i['Code_douane'] ?? '');
     'Ref_TecDoc' => $refTecDoc,
     'Code_pays' => $codePays,
     'Code_douane' => $codeDouane,
+    'category_id' => $category_id,
     'is_active' => true,
     'unit_id' => 1,
     'tva_group_id' => 1,
@@ -164,6 +166,7 @@ $codeDouane = trim($i['Code_douane'] ?? '');
     'Ref_TecDoc' => $refTecDoc,
     'Code_pays' => $codePays,
     'Code_douane' => $codeDouane,
+    'category_id' => $category_id,
     'is_active' => true,
     'unit_id' => 1,
     'tva_group_id' => 1,
