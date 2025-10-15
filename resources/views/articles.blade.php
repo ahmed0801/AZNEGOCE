@@ -641,7 +641,7 @@
 
                         <!-- Catégorie -->
                         <div class="mb-3 col-md-6">
-                            <label for="category_id" class="form-label">Catégorie</label>
+                            <label for="category_id" class="form-label">Famille</label>
                             <select class="form-control" id="category_id" name="category_id">
                                 <option value="">-- Choisir --</option>
                                 @foreach($categories as $category)
@@ -784,7 +784,7 @@
     </select>
 
     <select name="category_id" class="form-select form-select-sm" style="width: 130px;">
-        <option value="">Catégories (Tout)</option>
+        <option value="">Familles (Tout)</option>
         @foreach($categories as $category)
             <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
                 {{ $category->name }}
@@ -891,7 +891,7 @@
                     <th>Réference</th>
                     <th>Désignation</th>
                     <th>Marque</th>
-                    <th>Catégorie</th>
+                    <th>Famille</th>
                     <th>Prix A.HT</th>
                     <th>Prix V.HT</th>
                      <th>Fournisseur</th>
@@ -1164,7 +1164,7 @@
                         </div>
 
                         <div class="mb-3 col-md-6">
-                            <label class="form-label">Catégorie</label>
+                            <label class="form-label">Famille</label>
                             <select name="category_id" class="form-select" disabled>
                                 <option value="">-- Choisir --</option>
                                 @foreach($categories as $category)
