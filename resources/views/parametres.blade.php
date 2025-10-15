@@ -638,7 +638,7 @@
                                         <i class="fas fa-tags"></i>
                                     </div>
                                     <div class="numbers mt-2">
-                                        <p class="card-category">Catégories Articles</p>
+                                        <p class="card-category">Familles Articles</p>
                                     </div>
                                 </div>
                             </div>

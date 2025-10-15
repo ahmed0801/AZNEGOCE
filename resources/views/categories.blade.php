@@ -605,13 +605,13 @@
     
         <div class="container mt-4">
 
-        <h4>Catégories :</h4>
+        <h4>Familles :</h4>
 
 
 
         <!-- Bouton pour ouvrir le modal -->
 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createItemModal">
-    Créer Une Catégorie
+    Créer Une Famille
 </button>
 
 <!-- Modal -->
@@ -620,7 +620,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="createItemModalLabel">Créer une Catégorie</h5>
+                <h5 class="modal-title" id="createItemModalLabel">Créer une Famille</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div class="modal-body">
@@ -628,7 +628,7 @@
                     @csrf
                     <div class="row">
                         <div class="mb-3 col-md-4">
-                            <label for="id" class="form-label">ID Catégorie</label>
+                            <label for="id" class="form-label">Code Famille</label>
                             <input type="text" class="form-control" id="id" name="id" required>
                         </div>
                         <div class="mb-3 col-md-4">
@@ -655,7 +655,7 @@
          <!-- recherche dans le tableau -->
 <!-- Recherche -->
 <div class="mb-1 d-flex justify-content-center">
-    <input type="text" id="searchItemInput" class="form-control search-box" placeholder="🔍 Rechercher une Catégorie...">
+    <input type="text" id="searchItemInput" class="form-control search-box" placeholder="🔍 Rechercher une Famille...">
 </div>
 
 <style>
@@ -733,7 +733,7 @@
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title">Modifier la Catégorie : {{ $category->id }}</h5> <!-- Changed from code_famille -->
+                                    <h5 class="modal-title">Modifier la Famille : {{ $category->id }}</h5> <!-- Changed from code_famille -->
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                                 </div>
                                 <div class="modal-body">
@@ -742,7 +742,7 @@
                                         @method('PUT')
                                         <div class="row">
                                             <div class="mb-3 col-md-4">
-                                                <label class="form-label">ID Catégorie</label>
+                                                <label class="form-label">Code Famille</label>
                                                 <input type="text" name="id" class="form-control" value="{{ $category->id }}" required>
                                             </div>
                                             <div class="mb-3 col-md-4">
