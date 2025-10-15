@@ -703,7 +703,7 @@
         <table class="table table-bordered table-hover table-text-small" id="itemsTable">
             <thead class="table-dark">
                 <tr>
-                    <th>ID</th> <!-- Changed from Code Famille -->
+                    <th>Code</th> <!-- Changed from Code Famille -->
                     <th>Nom</th>
                     <th>Description</th>
                     <th>Actions</th>
