@@ -819,7 +819,7 @@ body {
    </form>
    <div class="button-container">
     <div class="btn-toolbar">
-      <button class="voice-button" id="voice-button" onclick="startRecognition()">
+  <button type="button" class="voice-button" id="voice-button" onclick="startRecognition(event)">
         <svg
 			class="voice-icon"
           	xmlns="http://www.w3.org/2000/svg"
@@ -909,7 +909,24 @@ function initChatBot(options) {
                 list.appendChild(responseItem);
               },
               success: function (response) {
-                responseItem.innerHTML = '<strong>NegoBot:</strong> ' + response.response;
+                // Render Markdown returned by the server safely using marked + DOMPurify
+                responseItem.innerHTML = '';
+                var strong = document.createElement('strong');
+                strong.textContent = 'NegoBot:';
+                responseItem.appendChild(strong);
+
+                var md = (response && response.response) ? response.response : '';
+                try {
+                  var unsafeHtml = (typeof marked !== 'undefined') ? marked.parse(md) : md;
+                  var clean = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(unsafeHtml) : unsafeHtml;
+                  var htmlContainer = document.createElement('div');
+                  htmlContainer.innerHTML = clean;
+                  responseItem.appendChild(htmlContainer);
+                } catch (e) {
+                  // fallback to plain text if parser/sanitizer not available
+                  responseItem.appendChild(document.createTextNode(' ' + md));
+                }
+
                 list.appendChild(responseItem);
                 list.scrollTop = list.scrollHeight;
                 responseItem = null;
@@ -954,40 +971,61 @@ document.getElementById("question").addEventListener("keydown", function(event) 
 </script>
 
 <script>
-function startRecognition() {
-    const recognition = new window.webkitSpeechRecognition();
-    recognition.lang = 'fr-FR';
+function startRecognition(e) {
+  // prevent button default behaviour
+  if (e && typeof e.preventDefault === 'function') e.preventDefault();
 
-    const resultDiv = document.getElementById("voice-result");
-    resultDiv.innerHTML = '<span class="typing">🔎 AZ écoute...</span>';
+  // Feature detection for SpeechRecognition
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  const resultDiv = document.getElementById("voice-result");
+  if (!SpeechRecognition) {
+    if (resultDiv) resultDiv.innerText = '❌ Reconnaissance vocale non supportée par ce navigateur.';
+    return;
+  }
 
-    recognition.onresult = function(event) {
-        const voiceText = event.results[0][0].transcript;
-        resultDiv.innerText = "🗣️ Commande reconnue : \"" + voiceText + "\" \n🤖 Traitement en cours...";
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'fr-FR';
 
-        fetch('/api/voice-command', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ command: voiceText })
-        })
-        .then(res => res.json())
-        .then(data => {
-            let msg = "✅ Réponse AZ :\n" + data.status + "\n\n";
-            if (data.propositions && data.propositions.length > 0) {
-                msg += "💡 Suggestions d'achat :\n";
-                data.propositions.forEach(p => {
-                    msg += `• 🛒 ${p.quantité_suggérée} x ${p.article} chez ${p.fournisseur} à ${p.prix_unitaire}€/unité\n`;
-                });
-            } else {
-                msg += "Aucune suggestion complémentaire.\n";
-            }
-            resultDiv.innerText = msg;
-        })
-        .catch(() => {
-            resultDiv.innerText = "❌ Erreur réseau ou API. Réessayez.";
+  if (resultDiv) resultDiv.innerHTML = '<span class="typing">🔎 AZ écoute...</span>';
+
+  recognition.onresult = function(event) {
+    const voiceText = event.results[0][0].transcript;
+    if (resultDiv) resultDiv.innerText = "🗣️ Commande reconnue : \"" + voiceText + "\" \n🤖 Traitement en cours...";
+
+    fetch('/api/voice-command', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+      },
+      body: JSON.stringify({ command: voiceText })
+    })
+    .then(res => res.json())
+    .then(data => {
+      let msg = "✅ Réponse AZ :\n" + (data.status || '') + "\n\n";
+      if (data.propositions && data.propositions.length > 0) {
+        msg += "💡 Suggestions d'achat :\n";
+        data.propositions.forEach(p => {
+          // escape values used in string construction
+          const q = p.quantité_suggérée || p.quantite || '';
+          const article = p.article || '';
+          const fournisseur = p.fournisseur || '';
+          const prix = p.prix_unitaire || p.prix || '';
+          msg += `• 🛒 ${q} x ${article} chez ${fournisseur} à ${prix}€/unité\n`;
         });
-    };
-    recognition.start();
+      } else {
+        msg += "Aucune suggestion complémentaire.\n";
+      }
+      if (resultDiv) resultDiv.innerText = msg;
+    })
+    .catch(() => {
+      if (resultDiv) resultDiv.innerText = "❌ Erreur réseau ou API. Réessayez.";
+    });
+  };
+  recognition.onerror = function(err) {
+    if (resultDiv) resultDiv.innerText = '❌ Erreur de reconnaissance vocale: ' + (err.error || err.message || JSON.stringify(err));
+  };
+  recognition.start();
 }
 </script>  
                      </div>
@@ -1061,17 +1099,24 @@ function startRecognition() {
 <!-- Kaiadmin JS -->
 <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
 
+<!-- Client-side Markdown renderer + sanitizer -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+
     
 
 <script>
-document.getElementById("searchItemInput").addEventListener("keyup", function() {
+var _searchInput = document.getElementById("searchItemInput");
+if (_searchInput) {
+  _searchInput.addEventListener("keyup", function() {
     var input = this.value.toLowerCase();
     var rows = document.querySelectorAll("#itemsTable tbody tr");
 
     rows.forEach(function(row) {
-        row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
+      row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
     });
-});
+  });
+}
 </script>
 
 </html>
