@@ -911,18 +911,17 @@ function initChatBot(options) {
               success: function (response) {
                 // Render Markdown returned by the server safely using marked + DOMPurify
                 responseItem.innerHTML = '';
-                var strong = document.createElement('strong');
-                responseItem.appendChild(strong);
                 var md = (response && response.response) ? response.response : '';
                 try {
                   var unsafeHtml = (typeof marked !== 'undefined') ? marked.parse(md) : md;
                   var clean = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(unsafeHtml) : unsafeHtml;
                   var htmlContainer = document.createElement('div');
                   htmlContainer.innerHTML = clean;
+                  // Append the rendered/sanitized HTML directly so there is no extra label or line break
                   responseItem.appendChild(htmlContainer);
                 } catch (e) {
                   // fallback to plain text if parser/sanitizer not available
-                  responseItem.appendChild(document.createTextNode(' ' + md));
+                  responseItem.appendChild(document.createTextNode(md));
                 }
 
                 list.appendChild(responseItem);
