@@ -912,7 +912,7 @@ function initChatBot(options) {
                 // Render Markdown returned by the server safely using marked + DOMPurify
                 responseItem.innerHTML = '';
                 var strong = document.createElement('strong');
-                strong.textContent = 'NegoBot:';
+                strong.textContent = '';
                 responseItem.appendChild(strong);
 
                 var md = (response && response.response) ? response.response : '';
