@@ -912,9 +912,7 @@ function initChatBot(options) {
                 // Render Markdown returned by the server safely using marked + DOMPurify
                 responseItem.innerHTML = '';
                 var strong = document.createElement('strong');
-                strong.textContent = '';
                 responseItem.appendChild(strong);
-
                 var md = (response && response.response) ? response.response : '';
                 try {
                   var unsafeHtml = (typeof marked !== 'undefined') ? marked.parse(md) : md;
