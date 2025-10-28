@@ -82,6 +82,7 @@ class ImportGoldaTarifs extends Command
             $supplier = Supplier::firstOrCreate(
                 ['name' => $fournisseurName],
                 ['code' => $prefixe]
+                // ,['tva_group_id' => 1]
             );
 
             $this->info("➡️ Traitement fournisseur : {$fournisseurName} ({$prefixe})");
