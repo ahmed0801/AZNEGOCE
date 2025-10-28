@@ -19,12 +19,14 @@ public function store(Request $request)
             'id' => 'required|string|max:20|unique:item_categories,id',
             'name' => 'required|string|max:255|unique:item_categories,name',
             'description' => 'nullable|string',
+            'default_sale_margin' => 'required|numeric|min:0|max:999.99',
         ]);
 
         ItemCategory::create([
             'id' => $request->id,
             'name' => $request->name,
             'description' => $request->description,
+            'default_sale_margin' => $request->default_sale_margin,
         ]);
 
         return back()->with('success', 'Catégorie créée avec succès.');
@@ -36,6 +38,7 @@ public function store(Request $request)
             'id' => 'required|string|max:20|unique:item_categories,id,' . $id,
             'name' => 'required|string|max:255|unique:item_categories,name,' . $id,
             'description' => 'nullable|string',
+            'default_sale_margin' => 'required|numeric|min:0|max:999.99',
         ]);
 
         $category = ItemCategory::findOrFail($id);
@@ -43,6 +46,7 @@ public function store(Request $request)
             'id' => $request->id,
             'name' => $request->name,
             'description' => $request->description,
+             'default_sale_margin' => $request->default_sale_margin,
         ]);
 
         return back()->with('success', 'Catégorie mise à jour.');
