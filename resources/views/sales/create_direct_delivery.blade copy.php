@@ -1124,20 +1124,35 @@
                                              data-stock="${item.stock_quantity || 0}"
                                              data-location="${item.location || ''}"
                                              data-is-active="${item.is_active}">
-                                            <span class="badge rounded-pill text-bg-light">${item.code}</span> 	&#8660;  ${item.name} : ${item.sale_price} € HT
+                                            <span class="badge rounded-pill text-bg-light"><b> ${item.code}</b></span> 	&#8660;  ${item.name} : ${item.sale_price} € HT
+
+
+
 
                                                 ${item.stock_quantity> 0
-? `<br> 🟢 ${item.stock_quantity} En Stock`
-: `<br> 🔴 Disponible auprès de <span class="badge text-bg-secondary"> ${item.supplier} </span>  au prix de <span class="badge text-bg-success"> ${item.cost_price}  € HT </span>` }
+? `<br>                                             <button
+    class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap"
+    style="font-size: 0.75rem;"
+    data-item='${JSON.stringify(item)}'
+>
+    <i class="fas fa-eye me-1"></i> Détails Article
+</button>
+ 🟢 ${item.stock_quantity} En Stock`
+: `<br>                                             <button
+    class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap"
+    style="font-size: 0.75rem;"
+    data-item='${JSON.stringify(item)}'
+>
+    <i class="fas fa-eye me-1"></i> Détails Article
+</button>
+ 🔴 Disponible auprès de <span class="badge text-bg-secondary"> ${item.supplier} </span>  au prix de <span class="badge text-bg-success"> ${item.cost_price}  € HT </span>` }
 
 
-<button class="btn btn-sm btn-outline-primary voir-details" 
-                                            data-item='${JSON.stringify(item)}'>
-                                        Voir détails
-                                    </button>
 
                                     
                                         </div>
+                                                <hr class="my-1">
+
                                     `);
                                 });
                             }
