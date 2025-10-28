@@ -261,7 +261,7 @@
 
         <div class="mb-3 col-md-4">
             <label class="form-label">Ville</label>
-            <input type="text" name="city" class="form-control">
+            <input type="text" name="city" class="form-control" value="Paris">
         </div>
 
         <div class="mb-3 col-md-6">
