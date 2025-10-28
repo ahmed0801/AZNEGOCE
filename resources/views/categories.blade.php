@@ -627,18 +627,24 @@
                 <form id="createItemForm" action="{{ route('category.store') }}" method="POST">
                     @csrf
                     <div class="row">
-                        <div class="mb-3 col-md-4">
+                        <div class="mb-3 col-md-3">
                             <label for="id" class="form-label">Code Famille</label>
                             <input type="text" class="form-control" id="id" name="id" required>
                         </div>
-                        <div class="mb-3 col-md-4">
+                        <div class="mb-3 col-md-3">
                             <label for="name" class="form-label">Nom</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
-                        <div class="mb-3 col-md-4">
+                        <div class="mb-3 col-md-3">
                             <label for="description" class="form-label">Description</label>
                             <input type="text" class="form-control" id="description" name="description">
                         </div>
+
+                        <div class="mb-3 col-md-3">
+                                                <label for="default_sale_margin" class="form-label">Marge par défaut (%)</label>
+                                                <input type="number" step="0.01" min="0" max="999.99" class="form-control" id="default_sale_margin" name="default_sale_margin" value="30.00" required>
+                                            </div>
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
@@ -706,6 +712,7 @@
                     <th>Code</th> <!-- Changed from Code Famille -->
                     <th>Nom</th>
                     <th>Description</th>
+                    <th>Marge par défaut (%)</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -715,6 +722,7 @@
                         <td>{{ $category->id }}</td> <!-- Changed from code_famille -->
                         <td>{{ $category->name }}</td>
                         <td>{{ $category->description }}</td>
+                        <td>{{ $category->default_sale_margin }}</td>
                         <td>
                             <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ $category->id }}">
                                 <i class="fas fa-edit"></i>
@@ -741,18 +749,22 @@
                                         @csrf
                                         @method('PUT')
                                         <div class="row">
-                                            <div class="mb-3 col-md-4">
+                                            <div class="mb-3 col-md-3">
                                                 <label class="form-label">Code Famille</label>
                                                 <input type="text" name="id" class="form-control" value="{{ $category->id }}" required>
                                             </div>
-                                            <div class="mb-3 col-md-4">
+                                            <div class="mb-3 col-md-3">
                                                 <label class="form-label">Nom</label>
                                                 <input type="text" name="name" class="form-control" value="{{ $category->name }}" required>
                                             </div>
-                                            <div class="mb-3 col-md-4">
+                                            <div class="mb-3 col-md-3">
                                                 <label class="form-label">Description</label>
                                                 <input type="text" name="description" class="form-control" value="{{ $category->description }}">
                                             </div>
+                                            <div class="mb-3 col-md-3">
+                                                                    <label class="form-label">Marge par défaut (%)</label>
+                                                                    <input type="number" step="0.01" min="0" max="999.99" name="default_sale_margin" class="form-control" value="{{ $category->default_sale_margin }}" required>
+                                                                </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
