@@ -711,6 +711,7 @@ s
         <table class="table table-bordered table-hover table-text-small" id="itemsTable">
             <thead class="table-dark">
                 <tr>
+                  <th>ID</th>
                     <th>Nom</th>
                     <th>Pourcentage %</th>
                     <th>Code</th>
@@ -720,6 +721,7 @@ s
             <tbody>
                 @foreach ($grouptvas as $grouptva)
                     <tr>
+                        <td>{{ $grouptva->id }}</td>
                         <td>{{ $grouptva->name }}</td>
                         <td>{{ $grouptva->rate }}</td>
                         <td>{{ $grouptva->code }}</td>
