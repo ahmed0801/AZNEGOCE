@@ -589,7 +589,7 @@
 <a href="/newcustomer"
    onclick="window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); return false;"
    class="btn btn-outline-secondary btn-sm px-2 py-1" style="font-size: 0.75rem;">
-  Créer & Modifier Client <i class="fas fa-plus-circle ms-1"></i>
+  Créer ou Modifier des Clients <i class="fas fa-plus-circle ms-1"></i>
 </a>
 
                                                                                     
