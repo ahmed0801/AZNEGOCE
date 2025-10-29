@@ -28,6 +28,8 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <style>
+
+        
         .card {
             border-radius: 8px;
             background: linear-gradient(135deg, #ffffff, #f8f9fa);
@@ -712,8 +714,9 @@
                                     <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de livraison, etc."></textarea>
                                 </div>
                                 <div class="text-end">
-                                    <button type="submit" name="action" value="validate" class="btn btn-success px-3 ms-2">✔️ Valider BL</button>
-                                    <button type="submit" name="action" value="validate_and_invoice" class="btn btn-primary px-3 ms-2">📄 Valider et Facturer</button>
+                                    <button type="button" id="generatePurchaseBtn" class="btn btn-danger px-3 ms-2">🛒 Générer Commande Achat</button>
+                                    <button type="submit" name="action" value="validate" class="btn btn-primary px-3 ms-2">✔️ Valider BL</button>
+                                    <button type="submit" name="action" value="validate_and_invoice" class="btn btn-success px-3 ms-2">📄 Valider et Facturer</button>
                                     <button type="submit" name="action" value="save_draft" class="btn btn-warning px-3 ms-2">📝 Enregistrer Devis</button>
                                 </div>
                             </form>
@@ -1260,7 +1263,16 @@ $(document).on('click', '.voir-details', function (e) {
                 let row = `
                     <tr data-line-id="${lineCount}">
                         <td>
-                            ${code}<br>
+                            <div class="d-flex align-items-center gap-1">
+                <span class="font-weight-bold">${code}</span>
+                <button type="button" 
+                        class="btn btn-xs btn-outline-secondary copy-line-code px-1 py-0"
+                        data-code="${code}"
+                        title="Copier la référence">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            <br>
                             <span class="badge bg-${isActive ? 'success' : 'danger'} badge-very-sm">${isActive ? '🟢 actif' : '🔴 bloqué'}</span>
                             <input type="hidden" name="lines[${lineCount}][article_code]" value="${code}">
                         </td>
@@ -1293,6 +1305,26 @@ $(document).on('click', '.voir-details', function (e) {
                     </tr>
                 `;
                 $('#lines_body').append(row);
+
+
+                // === Gestion du bouton "Copier" dans les lignes du tableau ===
+$(document).on('click', '.copy-line-code', function (e) {
+    e.stopPropagation();
+    let code = $(this).data('code');
+    navigator.clipboard.writeText(code).then(() => {
+        let btn = $(this);
+        let originalHtml = btn.html();
+        btn.html('<i class="fas fa-check text-success"></i>').prop('disabled', true);
+        setTimeout(() => {
+            btn.html(originalHtml).prop('disabled', false);
+        }, 1000);
+    }).catch(err => {
+        alert('Erreur copie : ' + err);
+    });
+});
+
+
+
                 updateLineTotals($('#lines_body tr:last'), price, 1, 0, tvaRate);
                 lineCount++;
                 $('#search_item').val('');
@@ -1587,6 +1619,34 @@ $(document).on('click', '.voir-details', function (e) {
                     tbody.append(row);
                 });
             }
+
+
+
+
+
+            // === Bouton Générer Commande Achat ===
+$('#generatePurchaseBtn').on('click', function () {
+    openPurchasesPopup();
+});
+
+function openPurchasesPopup() {
+    const width = 1400;
+    const height = 800;
+    const left = (screen.width / 2) - (width / 2);
+    const top = (screen.height / 2) - (height / 2);
+    window.open(
+        '/purchases',
+        'purchasesPopup',
+        `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no`
+    );
+}
+
+
+
+
+
+
+
         });
     </script>
 </body>
