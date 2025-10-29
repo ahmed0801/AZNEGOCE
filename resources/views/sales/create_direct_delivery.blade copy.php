@@ -589,7 +589,7 @@
 <a href="/newcustomer"
    onclick="window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); return false;"
    class="btn btn-outline-secondary btn-sm px-2 py-1" style="font-size: 0.75rem;">
-  Créer & Modifier Client <i class="fas fa-plus-circle ms-1"></i>
+  Créer ou Modifier des Clients <i class="fas fa-plus-circle ms-1"></i>
 </a>
 
                                                                                     
@@ -701,7 +701,11 @@
                                         <h5 class="mb-1">Total HT : <span id="total_ht_global" class="text-success fw-bold">0,00</span> €</h5>
                                         <h6 class="mb-0">Total TTC : <span id="total_ttc_global" class="text-danger fw-bold">0,00</span> €</h6>
                                     </div>
-                                    <a href="/articles" target="_blank" type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Aller a la Page Articles</a>
+                                    <!-- <a href="/articles" target="_blank" type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Aller a la Page Articles</a> -->
+                                    <a href="/articles" 
+                                    onclick="window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); return false;"
+                                     type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Créer ou Modifier des Articles</a>
+
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Notes / Commentaire</label>
