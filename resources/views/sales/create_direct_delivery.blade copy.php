@@ -1128,7 +1128,15 @@
                                              data-stock="${item.stock_quantity || 0}"
                                              data-location="${item.location || ''}"
                                              data-is-active="${item.is_active}">
-                                            <span class="badge rounded-pill text-bg-light"><b> ${item.code}</b></span> 	&#8660;  ${item.name} : ${item.sale_price} € HT
+                                            <span class="badge rounded-pill text-bg-light"><b> ${item.code}</b>
+                                             
+                                            <button class="btn btn-xs btn-outline-secondary copy-code px-1 py-0"
+                                                data-code="${item.code}"
+                                                title="Copier la référence">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                        </span>
+                                         	&#8660;  ${item.name} : ${item.sale_price} € HT
 
 
 
@@ -1159,6 +1167,28 @@
 
                                     `);
                                 });
+
+
+
+                                // === Gestion du bouton "Copier" ===
+                        $('.copy-code').off('click').on('click', function (e) {
+                            e.stopPropagation(); // Empêche la sélection de l'article
+                            let code = $(this).data('code');
+                            navigator.clipboard.writeText(code).then(() => {
+                                let btn = $(this);
+                                let originalHtml = btn.html();
+                                btn.html('<i class="fas fa-check text-success"></i>').prop('disabled', true);
+                                setTimeout(() => {
+                                    btn.html(originalHtml).prop('disabled', false);
+                                }, 1000);
+                            }).catch(err => {
+                                alert('Erreur copie : ' + err);
+                            });
+                        });
+
+
+                        
+
                             }
                         },
                         error: function (xhr, status, error) {
