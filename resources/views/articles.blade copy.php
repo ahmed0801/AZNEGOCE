@@ -193,160 +193,153 @@
 
   </head>
   <body>
-    <div class="wrapper">
-      <!-- Sidebar -->
-      <div class="sidebar" data-background-color="dark">
-        <div class="sidebar-logo">
-          <!-- Logo Header -->
-          <div class="logo-header" data-background-color="dark">
+    <div class="wrapper sidebar_minimize">
+       <!-- Sidebar -->
+<div class="sidebar" data-background-color="dark">
+    <div class="sidebar-logo">
+        <div class="logo-header" data-background-color="dark">
             <a href="/" class="logo">
-              <img
-                src="{{ asset('assets/img/logop.png')}}"
-                alt="navbar brand"-9
-                class="navbar-brand"
-                height="40"
-              />
+                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
             </a>
             <div class="nav-toggle">
-              <button class="btn btn-toggle toggle-sidebar">
-                <i class="gg-menu-right"></i>
-              </button>
-              <button class="btn btn-toggle sidenav-toggler">
-                <i class="gg-menu-left"></i>
-              </button>
+                <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
             </div>
-            <button class="topbar-toggler more">
-              <i class="gg-more-vertical-alt"></i>
-            </button>
-          </div>
-          <!-- End Logo Header -->
         </div>
-        <div class="sidebar-wrapper scrollbar scrollbar-inner">
-          <div class="sidebar-content">
+    </div>
+
+    <div class="sidebar-wrapper scrollbar scrollbar-inner">
+        <div class="sidebar-content">
             <ul class="nav nav-secondary">
-              
 
-            <li class="nav-item">
-                <a href="/dashboard">
-                  <i class="fas fa-home"></i>
-                  <p>Dashboard</p>
-                </a>
-              </li>
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
+                </li>
 
-              <li class="nav-item">
-                <a  href="/commande">
-                  <i class="fas fa-shopping-cart"></i>
-                  <p>Nouvelle Commande</p>
-                </a>
-              </li>
+                <!-- Ventes -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#ventes" aria-expanded="false">
+                        <i class="fas fa-shopping-cart"></i><p>Ventes</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="ventes">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
+                            <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
+                            <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="/salesnotes/list"><span class="sub-item">Avoirs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
-              <li class="nav-item">
-                <a  href="/orders">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <p>Mes BL</p>
-                </a>
-              </li>
+                <!-- Achats -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#achats" aria-expanded="false">
+                        <i class="fas fa-shopping-bag"></i><p>Achats</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="achats">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
-              <li class="nav-item">
-                <a  href="/listdevis">
-                <i class="fas fa-file-alt"></i>
-                  <p>Mes Devis</p>
-                </a>
-              </li>
+                <!-- Comptabilité -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#compta" aria-expanded="false">
+                        <i class="fas fa-balance-scale"></i><p>Comptabilité</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="compta">
+                        <ul class="nav nav-collapse">
+                            <li><a href="{{ route('generalaccounts.index') }}"><span class="sub-item">Plan Comptable</span></a></li>
+                            <li><a href="{{ route('payments.index') }}"><span class="sub-item">Règlements</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
-              <li class="nav-item">
-              <a href="/listbrouillon">
-              <i class="fas fa-reply-all"></i>
-              <p>Brouillons</p>
-                </a>
-              </li>
+                <!-- Stock -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#stock" aria-expanded="false">
+                        <i class="fas fa-warehouse"></i><p>Stock</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="stock">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/receptions"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="/articles"><span class="sub-item">Articles</span></a></li>
+                            <li><a href="/planification-tournee"><span class="sub-item">Suivi Livraisons</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
-              <li class="nav-item">
-              <a href="/invoices">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Mes Factures</p>
-                </a>
-              </li>
+                <!-- Référentiel -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#referentiel" aria-expanded="false">
+                        <i class="fas fa-users"></i><p>Référentiel</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="referentiel">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/customers"><span class="sub-item">Clients</span></a></li>
+                            <li><a href="/suppliers"><span class="sub-item">Fournisseurs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
-              <li class="nav-item">
-              <a href="/avoirs">
-              <i class="fas fa-reply-all"></i>
-              <p>Mes Avoirs</p>
-                </a>
-              </li>
+                <!-- Paramètres -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#parametres" aria-expanded="false">
+                        <i class="fas fa-cogs"></i><p>Paramètres</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="parametres">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/setting"><span class="sub-item">Configuration</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
+                <!-- Outils -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#outils" aria-expanded="false">
+                        <i class="fab fa-skyatlas"></i><p>Outils</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="outils">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/tecdoc"><span class="sub-item">TecDoc</span></a></li>
+                            <li><a href="/voice"><span class="sub-item">NEGOBOT</span></a></li>
+                        </ul>
+                    </div>
+                </li>
 
-                                          <li class="nav-item">
-              <a href="/purchases/list">
-                <i class="fas fa-file-alt"></i>
-              <p>Commandes Achat</p>
-                </a>
-              </li>
-
-              
-
-              <li class="nav-item">
-              <a href="/receptions">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Réception</p>
-                </a>
-              </li>
-
-
-              <li class="nav-item active">
-              <a href="/articles">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Articles</p>
-                </a>
-              </li>
-
-                                          <li class="nav-item">
-              <a href="/customers">
-              <i class="fa fa-user"></i>
-              <p>Clients</p>
-                </a>
-              </li>
-
-                            <li class="nav-item">
-              <a href="/suppliers">
-              <i class="fa fa-user"></i>
-              <p>Fournisseurs</p>
-                </a>
-              </li>
+                <!-- Assistance -->
+<li class="nav-item">
+    <a href="/contact">
+        <i class="fas fa-headset"></i>
+        <p>Assistance</p>
+    </a>
+</li>
 
 
-              <li class="nav-item">
-              <a href="/setting">
-              <i class="fas fa-money-bill-wave"></i>
-              <p>Paramétres</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-  <a href="/tecdoc">
-    <i class="fas fa-cogs"></i> 
-    <p>TecDoc</p>
-  </a>
-</li>    
-
-              
-  <!-- Lien de déconnexion -->
-  <li class="nav-item">
-        <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="fas fa-sign-out-alt"></i>
-            <p>Déconnexion</p>
-        </a>
-        <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
-            @csrf
-        </form>
-    </li>             
-
+                <!-- Déconnexion -->
+                <li class="nav-item">
+                    <a href="{{ route('logout.admin') }}" class="nav-link"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
+                    </a>
+                    <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
+                </li>
 
             </ul>
-          </div>
         </div>
-      </div>
-      <!-- End Sidebar -->
+    </div>
+</div>
+<!-- End Sidebar -->
 
       <div class="main-panel">
         <div class="main-header">
@@ -386,6 +379,131 @@
 
 
               <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+
+
+                    <!-- test quick action  -->
+<li class="nav-item topbar-icon dropdown hidden-caret">
+                  <a
+                    class="nav-link"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <i class="fas fa-layer-group"></i>
+                  </a>
+                  <div class="dropdown-menu quick-actions animated fadeIn">
+                    <div class="quick-actions-header">
+                      <span class="title mb-1">Actions Rapides</span>
+                      <!-- <span class="subtitle op-7">Liens Utiles</span> -->
+                    </div>
+                    <div class="quick-actions-scroll scrollbar-outer">
+                      <div class="quick-actions-items">
+                        <div class="row m-0">
+
+                                                  <a class="col-6 col-md-4 p-0" href="/articles">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-success rounded-circle"
+                              >
+                                <i class="fas fa-sitemap"></i>
+                              </div>
+                              <span class="text">Articles</span>
+                            </div>
+                          </a>
+
+                                                                            <a class="col-6 col-md-4 p-0" href="/customers">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-primary rounded-circle"
+                              >
+                                <i class="fas fa-users"></i>
+                              </div>
+                              <span class="text">Clients</span>
+                            </div>
+                          </a>
+
+
+                                                                                                      <a class="col-6 col-md-4 p-0" href="/suppliers">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-secondary rounded-circle"
+                              >
+                                <i class="fas fa-user-tag"></i>
+                              </div>
+                              <span class="text">Fournisseurs</span>
+                            </div>
+                          </a>
+
+
+
+                          <a class="col-6 col-md-4 p-0" href="/delivery_notes/list">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-danger rounded-circle">
+                                <i class="fa fa-cart-plus"></i>
+                              </div>
+                              <span class="text">Commandes Ventes</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/salesinvoices">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-warning rounded-circle"
+                              >
+                                <i class="fas fa-file-invoice-dollar"></i>
+                              </div>
+                              <span class="text">Factures Ventes</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/generalaccounts">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-info rounded-circle">
+                                <i class="fas fa-money-check-alt"></i>
+                              </div>
+                              <span class="text">Plan Comptable</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/purchases/list">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-success rounded-circle"
+                              >
+                                <i class="fa fa-cart-plus"></i>
+                              </div>
+                              <span class="text">Commandes Achats</span>
+                            </div>
+                          </a>
+                          <a class="col-6 col-md-4 p-0" href="/invoices">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-primary rounded-circle"
+                              >
+                                <i class="fas fa-file-invoice-dollar"></i>
+                              </div>
+                              <span class="text">Factures Achats</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/paymentlist">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-secondary rounded-circle"
+                              >
+                                <i class="fas fa-credit-card"></i>
+                              </div>
+                              <span class="text">Paiements</span>
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                        <!-- fin test quick action  -->
+
+                        
                 
 
  
@@ -488,9 +606,23 @@
         <div class="container mt-4">
 
         <h4>Articles :                         
-          <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#createItemModal">Nouveau 
+          <button type="submit" class="btn btn-outline-success btn-round ms-2" data-bs-toggle="modal" data-bs-target="#createItemModal">Nouvel Article
            <i class="fas fa-plus-circle ms-2"></i>
           </button>
+
+
+          <!-- Bouton Familles Articles -->
+        <a href="{{ url('/categories') }}" class="btn btn-outline-primary btn-round ms-2">
+            Familles Articles
+            <i class="fas fa-layer-group ms-2"></i>
+        </a>
+
+        <!-- Bouton Marques Articles -->
+        <a href="{{ url('/brands') }}" class="btn btn-outline-info btn-round ms-2">
+            Marques Articles
+            <i class="fas fa-tags ms-2"></i>
+        </a>
+        
 </h4>
 
 
@@ -523,7 +655,7 @@
 
                         <!-- Catégorie -->
                         <div class="mb-3 col-md-6">
-                            <label for="category_id" class="form-label">Catégorie</label>
+                            <label for="category_id" class="form-label">Famille</label>
                             <select class="form-control" id="category_id" name="category_id">
                                 <option value="">-- Choisir --</option>
                                 @foreach($categories as $category)
@@ -652,76 +784,66 @@
 </div>
 
 
+<form method="GET" action="{{ route('articles.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+    <input type="text" name="search" class="form-control form-control-sm" style="width: 170px;"
+           placeholder="🔍 Rechercher..." value="{{ request('search') }}">
 
-    <form method="GET" action="{{ route('articles.index') }}" class="d-flex flex-wrap align-items-end gap-2">
+    <select name="brand_id" class="form-select form-select-sm" style="width: 120px;">
+        <option value="">Marques (Tout)</option>
+        @foreach($brands as $brand)
+            <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
+                {{ $brand->name }}
+            </option>
+        @endforeach
+    </select>
 
-        <input type="text" name="search" class="form-control form-control-sm" style="width: 180px;"
-               placeholder="🔍 Rechercher..." value="{{ request('search') }}">
+    <select name="category_id" class="form-select form-select-sm" style="width: 130px;">
+        <option value="">Familles (Tout)</option>
+        @foreach($categories as $category)
+            <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                {{ $category->name }}
+            </option>
+        @endforeach
+    </select>
 
-        <select name="brand_id" class="form-select form-select-sm" style="width: 150px;">
-            <option value="">Marques (Tout)</option>
-            @foreach($brands as $brand)
-                <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
-                    {{ $brand->name }}
-                </option>
-            @endforeach
-        </select>
+    <select name="codefournisseur" class="form-select form-select-sm" style="width: 140px;">
+        <option value="">Fournisseurs (Tout)</option>
+        @foreach(\App\Models\Supplier::all() as $supplier)
+            <option value="{{ $supplier->code }}" {{ request('codefournisseur') == $supplier->code ? 'selected' : '' }}>
+                {{ $supplier->code }} - {{ $supplier->name }}
+            </option>
+        @endforeach
+    </select>
 
-        <select name="category_id" class="form-select form-select-sm" style="width: 140px;">
-            <option value="">Catégories (Tout)</option>
-            @foreach($categories as $category)
-                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                    {{ $category->name }}
-                </option>
-            @endforeach
-        </select>
+    <select name="store_id" class="form-select form-select-sm" style="width: 120px;">
+        <option value="">Magasins (Tout)</option>
+        @foreach($stores as $store)
+            <option value="{{ $store->id }}" {{ request('store_id') == $store->id ? 'selected' : '' }}>
+                {{ $store->name }}
+            </option>
+        @endforeach
+    </select>
 
-        <select name="codefournisseur" class="form-select form-select-sm" style="width: 150px;">
-            <option value="">Fournisseurs (Tout)</option>
-            @foreach(\App\Models\Supplier::all() as $supplier)
-                <option value="{{ $supplier->code }}" {{ request('codefournisseur') == $supplier->code ? 'selected' : '' }}>
-                    {{ $supplier->code }} - {{ $supplier->name }}
-                </option>
-            @endforeach
-        </select>
+    <select name="is_active" class="form-select form-select-sm" style="width: 110px;">
+        <option value="">Statut (Tout)</option>
+        <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>Autorisé</option>
+        <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>Bloqué</option>
+    </select>
 
-        <select name="store_id" class="form-select form-select-sm" style="width: 140px;">
-            <option value="">Magasins (Tout)</option>
-            @foreach($stores as $store)
-                <option value="{{ $store->id }}" {{ request('store_id') == $store->id ? 'selected' : '' }}>
-                    {{ $store->name }}
-                </option>
-            @endforeach
-        </select>
+    <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
+        <i class="fas fa-filter me-1"></i> Filtrer
+    </button>
 
-        <select name="is_active" class="form-select form-select-sm" style="width: 115px;">
-            <option value="">Statut (Tout)</option>
-            <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>Autorisé</option>
-            <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>Bloqué</option>
-        </select>
+    <button type="submit" name="action" value="export" formaction="{{ route('articles.export') }}"
+            class="btn btn-outline-success btn-sm px-3">
+        <i class="fas fa-file-excel me-1"></i> Exporter
+    </button>
 
-        <button type="submit" class="btn btn-outline-primary btn-sm px-3">
-            <i class="fas fa-filter me-1"></i> Filtrer
-        </button>
+    <a href="{{ route('articles.index') }}" class="btn btn-outline-secondary btn-sm px-3">
+        <i class="fas fa-undo me-1"></i> Réinitialiser
+    </a>
+</form>
 
-        <a href="{{ route('articles.index') }}" class="btn btn-outline-secondary btn-sm px-3">
-            <i class="fas fa-undo me-1"></i> Réinitialiser
-        </a>
-
-    </form>
-
-    <form method="GET" action="{{ route('articles.export') }}">
-        <input type="hidden" name="search" value="{{ request('search') }}">
-        <input type="hidden" name="brand_id" value="{{ request('brand_id') }}">
-        <input type="hidden" name="category_id" value="{{ request('category_id') }}">
-        <input type="hidden" name="codefournisseur" value="{{ request('codefournisseur') }}">
-        <input type="hidden" name="store_id" value="{{ request('store_id') }}">
-        <input type="hidden" name="is_active" value="{{ request('is_active') }}">
-
-        <button type="submit" class="btn btn-outline-success btn-sm px-3">
-            <i class="fas fa-file-excel me-1"></i> Exporter Excel
-        </button>
-    </form>
 
 
 <!-- fin recherche -->
@@ -783,7 +905,7 @@
                     <th>Réference</th>
                     <th>Désignation</th>
                     <th>Marque</th>
-                    <th>Catégorie</th>
+                    <th>Famille</th>
                     <th>Prix A.HT</th>
                     <th>Prix V.HT</th>
                      <th>Fournisseur</th>
@@ -884,8 +1006,8 @@
               <!-- <th>Type</th> -->
               <th>QTE</th>
               <th>Magasin</th>
-              <th>Cout.HT</th>
-              <th>Fournisseur</th>
+              <th>Prix.HT</th>
+              <th>Source</th>
               <th>Référence</th>
               <th>Note</th>
             </tr>
@@ -896,7 +1018,7 @@
                 <td>
                                     <span class="badge bg-{{ $movement->quantity >= 0 ? 'success' : 'danger' }}">
                     {{ ucfirst($movement->type) }}
-                  </span>
+                  </span><br>
                   {{ $movement->created_at->format('d/m/Y H:i') }}</td>
                 <!-- <td>
                   <span class="badge bg-{{ $movement->quantity >= 0 ? 'success' : 'danger' }}">
@@ -1056,7 +1178,7 @@
                         </div>
 
                         <div class="mb-3 col-md-6">
-                            <label class="form-label">Catégorie</label>
+                            <label class="form-label">Famille</label>
                             <select name="category_id" class="form-select" disabled>
                                 <option value="">-- Choisir --</option>
                                 @foreach($categories as $category)
@@ -1327,7 +1449,7 @@ document.addEventListener("DOMContentLoaded", function () {
               </ul> -->
             </nav>
             <div class="copyright">
-            © TPG. All Rights Reserved.
+            © AZ NEGOCE. All Rights Reserved.
               <!-- <a href="http://www.themekita.com">By Ahmed Arfaoui</a> -->
             </div>
             <div>

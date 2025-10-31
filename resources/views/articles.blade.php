@@ -609,6 +609,19 @@
           <button type="submit" class="btn btn-outline-success btn-round ms-2" data-bs-toggle="modal" data-bs-target="#createItemModal">Nouvel Article
            <i class="fas fa-plus-circle ms-2"></i>
           </button>
+
+
+          <!-- Bouton Familles Articles -->
+        <a href="{{ url('/categories') }}" class="btn btn-outline-primary btn-round ms-2">
+            Familles Articles
+            <i class="fas fa-layer-group ms-2"></i>
+        </a>
+
+        <!-- Bouton Marques Articles -->
+        <a href="{{ url('/brands') }}" class="btn btn-outline-info btn-round ms-2">
+            Marques Articles
+            <i class="fas fa-tags ms-2"></i>
+        </a>
 </h4>
 
 
