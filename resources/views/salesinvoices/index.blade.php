@@ -653,7 +653,7 @@
                                                     <label for="payment_mode{{ $invoice->id }}" class="form-label">Mode de paiement</label>
                                                     <select class="form-control select2" id="payment_mode{{ $invoice->id }}" name="payment_mode" required>
                                                         <option value="">Sélectionner le mode de paiement</option>
-                                                        @foreach(\App\Models\PaymentMode::all() as $mode)
+                                                       @foreach(\App\Models\PaymentMode::where('type', 'encaissement')->get() as $mode)
                                                             <option value="{{ $mode->name }}">{{ $mode->name }}</option>
                                                         @endforeach
                                                     </select>
