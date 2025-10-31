@@ -672,6 +672,7 @@
                                                         <option value="caisse" {{ old('type') == 'caisse' ? 'selected' : '' }}>Caisse</option>
                                                         <option value="banque" {{ old('type') == 'banque' ? 'selected' : '' }}>Banque</option>
                                                         <option value="coffre" {{ old('type') == 'coffre' ? 'selected' : '' }}>Coffre</option>
+                                                        <option value="compte parametré" {{ old('type') == 'compte parametré' ? 'selected' : '' }}>Compte parametré</option>
                                                     </select>
                                                     @error('type')
                                                         <span class="text-danger">{{ $message }}</span>
@@ -916,6 +917,8 @@
                                                                             <option value="caisse" {{ $account->type == 'caisse' ? 'selected' : '' }}>Caisse</option>
                                                                             <option value="banque" {{ $account->type == 'banque' ? 'selected' : '' }}>Banque</option>
                                                                             <option value="coffre" {{ $account->type == 'coffre' ? 'selected' : '' }}>Coffre</option>
+                                                                            <option value="compte parametré" {{ $account->type == 'compte parametré' ? 'selected' : '' }}>Compte Parametré
+</option>
                                                                         </select>
                                                                         @error('type')
                                                                             <span class="text-danger">{{ $message }}</span>

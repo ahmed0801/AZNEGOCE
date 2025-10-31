@@ -36,7 +36,7 @@ class GeneralAccountsController extends Controller
         $request->validate([
             'account_number' => 'required|string|max:255|unique:general_accounts,account_number',
             'name' => 'required|string|max:255',
-            'type' => 'required|in:caisse,banque,coffre',
+            'type' => 'required|in:caisse,banque,coffre,compte parametré',
         ]);
 
         try {
@@ -58,7 +58,7 @@ class GeneralAccountsController extends Controller
         $request->validate([
             'account_number' => 'required|string|max:255|unique:general_accounts,account_number,' . $id,
             'name' => 'required|string|max:255',
-            'type' => 'required|in:caisse,banque,coffre',
+            'type' => 'required|in:caisse,banque,coffre,compte parametré',
         ]);
 
         try {

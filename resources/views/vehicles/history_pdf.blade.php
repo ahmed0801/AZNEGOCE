@@ -43,8 +43,8 @@
 
 <main>
     <div class="intro-text">
-        Ce document récapitule l’ensemble des pièces détachées fournies et des interventions réalisées sur le véhicule indiqué ci-dessus. 
-        Il constitue un justificatif de l’historique technique et peut être utilisé comme preuve lors d’une vente, d’une cession ou pour le suivi des réparations.
+        Ce document récapitule l’ensemble des pièces détachées fournies pour le véhicule indiqué ci-dessus. 
+        Il constitue un justificatif d'achat et peut être utilisé pour le suivi des réparations.
     </div>
 
     @foreach($deliveryNotes as $bl)
