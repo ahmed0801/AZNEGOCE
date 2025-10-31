@@ -609,6 +609,7 @@
                                 <div class="col-md-4">
                                     <label class="form-label">Fournisseur</label>
                                     <select name="supplier_id" class="form-control select2" required>
+                                        <option value="">Sélectionner un fournisseur</option>
                                         @foreach($suppliers as $supplier)
                                             <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                                         @endforeach
