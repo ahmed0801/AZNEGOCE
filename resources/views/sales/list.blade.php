@@ -480,6 +480,11 @@
                             PDF <i class="fas fa-print"></i>
                         </a>
 
+                                    <a href="{{ route('sales.print_singlesansref', $order->id) }}" class="btn btn-xs btn-outline-primary" title="Télécharger PDF" target="_blank">
+                            PDF sans Réference <i class="fas fa-print"></i>
+                        </a>
+                                    
+
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
                                             <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
