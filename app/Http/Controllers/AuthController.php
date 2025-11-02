@@ -119,15 +119,25 @@ public function adminDashboard()
     {
         
         // Today’s revenue (livré and en_cours, excluding annulé)
+        // $todayRevenue = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])
+        //     ->whereDate('delivery_date', Carbon::today())
+        //     ->sum('total_ttc');
+
         $todayRevenue = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])
-            ->whereDate('delivery_date', Carbon::today())
-            ->sum('total_ttc');
+    ->whereDate('delivery_date', Carbon::today())
+    ->sum('total_ttc') - 
+    SalesReturn::whereDate('return_date', Carbon::today())  // Assumes 'return_date' for sales returns
+    ->sum('total_ttc');
+
 
         // This month’s revenue (livré and en_cours, excluding annulé)
         // $monthRevenue = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])
         //     ->whereYear('delivery_date', Carbon::now()->year)
         //     ->whereMonth('delivery_date', Carbon::now()->month)
         //     ->sum('total_ttc');
+
+
+        
 // Revenu du mois (livré et en_cours, excluant annulé)
 $monthRevenue = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])
     ->whereYear('delivery_date', Carbon::now()->year)
