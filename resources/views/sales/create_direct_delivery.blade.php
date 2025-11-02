@@ -945,10 +945,13 @@
                 let totalHtGlobal = 0;
                 let totalTtcGlobal = 0;
                 $('#lines_body tr').each(function () {
-                    let totalHt = parseFloat($(this).find('.total_ht').text()) || 0;
-                    let totalTtc = parseFloat($(this).find('.total_ttc').text()) || 0;
-                    totalHtGlobal += totalHt;
-                    totalTtcGlobal += totalTtc;
+                    // ✅ Remplace la virgule avant conversion
+        let totalHt = parseFloat($(this).find('.total_ht').text().replace(',', '.')) || 0;
+        let totalTtc = parseFloat($(this).find('.total_ttc').text().replace(',', '.')) || 0;
+                    // ✅ Arrondir à 2 décimales avant l'addition
+        totalHtGlobal += Math.round(totalHt * 100) / 100;
+        totalTtcGlobal += Math.round(totalTtc * 100) / 100;
+
                 });
                 $('#total_ht_global').text(totalHtGlobal.toFixed(2).replace('.', ','));
                 $('#total_ttc_global').text(totalTtcGlobal.toFixed(2).replace('.', ','));

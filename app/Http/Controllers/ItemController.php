@@ -124,9 +124,9 @@ public function indexold(Request $request)
 
 public function store(Request $request)
 {
-    // 1. Validation des champs
+    // 1️⃣ Validation des champs (sans la contrainte "unique")
     $validated = $request->validate([
-        'code'           => 'required|string|max:255|unique:items,code',
+        'code'           => 'required|string|max:255',
         'name'           => 'required|string|max:255',
         'description'    => 'nullable|string',
         'category_id'    => 'nullable|exists:item_categories,id',
@@ -139,36 +139,48 @@ public function store(Request $request)
         'stock_min'      => 'nullable|integer|min:0',
         'stock_max'      => 'nullable|integer|min:0',
         'is_active'      => 'nullable|boolean',
-        'store_id' => 'nullable|exists:stores,id',
-        'codefournisseur' => 'nullable|exists:suppliers,code',
-'location' => 'nullable|string|max:255',
-
+        'store_id'       => 'nullable|exists:stores,id',
+        'codefournisseur'=> 'nullable|exists:suppliers,code',
+        'location'       => 'nullable|string|max:255',
     ]);
 
-    // 2. Création de l’article
-    $item = Item::create([
-        'code'           => $validated['code'],
-        'name'           => $validated['name'],
-        'description'    => $validated['description'] ?? null,
-        'category_id'    => $validated['category_id'] ?? null,
-        'brand_id'       => $validated['brand_id'] ?? null,
-        'unit_id'        => $validated['unit_id'] ?? null,
-        'tva_group_id'   => $validated['tva_group_id'] ?? null,
-        'barcode'        => $validated['barcode'] ?? null,
-        'cost_price'     => $validated['cost_price'] ?? 0.00,
-        'sale_price'     => $validated['sale_price'] ?? 0.00,
-        'stock_min'      => $validated['stock_min'] ?? 0,
-        'stock_max'      => $validated['stock_max'] ?? 0,
-        'store_id' => $validated['store_id'] ?? null,
+    // 2️⃣ Gestion du code pour qu’il soit unique
+    $code = $validated['code'];
+    $originalCode = $code;
+    $maxTries = 20; // pour éviter les boucles infinies
+    $tries = 0;
+
+    while (\App\Models\Item::where('code', $code)->exists() && $tries < $maxTries) {
+        $code .= '.';
+        $tries++;
+    }
+
+    // 3️⃣ Création de l’article avec le code corrigé
+    $item = \App\Models\Item::create([
+        'code'            => $code,
+        'name'            => $validated['name'],
+        'description'     => $validated['description'] ?? null,
+        'category_id'     => $validated['category_id'] ?? null,
+        'brand_id'        => $validated['brand_id'] ?? null,
+        'unit_id'         => $validated['unit_id'] ?? null,
+        'tva_group_id'    => $validated['tva_group_id'] ?? null,
+        'barcode'         => $validated['barcode'] ?? null,
+        'cost_price'      => $validated['cost_price'] ?? 0.00,
+        'sale_price'      => $validated['sale_price'] ?? 0.00,
+        'stock_min'       => $validated['stock_min'] ?? 0,
+        'stock_max'       => $validated['stock_max'] ?? 0,
+        'store_id'        => $validated['store_id'] ?? null,
         'codefournisseur' => $validated['codefournisseur'] ?? null,
-'location' => $validated['location'] ?? null,
-
-        'is_active'      => true,
+        'location'        => $validated['location'] ?? null,
+        'is_active'       => true,
     ]);
 
-    // 3. Redirection ou réponse AJAX
-    return redirect()->back()->with('success', 'Article créé avec succès.');
+    // 4️⃣ Redirection avec message précisant le code final
+    return redirect()
+        ->back()
+        ->with('success', "Article créé avec succès (code final : {$code}).");
 }
+
 
 
 
