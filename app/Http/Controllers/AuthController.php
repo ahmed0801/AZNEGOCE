@@ -174,6 +174,20 @@ $monthRevenue -= $salesReturns;
             ->pluck('total', 'date')
             ->toArray(); // Convert to array to avoid array_keys() error
 
+
+        // Retours des 30 derniers jours
+$salesReturnsLastMonth = SalesReturn::where('return_date', '>=', Carbon::now()->subDays(30))
+    ->groupBy(DB::raw('DATE(return_date)'))
+    ->get([
+        DB::raw('DATE(return_date) as date'),
+        DB::raw('SUM(total_ttc) as total')
+    ])
+    ->pluck('total', 'date')
+    ->toArray();
+
+        
+$salesLastMonth -= $salesReturnsLastMonth;
+
         // Deliveries by status
         $deliveriesByStatus = [
             'en_cours' => DeliveryNote::where('status', 'en_cours')->count(),
