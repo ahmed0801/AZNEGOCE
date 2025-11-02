@@ -184,9 +184,17 @@ $salesReturnsLastMonth = SalesReturn::where('return_date', '>=', Carbon::now()->
     ])
     ->pluck('total', 'date')
     ->toArray();
-
+// Soustraction des retours jour par jour
+foreach ($salesReturnsLastMonth as $date => $returnTotal) {
+    if (isset($salesLastMonth[$date])) {
+        $salesLastMonth[$date] -= $returnTotal;
+    } else {
+        // Si un jour n’a que des retours, on le garde négatif
+        $salesLastMonth[$date] = -$returnTotal;
+    }
+}
         
-$salesLastMonth -= $salesReturnsLastMonth;
+
 
         // Deliveries by status
         $deliveriesByStatus = [
