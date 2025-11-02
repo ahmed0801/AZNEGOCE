@@ -18,6 +18,7 @@ use App\Models\SalesOrder;
 use App\Models\DeliveryNote;
 use App\Models\Customer;
 use App\Models\DeliveryNoteLine;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
@@ -36,7 +37,7 @@ class AuthController extends Controller
         // Formulaire de connexion pour les administrateurs
         public function loginFormAdmin()
         {
-            return view('admin.loginFormAdmin');
+            return view('admin.loginforadmin');
         }
 
 
@@ -113,61 +114,76 @@ class AuthController extends Controller
 
 
 
-
-    
-     public function adminDashboard()
+public function adminDashboard()
     {
-        // Totaux (KPIs)
-        $totalDeliveredValue = DeliveryNote::where('status', 'livré')
-            ->sum('total_ttc'); // Total value of delivered delivery notes
-        $totalDeliveries = DeliveryNote::count(); // Total number of delivery notes
-        $pendingDeliveries = DeliveryNote::where('status', 'en_cours')
-            ->count(); // Number of pending delivery notes
-        $newCustomers = Customer::latest()->take(5)->get(); // Recent customers
+        // Today’s revenue (livré and en_cours, excluding annulé)
+        $todayRevenue = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])
+            ->whereDate('delivery_date', Carbon::today())
+            ->sum('total_ttc');
 
-        // CA par date (bons de livraison sur 30 jours, status = livré)
-        $salesLastMonth = DeliveryNote::selectRaw("DATE(delivery_date) as date, SUM(total_ttc) as total")
-            ->where('delivery_date', '>=', now()->subMonth())
-            ->where('status', 'livré')
+        // This month’s revenue (livré and en_cours, excluding annulé)
+        $monthRevenue = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])
+            ->whereYear('delivery_date', Carbon::now()->year)
+            ->whereMonth('delivery_date', Carbon::now()->month)
+            ->sum('total_ttc');
+
+
+
+        // Pending deliveries (en_cours)
+        $pendingDeliveries = DeliveryNote::where('status', 'en_cours')->count();
+ 
+        // New customers (created this month)
+        $newCustomers = Customer::whereYear('created_at', Carbon::now()->year)
+            ->whereMonth('created_at', Carbon::now()->month)
+            ->get();
+
+        // Sales last 30 days (for chart, excluding annulé)
+        $salesLastMonth = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])
+            ->where('delivery_date', '>=', Carbon::now()->subDays(30))
             ->groupBy('date')
             ->orderBy('date')
-            ->get()
+            ->get([
+                DB::raw('DATE(delivery_date) as date'),
+                DB::raw('SUM(total_ttc) as total')
+            ])
             ->pluck('total', 'date')
-            ->toArray();
+            ->toArray(); // Convert to array to avoid array_keys() error
 
-        // Distribution des bons de livraison par statut (pour camembert)
-        $deliveriesByStatus = DeliveryNote::select('status', DB::raw('COUNT(*) as count'))
-            ->groupBy('status')
-            ->pluck('count', 'status')
-            ->toArray();
+        // Deliveries by status
+        $deliveriesByStatus = [
+            'en_cours' => DeliveryNote::where('status', 'en_cours')->count(),
+            'Expédié' => DeliveryNote::where('status', 'Expédié')->count(),
+            'annulé' => DeliveryNote::where('status', 'annulé')->count(),
+        ];
 
-        // Top 5 articles par quantité livrée
+        // Top 5 articles by quantity (livré and en_cours)
         $topArticles = DeliveryNoteLine::select('article_code', DB::raw('SUM(delivered_quantity) as total_quantity'))
             ->join('delivery_notes', 'delivery_note_lines.delivery_note_id', '=', 'delivery_notes.id')
-            ->where('delivery_notes.status', 'livré')
+            ->whereIn('delivery_notes.status', ['Expédié', 'en_cours'])
             ->groupBy('article_code')
             ->orderByDesc('total_quantity')
             ->take(5)
             ->get();
 
-        // CA par client top 5 (basé sur bons de livraison)
+        // Top 5 clients by revenue (livré and en_cours)
         $topClients = DeliveryNote::select('numclient', DB::raw('SUM(total_ttc) as total'))
-            ->where('status', 'livré')
+            ->whereIn('status', ['Expédié', 'en_cours'])
             ->groupBy('numclient')
             ->with('customer')
             ->orderByDesc('total')
             ->take(5)
             ->get();
 
-        // Historique récent des bons de livraison
+        // Recent deliveries (last 7)
         $recentDeliveries = DeliveryNote::with('customer')
-            ->orderBy('delivery_date', 'desc')
+            ->orderBy('numdoc', 'desc')
             ->take(7)
             ->get();
 
         return view('admin.dashboard', compact(
-            'totalDeliveredValue',
-            'totalDeliveries',
+            'todayRevenue',
+            'monthRevenue',
+
             'pendingDeliveries',
             'newCustomers',
             'salesLastMonth',
@@ -177,8 +193,6 @@ class AuthController extends Controller
             'recentDeliveries'
         ));
     }
-
-
 
 
    public function store(Request $request)
