@@ -79,12 +79,14 @@ class ImportGoldaTarifs extends Command
 
     // 🚫 Liste des fournisseurs à ignorer
     $fournisseursIgnorer = [
-        'AUTO DISTRIBUTION',
-        'MISTER AUTO',
-        'PIECES AUTO SERVICE',
-        'AUTODOC',
-        'PARTS FRANCE'
-        // ajoute ici d'autres noms exacts à exclure
+        'C-CARPARTS',
+        'DRiV',
+        'ELECTRICFIL SERVICE',
+        'FRANCELEC',
+        'IRONTEK',
+        'LRT AUTOMOTIVE GmbH',
+        'EXADIS',
+        
     ];
 
     // Si le fournisseur est dans la liste noire, on saute totalement son traitement
