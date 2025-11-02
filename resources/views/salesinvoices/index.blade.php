@@ -641,7 +641,7 @@
 
 <div class="mb-3">
                                                     <label for="amount{{ $invoice->id }}" class="form-label">Montant (€)</label>
-                                                    <input type="number" step="0.01" class="form-control" id="amount{{ $invoice->id }}" name="amount" max="{{ $invoice->getRemainingBalanceAttribute() }}"  value== '{{ abs($invoice->getRemainingBalanceAttribute()) }}'" required>
+                                                    <input type="number" step="0.01" class="form-control" id="amount{{ $invoice->id }}" name="amount" max="{{ $invoice->getRemainingBalanceAttribute() }}"  value="{{ abs($invoice->getRemainingBalanceAttribute()) }}" required>
                                                     <small>Reste à payer : {{ number_format($invoice->getRemainingBalanceAttribute(), 2, ',', ' ') }} €</small>
                                                         <!-- Bouton Lettrer -->
     <button 
