@@ -481,7 +481,7 @@
                         </a>
 
                                     <a href="{{ route('sales.print_singlesansref', $order->id) }}" class="btn btn-xs btn-outline-primary" title="Télécharger PDF" target="_blank">
-                            PDF sans Réference <i class="fas fa-print"></i>
+                            PDF SANS REFERENCE <i class="fas fa-print"></i>
                         </a>
                                     
 
