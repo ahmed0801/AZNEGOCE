@@ -11,6 +11,7 @@ use League\Csv\Statement;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\GoldaImportReport;
+use App\Models\ItemCategory;
 
 class ImportGoldaTarifs extends Command
 {
@@ -81,6 +82,7 @@ class ImportGoldaTarifs extends Command
             $supplier = Supplier::firstOrCreate(
                 ['name' => $fournisseurName],
                 ['code' => $prefixe]
+                // ,['tva_group_id' => 1]
             );
 
             $this->info("➡️ Traitement fournisseur : {$fournisseurName} ({$prefixe})");
@@ -133,11 +135,19 @@ $category_id = trim($i['Code_famille_NU'] ?? '');
                         // Création ou mise à jour de l'article
                         $item = Item::where('code', $ref)->first();
 
+
+
+                        $category = $category_id ? ItemCategory::find($category_id) : null;
+$margin = $category ? $category->default_sale_margin : 30.00;
+$sale_price = round($price * (1 + $margin / 100), 2);
+
+
                         if ($item) {
                             $item->update([
     'codefournisseur' => $supplier->code,
     'name' => $name,
     'cost_price' => $price,
+    'sale_price' => $sale_price,
     'barcode' => $ean,
     'Poids' => $poids,
     'Hauteur' => $hauteur,
