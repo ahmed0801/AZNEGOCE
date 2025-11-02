@@ -309,6 +309,8 @@ Route::post('/stock/movement', [StockMovementController::class, 'store'])->name(
 Route::get('/export/{id}', [SalesController::class, 'exportSingle'])->name('sales.export_single');
     Route::get('/sales/print/{id}', [SalesController::class, 'printSingle'])->name('sales.print_single');
 
+Route::get('/sales/printsansref/{id}', [SalesController::class, 'printSinglesansref'])->name('sales.print_singlesansref');
+
 
     Route::get('/items/stock-details', [SalesController::class, 'stockDetails'])->name('items.stock.details');
 
