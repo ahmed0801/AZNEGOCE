@@ -1,91 +1,190 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <meta charset="utf-8">
-    <title>Devis #{{ $entetedevis->id }}</title>
+    <meta charset="UTF-8">
+    <title>Commande #{{ $order->numdoc }}</title>
     <style>
+        /* Reset defaults for PDF compatibility */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    margin: 150px 40px 100px 40px; /* espace pour header */
-    position: relative;
-}
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 12px;
+            color: #333333;
+            margin: 40px 40px 60px 40px;
+            line-height: 1.4;
+        }
 
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 100px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 10px;
-    background-color: white;
-    z-index: 1000;
-}
+        /* Page layout for A4 */
+        @page {
+            margin: 15mm;
+        }
 
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 110px;
+            text-align: center;
+            border: 4px double #007bff;
+            background-color: #f8f9fa;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            position: relative;
+        }
 
-        header img {
-            height: 65px;
+        /* Blue triangles in header corners */
+        header::before,
+        header::after,
+        header .triangle-top-right,
+        header .triangle-bottom-left {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            z-index: 1001;
+        }
+
+        header::before {
+            top: -2px;
+            left: -2px;
+            border-width: 25px 25px 0 0;
+            border-color: #007bff transparent transparent transparent;
+        }
+
+        header::after {
+            bottom: -2px;
+            right: -2px;
+            border-width: 0 0 25px 25px;
+            border-color: transparent transparent #007bff transparent;
+        }
+
+        header .triangle-top-right {
+            top: -2px;
+            right: -2px;
+            border-width: 0 15px 15px 0;
+            border-color: transparent #007bff transparent transparent;
+        }
+
+        header .triangle-bottom-left {
+            bottom: -2px;
+            left: -2px;
+            border-width: 15px 0 0 15px;
+            border-color: transparent transparent transparent #007bff;
+        }
+
+        header img.logo {
+            height: 85px;
             float: left;
+            margin-left: 5px;
         }
 
         header h1 {
-            margin: 0;
-            font-size: 24px;
+            margin: 20px 0 10px 0;
+            font-size: 20px;
             color: #2c3e50;
+            font-weight: bold;
         }
 
         header h4 {
             margin: 0;
             font-size: 14px;
-            color: #555;
+            color: #555555;
         }
 
-        footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 90px; /* ou plus selon ta hauteur */
-    padding: 10px 40px; /* ajouter du padding pour que le texte ne colle pas */
-    background-color: #f9f9f9;
-    font-size: 10px;
-    color: #555;
-    border-top: 1px solid #ddd;
-    line-height: 1.3;
-    box-sizing: border-box; /* pour que padding soit inclus dans la hauteur */
-    overflow: visible; /* autoriser le contenu à déborder si besoin */
-    z-index: 1000;
-}
+        header h4.barcode-container {
+            margin-bottom: 10px;
+        }
 
+        header img.barcode {
+            height: 15px;
+            margin-top: 3px;
+            margin-left: 80px;
+        }
+
+        /* Footer */
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 90px;
+            padding: 10px 40px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            font-size: 10px;
+            border-top: 2px double #007bff;
+            line-height: 1.3;
+            text-align: center;
+            z-index: 1000;
+        }
 
         footer hr {
             margin-bottom: 5px;
+            border-color: #555555;
         }
 
+        /* Main content */
+        main {
+            margin: 20px 0;
+        }
+
+        /* Tables */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin: 15px 0;
         }
 
         th, td {
-            border: 1px solid #000;
-            padding: 6px;
+            border: 1px solid #2c3e50;
+            padding: 8px;
             text-align: center;
         }
 
         th {
-            background-color: #f0f0f0;
+            background-color: #e9ecef;
+            color: #2c3e50;
+            font-weight: bold;
+            border-bottom: 2px solid #007bff;
         }
 
+        .info-table {
+            margin-bottom: 20px;
+            border: 1px solid #2c3e50;
+        }
+
+        .info-table td {
+            text-align: left;
+            padding: 6px;
+            border: none;
+        }
+
+        .info-table tr:nth-child(odd) {
+            background-color: #f8f9fa;
+        }
+
+        .items-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Totals box */
         .totals-box {
             width: 300px;
-            margin-left: auto;
-            margin-top: 20px;
-            border: 1px solid #000;
+            margin: 20px 0 0 auto;
+            border: 2px double #2c3e50;
             padding: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .totals-box table {
@@ -93,109 +192,113 @@ header {
         }
 
         .totals-box td {
+            padding: 5px;
             border: none;
-            padding: 5px 0;
             text-align: right;
         }
 
         .totals-box td.label {
             text-align: left;
+            font-weight: bold;
         }
 
-        .info-table td {
-            text-align: left;
-            padding: 4px;
+        /* Clear floats */
+        .clearfix::after {
+            content: "";
+            display: table;
+            clear: both;
         }
     </style>
 </head>
 <body>
+    <header>
+        <img src="{{ public_path($company->logo_path) }}" alt="Logo" class="logo">
+        <h1>{{ $company->name }}</h1>
+        <h4>@if($order->status == 'Devis' ) Devis N° @else  Commande N°  @endif : {{ $order->numdoc }}</h4>
+        <h4 class="barcode-container"><img src="{{ $barcode }}" alt="Code-barres" class="barcode"></h4>
+        <div class="triangle-top-right"></div>
+        <div class="triangle-bottom-left"></div>
+    </header>
 
-<header>
-    <img src="{{ public_path('assets/img/logop.png') }}" alt="Logo">
-    <h1>TRUCK PARTS GROUP</h1>
-    <h4>Devis N° : DEV-{{ $entetedevis->id }}</h4>
-</header>
-
-<footer>
-    <hr>
-    <p>
-        <strong>TRUCK PARTS GROUP s.a.r.l</strong> &nbsp;&nbsp; | &nbsp;&nbsp; 28, Boulevard de l'Environnement, L'Ariana 2080 Tunis<br>
-        MF : 1347574QBM000 &nbsp;&nbsp; | &nbsp;&nbsp; | &nbsp;&nbsp; SWIFT : BHBKTNTT &nbsp;&nbsp; | &nbsp;&nbsp; Tél. : 70 732 415 / 20 467 467<br>
-        RIB : 9041017008642 &nbsp;&nbsp; | &nbsp;&nbsp; IBAN : TN59 1490 4904 1017 0086 4226 &nbsp;&nbsp; | &nbsp;&nbsp; Email : <strong>truckparts.ls@gmail.com</strong><br>
-        
-    </p>
-</footer>
-
-<main>
-    <table class="info-table">
-        <tr>
-            <td><strong>Code client :</strong> {{ $entetedevis->user_id ?? '-' }}</td>
-            <td><strong>Nom Client :</strong> {{ $entetedevis->CustomerName ?? '-' }}</td>
-
-        </tr>
-        <tr>
-            <td><strong>Matricule fiscale :</strong> {{ $entetedevis->MatFiscale ?? '-' }}</td>
-            <td><strong>Adresse :</strong> {{ $entetedevis->VATCode ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td><strong>Date :</strong> {{ $entetedevis->created_at->format('d/m/Y H:i') }}</td>
-            <td><strong>Ce devis est valable 30 jours à compter de la date d’émission</strong> </td>
-
-        </tr>
-    </table>
-
-    <table>
-        <thead>
+    <main>
+        <table class="info-table">
             <tr>
-            <th>Référence</th>
-                <th>Désignation</th>
-                <th>Prix U.HT</th>
-                <th>Qté</th>
-                <th>Remise</th>
-                <th>Total HT</th>
-                <th>Total TTC</th>
-            </tr>
-        </thead>
-        <tbody>
-            @php $totalHT = 0; @endphp
-            @foreach ($details as $item)
-                @php
-                    $remise = $item->remise ?? 0;
-                    $prixRemise = $item->price * (1 - $remise / 100);
-                    $totalLigne = $prixRemise * $item->quantity;
-                    $totalHT += $totalLigne;
-                @endphp
-                <tr>
-                <td></td>
-                    <td>{{ $item->item_name }}</td>
-                    <td>{{ number_format($item->price, 3, ',', ' ') }}</td>
-                    <td>{{ $item->quantity }}</td>
-                    <td>{{ $remise }}%</td>
-                    <td>{{ number_format($totalLigne, 3, ',', ' ') }}</td>
-                    <td><strong>{{ number_format($totalHT * 1.19, 3, ',', ' ') }} TND</strong></td>
-
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    <div class="totals-box">
-        <table>
-            <tr>
-                <td class="label"><strong>Total HT :</strong></td>
-                <td><strong>{{ number_format($totalHT, 3, ',', ' ') }} TND</strong></td>
+                <td><strong>Client :</strong> {{ $order->customer->name ?? '-' }}</td>
+                <td><strong>Date Commande :</strong> {{ \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') }}</td>
             </tr>
             <tr>
-                <td class="label"><strong>TVA (19%) :</strong></td>
-                <td><strong>{{ number_format($totalHT * 0.19, 3, ',', ' ') }} TND</strong></td>
+                <td><strong>N° Client :</strong> {{ $order->customer->code ?? '-' }}</td>
+                <td><strong>Statut :</strong> {{ ucfirst($order->status) }}</td>
             </tr>
             <tr>
-                <td class="label"><strong>Total TTC :</strong></td>
-                <td><strong>{{ number_format($totalHT * 1.19, 3, ',', ' ') }} TND</strong></td>
+                <td><strong>TVA Client :</strong> {{ number_format($order->customer->tvaGroup->rate ?? ($order->total_ht > 0 ? ($order->total_ttc / $order->total_ht - 1) * 100 : 0), 2, ',', ' ') }}%</td>
+                <td><strong>Statut BL :</strong> {{ $order->deliveryNote ? ucfirst($order->deliveryNote->status) : 'Aucun BL' }}</td>
             </tr>
         </table>
-    </div>
-</main>
 
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <!-- <th>Code Article</th> -->
+                    <th>Article</th>
+                    <th>Qté</th>
+                    <th>PU HT</th>
+                    <th>Remise (%)</th>
+                    <th>Total HT</th>
+                    <th>Total TTC</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                    $totalHT = 0;
+                    $tvaRate = $order->customer->tvaGroup->rate ?? ($order->total_ht > 0 ? ($order->total_ttc / $order->total_ht - 1) * 100 : 0);
+                @endphp
+                @foreach ($order->lines as $line)
+                    @php
+                        $totalLigne = $line->unit_price_ht * $line->ordered_quantity * (1 - ($line->remise / 100));
+                        $totalLigneTTC = $totalLigne * (1 + $tvaRate / 100);
+                        $totalHT += $totalLigne;
+                    @endphp
+                    <tr>
+                        <!-- <td>{{ $line->article_code ?? '-' }}</td> -->
+                        <td>{{ $line->item->name ?? '-' }}</td>
+                        <td>{{ $line->ordered_quantity }}</td>
+                        <td>{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
+                        <td>{{ $line->remise }}%</td>
+                        <td>{{ number_format($totalLigne, 2, ',', ' ') }} €</td>
+                        <td>{{ number_format($totalLigneTTC, 2, ',', ' ') }} €</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <div class="totals-box">
+            <table>
+                <tr>
+                    <td class="label">Total HT :</td>
+                    <td>{{ number_format($totalHT, 2, ',', ' ') }} €</td>
+                </tr>
+                <tr>
+                    <td class="label">TVA ({{ number_format($tvaRate, 2, ',', ' ') }}%) :</td>
+                    <td>{{ number_format($totalHT * ($tvaRate / 100), 2, ',', ' ') }} €</td>
+                </tr>
+                <tr>
+                    <td class="label">Total TTC :</td>
+                    <td>{{ number_format($order->total_ttc, 2, ',', ' ') }} €</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="clearfix"></div>
+    </main>
+
+    <footer>
+        <hr>
+        <p>
+            <strong>{{ $company->name }}</strong> | {{ $company->address }}<br>
+            MF : {{ $company->matricule_fiscal }} | SWIFT : {{ $company->swift }} | Tél : {{ $company->phone }}<br>
+            RIB : {{ $company->rib }} | IBAN : {{ $company->iban }} | Email : <strong>{{ $company->email }}</strong>
+        </p>
+    </footer>
 </body>
 </html>
