@@ -460,20 +460,20 @@
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
                                     <div>
                                         <h6 class="mb-0">
-                                            <strong>Facture N° : {{ $invoice->numdoc }}</strong>
-                                            <span class="badge rounded-pill text-bg-secondary">{{ number_format($invoice->total_ttc, 2, ',', ' ') }} € TTC</span> –
+                                            <strong>Facture N° : {{ $invoice->numdoc }}</strong> –
                                             &#x1F482;{{ $invoice->customer->name ?? 'N/A' }}
                                             <span class="text-muted small">({{ $invoice->numclient ?? 'N/A' }})</span>
                                             <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</span>
 
                                              
                                              
-                                        </h6><hr>
+                                        </h6>
                                         @if($invoice->status === 'brouillon')
                                             <span class="badge bg-secondary">{{ ucfirst($invoice->status) }}</span>
                                         @else
                                             <span class="badge bg-success">{{ ucfirst($invoice->status) }}</span>
                                         @endif
+                                        <span class="badge rounded-pill text-bg-secondary">Total  TTC : {{ number_format($invoice->total_ttc, 2, ',', ' ') }} €</span> 
                                         @if($invoice->status != 'brouillon')
                                             @if($invoice->paid)
                                                 <span class="badge bg-success">Payé</span>
@@ -653,7 +653,7 @@
                                                     <label for="payment_mode{{ $invoice->id }}" class="form-label">Mode de paiement</label>
                                                     <select class="form-control select2" id="payment_mode{{ $invoice->id }}" name="payment_mode" required>
                                                         <option value="">Sélectionner le mode de paiement</option>
-                                                        @foreach(\App\Models\PaymentMode::all() as $mode)
+                                                       @foreach(\App\Models\PaymentMode::where('type', 'encaissement')->get() as $mode)
                                                             <option value="{{ $mode->name }}">{{ $mode->name }}</option>
                                                         @endforeach
                                                     </select>
