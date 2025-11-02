@@ -18,6 +18,7 @@ use App\Models\SalesOrder;
 use App\Models\DeliveryNote;
 use App\Models\Customer;
 use App\Models\DeliveryNoteLine;
+use App\Models\SalesReturn;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
