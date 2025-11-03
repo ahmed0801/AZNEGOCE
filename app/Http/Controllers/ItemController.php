@@ -63,7 +63,7 @@ if ($request->has('is_active') && $request->is_active !== null && $request->is_a
 
 
 
-    $items = $query->orderBy('name')->paginate(150)->withQueryString();
+    $items = $query->orderBy('name')->paginate(50)->withQueryString();
 
     return view('articles', [
         'items' => $items,
