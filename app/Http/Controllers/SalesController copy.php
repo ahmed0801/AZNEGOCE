@@ -1064,6 +1064,15 @@ public function validateOrder($id)
                 'stock_quantity' => $item->getStockQuantityAttribute(),
                 'cost_price' => $item->cost_price,
                 'sale_price' => $item->sale_price,
+
+                 // 🔹 Nouveaux champs importés depuis GOLDA
+            'Poids' => $item->Poids,
+            'Hauteur' => $item->Hauteur,
+            'Longueur' => $item->Longueur,
+            'Largeur' => $item->Largeur,
+            'Ref_TecDoc' => $item->Ref_TecDoc,
+            'Code_pays' => $item->Code_pays,
+            'Code_douane' => $item->Code_douane,
             ];
         });
 
@@ -1117,6 +1126,39 @@ public function exportSingle($id)
         $pdf = PDF::loadView('pdf.sales_order', compact('order', 'company', 'barcode'));
         return $pdf->stream("commande_vente_{$order->numdoc}.pdf");
     }
+
+
+
+
+
+// devis sans ref
+     public function printSinglesansref($id)
+    {
+        $order = SalesOrder::with(['customer', 'deliveryNote', 'lines.item', 'customer.tvaGroup'])->findOrFail($id);
+        $company = CompanyInformation::first() ?? new CompanyInformation([
+            'name' => 'Test Company S.A.R.L',
+            'address' => '123 Rue Fictive, Tunis 1000',
+            'phone' => '+216 12 345 678',
+            'email' => 'contact@testcompany.com',
+            'matricule_fiscal' => '1234567ABC000',
+            'swift' => 'TESTTNTT',
+            'rib' => '123456789012',
+            'iban' => 'TN59 1234 5678 9012 3456 7890',
+            'logo_path' => 'assets/img/test_logo.png',
+        ]);
+
+        $generator = new BarcodeGeneratorPNG();
+        $barcode = 'data:image/png;base64,' . base64_encode(
+            $generator->getBarcode($order->numdoc, $generator::TYPE_CODE_128)
+        );
+
+        $pdf = PDF::loadView('pdf.devissansref', compact('order', 'company', 'barcode'));
+        return $pdf->stream("devis_{$order->numdoc}.pdf");
+    }
+
+
+
+    
 
     /**
      * Print a single invoice.
@@ -1270,6 +1312,8 @@ public function exportSingle($id)
         throw new \Exception('Impossible de générer un numéro de document unique après plusieurs tentatives.');
     });
 }
+
+
 
 
 

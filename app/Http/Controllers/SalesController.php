@@ -1038,8 +1038,8 @@ public function validateOrder($id)
         if ($request->filled('query')) {
             $searchTerm = $request->query('query');
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('code', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('name', 'like', '%' . $searchTerm . '%');
+                $q->where('code', 'like',$searchTerm . '%')
+                  ->orWhere('name', 'like',$searchTerm . '%');
             });
         }
         if ($request->filled('brand_id')) {
