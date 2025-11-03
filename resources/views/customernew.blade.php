@@ -246,12 +246,12 @@
 
         <div class="mb-3 col-md-6">
             <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control" required>
+            <input type="email" name="email" class="form-control">
         </div>
 
         <div class="mb-3 col-md-4">
             <label class="form-label">Téléphone 1</label>
-            <input type="text" name="phone1" class="form-control" required>
+            <input type="text" name="phone1" class="form-control">
         </div>
 
         <div class="mb-3 col-md-4">
@@ -266,7 +266,7 @@
 
         <div class="mb-3 col-md-6">
             <label class="form-label">Adresse</label>
-            <input type="text" name="address" class="form-control" required>
+            <input type="text" name="address" class="form-control">
         </div>
 
         <div class="mb-3 col-md-6">
@@ -276,7 +276,7 @@
 
         <div class="mb-3 col-md-4">
             <label class="form-label">Pays</label>
-            <input type="text" name="country" class="form-control" value="France" required>
+            <input type="text" name="country" class="form-control" value="France">
         </div>
 
         <div class="mb-3 col-md-4">
