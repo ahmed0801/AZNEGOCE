@@ -798,11 +798,15 @@
                 </div>
             </div>
 
+
+
+
             <!-- Section Utilisateurs -->
             <div class="settings-section" id="section-users" data-section="users">
                 <h4 class="section-header users">Utilisateurs</h4>
                 <p class="section-description">Gérez les utilisateurs et leurs remises.</p>
                 <div class="row">
+                                @if(Auth::user()->role != "vendeur")
                     <div class="col-sm-6 col-md-4 mb-3 setting-card" data-keywords="utilisateur compte accès">
                         <a href="/users" class="text-decoration-none">
                             <div class="card card-stats card-danger card-round text-center">
@@ -817,6 +821,9 @@
                             </div>
                         </a>
                     </div>
+
+                                            @endif
+
                     <div class="col-sm-6 col-md-4 mb-3 setting-card" data-keywords="remise groupe réduction">
                         <a href="/groupremises" class="text-decoration-none">
                             <div class="card card-stats card-danger card-round text-center">
@@ -833,6 +840,7 @@
                     </div>
                 </div>
             </div>
+                        
  </div>
 
 
