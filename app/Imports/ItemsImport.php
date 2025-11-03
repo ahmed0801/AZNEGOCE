@@ -66,7 +66,7 @@ if (!empty($row['tva_group'])) {
         'name' => $row['name'] ?? null,
         'description' => $row['description'] ?? null,
         'category_id' => $category ? $category->id : null,
-        'brand_id' => $brand ? $brand->id : null,
+        // 'brand_id' => $brand ? $brand->id : null,
         'unit_id' => $unit ? $unit->id : null,
         'barcode' => $row['barcode'] ?? null,
         'cost_price' => $costPrice,
