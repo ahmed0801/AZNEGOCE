@@ -21,7 +21,7 @@ class ItemsImport implements ToCollection, WithHeadingRow
 
             // --- Gestion des clés étrangères par nom réel ---
             $category = !empty($row['category']) ? ItemCategory::firstOrCreate(['name' => $row['category']]) : null;
-            $brand    = !empty($row['brand']) ? Brand::firstOrCreate(['name' => $row['brand']]) : null;
+            // $brand    = !empty($row['brand']) ? Brand::firstOrCreate(['name' => $row['brand']]) : null;
             $unit     = !empty($row['unit']) ? Unit::firstOrCreate(['label' => $row['unit']]) : null;
             $store    = !empty($row['store']) ? Store::firstOrCreate(['name' => $row['store']]) : null;
 
