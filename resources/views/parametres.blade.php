@@ -644,6 +644,25 @@
                             </div>
                         </a>
                     </div>
+
+
+
+                    <div class="col-sm-6 col-md-4 mb-3 setting-card" data-keywords="article catégorie classification">
+                        <a href="/articles/import" class="text-decoration-none">
+                            <div class="card card-stats card-success card-round text-center">
+                                <div class="card-body">
+                                    <div class="icon-big text-center text-success">
+                                        <i class="fas fa-file-excel"></i>
+                                    </div>
+                                    <div class="numbers mt-2">
+                                        <p class="card-category">Importation Articles Depuis Excel</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+
                     <div class="col-sm-6 col-md-4 mb-3 setting-card" data-keywords="article unité mesure">
                         <a href="/units" class="text-decoration-none">
                             <div class="card card-stats card-success card-round text-center">

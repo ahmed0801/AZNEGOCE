@@ -611,6 +611,9 @@
           </button>
 
 
+
+
+
           <!-- Bouton Familles Articles -->
         <a href="{{ url('/categories') }}" class="btn btn-outline-primary btn-round ms-2">
             Familles Articles
@@ -622,6 +625,13 @@
             Marques Articles
             <i class="fas fa-tags ms-2"></i>
         </a>
+
+
+                  <a href="{{ route('articles.import') }}" class="btn btn-outline-danger btn-round ms-2">
+    <i class="fas fa-file-excel me-2"></i> Importer d'Excel
+</a>
+
+
 </h4>
 
 

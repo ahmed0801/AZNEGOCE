@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ArticleImportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AvoirController;
 use App\Http\Controllers\BotController;
@@ -747,6 +748,27 @@ Route::get('/lastarrivage/{id}', [AdminController::class, 'showArrivage'])->name
     Route::delete('/users/{user}', [AuthController::class, 'destroy'])->name('users.destroy');
 
 
+
+
+
+
+
+
+
+        Route::get('/articles/import', [ArticleImportController::class, 'showForm'])->name('articles.import.form');
+    Route::get('/articles/import/template', [ArticleImportController::class, 'downloadTemplate'])->name('articles.import.template');
+    Route::post('/articles/import', [ArticleImportController::class, 'import'])->name('articles.import');
+Route::post('/articles/preview', [ArticleImportController::class, 'preview'])->name('articles.import.preview');
+
+
+
+
+
+
+
+
+
+    
     // Autres routes protégées...
 });
 
