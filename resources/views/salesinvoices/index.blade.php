@@ -634,6 +634,11 @@
                                         </div>
                                         <form action="{{ route('salesinvoices.make_payment', $invoice->id) }}" method="POST">
                                             @csrf
+                                          <!-- enregistrer et imprimer -->
+                                                <input type="hidden" name="print_after" id="print_after{{ $invoice->id }}" value="0">
+
+
+
                                             <div class="modal-body">
 
                                             
@@ -678,7 +683,16 @@
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+
+                                                                                                <!-- Nouveau bouton Enregistrer et Imprimer -->
+        <button type="submit" class="btn btn-success" onclick="document.getElementById('print_after{{ $invoice->id }}').value = 1;">
+            Enregistrer et Imprimer
+        </button>
+        
                                                 <button type="submit" class="btn btn-primary">Enregistrer</button>
+
+
+
                                             </div>
                                         </form>
                                     </div>
@@ -817,5 +831,18 @@ function addEmailField(id) {
             section.classList.toggle('d-none');
         }
     </script>
+
+
+
+
+@if(session('print_url'))
+<script>
+    window.open("{{ session('print_url') }}", "_blank");
+</script>
+@endif
+
+
+
+
 </body>
 </html>

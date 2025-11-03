@@ -513,6 +513,15 @@
                                         <a href="{{ route('salesinvoices.print', $invoice->id) }}" class="btn btn-xs btn-outline-primary" title="Télécharger PDF" target="_blank">
                                             PDF <i class="fas fa-print"></i>
                                         </a>
+
+
+                                                                                         @if($invoice->status === 'validée' && !$invoice->paid)
+                                         <a href="#" data-toggle="modal" data-target="#makePaymentModal{{ $invoice->id }}" class="btn btn-xs btn-outline-danger">
+                                            Régler <i class="fas fa-credit-card"></i>
+                                        </a>
+                                        @endif
+                                        
+                                        
                                         <div class="btn-group">
                                             <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                 <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
@@ -632,7 +641,7 @@
 
 <div class="mb-3">
                                                     <label for="amount{{ $invoice->id }}" class="form-label">Montant (€)</label>
-                                                    <input type="number" step="0.01" class="form-control" id="amount{{ $invoice->id }}" name="amount" max="{{ $invoice->getRemainingBalanceAttribute() }}" required>
+                                                    <input type="number" step="0.01" class="form-control" id="amount{{ $invoice->id }}" name="amount" max="{{ $invoice->getRemainingBalanceAttribute() }}"  value="{{ abs($invoice->getRemainingBalanceAttribute()) }}" required>
                                                     <small>Reste à payer : {{ number_format($invoice->getRemainingBalanceAttribute(), 2, ',', ' ') }} €</small>
                                                         <!-- Bouton Lettrer -->
     <button 
