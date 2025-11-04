@@ -534,24 +534,53 @@
                                 @endcan
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card card-round">
-                                <div class="card-header">
-                                    <div class="card-head-row">
-                                        <div class="card-title">Bons de Livraison par Statut</div>
-                                    </div>
-                                    <div class="card-category">Répartition</div>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="deliveriesByStatusChart"></canvas>
-                                   
-                                </div>
-                            </div>
-                        </div>
+
+
+<!-- After the CA chart in the row mt-4 -->
+<div class="col-md-4">
+    <div class="card card-round">
+        <div class="card-header">
+            <div class="card-head-row card-tools-still-right">
+                <h4 class="card-title">Derniers factures</h4>
+                <div class="card-tools">
+                    <a href="/salesinvoices" class="btn btn-label-primary btn-round btn-sm">
+                        <span class="btn-label"><i class="fa fa-list"></i></span> Voir Tous
+                    </a>
+                </div>
+            </div>
+            <!-- <p class="card-category">Derniers 7 factures</p> -->
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-items-center mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">Facture</th>
+                            <th scope="col" class="text-end">TTC (€)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($recentInvoices as $invoice)
+                            <tr>
+                                <th scope="row">
+                                    <a href="{{ route('salesinvoices.edit', $invoice->id) }}">{{ $invoice->numdoc }}</a> - {{ $invoice->customer->name ?? 'N/A' }} <br> {{ $invoice->created_at }}
+                                </th>
+                                <td class="text-end">{{ number_format($invoice->total_ttc, 2, ',', ' ') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+                        
                     </div>
 
                     <div class="row mt-4">
-                        <div class="col-md-12">
+                        <div class="col-md-8">
                             <div class="card card-round">
                                 <div class="card-header">
                                     <div class="card-head-row card-tools-still-right">
@@ -570,6 +599,23 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-md-4">
+                            <div class="card card-round">
+                                <div class="card-header">
+                                    <div class="card-head-row">
+                                        <div class="card-title">Bons de Livraison par Statut</div>
+                                    </div>
+                                    <div class="card-category">Répartition</div>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="deliveriesByStatusChart"></canvas>
+                                   
+                                </div>
+                            </div>
+                        </div>
+
+
                     </div>
 
                     <div class="row mt-4">

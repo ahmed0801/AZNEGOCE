@@ -18,6 +18,7 @@ use App\Models\SalesOrder;
 use App\Models\DeliveryNote;
 use App\Models\Customer;
 use App\Models\DeliveryNoteLine;
+use App\Models\SalesReturn;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -116,16 +117,40 @@ class AuthController extends Controller
 
 public function adminDashboard()
     {
+        
         // Today’s revenue (livré and en_cours, excluding annulé)
+        // $todayRevenue = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])
+        //     ->whereDate('delivery_date', Carbon::today())
+        //     ->sum('total_ttc');
+
         $todayRevenue = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])
-            ->whereDate('delivery_date', Carbon::today())
-            ->sum('total_ttc');
+    ->whereDate('delivery_date', Carbon::today())
+    ->sum('total_ttc') - 
+    SalesReturn::whereDate('return_date', Carbon::today())  // Assumes 'return_date' for sales returns
+    ->sum('total_ttc');
+
 
         // This month’s revenue (livré and en_cours, excluding annulé)
-        $monthRevenue = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])
-            ->whereYear('delivery_date', Carbon::now()->year)
-            ->whereMonth('delivery_date', Carbon::now()->month)
-            ->sum('total_ttc');
+        // $monthRevenue = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])
+        //     ->whereYear('delivery_date', Carbon::now()->year)
+        //     ->whereMonth('delivery_date', Carbon::now()->month)
+        //     ->sum('total_ttc');
+
+
+        
+// Revenu du mois (livré et en_cours, excluant annulé)
+$monthRevenue = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])
+    ->whereYear('delivery_date', Carbon::now()->year)
+    ->whereMonth('delivery_date', Carbon::now()->month)
+    ->sum('total_ttc');
+
+// Soustraction des retours de ventes du mois
+$salesReturns = SalesReturn::whereYear('return_date', Carbon::now()->year)
+    ->whereMonth('return_date', Carbon::now()->month)
+    ->sum('total_ttc');
+
+// Revenu net du mois après les retours
+$monthRevenue -= $salesReturns;
 
 
 
@@ -148,6 +173,28 @@ public function adminDashboard()
             ])
             ->pluck('total', 'date')
             ->toArray(); // Convert to array to avoid array_keys() error
+
+
+        // Retours des 30 derniers jours
+$salesReturnsLastMonth = SalesReturn::where('return_date', '>=', Carbon::now()->subDays(30))
+    ->groupBy(DB::raw('DATE(return_date)'))
+    ->get([
+        DB::raw('DATE(return_date) as date'),
+        DB::raw('SUM(total_ttc) as total')
+    ])
+    ->pluck('total', 'date')
+    ->toArray();
+// Soustraction des retours jour par jour
+foreach ($salesReturnsLastMonth as $date => $returnTotal) {
+    if (isset($salesLastMonth[$date])) {
+        $salesLastMonth[$date] -= $returnTotal;
+    } else {
+        // Si un jour n’a que des retours, on le garde négatif
+        $salesLastMonth[$date] = -$returnTotal;
+    }
+}
+        
+
 
         // Deliveries by status
         $deliveriesByStatus = [
