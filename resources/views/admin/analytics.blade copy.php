@@ -481,67 +481,7 @@
     <!-- GRAPHIQUES -->
     <div class="row mt-4">
         <!-- CA NET JOURNALIER -->
-
-
-
-
-        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header"><div class="card-title">Classement Vendeurs (CA + Retours)</div></div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hover">
-                                            <thead class="bg-light">
-                                                <tr><th>#</th><th>Vendeur</th><th>CA Net</th><th>Retours</th><th>Taux Retour</th></tr>
-                                            </thead>
-                                            <tbody>
-                                                @forelse($returnRateBySeller as $index => $s)
-                                                    <tr class="{{ $index === 0 ? 'table-success' : '' }}">
-                                                        <td><strong>{{ $index + 1 }}</strong></td>
-                                                        <td>{{ $s['vendeur'] }}</td>
-                                                        <td>{{ number_format($s['ventes'] - $s['retours'], 0, ',', ' ') }} €</td>
-                                                        <td class="text-danger">-{{ number_format($s['retours'], 0, ',', ' ') }} €</td>
-                                                        <td><span class="badge bg-{{ $s['taux_retour'] > 10 ? 'danger' : ($s['taux_retour'] > 5 ? 'warning' : 'success') }}">{{ $s['taux_retour'] }}%</span></td>
-                                                    </tr>
-                                                @empty
-                                                    <tr><td colspan="5" class="text-center">Aucun vendeur</td></tr>
-                                                @endforelse
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-
-                                <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Top 5 Vendeurs (CA Net)</div>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="sellerChart" height="300"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-
-    </div>
-
-   
-
-
-
-
-
-
-   <div class="row mt-4">
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Évolution CA Net (30 derniers jours)</div>
@@ -554,30 +494,22 @@
             </div>
         </div>
 
-
-                <!-- TAUX DE RETOUR PAR JOUR -->
-        <div class="col-md-6">
+        <!-- TOP 10 CLIENTS -->
+        <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Taux de Retour (%)</div>
+                    <div class="card-title">Top 10 Clients (CA Net)</div>
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
-                        <canvas id="returnRateChart" height="300"></canvas>
+                        <canvas id="topClientsChart" height="400"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-
-
-
     </div>
 
-
-
-
-
-     <div class="row mt-4">
+    <div class="row mt-4">
         <!-- RÉPARTITION STATUT -->
 <!-- RÉPARTITION STATUT -->
 <div class="col-md-4">
@@ -600,29 +532,43 @@
     </div>
 </div>
 
-
-        <!-- TOP 10 CLIENTS -->
-        <div class="col-md-8">
+        <!-- TOP VENDEURS -->
+        <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Top 10 Clients (CA Net)</div>
+                    <div class="card-title">Top 5 Vendeurs (CA Net)</div>
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
-                        <canvas id="topClientsChart" height="400"></canvas>
+                        <canvas id="sellerChart" height="300"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-
+        <!-- TAUX DE RETOUR PAR JOUR -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Taux de Retour (%)</div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="returnRateChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-
-
-    
 </div>
-</div>
+
+
+
+
+
+
+
+
 
 
 
