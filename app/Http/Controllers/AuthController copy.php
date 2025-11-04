@@ -18,6 +18,7 @@ use App\Models\SalesOrder;
 use App\Models\DeliveryNote;
 use App\Models\Customer;
 use App\Models\DeliveryNoteLine;
+use App\Models\Invoice;
 use App\Models\SalesReturn;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -196,6 +197,15 @@ foreach ($salesReturnsLastMonth as $date => $returnTotal) {
         
 
 
+$recentInvoices = Invoice::with('customer')
+    ->orderByDesc('id') 
+    ->take(5)
+    ->get();
+
+
+
+    
+
         // Deliveries by status
         $deliveriesByStatus = [
             'en_cours' => DeliveryNote::where('status', 'en_cours')->count(),
@@ -237,7 +247,8 @@ foreach ($salesReturnsLastMonth as $date => $returnTotal) {
             'deliveriesByStatus',
             'topArticles',
             'topClients',
-            'recentDeliveries'
+            'recentDeliveries',
+            'recentInvoices'
         ));
     }
 

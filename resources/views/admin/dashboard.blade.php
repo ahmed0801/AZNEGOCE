@@ -407,6 +407,14 @@
                             </h6>
                         </div>
                         <div class="ms-md-auto py-2 py-md-0">
+
+                        <!-- analytics -->
+                                                 <a href="{{ route('analytics') }}" class="btn btn-label-warning btn-round me-2">
+        <span class="btn-label"><i class="fas fa-chart-line"></i></span> Analytics
+    </a>
+                        <!-- analytics -->
+
+
                             <a href="/salesinvoices" class="btn btn-label-info btn-round me-2">
                                 <span class="btn-label"><i class="fas fa-list"></i></span> Voir Factures Ventes
                             </a>

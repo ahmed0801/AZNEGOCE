@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\ArticleImportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AvoirController;
@@ -560,7 +561,8 @@ Route::post('/sales/delivery/store-and-invoice', [SalesController::class, 'store
     Route::get('/sales/items/{itemId}/history', [SalesController::class, 'itemHistory'])->name('sales.items.history');
 
 
-
+Route::get('/analytics', [AnalyticsController::class, 'index'])
+    ->name('analytics');
 
 
 

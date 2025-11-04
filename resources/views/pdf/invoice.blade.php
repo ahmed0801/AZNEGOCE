@@ -205,6 +205,7 @@ td {
 
 <!-- === CONTENU PRINCIPAL === -->
 <main>
+                    @if($invoice->notes )<p> Note : {{ $invoice->notes ?? '-' }}</p> @endif
     <table class="items-table">
         <thead>
             <tr>

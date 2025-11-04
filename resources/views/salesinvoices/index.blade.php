@@ -588,7 +588,8 @@
                                 </div>
 
                                 <div id="lines-{{ $invoice->id }}" class="card-body d-none bg-light">
-                                    <h6 class="fw-bold mb-3"><i class="fa fa-solid fa-car"></i> : {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}</h6>
+                                    <h6 class="fw-bold mb-3"><i class="fa fa-solid fa-car"></i> : {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}                     @if($invoice->notes )<p> Note : {{ $invoice->notes ?? '-' }}</p> @endif
+ </h6>
                                     <table class="table table-sm table-bordered align-middle">
                                         <thead class="table-light text-center">
                                             <tr>
