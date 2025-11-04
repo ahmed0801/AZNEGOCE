@@ -199,7 +199,7 @@ footer .hours {
                 <div class="details">
                     <p><strong>Date :</strong> {{ \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') }}</p>
                     <p><strong>Client :</strong> {{ $order->customer->name ?? '-' }}</p>
-                    <p><strong>Statut :</strong> {{ ucfirst($order->status) }}</p>
+                    <!-- <p><strong>Statut :</strong> {{ ucfirst($order->status) }}</p> -->
                 </div>
                 <p class="validite">Validité de l’offre : <strong>30 jours hors promotion</strong></p>
             </td>
