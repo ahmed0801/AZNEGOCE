@@ -214,7 +214,7 @@
     <header>
         <img src="{{ public_path($company->logo_path) }}" alt="Logo" class="logo">
         <h1>{{ $company->name }}</h1>
-        <h4>Commande N° : {{ $order->numdoc }}</h4>
+        <h4>@if($order->status == 'Devis' ) Devis N° @else  Commande N°  @endif : {{ $order->numdoc }}</h4>
         <h4 class="barcode-container"><img src="{{ $barcode }}" alt="Code-barres" class="barcode"></h4>
         <div class="triangle-top-right"></div>
         <div class="triangle-bottom-left"></div>
