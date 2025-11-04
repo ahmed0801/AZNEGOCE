@@ -486,7 +486,7 @@
 
 
         <div class="col-md-6">
-                            <div class="card">
+                            <div class="card"> 
                                 <div class="card-header"><div class="card-title">Classement Vendeurs (CA + Retours)</div></div>
                                 <div class="card-body">
                                     <div class="table-responsive">
@@ -495,6 +495,11 @@
                                                 <tr><th>#</th><th>Vendeur</th><th>CA Net</th><th>Retours</th><th>Taux Retour</th></tr>
                                             </thead>
                                             <tbody>
+
+                                            @if(auth::user()->role =="vendeur") 
+                                            <u>vous n'étes pas autorisées, merci de contacter votre administrateur</u>
+                                            @else
+
                                                 @forelse($returnRateBySeller as $index => $s)
                                                     <tr class="{{ $index === 0 ? 'table-success' : '' }}">
                                                         <td><strong>{{ $index + 1 }}</strong></td>
@@ -506,6 +511,8 @@
                                                 @empty
                                                     <tr><td colspan="5" class="text-center">Aucun vendeur</td></tr>
                                                 @endforelse
+
+                                                @endif
                                             </tbody>
                                         </table>
                                     </div>
@@ -519,15 +526,24 @@
                                 <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Top 5 Vendeurs (CA Net)</div>
+                    <div class="card-title">Top Vendeurs (CA Net)</div>
                 </div>
+
+                                                            @if(auth::user()->role =="vendeur") 
+                                            <u>vous n'étes pas autorisées, merci de contacter votre administrateur</u>
+                                            @else
+
                 <div class="card-body">
                     <div class="chart-container">
                         <canvas id="sellerChart" height="300"></canvas>
                     </div>
                 </div>
+
+                @endif
             </div>
         </div>
+
+
 
 
 
@@ -541,7 +557,7 @@
 
 
    <div class="row mt-4">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Évolution CA Net (30 derniers jours)</div>
@@ -556,7 +572,7 @@
 
 
                 <!-- TAUX DE RETOUR PAR JOUR -->
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Taux de Retour (%)</div>
@@ -620,7 +636,7 @@
 
 
 
-    
+
 </div>
 </div>
 
@@ -643,7 +659,6 @@
 
 
 
-             </div>
 
             <footer class="footer">
                 <div class="container-fluid d-flex justify-content-between">
