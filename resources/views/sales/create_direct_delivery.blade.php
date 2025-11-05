@@ -591,7 +591,7 @@
                                     <div class="col-md-4 col-12 mb-2">
 <a href="/newcustomer"
    onclick="window.open(this.href, 'popupWindow', 'width=1200,height=700,scrollbars=yes'); return false;"
-   class="btn btn-outline-secondary btn-sm px-2 py-1" style="font-size: 0.75rem;">
+   class="btn btn-outline-success btn-round ms-2">
   Créer ou Modifier des Clients <i class="fas fa-plus-circle ms-1"></i>
 </a>
 
@@ -707,7 +707,7 @@
                                     <!-- <a href="/articles" target="_blank" type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Aller a la Page Articles</a> -->
                                     <a href="/articles" 
                                     onclick="window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); return false;"
-                                     type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Créer ou Modifier des Articles</a>
+                                     type="button" class="btn btn-outline-success btn-round ms-2">+ Créer ou Modifier des Articles</a>
 
                                 </div>
                                 <div class="mb-3">

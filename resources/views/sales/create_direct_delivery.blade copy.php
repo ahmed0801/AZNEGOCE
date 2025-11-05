@@ -358,6 +358,7 @@
                     </a>
                     <div class="collapse" id="outils">
                         <ul class="nav nav-collapse">
+                            <li><a href="/analytics"><span class="sub-item">Analytics</span></a></li>
                             <li><a href="/tecdoc"><span class="sub-item">TecDoc</span></a></li>
                             <li><a href="/voice"><span class="sub-item">NEGOBOT</span></a></li>
                         </ul>
@@ -589,7 +590,7 @@
                                 <div class="row mb-3">
                                     <div class="col-md-4 col-12 mb-2">
 <a href="/newcustomer"
-   onclick="window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); return false;"
+   onclick="window.open(this.href, 'popupWindow', 'width=1200,height=700,scrollbars=yes'); return false;"
    class="btn btn-outline-secondary btn-sm px-2 py-1" style="font-size: 0.75rem;">
   Créer ou Modifier des Clients <i class="fas fa-plus-circle ms-1"></i>
 </a>
