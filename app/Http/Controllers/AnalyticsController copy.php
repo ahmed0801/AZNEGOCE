@@ -190,10 +190,54 @@ $statusRepartition = array_merge([
 
 
 
+
+// === 11. TAUX DE RETOUR PAR VENDEUR (SÉCURISÉ) ===
+$returnRateBySeller = DB::table(DB::raw("
+    (
+        SELECT COALESCE(vendeur, 'Inconnu') as vendeur, SUM(total_ttc) as ca_brut
+        FROM delivery_notes
+        WHERE status IN ('Expédié', 'en_cours')
+          AND delivery_date >= ?
+          AND (vendeur IS NOT NULL OR vendeur != '')
+        GROUP BY COALESCE(vendeur, 'Inconnu')
+
+        UNION ALL
+
+        SELECT COALESCE(vendeur, 'Inconnu') as vendeur, -SUM(total_ttc) as ca_brut
+        FROM sales_returns
+        WHERE return_date >= ?
+          AND (vendeur IS NOT NULL OR vendeur != '')
+        GROUP BY COALESCE(vendeur, 'Inconnu')
+    ) as t
+"))
+->setBindings([$thirtyDaysAgo, $thirtyDaysAgo])
+->groupBy('vendeur')
+->selectRaw('
+    vendeur,
+    SUM(CASE WHEN ca_brut > 0 THEN ca_brut ELSE 0 END) as ventes,
+    SUM(CASE WHEN ca_brut < 0 THEN ABS(ca_brut) ELSE 0 END) as retours,
+    CASE 
+        WHEN SUM(CASE WHEN ca_brut > 0 THEN ca_brut ELSE 0 END) > 0
+        THEN ROUND((SUM(CASE WHEN ca_brut < 0 THEN ABS(ca_brut) ELSE 0 END) / SUM(CASE WHEN ca_brut > 0 THEN ca_brut ELSE 0 END)) * 100, 1)
+        ELSE 0 
+    END as taux_retour
+')
+->havingRaw('ventes > 0')
+->orderByDesc('ventes')
+->get()
+->map(fn($s) => [
+    'vendeur' => $s->vendeur,
+    'ventes' => (float) $s->ventes,
+    'retours' => (float) $s->retours,
+    'taux_retour' => (float) $s->taux_retour
+]);
+
+
+
 return view('admin.analytics', compact(
     'caNet', 'caBrut', 'caRetour', 'nbBl', 'panierMoyen', 'caParJour',
     'caNetByDay', 'topClients', 'salesBySeller', 'forecast',
-    'caNetPrev', 'returnRateByDay', 'statusRepartition'
+    'caNetPrev', 'returnRateByDay', 'statusRepartition','returnRateBySeller'
 ));
 }
 
