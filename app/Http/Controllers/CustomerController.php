@@ -126,6 +126,7 @@ class CustomerController extends Controller
             'discount_group_id' => 'nullable|exists:discount_groups,id',
             'payment_mode_id' => 'nullable|exists:payment_modes,id',
             'payment_term_id' => 'nullable|exists:payment_terms,id',
+            'type' => 'nullable|in:particulier,jobber,professionnel', // Validation
         ]);
 
         $souche = Souche::where('type', 'client')->first();
@@ -137,6 +138,7 @@ class CustomerController extends Controller
         $code = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
 
         $customer = new Customer($request->except('code'));
+        $data['type'] = $request->type ?? 'particulier'; // Forcer par défaut
         $customer->code = $code;
         $customer->save();
 
@@ -166,6 +168,7 @@ class CustomerController extends Controller
             'discount_group_id' => 'nullable|exists:discount_groups,id',
             'payment_mode_id' => 'nullable|exists:payment_modes,id',
             'payment_term_id' => 'nullable|exists:payment_terms,id',
+            'type' => 'required|in:particulier,jobber,professionnel',
         ]);
 
         $customer = Customer::findOrFail($id);

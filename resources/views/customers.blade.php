@@ -630,6 +630,15 @@
         </div>
 
         <div class="mb-3 col-md-6">
+    <label class="form-label">Type de client</label>
+    <select name="type" class="form-control" required>
+        <option value="particulier" selected>Particulier</option>
+        <option value="jobber">Jobber</option>
+        <option value="professionnel">Professionnel</option>
+    </select>
+</div>
+
+        <div class="mb-3 col-md-6">
             <label class="form-label">Email</label>
             <input type="email" name="email" class="form-control">
         </div>
@@ -923,7 +932,21 @@
         <span class="badge bg-success badge-very-sm">🟢 Actif</span>
     @endif
                             </td>
-                            <td>{{ $customer->name }}</td>
+                            <td>{{ $customer->name }}<br>
+                            
+                                @switch($customer->type)
+        @case('particulier')
+            <span class="badge bg-primary">Particulier</span>
+            @break
+        @case('jobber')
+            <span class="badge bg-warning text-dark">Jobber</span>
+            @break
+        @case('professionnel')
+            <span class="badge bg-success">Professionnel</span>
+            @break
+    @endswitch
+
+                            </td>
                             <td>{{ $customer->address }} <br>
                           🏴󠁢󠁹󠁭󠁩󠁿{{ $customer->city }}</td>
                             <td>📞 {{ $customer->phone1 }} <br>
@@ -1281,6 +1304,15 @@
             <label class="form-label">Nom</label>
             <input type="text" name="name" class="form-control" value="{{ $customer->name }}" required disabled>
         </div>
+
+        <div class="mb-3 col-md-6">
+    <label class="form-label">Type de client</label>
+    <select name="type" class="form-control" disabled>
+        <option value="particulier" {{ $customer->type == 'particulier' ? 'selected' : '' }}>Particulier</option>
+        <option value="jobber" {{ $customer->type == 'jobber' ? 'selected' : '' }}>Jobber</option>
+        <option value="professionnel" {{ $customer->type == 'professionnel' ? 'selected' : '' }}>Professionnel</option>
+    </select>
+</div>
 
         <div class="mb-3 col-md-6">
             <label class="form-label">Email</label>
