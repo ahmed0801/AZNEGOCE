@@ -161,6 +161,7 @@ $monthRevenue -= $salesReturns;
         // New customers (created this month)
         $newCustomers = Customer::whereYear('created_at', Carbon::now()->year)
             ->whereMonth('created_at', Carbon::now()->month)
+                ->take(10)
             ->get();
 
         // Sales last 30 days (for chart, excluding annulé)

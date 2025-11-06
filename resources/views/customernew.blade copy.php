@@ -239,12 +239,23 @@
                 <form action="{{ route('customer.store') }}" method="POST">
     @csrf
     <div class="modal-body row">
-        <div class="mb-3 col-md-6">
+        <div class="mb-3 col-md-4">
             <label class="form-label">Nom</label>
             <input type="text" name="name" class="form-control" required>
         </div>
 
-        <div class="mb-3 col-md-6">
+                <div class="mb-3 col-md-3">
+    <label class="form-label">Type de client</label>
+    <select name="type" class="form-control" required>
+        <option value="particulier" selected>Particulier</option>
+        <option value="jobber">Jobber</option>
+        <option value="professionnel">Professionnel</option>
+    </select>
+</div>
+
+
+
+        <div class="mb-3 col-md-5">
             <label class="form-label">Email</label>
             <input type="email" name="email" class="form-control">
         </div>
@@ -274,13 +285,13 @@
             <input type="text" name="address_delivery" class="form-control">
         </div>
 
-        <div class="mb-3 col-md-4">
+        <div class="mb-3 col-md-2">
             <label class="form-label">Pays</label>
             <input type="text" name="country" class="form-control" value="France">
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Matricule fiscale</label>
+            <label class="form-label">SIRET</label>
             <input type="text" name="matfiscal" class="form-control">
         </div>
 
@@ -289,22 +300,22 @@
             <input type="text" name="bank_no" class="form-control">
         </div>
 
-        <div class="mb-3 col-md-4">
+        <div class="mb-3 col-md-3">
             <label class="form-label">Solde</label>
             <input type="number" step="0.01" name="solde" class="form-control" value="0" readonly>
         </div>
 
-        <div class="mb-3 col-md-4">
+        <div class="mb-3 col-md-2">
             <label class="form-label">Plafond</label>
             <input type="number" step="0.01" name="plafond" class="form-control" value="0">
         </div>
 
-        <div class="mb-3 col-md-4">
+        <div class="mb-3 col-md-2">
             <label class="form-label">Risque</label>
             <input type="number" name="risque" class="form-control">
         </div>
 
-        <div class="mb-3 col-md-6">
+        <div class="mb-3 col-md-3">
             <label class="form-label">TVA</label>
             <select name="tva_group_id" class="form-control" required>
                 <!-- <option value="">-- Choisir --</option> -->
@@ -314,7 +325,7 @@
             </select>
         </div>
 
-        <div class="mb-3 col-md-6">
+        <div class="mb-3 col-md-3">
             <label class="form-label">Groupe Remise</label>
             <select name="discount_group_id" class="form-control" required>
                 <!-- <option value="">-- Choisir --</option> -->
@@ -324,7 +335,7 @@
             </select>
         </div>
 
-        <div class="mb-3 col-md-6">
+        <div class="mb-3 col-md-3">
             <label class="form-label">Mode de paiement</label>
             <select name="payment_mode_id" class="form-control" required>
                 <!-- <option value="">-- Choisir --</option> -->
@@ -334,7 +345,7 @@
             </select>
         </div>
 
-        <div class="mb-3 col-md-6">
+        <div class="mb-3 col-md-3">
             <label class="form-label">Condition de paiement</label>
             <select name="payment_term_id" class="form-control" required>
                 <!-- <option value="">-- Choisir --</option> -->
@@ -437,10 +448,22 @@
                             <td>🧑‍💼{{ $customer->code }}<br>{{ $customer->name }}
                               <br>
                                   @if ($customer->blocked)
-        <span class="badge bg-danger badge-very-sm">🔴 Bloqué</span>
+        🔴 
     @else
-        <span class="badge bg-success badge-very-sm">🟢 Actif</span>
+        🟢 
     @endif
+                                    @switch($customer->type)
+        @case('particulier')
+            <span class="badge bg-primary">Particulier</span>
+            @break
+        @case('jobber')
+            <span class="badge bg-warning text-dark">Jobber</span>
+            @break
+        @case('professionnel')
+            <span class="badge bg-success">Professionnel</span>
+            @break
+    @endswitch
+
                             </td>
                             <td>{{ $customer->address }} <br>
                           🏴󠁢󠁹󠁭󠁩󠁿{{ $customer->city }}<br>📞 {{ $customer->phone1 }} <br>
@@ -799,6 +822,17 @@
             <input type="text" name="name" class="form-control" value="{{ $customer->name }}" required disabled>
         </div>
 
+
+                <div class="mb-3 col-md-6">
+    <label class="form-label">Type de client</label>
+    <select name="type" class="form-control" disabled>
+        <option value="particulier" {{ $customer->type == 'particulier' ? 'selected' : '' }}>Particulier</option>
+        <option value="jobber" {{ $customer->type == 'jobber' ? 'selected' : '' }}>Jobber</option>
+        <option value="professionnel" {{ $customer->type == 'professionnel' ? 'selected' : '' }}>Professionnel</option>
+    </select>
+</div>
+
+
         <div class="mb-3 col-md-6">
             <label class="form-label">Email</label>
             <input type="email" name="email" class="form-control" value="{{ $customer->email }}" disabled>
@@ -835,7 +869,7 @@
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Matricule fiscale</label>
+            <label class="form-label">SIRET</label>
             <input type="text" name="matfiscal" class="form-control" value="{{ $customer->matfiscal }}" disabled>
         </div>
 

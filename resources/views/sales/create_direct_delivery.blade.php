@@ -594,6 +594,7 @@
    class="btn btn-outline-success btn-round ms-2">
   Créer ou Modifier des Clients <i class="fas fa-plus-circle ms-1"></i>
 </a>
+<hr>
 
                                                                                     
                                         <select name="customer_id" id="customer_id" class="form-control select2" required>
@@ -679,7 +680,16 @@
 
 
                                 <div class="mb-3">
-                                    <h6 class="font-weight-bold mb-2">Lignes de commande</h6>
+                                    <h6 class="font-weight-bold mb-2">Lignes de commande : 
+                                        <button type="button" id="add_divers_item" class="btn btn-outline-info btn-sm">
+            + Article Divers
+        </button>
+
+                                    </h6>
+
+                                    <!-- AJOUTE LE BOUTON ICI -->
+
+
                                     <div class="table-responsive">
                                         <table class="table table-striped table-bordered table-text-small" id="lines_table">
                                             <thead class="table-dark">
@@ -1651,7 +1661,42 @@ function openPurchasesPopup() {
 
 
 
-        });
+
+
+
+
+    $(document).on('click', '#add_divers_item', function () {
+let tvaRate = parseFloat($('#tva_rate').val()) || 20;
+        let i = lineCount;  // ← INDEX UNIQUE
+        lineCount++;        // ← INCRÉMENTÉ ICI
+
+        let rowHtml = `
+            <tr class="divers-line" data-line-id="divers_${i}">
+                <td>
+                    <input type="text" name="lines[${i}][article_code]" class="form-control form-control-sm" placeholder="Réf (ex: DIV001)" required>
+                    <input type="hidden" name="lines[${i}][is_new_item]" value="1">
+                </td>
+                <td>
+                    <input type="text" name="lines[${i}][item_name]" class="form-control form-control-sm" placeholder="Désignation" required>
+                </td>
+                <td><span class="text-muted">-</span></td>
+                <td><span class="text-muted">-</span></td>
+                <td><span class="text-muted">-</span></td>
+                <td><input type="number" name="lines[${i}][ordered_quantity]" class="form-control quantity" value="1" min="1" required></td>
+                <td><input type="number" step="0.01" name="lines[${i}][unit_price_ht]" class="form-control unit_price_ht" placeholder="Prix HT" required></td>
+                <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
+                <td class="text-right total_ht">0,00</td>
+                <td class="text-right total_ttc">0,00</td>
+                <td><button type="button" class="btn btn-outline-danger btn-sm remove_line">×</button></td>
+            </tr>
+        `;
+
+        $('#lines_body').append(rowHtml);
+        lineCount++;
+        updateGlobalTotals();
+    });
+
+            });
     </script>
 </body>
 </html>

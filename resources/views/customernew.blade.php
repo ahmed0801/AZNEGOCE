@@ -13,8 +13,13 @@
       type="image/x-icon"
     />
 <!-- jQuery + Bootstrap JS (v4) -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
+<!-- Select2 JS -->
 
     <!-- Fonts and icons -->
     <script src="{{ asset('assets/js/plugin/webfont/webfont.min.js') }}"></script>
@@ -655,35 +660,44 @@
             <form method="POST" action="{{ route('customer.vehicle.store', $customer->id) }}" id="vehicleForm{{ $customer->id }}">
                 @csrf
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="brand_id_{{ $customer->id }}" class="form-label">Marque :</label>
-                        <select id="brand_id_{{ $customer->id }}" name="brand_id" class="form-control" required>
-                            <option value="">Sélectionner une marque</option>
-                            @foreach($brands as $brand)
-                                <option value="{{ $brand['id'] }}" data-name="{{ $brand['name'] }}">{{ $brand['name'] }}</option>
-                            @endforeach
-                        </select>
-                        <input type="hidden" name="brand_name" id="brand_name_{{ $customer->id }}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="model_id_{{ $customer->id }}" class="form-label">Modèle :</label>
-                        <select id="model_id_{{ $customer->id }}" name="model_id" class="form-control" required>
-                            <option value="">Sélectionner un modèle</option>
-                        </select>
-                        <input type="hidden" name="model_name" id="model_name_{{ $customer->id }}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="engine_id_{{ $customer->id }}" class="form-label">Motorisation :</label>
-                        <select id="engine_id_{{ $customer->id }}" name="engine_id" class="form-control" required>
-                            <option value="">Sélectionner une motorisation</option>
-                        </select>
-                        <input type="hidden" name="engine_description" id="engine_description_{{ $customer->id }}">
-                        <input type="hidden" name="linkage_target_id" id="linkage_target_id_{{ $customer->id }}">
-                    </div>
-                    <div class="mb-3">
+
+                 <div class="mb-3">
                         <label for="license_plate_{{ $customer->id }}" class="form-label">Immatriculation :</label>
                         <input type="text" id="license_plate_{{ $customer->id }}" name="license_plate" class="form-control" required>
                     </div>
+                    <!-- Marque -->
+<div class="mb-3">
+    <label class="form-label">Marque :</label>
+    <select id="brand_id_{{ $customer->id }}" name="brand_id" class="form-control select2-brand" style="width: 100%;" required>
+        <option value="">Rechercher une marque...</option>
+        @foreach($brands as $brand)
+            <option value="{{ $brand['id'] }}" data-name="{{ $brand['name'] }}">{{ $brand['name'] }}</option>
+        @endforeach
+    </select>
+    <input type="hidden" name="brand_name" id="brand_name_{{ $customer->id }}">
+</div>
+
+
+
+<!-- Modèle -->
+<div class="mb-3">
+    <label class="form-label">Modèle :</label>
+    <select id="model_id_{{ $customer->id }}" name="model_id" class="form-control select2-model" style="width: 100%;" required>
+        <option value="">Rechercher un modèle...</option>
+    </select>
+    <input type="hidden" name="model_name" id="model_name_{{ $customer->id }}">
+</div>
+
+<!-- Motorisation -->
+<div class="mb-3">
+    <label class="form-label">Motorisation :</label>
+    <select id="engine_id_{{ $customer->id }}" name="engine_id" class="form-control select2-engine" style="width: 100%;" required>
+        <option value="">Rechercher une motorisation...</option>
+    </select>
+    <input type="hidden" name="engine_description" id="engine_description_{{ $customer->id }}">
+    <input type="hidden" name="linkage_target_id" id="linkage_target_id_{{ $customer->id }}">
+</div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
@@ -694,84 +708,7 @@
     </div>
 </div>
 <!-- Script for Vehicle Modal -->
-                        <script>
-                            document.addEventListener("DOMContentLoaded", function () {
-                                // Ensure vehicles modal doesn't open automatically
-                                const vehiclesModal = document.getElementById('viewVehiclesModal{{ $customer->id }}');
-                                vehiclesModal.classList.remove('show');
-                                vehiclesModal.style.display = 'none';
-
-                                // Handle brand selection
-                                document.getElementById('brand_id_{{ $customer->id }}').addEventListener('change', function () {
-                                    const brandId = this.value;
-                                    const brandName = this.options[this.selectedIndex].dataset.name;
-                                    document.getElementById('brand_name_{{ $customer->id }}').value = brandName;
-                                    if (brandId) {
-                                        fetch("{{ route('getModels') }}?brand_id=" + brandId)
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                const modelSelect = document.getElementById('model_id_{{ $customer->id }}');
-                                                modelSelect.innerHTML = '<option value="">Sélectionner un modèle</option>';
-                                                data.forEach(model => {
-                                                    modelSelect.innerHTML += `<option value="${model.id}" data-name="${model.name}">${model.name}</option>`;
-                                                });
-                                            })
-                                            .catch(error => {
-                                                console.error('Error fetching models:', error);
-                                                alert('Erreur lors du chargement des modèles.');
-                                            });
-                                    } else {
-                                        document.getElementById('model_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner un modèle</option>';
-                                    }
-                                    document.getElementById('engine_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner une motorisation</option>';
-                                });
-
-                                // Handle model selection
-                                document.getElementById('model_id_{{ $customer->id }}').addEventListener('change', function () {
-                                    const modelId = this.value;
-                                    const modelName = this.options[this.selectedIndex].dataset.name;
-                                    document.getElementById('model_name_{{ $customer->id }}').value = modelName;
-                                    if (modelId) {
-                                        fetch("{{ route('getEngines') }}?model_id=" + modelId)
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                const engineSelect = document.getElementById('engine_id_{{ $customer->id }}');
-                                                engineSelect.innerHTML = '<option value="">Sélectionner une motorisation</option>';
-                                                data.forEach(engine => {
-                                                    engineSelect.innerHTML += `<option value="${engine.id}" data-description="${engine.description}" data-linking-target-id="${engine.linkageTargetId}">${engine.description}</option>`;
-                                                });
-                                            })
-                                            .catch(error => {
-                                                console.error('Error fetching engines:', error);
-                                                alert('Erreur lors du chargement des motorisations.');
-                                            });
-                                    } else {
-                                        document.getElementById('engine_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner une motorisation</option>';
-                                    }
-                                });
-
-                                // Handle engine selection
-                                document.getElementById('engine_id_{{ $customer->id }}').addEventListener('change', function () {
-                                    const engineDescription = this.options[this.selectedIndex].dataset.description;
-                                    const linkageTargetId = this.options[this.selectedIndex].dataset.linkingTargetId;
-                                    document.getElementById('engine_description_{{ $customer->id }}').value = engineDescription;
-                                    document.getElementById('linkage_target_id_{{ $customer->id }}').value = linkageTargetId;
-                                });
-
-                                // Clear vehicle modal fields when closed
-                                document.getElementById('addVehicleModal{{ $customer->id }}').addEventListener('hidden.bs.modal', function () {
-                                    document.getElementById('vehicleForm{{ $customer->id }}').reset();
-                                    document.getElementById('model_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner un modèle</option>';
-                                    document.getElementById('engine_id_{{ $customer->id }}').innerHTML = '<option value="">Sélectionner une motorisation</option>';
-                                    document.getElementById('brand_name_{{ $customer->id }}').value = '';
-                                    document.getElementById('model_name_{{ $customer->id }}').value = '';
-                                    document.getElementById('engine_description_{{ $customer->id }}').value = '';
-                                    document.getElementById('linkage_target_id_{{ $customer->id }}').value = '';
-                                });
-                            });
-                        </script>
-
-
+                   
 
 
 
@@ -1201,6 +1138,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <!-- Kaiadmin JS -->
 <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     
 
@@ -1370,11 +1308,128 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // === FONCTION GLOBALE POUR INITIALISER SELECT2 DANS N'IMPORTE QUEL MODAL ===
+    function initVehicleSelect2(modal) {
+        const customerId = modal.id.replace('addVehicleModal', '');
 
+        const $brand = $(`#brand_id_${customerId}`);
+        const $model = $(`#model_id_${customerId}`);
+        const $engine = $(`#engine_id_${customerId}`);
 
+        // Détruire si déjà initialisé
+        [$brand, $model, $engine].forEach($el => {
+            if ($el.hasClass('select2-hidden-accessible')) {
+                $el.select2('destroy');
+            }
+        });
 
+        // Initialiser Select2
+        $brand.select2({
+            placeholder: "Rechercher une marque...",
+            allowClear: true,
+            width: '100%',
+            dropdownParent: modal
+        });
 
+        $model.select2({
+            placeholder: "Rechercher un modèle...",
+            allowClear: true,
+            width: '100%',
+            dropdownParent: modal
+        });
 
+        $engine.select2({
+            placeholder: "Rechercher une motorisation...",
+            allowClear: true,
+            width: '100%',
+            dropdownParent: modal
+        });
+    }
+
+    // === ÉCOUTEUR GLOBAL SUR TOUS LES MODALS ===
+    $(document).on('shown.bs.modal', '[id^="addVehicleModal"]', function () {
+        initVehicleSelect2(this);
+    });
+
+    // === MARQUE CHANGE (délégation d'événements) ===
+    $(document).on('change', '[id^="brand_id_"]', function () {
+        const customerId = this.id.replace('brand_id_', '');
+        const brandId = this.value;
+        const brandName = $(this).find('option:selected').data('name') || '';
+        $(`#brand_name_${customerId}`).val(brandName);
+
+        const $model = $(`#model_id_${customerId}`);
+        const $engine = $(`#engine_id_${customerId}`);
+
+        if (brandId) {
+            fetch(`{{ route('getModels') }}?brand_id=${brandId}`)
+                .then(r => r.json())
+                .then(data => {
+                    $model.empty().append('<option value="">Rechercher un modèle...</option>');
+                    data.forEach(m => {
+                        $model.append(`<option value="${m.id}" data-name="${m.name}">${m.name}</option>`);
+                    });
+                    $model.val('').trigger('change');
+                });
+        } else {
+            $model.empty().append('<option value="">Rechercher un modèle...</option>').val('').trigger('change');
+        }
+        $engine.empty().append('<option value="">Rechercher une motorisation...</option>').val('').trigger('change');
+    });
+
+    // === MODÈLE CHANGE ===
+    $(document).on('change', '[id^="model_id_"]', function () {
+        const customerId = this.id.replace('model_id_', '');
+        const modelId = this.value;
+        const modelName = $(this).find('option:selected').data('name') || '';
+        $(`#model_name_${customerId}`).val(modelName);
+
+        const $engine = $(`#engine_id_${customerId}`);
+
+        if (modelId) {
+            fetch(`{{ route('getEngines') }}?model_id=${modelId}`)
+                .then(r => r.json())
+                .then(data => {
+                    $engine.empty().append('<option value="">Rechercher une motorisation...</option>');
+                    data.forEach(e => {
+                        $engine.append(
+                            `<option value="${e.id}" 
+                                     data-description="${e.description}" 
+                                     data-linking-target-id="${e.linkageTargetId}">
+                                ${e.description}
+                             </option>`
+                        );
+                    });
+                    $engine.val('').trigger('change');
+                });
+        } else {
+            $engine.empty().append('<option value="">Rechercher une motorisation...</option>').val('').trigger('change');
+        }
+    });
+
+    // === MOTORISATION CHANGE ===
+    $(document).on('change', '[id^="engine_id_"]', function () {
+        const customerId = this.id.replace('engine_id_', '');
+        const desc = $(this).find('option:selected').data('description') || '';
+        const link = $(this).find('option:selected').data('linking-target-id') || '';
+        $(`#engine_description_${customerId}`).val(desc);
+        $(`#linkage_target_id_${customerId}`).val(link);
+    });
+
+    // === RESET QUAND MODAL FERMÉ ===
+    $(document).on('hidden.bs.modal', '[id^="addVehicleModal"]', function () {
+        const customerId = this.id.replace('addVehicleModal', '');
+        $(`#vehicleForm${customerId}`)[0].reset();
+        $(`#model_id_${customerId}, #engine_id_${customerId}`)
+            .empty()
+            .append('<option value="">Rechercher...</option>')
+            .val('').trigger('change');
+        $(`#brand_name_${customerId}, #model_name_${customerId}, #engine_description_${customerId}, #linkage_target_id_${customerId}`).val('');
+    });
+});
+</script>
 
 
 

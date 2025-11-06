@@ -549,7 +549,8 @@ public function getAllAccountingEntriesHT()
             $query->where('solde', '<=', $request->max_solde);
         }
 
-        $customers = $query->orderBy('name')->paginate(20);
+        $customers = $query->latest()->paginate(30);
+
 
         $tvaGroups = TvaGroup::all();
         $discountGroups = DiscountGroup::all();

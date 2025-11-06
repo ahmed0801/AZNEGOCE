@@ -37,7 +37,8 @@ $query = Item::with(['category', 'brand', 'tvaGroup', 'store', 'supplier','stock
     if ($request->filled('search')) {
         $query->where(function ($q) use ($request) {
             $q->where('name', 'like', "{$request->search}%")
-              ->orWhere('code', $request->search);
+              ->orWhere('code','like',$request->search);
+
         });
     }
 

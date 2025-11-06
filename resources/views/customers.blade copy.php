@@ -191,7 +191,7 @@
 
   </head>
   <body>
-    <div class="wrapper">
+    <div class="wrapper sidebar_minimize">
      <!-- Sidebar -->
 <div class="sidebar" data-background-color="dark">
     <div class="sidebar-logo">
@@ -307,6 +307,7 @@
                     </a>
                     <div class="collapse" id="outils">
                         <ul class="nav nav-collapse">
+                            <li><a href="/analytics"><span class="sub-item">Analytics</span></a></li>
                             <li><a href="/tecdoc"><span class="sub-item">TecDoc</span></a></li>
                             <li><a href="/voice"><span class="sub-item">NEGOBOT</span></a></li>
                         </ul>
@@ -629,13 +630,22 @@
         </div>
 
         <div class="mb-3 col-md-6">
+    <label class="form-label">Type de client</label>
+    <select name="type" class="form-control" required>
+        <option value="particulier" selected>Particulier</option>
+        <option value="jobber">Jobber</option>
+        <option value="professionnel">Professionnel</option>
+    </select>
+</div>
+
+        <div class="mb-3 col-md-6">
             <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control" required>
+            <input type="email" name="email" class="form-control">
         </div>
 
         <div class="mb-3 col-md-4">
             <label class="form-label">Téléphone 1</label>
-            <input type="text" name="phone1" class="form-control" required>
+            <input type="text" name="phone1" class="form-control">
         </div>
 
         <div class="mb-3 col-md-4">
@@ -650,7 +660,7 @@
 
         <div class="mb-3 col-md-6">
             <label class="form-label">Adresse</label>
-            <input type="text" name="address" class="form-control" required>
+            <input type="text" name="address" class="form-control">
         </div>
 
         <div class="mb-3 col-md-6">
@@ -660,7 +670,7 @@
 
         <div class="mb-3 col-md-4">
             <label class="form-label">Pays</label>
-            <input type="text" name="country" class="form-control" required>
+            <input type="text" name="country" class="form-control" value="France" required>
         </div>
 
         <div class="mb-3 col-md-4">
@@ -691,7 +701,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">TVA</label>
             <select name="tva_group_id" class="form-control" required>
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($tvaGroups as $group)
                     <option value="{{ $group->id }}">{{ $group->name }} : {{ $group->rate }} %</option>
                 @endforeach
@@ -701,7 +711,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">Groupe Remise</label>
             <select name="discount_group_id" class="form-control" required>
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($discountGroups as $group)
                     <option value="{{ $group->id }}">{{ $group->name }} : {{ $group->discount_rate }} %</option>
                 @endforeach
@@ -711,7 +721,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">Mode de paiement</label>
             <select name="payment_mode_id" class="form-control" required>
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($paymentModes as $mode)
                     <option value="{{ $mode->id }}">{{ $mode->name }}</option>
                 @endforeach
@@ -721,7 +731,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">Condition de paiement</label>
             <select name="payment_term_id" class="form-control" required>
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($paymentTerms as $term)
                     <option value="{{ $term->id }}">{{ $term->label }} : {{ $term->days }} Jours</option>
                 @endforeach
@@ -922,7 +932,21 @@
         <span class="badge bg-success badge-very-sm">🟢 Actif</span>
     @endif
                             </td>
-                            <td>{{ $customer->name }}</td>
+                            <td>{{ $customer->name }}<br>
+                            
+                                @switch($customer->type)
+        @case('particulier')
+            <span class="badge bg-primary">Particulier</span>
+            @break
+        @case('jobber')
+            <span class="badge bg-warning text-dark">Jobber</span>
+            @break
+        @case('professionnel')
+            <span class="badge bg-success">Professionnel</span>
+            @break
+    @endswitch
+
+                            </td>
                             <td>{{ $customer->address }} <br>
                           🏴󠁢󠁹󠁭󠁩󠁿{{ $customer->city }}</td>
                             <td>📞 {{ $customer->phone1 }} <br>
@@ -1280,6 +1304,15 @@
             <label class="form-label">Nom</label>
             <input type="text" name="name" class="form-control" value="{{ $customer->name }}" required disabled>
         </div>
+
+        <div class="mb-3 col-md-6">
+    <label class="form-label">Type de client</label>
+    <select name="type" class="form-control" disabled>
+        <option value="particulier" {{ $customer->type == 'particulier' ? 'selected' : '' }}>Particulier</option>
+        <option value="jobber" {{ $customer->type == 'jobber' ? 'selected' : '' }}>Jobber</option>
+        <option value="professionnel" {{ $customer->type == 'professionnel' ? 'selected' : '' }}>Professionnel</option>
+    </select>
+</div>
 
         <div class="mb-3 col-md-6">
             <label class="form-label">Email</label>

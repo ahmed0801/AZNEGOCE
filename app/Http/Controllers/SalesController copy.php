@@ -27,6 +27,7 @@ use App\Models\TvaGroup;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use PDF;
@@ -400,13 +401,13 @@ $paymentTerms = PaymentTerm::all();
  */
 public function storeDirectDeliveryNote(Request $request)
 {
+    // Validation globale sans exists sur items.code
     $request->validate([
         'customer_id' => 'required|exists:customers,id',
         'vehicle_id' => 'nullable|exists:vehicles,id',
         'order_date' => 'required|date',
         'lines' => 'required|array',
-        'lines.*.article_code' => 'required|exists:items,code',
-        'lines.*.ordered_quantity' => 'required|numeric|min:0',
+        'lines.*.ordered_quantity' => 'required|numeric|min:0.01',
         'lines.*.unit_price_ht' => 'required|numeric|min:0',
         'lines.*.remise' => 'nullable|numeric|min:0|max:100',
     ]);
@@ -446,27 +447,82 @@ public function storeDirectDeliveryNote(Request $request)
                 ]);
 
                 $total = 0;
-                foreach ($request->lines as $line) {
-                    $item = Item::where('code', $line['article_code'])->first();
-                    if (!$item) {
-                        throw new \Exception("Article {$line['article_code']} introuvable.");
-                    }
-                    if ($status === 'validée' && $item->getStockQuantityAttribute() < $line['ordered_quantity']) {
-                        // throw new \Exception("Stock insuffisant pour l'article {$line['article_code']}.");
+
+                foreach ($request->lines as $index => $line) {
+                    $articleCode = $line['article_code'] ?? null;
+                    $isNewItem = !empty($line['is_new_item']);
+                    $item = null;
+
+                    // === GESTION ARTICLE DIVERS (is_new_item) ===
+                    if ($isNewItem) {
+                        $request->validate([
+                            "lines.$index.item_name" => 'required|string|max:255',
+                            "lines.$index.unit_price_ht" => 'required|numeric|min:0',
+                        ]);
+
+                        $baseCode = $line['article_code'] ?? 'DIVERS';
+
+                        // Forcer préfixe DIV-
+                        if (!str_starts_with($baseCode, 'DIV-')) {
+                            $baseCode = 'DIV-' . ltrim($baseCode, 'DIV-');
+                        }
+
+                        $code = $baseCode;
+                        $counter = 0;
+
+                        // Générer code unique avec points
+                        while (Item::where('code', $code)->exists()) {
+                            $counter++;
+                            $code = $baseCode . str_repeat('.', $counter);
+                        }
+
+                        // Validation finale
+                        $validator = Validator::make(
+                            ['code' => $code],
+                            ['code' => 'unique:items,code']
+                        );
+
+                        if ($validator->fails()) {
+                            throw new \Exception("Impossible de générer une référence unique pour l'article divers.");
+                        }
+
+                        $item = Item::create([
+                            'code' => $code,
+                            'name' => $line['item_name'],
+                            'sale_price' => $line['unit_price_ht'],
+                            'cost_price' => $line['unit_price_ht'],
+                            'is_active' => 1,
+                            'store_id' => $request->store_id ?? 1,
+                            'location' => 'Divers',
+                        ]);
+
+                        // Mettre à jour la ligne avec le code généré
+                        $line['article_code'] = $code;
+                    } else {
+                        $item = Item::where('code', $articleCode)->first();
+                        if (!$item) {
+                            throw new \Exception("Article {$articleCode} introuvable.");
+                        }
                     }
 
-                    $ligne_total = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
-                    $unit_price_ttc = $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100) * (1 + $tvaRate / 100);
+                    // Vérification stock si validée
+                    if ($status === 'validée' && $item->getStockQuantityAttribute() < $line['ordered_quantity']) {
+                        throw new \Exception("Stock insuffisant pour l'article {$item->code}.");
+                    }
+
+                    $remise = $line['remise'] ?? 0;
+                    $ligne_total = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - $remise / 100);
+                    $unit_price_ttc = $line['unit_price_ht'] * (1 - $remise / 100) * (1 + $tvaRate / 100);
                     $total_ligne_ttc = $ligne_total * (1 + $tvaRate / 100);
                     $total += $ligne_total;
 
                     SalesOrderLine::create([
                         'sales_order_id' => $order->id,
-                        'article_code' => $line['article_code'],
+                        'article_code' => $item->code,
                         'ordered_quantity' => $line['ordered_quantity'],
                         'unit_price_ht' => $line['unit_price_ht'],
                         'unit_price_ttc' => $unit_price_ttc,
-                        'remise' => $line['remise'] ?? 0,
+                        'remise' => $remise,
                         'total_ligne_ht' => $ligne_total,
                         'total_ligne_ttc' => $total_ligne_ttc,
                     ]);
@@ -477,14 +533,15 @@ public function storeDirectDeliveryNote(Request $request)
                     'total_ttc' => $total * (1 + $tvaRate / 100),
                 ]);
 
-                
-                    $this->createDeliveryNoteFromOrder($order, $request);
-               
+                // Création du BL à partir de la commande
+                $this->createDeliveryNoteFromOrder($order, $request);
+
                 $souche->last_number += 1;
                 $souche->save();
                 \Log::info('Souche updated', ['numdoc' => $numdoc, 'new_last_number' => $souche->last_number]);
 
-                return redirect()->route('delivery_notes.list')->with('success', 'Commande ' . ($status === 'validée' ? 'validée et créée' : 'créée'));
+                return redirect()->route('delivery_notes.list')
+                    ->with('success', 'Commande ' . ($status === 'validée' ? 'validée et bon de livraison créé' : 'créée en brouillon'));
             }
 
             $souche->last_number += 1;
@@ -510,13 +567,13 @@ public function storeDirectDeliveryNote(Request $request)
 // creer et facturer un BL 
 public function storedeliveryandinvoice(Request $request)
 {
+    // Validation globale (on enlève exists:items,code → gérée plus bas)
     $request->validate([
         'customer_id' => 'required|exists:customers,id',
         'vehicle_id' => 'nullable|exists:vehicles,id',
         'order_date' => 'required|date',
-        'lines' => 'required|array',
-        'lines.*.article_code' => 'required|exists:items,code',
-        'lines.*.ordered_quantity' => 'required|numeric|min:0',
+        'lines' => 'required|array|min:1',
+        'lines.*.ordered_quantity' => 'required|numeric|min:0.01',
         'lines.*.unit_price_ht' => 'required|numeric|min:0',
         'lines.*.remise' => 'nullable|numeric|min:0|max:100',
     ]);
@@ -525,7 +582,7 @@ public function storedeliveryandinvoice(Request $request)
         $customer = Customer::with('tvaGroup')->findOrFail($request->customer_id);
         $tvaRate = $customer->tvaGroup->rate ?? 0;
 
-        // Create Delivery Note
+        // === GÉNÉRATION NUMÉRO BL ===
         $maxRetries = 3;
         $retryCount = 0;
         $souche = Souche::where('type', 'bon_livraison')->lockForUpdate()->first();
@@ -538,9 +595,9 @@ public function storedeliveryandinvoice(Request $request)
             $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
             $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
 
-            \Log::info('Generating delivery note numdoc', ['numdoc' => $numdoc, 'last_number' => $souche->last_number, 'retry' => $retryCount]);
-
             if (!DeliveryNote::where('numdoc', $numdoc)->exists()) {
+
+                // === CRÉATION DU BL ===
                 $deliveryNote = DeliveryNote::create([
                     'customer_id' => $request->customer_id,
                     'vehicle_id' => $request->vehicle_id,
@@ -558,36 +615,97 @@ public function storedeliveryandinvoice(Request $request)
                     'invoiced' => true,
                 ]);
 
+                // === INIT DES TOTAUX (comme avant) ===
                 $totalDelivered = 0;
                 $totalHt = 0;
-                foreach ($request->lines as $line) {
-                    $item = Item::where('code', $line['article_code'])->first();
-                    if (!$item) {
-                        throw new \Exception("Article {$line['article_code']} introuvable.");
-                    }
-                    if ($item->getStockQuantityAttribute() < $line['ordered_quantity']) {
-                        // throw new \Exception("Stock insuffisant pour l'article {$line['article_code']}.");
-                    }
 
-                    $total_ligne_ht = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
-                    $unit_price_ttc = $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100) * (1 + $tvaRate / 100);
+                // === BOUCLE SUR LES LIGNES ===
+                foreach ($request->lines as $index => $line) {
+                    $articleCode = $line['article_code'] ?? null;
+                    $isNewItem = !empty($line['is_new_item']);
+
+                    $item = null;
+
+                    // === SI NOUVEL ARTICLE (divers) ===
+                    // === SI NOUVEL ARTICLE (divers) ===
+if ($isNewItem) {
+    $request->validate([
+        "lines.$index.item_name" => 'required|string|max:255',
+        "lines.$index.unit_price_ht" => 'required|numeric|min:0',
+    ]);
+
+    // === GÉNÉRATION RÉFÉRENCE UNIQUE AVEC DIV- ===
+    $baseCode = $line['article_code'] ?? 'DIVERS';
+    $originalCode = $baseCode;
+
+    // Forcer le préfixe DIV-
+    if (!str_starts_with($baseCode, 'DIV-')) {
+        $baseCode = 'DIV-' . ltrim($baseCode, 'DIV-');
+    }
+
+    $code = $baseCode;
+    $suffix = '';
+    $counter = 0;
+
+    // Tant que le code existe → ajouter un point
+    while (Item::where('code', $code)->exists()) {
+        $counter++;
+        $suffix = str_repeat('.', $counter);
+        $code = $baseCode . $suffix;
+    }
+
+    // Validation finale d'unicité
+    $validator = Validator::make(
+        ['code' => $code],
+        ['code' => 'unique:items,code']
+    );
+
+    if ($validator->fails()) {
+        throw new \Exception("Impossible de générer une référence unique pour l'article divers.");
+    }
+
+    $item = Item::create([
+        'code' => $code,
+        'name' => $line['item_name'],
+        'sale_price' => $line['unit_price_ht'],
+        'cost_price' => $line['unit_price_ht'],
+        'is_active' => 1,
+        'store_id' => $request->store_id ?? 1,
+        'location' => 'Divers',
+    ]);
+
+    // Mise à jour de la ligne avec le code généré
+    $line['article_code'] = $code;
+} else {
+    $item = Item::where('code', $articleCode)->first();
+    if (!$item) {
+        throw new \Exception("Article {$articleCode} introuvable.");
+    }
+}
+
+                    // === CALCULS (identiques à l’ancienne version) ===
+                    $remise = $line['remise'] ?? 0;
+                    $total_ligne_ht = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - $remise / 100);
+                    $unit_price_ttc = $line['unit_price_ht'] * (1 - $remise / 100) * (1 + $tvaRate / 100);
                     $total_ligne_ttc = $total_ligne_ht * (1 + $tvaRate / 100);
 
+                    // === CRÉATION DE LA LIGNE BL ===
                     DeliveryNoteLine::create([
                         'delivery_note_id' => $deliveryNote->id,
-                        'article_code' => $line['article_code'],
+                        'article_code' => $item->code,
                         'delivered_quantity' => $line['ordered_quantity'],
                         'unit_price_ht' => $line['unit_price_ht'],
                         'unit_price_ttc' => $unit_price_ttc,
-                        'remise' => $line['remise'] ?? 0,
+                        'remise' => $remise,
                         'total_ligne_ht' => $total_ligne_ht,
                         'total_ligne_ttc' => $total_ligne_ttc,
                     ]);
 
+                    // === MISE À JOUR DES TOTAUX ===
                     $totalDelivered += $line['ordered_quantity'];
                     $totalHt += $total_ligne_ht;
 
-                    // Update stock
+                    // === GESTION STOCK (identique) ===
                     $storeId = $deliveryNote->store_id ?? 1;
                     $stock = Stock::firstOrNew([
                         'item_id' => $item->id,
@@ -596,7 +714,7 @@ public function storedeliveryandinvoice(Request $request)
                     $stock->quantity = ($stock->quantity ?? 0) - $line['ordered_quantity'];
                     $stock->save();
 
-                    $cost_price = $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
+                    $cost_price = $line['unit_price_ht'] * (1 - $remise / 100);
                     StockMovement::create([
                         'item_id' => $item->id,
                         'store_id' => $storeId,
@@ -608,7 +726,8 @@ public function storedeliveryandinvoice(Request $request)
                         'reference' => $deliveryNote->numdoc,
                     ]);
                 }
-// dd( $deliveryNote);
+
+                // === MISE À JOUR DU BL ===
                 $deliveryNote->update([
                     'total_delivered' => $totalDelivered,
                     'total_ht' => $totalHt,
@@ -616,7 +735,7 @@ public function storedeliveryandinvoice(Request $request)
                     'invoiced' => true,
                 ]);
 
-                // Create Invoice
+                // === CRÉATION FACTURE (identique) ===
                 $soucheInvoice = Souche::where('type', 'facture_vente')->lockForUpdate()->first();
                 if (!$soucheInvoice) {
                     throw new \Exception('Souche facture vente manquante.');
@@ -658,24 +777,20 @@ public function storedeliveryandinvoice(Request $request)
                     ]);
                 }
 
+                // === MISE À JOUR SOLDE CLIENT ===
+                $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                $customer->save();
 
-                     // Update customer balance solde client
-                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
-                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
-                    $customer->save();
+                \Log::info('Customer balance updated', [
+                    'customer_id' => $customer->id,
+                    'invoice_id' => $invoice->id,
+                    'numdoc' => $numdocInvoice,
+                    'amount_added' => $totalTtc,
+                    'new_balance' => $customer->solde,
+                ]);
 
-                    // Log the balance update
-                    \Log::info('Customer balance updated', [
-                        'customer_id' => $customer->id,
-                        'invoice_id' => $invoice->id,
-                        'numdoc' => $numdocInvoice,
-                        'amount_added' => $totalTtc,
-                        'new_balance' => $customer->balance,
-                    ]);
-
-
-
-
+                // === FINALISATION ===
                 $deliveryNote->update(['invoiced' => true]);
                 $invoice->deliveryNotes()->attach($deliveryNote->id);
 
@@ -691,14 +806,11 @@ public function storedeliveryandinvoice(Request $request)
             $souche->last_number += 1;
             $souche->save();
             $retryCount++;
-            \Log::warning('Duplicate numdoc detected, retrying', ['numdoc' => $numdoc, 'retry' => $retryCount]);
         }
 
-        \Log::error('Failed to find unique numdoc after retries', ['last_numdoc' => $numdoc, 'retries' => $maxRetries]);
-        throw new \Exception('Impossible de générer un numéro de document unique après plusieurs tentatives.');
+        throw new \Exception('Impossible de générer un numéro de document unique.');
     });
 }
-
 // fin creer et facturer un BL
 
 
@@ -1038,8 +1150,9 @@ public function validateOrder($id)
         if ($request->filled('query')) {
             $searchTerm = $request->query('query');
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('code', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('name', 'like', '%' . $searchTerm . '%');
+                $q->where('code','like',$searchTerm)
+                  ->orWhere('name', 'like',$searchTerm . '%');
+
             });
         }
         if ($request->filled('brand_id')) {
@@ -1213,15 +1326,15 @@ public function exportSingle($id)
 
 
 
-    public function storedevis(Request $request)
+  public function storedevis(Request $request)
 {
+    // Validation globale sans exists sur items.code
     $request->validate([
         'customer_id' => 'required|exists:customers,id',
         'order_date' => 'required|date',
         'vehicle_id' => 'nullable|exists:vehicles,id',
         'lines' => 'required|array',
-        'lines.*.article_code' => 'required|exists:items,code',
-        'lines.*.ordered_quantity' => 'required|numeric|min:0',
+        'lines.*.ordered_quantity' => 'required|numeric|min:0.01',
         'lines.*.unit_price_ht' => 'required|numeric|min:0',
         'lines.*.remise' => 'nullable|numeric|min:0|max:100',
     ]);
@@ -1262,27 +1375,82 @@ public function exportSingle($id)
                 ]);
 
                 $total = 0;
-                foreach ($request->lines as $line) {
-                    $item = Item::where('code', $line['article_code'])->first();
-                    if (!$item) {
-                        throw new \Exception("Article {$line['article_code']} introuvable.");
-                    }
-                    if ($status === 'validée' && $item->getStockQuantityAttribute() < $line['ordered_quantity']) {
-                        // throw new \Exception("Stock insuffisant pour l'article {$line['article_code']}.");
+
+                foreach ($request->lines as $index => $line) {
+                    $articleCode = $line['article_code'] ?? null;
+                    $isNewItem = !empty($line['is_new_item']);
+                    $item = null;
+
+                    // === GESTION ARTICLE DIVERS (is_new_item) ===
+                    if ($isNewItem) {
+                        $request->validate([
+                            "lines.$index.item_name" => 'required|string|max:255',
+                            "lines.$index.unit_price_ht" => 'required|numeric|min:0',
+                        ]);
+
+                        $baseCode = $line['article_code'] ?? 'DIVERS';
+
+                        // Forcer préfixe DIV-
+                        if (!str_starts_with($baseCode, 'DIV-')) {
+                            $baseCode = 'DIV-' . ltrim($baseCode, 'DIV-');
+                        }
+
+                        $code = $baseCode;
+                        $counter = 0;
+
+                        // Générer code unique avec points
+                        while (Item::where('code', $code)->exists()) {
+                            $counter++;
+                            $code = $baseCode . str_repeat('.', $counter);
+                        }
+
+                        // Validation finale
+                        $validator = Validator::make(
+                            ['code' => $code],
+                            ['code' => 'unique:items,code']
+                        );
+
+                        if ($validator->fails()) {
+                            throw new \Exception("Impossible de générer une référence unique pour l'article divers.");
+                        }
+
+                        $item = Item::create([
+                            'code' => $code,
+                            'name' => $line['item_name'],
+                            'sale_price' => $line['unit_price_ht'],
+                            'cost_price' => $line['unit_price_ht'],
+                            'is_active' => 1,
+                            'store_id' => $request->store_id ?? 1,
+                            'location' => 'Divers',
+                        ]);
+
+                        // Mettre à jour la ligne avec le code généré
+                        $line['article_code'] = $code;
+                    } else {
+                        $item = Item::where('code', $articleCode)->first();
+                        if (!$item) {
+                            throw new \Exception("Article {$articleCode} introuvable.");
+                        }
                     }
 
-                    $ligne_total = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
-                    $unit_price_ttc = $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100) * (1 + $tvaRate / 100);
+                    // Vérification stock si validée
+                    if ($status === 'validée' && $item->getStockQuantityAttribute() < $line['ordered_quantity']) {
+                        throw new \Exception("Stock insuffisant pour l'article {$item->code}.");
+                    }
+
+                    $remise = $line['remise'] ?? 0;
+                    $ligne_total = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - $remise / 100);
+                    $unit_price_ttc = $line['unit_price_ht'] * (1 - $remise / 100) * (1 + $tvaRate / 100);
                     $total_ligne_ttc = $ligne_total * (1 + $tvaRate / 100);
                     $total += $ligne_total;
 
                     SalesOrderLine::create([
                         'sales_order_id' => $order->id,
-                        'article_code' => $line['article_code'],
+                        'article_code' => $item->code,
                         'ordered_quantity' => $line['ordered_quantity'],
                         'unit_price_ht' => $line['unit_price_ht'],
                         'unit_price_ttc' => $unit_price_ttc,
-                        'remise' => $line['remise'] ?? 0,
+                        'remise' => $remise,
                         'total_ligne_ht' => $ligne_total,
                         'total_ligne_ttc' => $total_ligne_ttc,
                     ]);
@@ -1293,13 +1461,12 @@ public function exportSingle($id)
                     'total_ttc' => $total * (1 + $tvaRate / 100),
                 ]);
 
-
-
                 $souche->last_number += 1;
                 $souche->save();
                 \Log::info('Souche updated', ['numdoc' => $numdoc, 'new_last_number' => $souche->last_number]);
 
-                return redirect()->route('sales.list')->with('success', 'Devis ' . ($status === 'validée' ? 'validée et créée' : 'créée'));
+                return redirect()->route('sales.list')
+                    ->with('success', 'Devis ' . ($status === 'validée' ? 'validé et créé' : 'créé en brouillon'));
             }
 
             $souche->last_number += 1;
