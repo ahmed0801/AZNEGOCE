@@ -209,6 +209,8 @@ footer .hours {
 
 <!-- === CONTENU PRINCIPAL === -->
 <main>
+                        @if($order->notes )<p> Note : {{ $invoice->notes ?? '-' }}</p> @endif
+
     <table class="items-table">
         <thead>
             <tr>
