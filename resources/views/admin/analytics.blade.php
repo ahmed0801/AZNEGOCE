@@ -446,7 +446,7 @@
                 <!-- KPI CARDS -->
                 <div class="row g-3 mb-4">
                     <div class="col-md-3 col-sm-6">
-                        <div class="card card-stats card-round h-100">
+                        <div class="card card-stats card-round">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
@@ -456,8 +456,8 @@
                                         </h4>
                                         <small class="text-success">
                                             @if($caNetPrev > 0)
-                                                +{{ round((($metrics['caNet'] - $caNetPrev) / $caNetPrev) * 100, 1) }}%
-                                            @else N/A @endif
+                                                +{{ round((($metrics['caNet'] - $caNetPrev) / $caNetPrev) * 100, 1) }}% VS période précedente
+                                            @else - @endif
                                         </small>
                                     </div>
                                     <div class="avatar avatar-xl">
@@ -471,7 +471,7 @@
                     </div>
 
                     <div class="col-md-3 col-sm-6">
-                        <div class="card card-stats card-round h-100">
+                        <div class="card card-stats card-round">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
@@ -480,7 +480,7 @@
                                             -{{ number_format($metrics['caRetour'], 0, ',', ' ') }} €
                                         </h4>
                                         <small class="text-danger">
-                                            {{ $metrics['caBrut'] > 0 ? round(($metrics['caRetour'] / $metrics['caBrut']) * 100, 1) : 0 }}%
+                                            {{ $metrics['caBrut'] > 0 ? round(($metrics['caRetour'] / $metrics['caBrut']) * 100, 1) : 0 }}% du CA brut
                                         </small>
                                     </div>
                                     <div class="avatar avatar-xl">
@@ -493,15 +493,15 @@
                         </div>
                     </div>
 
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card card-stats card-round h-100">
+                    <div class="col-md-3 col-sm-6"> 
+                        <div class="card card-stats card-round">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <p class="text-muted mb-1 small">BONS LIVRÉS</p>
                                         <h4 class="mb-0 text-primary fw-bold">{{ $metrics['nbBl'] }}</h4>
                                         <small class="text-primary">
-                                            Panier: {{ number_format($metrics['panierMoyen'], 0, ',', ' ') }} €
+                                            Panier moyen: {{ number_format($metrics['panierMoyen'], 0, ',', ' ') }} €
                                         </small>
                                     </div>
                                     <div class="avatar avatar-xl">
@@ -515,13 +515,13 @@
                     </div>
 
                     <div class="col-md-3 col-sm-6">
-                        <div class="card card-stats card-round h-100">
+                        <div class="card card-stats card-round">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <p class="text-muted mb-1 small">PRÉVISION J+1</p>
                                         <h4 class="mb-0 text-info fw-bold">{{ number_format($forecast, 0, ',', ' ') }} €</h4>
-                                        <small class="text-info">+3% vs 7j</small>
+                                        <small class="text-info">+3% vs Moyenne 7j</small>
                                     </div>
                                     <div class="avatar avatar-xl">
                                         <div class="avatar-title rounded-circle bg-info text-white kpi-icon">
@@ -539,7 +539,7 @@
 
                     <!-- Classement Vendeurs + Top Vendeurs -->
                     <div class="col-lg-6">
-                        <div class="card card-round h-100">
+                        <div class="card card-round">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Classement Vendeurs</h5>
                             </div>
@@ -586,7 +586,7 @@
                     </div>
 
                     <div class="col-lg-6">
-                            <div class="card card-round h-100">
+                            <div class="card card-round">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">Top Vendeurs</h5>
                                 </div>
@@ -619,7 +619,7 @@
 
                     <!-- Taux de Retour -->
                     <div class="col-md-8">
-                        <div class="card card-round h-100">
+                        <div class="card card-round">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Taux de Retour (%)</h5>
                             </div>
@@ -633,7 +633,7 @@
 
                     <!-- Répartition Statut -->
                     <div class="col-md-4">
-                        <div class="card card-round h-100">
+                        <div class="card card-round">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Répartition Statut BL</h5>
                             </div>
@@ -668,7 +668,7 @@
 
                     <!-- Comparatif 3 mois -->
                     <div class="col-lg-4">
-                        <div class="card card-round h-100">
+                        <div class="card card-round">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Comparatif 3 mois</h5>
                             </div>
