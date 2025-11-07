@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\DeliveryNote;
@@ -9,76 +10,95 @@ use App\Models\SalesReturn;
 
 class AnalyticsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $now = Carbon::now();
-        $thirtyDaysAgo = $now->clone()->subDays(30);
-        $sixtyDaysAgo = $now->clone()->subDays(60);
-        $thirtyOneDaysAgo = $now->clone()->subDays(31);
         $today = $now->clone()->startOfDay();
         $thisMonthStart = $now->clone()->startOfMonth();
+        $thirtyDaysAgo = $now->clone()->subDays(30);
+
+        // === FILTRE PERSONNALISÉ ===
+        $customStart = $request->query('start_date');
+        $customEnd = $request->query('end_date');
+        $period = $request->query('period', 'last30');
+
+        $start = null;
+        $end = null;
+
+        if ($customStart && $customEnd) {
+            try {
+                $start = Carbon::parse($customStart)->startOfDay();
+                $end = Carbon::parse($customEnd)->endOfDay(); // Inclure toute la journée
+
+                if ($start->gt($end)) {
+                    [$start, $end] = [$end, $start];
+                }
+            } catch (\Exception $e) {
+                $start = $end = null;
+            }
+        }
+
+        // Si pas de filtre, utiliser l'onglet actif
+        if (!$start || !$end) {
+            switch ($period) {
+                case 'today':
+                    $start = $today;
+                    $end = $now;
+                    break;
+                case 'thisMonth':
+                    $start = $thisMonthStart;
+                    $end = $now;
+                    break;
+                case 'last30':
+                default:
+                    $start = $thirtyDaysAgo;
+                    $end = $now;
+                    break;
+            }
+        }
+
+        // === DONNÉES DYNAMIQUES ===
+        $metrics = $this->getSalesMetrics($start, $end);
+        $salesBySeller = $this->getSalesBySeller($start, $end);
+        $returnRateBySeller = $this->getReturnRateBySeller($start, $end);
+        $caNetByDay = $this->getCaNetByDay($start, $end);
+        $returnRateByDay = $this->getReturnRateByDay($start, $end);
+        $statusRepartition = $this->getStatusRepartition($start, $end);
+        $topClients = $this->getTopClients($start, $end);
+
+        // === Comparatifs 3 mois ===
         $lastMonthStart = $now->clone()->subMonth()->startOfMonth();
         $lastMonthEnd = $now->clone()->subMonth()->endOfMonth();
         $twoMonthsAgoStart = $now->clone()->subMonths(2)->startOfMonth();
         $twoMonthsAgoEnd = $now->clone()->subMonths(2)->endOfMonth();
 
-        // Derniers 30 jours
-        $last30Metrics = $this->getSalesMetrics($thirtyDaysAgo, $now);
-        $last30SalesBySeller = $this->getSalesBySeller($thirtyDaysAgo, $now);
-        $last30ReturnRateBySeller = $this->getReturnRateBySeller($thirtyDaysAgo, $now);
-        $last30CaNetByDay = $this->getCaNetByDay($thirtyDaysAgo, $now);
-        $last30ReturnRateByDay = $this->getReturnRateByDay($thirtyDaysAgo, $now);
-        $last30StatusRepartition = $this->getStatusRepartition($thirtyDaysAgo, $now);
-        $last30TopClients = $this->getTopClients($thirtyDaysAgo, $now);
-
-        // Aujourd'hui
-        $todayMetrics = $this->getSalesMetrics($today, $now);
-        $todaySalesBySeller = $this->getSalesBySeller($today, $now);
-        $todayReturnRateBySeller = $this->getReturnRateBySeller($today, $now);
-        $todayCaNetByDay = $this->getCaNetByDay($today, $now); // Sera un seul point
-        $todayReturnRateByDay = $this->getReturnRateByDay($today, $now);
-        $todayStatusRepartition = $this->getStatusRepartition($today, $now);
-        $todayTopClients = $this->getTopClients($today, $now);
-
-        // Ce mois
-        $thisMonthMetrics = $this->getSalesMetrics($thisMonthStart, $now);
-        $thisMonthSalesBySeller = $this->getSalesBySeller($thisMonthStart, $now);
-        $thisMonthReturnRateBySeller = $this->getReturnRateBySeller($thisMonthStart, $now);
-        $thisMonthCaNetByDay = $this->getCaNetByDay($thisMonthStart, $now);
-        $thisMonthReturnRateByDay = $this->getReturnRateByDay($thisMonthStart, $now);
-        $thisMonthStatusRepartition = $this->getStatusRepartition($thisMonthStart, $now);
-        $thisMonthTopClients = $this->getTopClients($thisMonthStart, $now);
-
-        // CA mois précédent (pour comparaison dans les KPI)
         $lastMonthMetrics = $this->getSalesMetrics($lastMonthStart, $lastMonthEnd);
         $twoMonthsAgoMetrics = $this->getSalesMetrics($twoMonthsAgoStart, $twoMonthsAgoEnd);
 
-        // Comparatif des 3 derniers mois (global)
         $monthsCa = [
             $twoMonthsAgoStart->format('M Y') => $twoMonthsAgoMetrics['caNet'],
             $lastMonthStart->format('M Y') => $lastMonthMetrics['caNet'],
-            $thisMonthStart->format('M Y') => $thisMonthMetrics['caNet'], // Partiel
+            $thisMonthStart->format('M Y') => $this->getSalesMetrics($thisMonthStart, $now)['caNet'],
         ];
 
-        // CA net précédent pour les 30 jours (déjà calculé)
-        $caNetPrev = $this->getSalesMetrics($sixtyDaysAgo, $thirtyOneDaysAgo)['caNet'];
-
-        // Prévision (gardée pour les 30 jours uniquement)
-        $last7 = array_slice($last30CaNetByDay, -7, 7, true);
+        // === Prévision J+1 ===
+        $last7 = array_slice($caNetByDay, -7, 7, true);
         $avg7 = !empty($last7) ? round(array_sum($last7) / count($last7), 0) : 0;
         $forecast = $avg7 > 0 ? round($avg7 * 1.03) : 0;
 
+        // CA Net période précédente (30 jours avant)
+        $sixtyDaysAgo = $now->clone()->subDays(60);
+        $thirtyOneDaysAgo = $now->clone()->subDays(31);
+        $caNetPrev = $this->getSalesMetrics($sixtyDaysAgo, $thirtyOneDaysAgo)['caNet'];
+
         return view('admin.analytics', compact(
-            'last30Metrics', 'last30SalesBySeller', 'last30ReturnRateBySeller', 'last30CaNetByDay',
-            'last30ReturnRateByDay', 'last30StatusRepartition', 'last30TopClients',
-            'todayMetrics', 'todaySalesBySeller', 'todayReturnRateBySeller', 'todayCaNetByDay',
-            'todayReturnRateByDay', 'todayStatusRepartition', 'todayTopClients',
-            'thisMonthMetrics', 'thisMonthSalesBySeller', 'thisMonthReturnRateBySeller', 'thisMonthCaNetByDay',
-            'thisMonthReturnRateByDay', 'thisMonthStatusRepartition', 'thisMonthTopClients',
-            'monthsCa', 'caNetPrev', 'forecast'
+            'metrics', 'salesBySeller', 'returnRateBySeller', 'caNetByDay',
+            'returnRateByDay', 'statusRepartition', 'topClients',
+            'monthsCa', 'forecast', 'start', 'end', 'period', 'caNetPrev'
         ));
     }
 
+    // === MÉTHODES DE CALCUL (inchangées) ===
     private function getSalesMetrics($start, $end)
     {
         $ventes = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])

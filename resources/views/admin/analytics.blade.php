@@ -366,682 +366,323 @@
             </div>
 
             <div class="container">
-<div class="page-inner">
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h3 class="fw-bold mb-1">Analytics Ventes</h3>
-            <p class="text-muted">Pilotage commercial en temps réel – CA Net après retours</p>
-        </div>
-        <div>
-            <button class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-sync"></i> Actualiser
-            </button>
-            <a href="" class="btn btn-success btn-sm">
-                <i class="fas fa-file-excel"></i> Export Excel
-            </a>
-        </div>
-    </div>
+            <div class="page-inner">
 
-    <!-- Onglets pour les périodes -->
-    <ul class="nav nav-tabs mb-4" id="periodTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="last30-tab" data-bs-toggle="tab" data-bs-target="#last30" type="button" role="tab" aria-controls="last30" aria-selected="true">Derniers 30 jours</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="thisMonth-tab" data-bs-toggle="tab" data-bs-target="#thisMonth" type="button" role="tab" aria-controls="thisMonth" aria-selected="false">Ce mois</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="today-tab" data-bs-toggle="tab" data-bs-target="#today" type="button" role="tab" aria-controls="today" aria-selected="false">Aujourd'hui</button>
-        </li>
-    </ul>
-
-    <div class="tab-content" id="periodTabsContent">
-        <!-- Derniers 30 jours -->
-        <div class="tab-pane fade show active" id="last30" role="tabpanel" aria-labelledby="last30-tab">
-            <!-- KPI CARDS -->
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <p class="text-muted mb-1">CA NET (30j)</p>
-                                    <h4 class="mb-0 text-success fw-bold">
-                                        {{ number_format($last30Metrics['caNet'], 0, ',', ' ') }} €
-                                    </h4>
-                                </div>
-                                <div class="avatar avatar-xl">
-                                    <div class="avatar-title rounded-circle bg-success">
-                                        <i class="fas fa-euro-sign"></i>
-                                    </div>
-                                </div>
-                            </div>
-<small class="text-success">
-    @if($caNetPrev > 0)
-        +{{ round((($last30Metrics['caNet'] - $caNetPrev) / $caNetPrev) * 100, 1) }}%
-    @else
-        N/A
-    @endif
-    vs période précédente
-</small>
-                        </div>
+                <!-- HEADER -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h3 class="fw-bold mb-1">Analytics Ventes</h3>
+                        <p class="text-muted mb-0">Pilotage en temps réel – CA Net après retours</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="location.reload()">
+                            <i class="fas fa-sync-alt"></i> Actualiser
+                        </button>
+                        <a href="#" class="btn btn-success btn-sm">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </a>
                     </div>
                 </div>
 
-                <div class="col-md-3">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <p class="text-muted mb-1">Retours</p>
-                                    <h4 class="mb-0 text-danger fw-bold">
-                                        -{{ number_format($last30Metrics['caRetour'], 0, ',', ' ') }} €
-                                    </h4>
-                                </div>
-                                <div class="avatar avatar-xl">
-                                    <div class="avatar-title rounded-circle bg-danger">
-                                        <i class="fas fa-undo"></i>
-                                    </div>
-                                </div>
+                <!-- FILTRE + PÉRIODE -->
+                <div class="card card-round mb-4">
+                    <div class="card-body py-3">
+                        <form method="GET" action="{{ route('analytics') }}" class="row g-2 align-items-center">
+                            <div class="col-auto">
+                                <input type="date" name="start_date" class="form-control form-control-sm"
+                                       value="{{ $start ? $start->format('Y-m-d') : '' }}">
                             </div>
-                            <small class="text-danger">{{ round(($last30Metrics['caRetour'] / $last30Metrics['caBrut']) * 100, 1) }}% du CA brut</small>
-                        </div>
-                    </div>
-                </div>
+                            <div class="col-auto"><strong>→</strong></div>
+                            <div class="col-auto">
+                                <input type="date" name="end_date" class="form-control form-control-sm"
+                                       value="{{ $end ? $end->format('Y-m-d') : '' }}">
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary btn-sm">Filtrer</button>
+                                @if(request()->has('start_date'))
+                                    <a href="{{ route('analytics') }}" class="btn btn-outline-secondary btn-sm">Supprimer les filtres</a>
+                                @endif
+                            </div>
+                        </form>
 
-                <div class="col-md-3">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <p class="text-muted mb-1">Bons Livrés</p>
-                                    <h4 class="mb-0 text-primary fw-bold">{{ $last30Metrics['nbBl'] }}</h4>
-                                </div>
-                                <div class="avatar avatar-xl">
-                                    <div class="avatar-title rounded-circle bg-primary">
-                                        <i class="fas fa-truck"></i>
-                                    </div>
-                                </div>
+                        @if($start && $end)
+                            <div class="mt-2 small text-success">
+                                <i class="fas fa-calendar-alt"></i>
+                                <strong>Période :</strong> {{ $start->format('d/m/Y') }} → {{ $end->format('d/m/Y') }}
                             </div>
-<small class="text-danger">
-    @if($thisMonthMetrics['caBrut'] > 0)
-        {{ round(($thisMonthMetrics['caRetour'] / $thisMonthMetrics['caBrut']) * 100, 1) }}%
-    @else
-        0%
-    @endif
-    du CA brut
-</small>                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <p class="text-muted mb-1">Prévision J+1</p>
-                                    <h4 class="mb-0 text-info fw-bold">{{ number_format($forecast, 0, ',', ' ') }} €</h4>
-                                </div>
-                                <div class="avatar avatar-xl">
-                                    <div class="avatar-title rounded-circle bg-info">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <small class="text-info">+3% vs moyenne 7j</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- GRAPHIQUES -->
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="card"> 
-                        <div class="card-header"><div class="card-title">Classement Vendeurs (CA + Retours)</div></div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-striped table-hover">
-                                    <thead class="bg-light">
-                                        <tr><th>#</th><th>Vendeur</th><th>CA Net</th><th>Retours</th><th>Taux Retour</th></tr>
-                                    </thead>
-                                    <tbody>
-                                        @if(auth::user()->role == "vendeur") 
-                                        <u>vous n'êtes pas autorisé, merci de contacter votre administrateur</u>
-                                        @else
-                                            @forelse($last30ReturnRateBySeller as $index => $s)
-                                                <tr class="{{ $index === 0 ? 'table-success' : '' }}">
-                                                    <td><strong>{{ $index + 1 }}</strong></td>
-                                                    <td>{{ $s['vendeur'] }}</td>
-                                                    <td>{{ number_format($s['ventes'] - $s['retours'], 0, ',', ' ') }} €</td>
-                                                    <td class="text-danger">-{{ number_format($s['retours'], 0, ',', ' ') }} €</td>
-                                                    <td><span class="badge bg-{{ $s['taux_retour'] > 10 ? 'danger' : ($s['taux_retour'] > 5 ? 'warning' : 'success') }}">{{ $s['taux_retour'] }}%</span></td>
-                                                </tr>
-                                            @empty
-                                                <tr><td colspan="5" class="text-center">Aucun vendeur</td></tr>
-                                            @endforelse
-                                        @endif
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Top Vendeurs (CA Net)</div>
-                        </div>
-                        @if(auth::user()->role == "vendeur") 
-                        <u>vous n'êtes pas autorisé, merci de contacter votre administrateur</u>
-                        @else
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="sellerChartLast30" height="300"></canvas>
-                            </div>
-                        </div>
                         @endif
                     </div>
                 </div>
-            </div>
 
-            <div class="row mt-4">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Évolution CA Net</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="caNetChartLast30" height="400"></canvas>
-                            </div>
-                        </div>
+                <!-- ONGLETS -->
+                <ul class="nav nav-tabs mb-4" id="periodTabs">
+                    @php $active = !$start || $period === 'last30' ? 'active' : '' @endphp
+                    <li class="nav-item">
+                        <a href="{{ route('analytics', ['period' => 'last30']) }}"
+                           class="nav-link {{ $active }} {{ request()->has('start_date') ? 'disabled' : '' }}">
+                            Derniers 30 jours
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('analytics', ['period' => 'thisMonth']) }}"
+                           class="nav-link {{ $period === 'thisMonth' ? 'active' : '' }} {{ request()->has('start_date') ? 'disabled' : '' }}">
+                            Ce mois
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('analytics', ['period' => 'today']) }}"
+                           class="nav-link {{ $period === 'today' ? 'active' : '' }} {{ request()->has('start_date') ? 'disabled' : '' }}">
+                            Aujourd'hui
+                        </a>
+                    </li>
+                </ul>
+
+                @if(request()->has('start_date'))
+                    <div class="alert alert-warning small py-2 mb-4">
+                        <i class="fas fa-info-circle"></i> Les onglets sont désactivés en filtre personnalisé.
                     </div>
-                </div>
+                @endif
 
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Taux de Retour (%)</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="returnRateChartLast30" height="300"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-4">
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Répartition Statut BL</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="statusChartLast30" height="300"></canvas>
-                            </div>
-                            <div class="mt-3 text-center">
-                                @foreach($last30StatusRepartition as $label => $count)
-                                    <span class="badge bg-{{ $label === 'Expédié' ? 'success' : ($label === 'En cours' ? 'warning' : 'danger') }} me-2">
-                                        {{ $label }}: {{ $count }}
-                                    </span>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Top 10 Clients (CA Net)</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="topClientsChartLast30" height="400"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Ce mois -->
-        <div class="tab-pane fade" id="thisMonth" role="tabpanel" aria-labelledby="thisMonth-tab">
-            <!-- KPI CARDS -->
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <p class="text-muted mb-1">CA NET (Ce mois)</p>
-                                    <h4 class="mb-0 text-success fw-bold">
-                                        {{ number_format($thisMonthMetrics['caNet'], 0, ',', ' ') }} €
-                                    </h4>
-                                </div>
-                                <div class="avatar avatar-xl">
-                                    <div class="avatar-title rounded-circle bg-success">
-                                        <i class="fas fa-euro-sign"></i>
+                <!-- KPI CARDS -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="card card-stats card-round h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="text-muted mb-1 small">CA NET</p>
+                                        <h4 class="mb-0 text-success fw-bold">
+                                            {{ number_format($metrics['caNet'], 0, ',', ' ') }} €
+                                        </h4>
+                                        <small class="text-success">
+                                            @if($caNetPrev > 0)
+                                                +{{ round((($metrics['caNet'] - $caNetPrev) / $caNetPrev) * 100, 1) }}%
+                                            @else N/A @endif
+                                        </small>
+                                    </div>
+                                    <div class="avatar avatar-xl">
+                                        <div class="avatar-title rounded-circle bg-success text-white kpi-icon">
+                                            <i class="fas fa-euro-sign"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <small class="text-success">
-                                N/A vs mois précédent <!-- À calculer si nécessaire -->
-                            </small>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-md-3">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <p class="text-muted mb-1">Retours</p>
-                                    <h4 class="mb-0 text-danger fw-bold">
-                                        -{{ number_format($thisMonthMetrics['caRetour'], 0, ',', ' ') }} €
-                                    </h4>
-                                </div>
-                                <div class="avatar avatar-xl">
-                                    <div class="avatar-title rounded-circle bg-danger">
-                                        <i class="fas fa-undo"></i>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="card card-stats card-round h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="text-muted mb-1 small">RETOURS</p>
+                                        <h4 class="mb-0 text-danger fw-bold">
+                                            -{{ number_format($metrics['caRetour'], 0, ',', ' ') }} €
+                                        </h4>
+                                        <small class="text-danger">
+                                            {{ $metrics['caBrut'] > 0 ? round(($metrics['caRetour'] / $metrics['caBrut']) * 100, 1) : 0 }}%
+                                        </small>
+                                    </div>
+                                    <div class="avatar avatar-xl">
+                                        <div class="avatar-title rounded-circle bg-danger text-white kpi-icon">
+                                            <i class="fas fa-undo"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <small class="text-danger">{{ round(($thisMonthMetrics['caRetour'] / $thisMonthMetrics['caBrut']) * 100, 1) }}% du CA brut</small>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-md-3">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <p class="text-muted mb-1">Bons Livrés</p>
-                                    <h4 class="mb-0 text-primary fw-bold">{{ $thisMonthMetrics['nbBl'] }}</h4>
-                                </div>
-                                <div class="avatar avatar-xl">
-                                    <div class="avatar-title rounded-circle bg-primary">
-                                        <i class="fas fa-truck"></i>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="card card-stats card-round h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="text-muted mb-1 small">BONS LIVRÉS</p>
+                                        <h4 class="mb-0 text-primary fw-bold">{{ $metrics['nbBl'] }}</h4>
+                                        <small class="text-primary">
+                                            Panier: {{ number_format($metrics['panierMoyen'], 0, ',', ' ') }} €
+                                        </small>
+                                    </div>
+                                    <div class="avatar avatar-xl">
+                                        <div class="avatar-title rounded-circle bg-primary text-white kpi-icon">
+                                            <i class="fas fa-truck"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <small class="text-primary">Panier moyen: {{ number_format($thisMonthMetrics['panierMoyen'], 0, ',', ' ') }} €</small>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-md-3">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <p class="text-muted mb-1">Prévision J+1</p>
-                                    <h4 class="mb-0 text-info fw-bold">{{ number_format($forecast, 0, ',', ' ') }} €</h4> <!-- Gardée globale -->
-                                </div>
-                                <div class="avatar avatar-xl">
-                                    <div class="avatar-title rounded-circle bg-info">
-                                        <i class="fas fa-chart-line"></i>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="card card-stats card-round h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="text-muted mb-1 small">PRÉVISION J+1</p>
+                                        <h4 class="mb-0 text-info fw-bold">{{ number_format($forecast, 0, ',', ' ') }} €</h4>
+                                        <small class="text-info">+3% vs 7j</small>
+                                    </div>
+                                    <div class="avatar avatar-xl">
+                                        <div class="avatar-title rounded-circle bg-info text-white kpi-icon">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <small class="text-info">+3% vs moyenne 7j</small>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- GRAPHIQUES similaires -->
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="card"> 
-                        <div class="card-header"><div class="card-title">Classement Vendeurs (CA + Retours)</div></div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-striped table-hover">
-                                    <thead class="bg-light">
-                                        <tr><th>#</th><th>Vendeur</th><th>CA Net</th><th>Retours</th><th>Taux Retour</th></tr>
-                                    </thead>
-                                    <tbody>
-                                        @if(auth::user()->role == "vendeur") 
-                                        <u>vous n'êtes pas autorisé, merci de contacter votre administrateur</u>
+                <!-- GRAPHIQUES -->
+                <div class="row g-4">
+
+                    <!-- Classement Vendeurs + Top Vendeurs -->
+                    <div class="col-lg-6">
+                        <div class="card card-round h-100">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Classement Vendeurs</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-3">#</th>
+                                            <th>Vendeur</th>
+                                            <th>CA Net</th>
+                                            <th>Retours</th>
+                                            <th>Taux</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @if(auth()->user()->role == "vendeur")
+                                            <tr><td colspan="5" class="text-center text-muted py-4">
+                                            <u>vous n'êtes pas autorisé, merci de contacter votre administrateur</u>
+
+                                            </td></tr>
                                         @else
-                                            @forelse($thisMonthReturnRateBySeller as $index => $s)
-                                                <tr class="{{ $index === 0 ? 'table-success' : '' }}">
-                                                    <td><strong>{{ $index + 1 }}</strong></td>
+                                            @forelse($returnRateBySeller as $i => $s)
+                                                <tr class="{{ $i === 0 ? 'table-success' : '' }}">
+                                                    <td class="ps-3"><strong>{{ $i + 1 }}</strong></td>
                                                     <td>{{ $s['vendeur'] }}</td>
                                                     <td>{{ number_format($s['ventes'] - $s['retours'], 0, ',', ' ') }} €</td>
                                                     <td class="text-danger">-{{ number_format($s['retours'], 0, ',', ' ') }} €</td>
-                                                    <td><span class="badge bg-{{ $s['taux_retour'] > 10 ? 'danger' : ($s['taux_retour'] > 5 ? 'warning' : 'success') }}">{{ $s['taux_retour'] }}%</span></td>
+                                                    <td>
+                                                        <span class="badge badge-xs bg-{{ $s['taux_retour'] > 10 ? 'danger' : ($s['taux_retour'] > 5 ? 'warning' : 'success') }}">
+                                                            {{ $s['taux_retour'] }}%
+                                                        </span>
+                                                    </td>
                                                 </tr>
                                             @empty
-                                                <tr><td colspan="5" class="text-center">Aucun vendeur</td></tr>
+                                                <tr><td colspan="5" class="text-center py-4">Aucun vendeur</td></tr>
                                             @endforelse
                                         @endif
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                            <div class="card card-round h-100">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Top Vendeurs</h5>
+                                </div>
+                                <div class="card-body">
+                                     @if(auth()->user()->role != "vendeur")
+                                    <div class="chart-container">
+                                        <canvas id="sellerChart"></canvas>
+                                    </div>
+                                    @else
+                                    <u>vous n'êtes pas autorisé, merci de contacter votre administrateur</u>
+                                    @endif
+                                </div>
+                            </div>
+                        
+                    </div>
+
+                    <!-- Évolution CA Net -->
+                    <div class="col-12">
+                        <div class="card card-round">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Évolution CA Net</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="caNetChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Taux de Retour -->
+                    <div class="col-md-8">
+                        <div class="card card-round h-100">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Taux de Retour (%)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="returnRateChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Répartition Statut -->
+                    <div class="col-md-4">
+                        <div class="card card-round h-100">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Répartition Statut BL</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <div class="chart-container">
+                                    <canvas id="statusChart"></canvas>
+                                </div>
+                                <div class="mt-3">
+                                    @foreach($statusRepartition as $label => $count)
+                                        <span class="badge me-1 mb-1 bg-{{ $label === 'Expédié' ? 'success' : ($label === 'En cours' ? 'warning' : 'danger') }}">
+                                            {{ $label }}: {{ $count }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top 10 Clients -->
+                    <div class="col-lg-8">
+                        <div class="card card-round">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Top 10 Clients</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="topClientsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comparatif 3 mois -->
+                    <div class="col-lg-4">
+                        <div class="card card-round h-100">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Comparatif 3 mois</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="monthsCaChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Top Vendeurs (CA Net)</div>
-                        </div>
-                        @if(auth::user()->role == "vendeur") 
-                        <u>vous n'êtes pas autorisé, merci de contacter votre administrateur</u>
-                        @else
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="sellerChartThisMonth" height="300"></canvas>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-4">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Évolution CA Net</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="caNetChartThisMonth" height="400"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Taux de Retour (%)</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="returnRateChartThisMonth" height="300"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-4">
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Répartition Statut BL</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="statusChartThisMonth" height="300"></canvas>
-                            </div>
-                            <div class="mt-3 text-center">
-                                @foreach($thisMonthStatusRepartition as $label => $count)
-                                    <span class="badge bg-{{ $label === 'Expédié' ? 'success' : ($label === 'En cours' ? 'warning' : 'danger') }} me-2">
-                                        {{ $label }}: {{ $count }}
-                                    </span>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Top 10 Clients (CA Net)</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="topClientsChartThisMonth" height="400"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
-
-        <!-- Aujourd'hui -->
-        <div class="tab-pane fade" id="today" role="tabpanel" aria-labelledby="today-tab">
-            <!-- KPI CARDS -->
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <p class="text-muted mb-1">CA NET (Aujourd'hui)</p>
-                                    <h4 class="mb-0 text-success fw-bold">
-                                        {{ number_format($todayMetrics['caNet'], 0, ',', ' ') }} €
-                                    </h4>
-                                </div>
-                                <div class="avatar avatar-xl">
-                                    <div class="avatar-title rounded-circle bg-success">
-                                        <i class="fas fa-euro-sign"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <small class="text-success">
-                                N/A vs hier <!-- À calculer si nécessaire -->
-                            </small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <p class="text-muted mb-1">Retours</p>
-                                    <h4 class="mb-0 text-danger fw-bold">
-                                        -{{ number_format($todayMetrics['caRetour'], 0, ',', ' ') }} €
-                                    </h4>
-                                </div>
-                                <div class="avatar avatar-xl">
-                                    <div class="avatar-title rounded-circle bg-danger">
-                                        <i class="fas fa-undo"></i>
-                                    </div>
-                                </div>
-                            </div>
-<small class="text-danger">
-    @if($todayMetrics['caBrut'] > 0)
-        {{ round(($todayMetrics['caRetour'] / $todayMetrics['caBrut']) * 100, 1) }}%
-    @else
-        0%
-    @endif
-    du CA brut
-</small>                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <p class="text-muted mb-1">Bons Livrés</p>
-                                    <h4 class="mb-0 text-primary fw-bold">{{ $todayMetrics['nbBl'] }}</h4>
-                                </div>
-                                <div class="avatar avatar-xl">
-                                    <div class="avatar-title rounded-circle bg-primary">
-                                        <i class="fas fa-truck"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <small class="text-primary">Panier moyen: {{ number_format($todayMetrics['panierMoyen'], 0, ',', ' ') }} €</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <p class="text-muted mb-1">Prévision J+1</p>
-                                    <h4 class="mb-0 text-info fw-bold">{{ number_format($forecast, 0, ',', ' ') }} €</h4> <!-- Gardée globale -->
-                                </div>
-                                <div class="avatar avatar-xl">
-                                    <div class="avatar-title rounded-circle bg-info">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <small class="text-info">+3% vs moyenne 7j</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- GRAPHIQUES (simplifiés pour aujourd'hui, car un seul jour) -->
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="card"> 
-                        <div class="card-header"><div class="card-title">Classement Vendeurs (CA + Retours)</div></div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-striped table-hover">
-                                    <thead class="bg-light">
-                                        <tr><th>#</th><th>Vendeur</th><th>CA Net</th><th>Retours</th><th>Taux Retour</th></tr>
-                                    </thead>
-                                    <tbody>
-                                        @if(auth::user()->role == "vendeur") 
-                                        <u>vous n'êtes pas autorisé, merci de contacter votre administrateur</u>
-                                        @else
-                                            @forelse($todayReturnRateBySeller as $index => $s)
-                                                <tr class="{{ $index === 0 ? 'table-success' : '' }}">
-                                                    <td><strong>{{ $index + 1 }}</strong></td>
-                                                    <td>{{ $s['vendeur'] }}</td>
-                                                    <td>{{ number_format($s['ventes'] - $s['retours'], 0, ',', ' ') }} €</td>
-                                                    <td class="text-danger">-{{ number_format($s['retours'], 0, ',', ' ') }} €</td>
-                                                    <td><span class="badge bg-{{ $s['taux_retour'] > 10 ? 'danger' : ($s['taux_retour'] > 5 ? 'warning' : 'success') }}">{{ $s['taux_retour'] }}%</span></td>
-                                                </tr>
-                                            @empty
-                                                <tr><td colspan="5" class="text-center">Aucun vendeur</td></tr>
-                                            @endforelse
-                                        @endif
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Top Vendeurs (CA Net)</div>
-                        </div>
-                        @if(auth::user()->role == "vendeur") 
-                        <u>vous n'êtes pas autorisé, merci de contacter votre administrateur</u>
-                        @else
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="sellerChartToday" height="300"></canvas>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-4">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Évolution CA Net (un seul jour)</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="caNetChartToday" height="400"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Taux de Retour (%)</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="returnRateChartToday" height="300"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-4">
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Répartition Statut BL</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="statusChartToday" height="300"></canvas>
-                            </div>
-                            <div class="mt-3 text-center">
-                                @foreach($todayStatusRepartition as $label => $count)
-                                    <span class="badge bg-{{ $label === 'Expédié' ? 'success' : ($label === 'En cours' ? 'warning' : 'danger') }} me-2">
-                                        {{ $label }}: {{ $count }}
-                                    </span>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Top 10 Clients (CA Net)</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="topClientsChartToday" height="400"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Comparatif des 3 derniers mois (global, hors onglets) -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Comparatif CA Net (3 derniers mois)</div>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="monthsCaChart" height="300"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-            </div>
 
             <footer class="footer">
                 <div class="container-fluid d-flex justify-content-between">
@@ -1069,124 +710,92 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Fonction générique pour créer un chart line
-    function createLineChart(ctxId, labels, data, label, borderColor, backgroundColor) {
-        const ctx = document.getElementById(ctxId).getContext('2d');
-        new Chart(ctx, {
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = (id) => document.getElementById(id).getContext('2d');
+
+        new Chart(ctx('caNetChart'), {
             type: 'line',
             data: {
-                labels: labels,
+                labels: Object.keys(@json($caNetByDay)),
                 datasets: [{
-                    label: label,
-                    data: data,
-                    borderColor: borderColor,
-                    backgroundColor: backgroundColor,
+                    label: 'CA Net',
+                    data: Object.values(@json($caNetByDay)),
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40,167,69,0.1)',
                     fill: true,
-                    tension: 0.4,
-                    pointRadius: 5,
-                    pointHoverRadius: 8
+                    tension: 0.4
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return label + ': ' + context.formattedValue + (label.includes('%') ? '%' : ' €');
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: { beginAtZero: true, max: label.includes('%') ? 100 : undefined }
-                }
-            }
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
         });
-    }
 
-    // Fonction générique pour bar chart
-    function createBarChart(ctxId, labels, data, label, backgroundColor, indexAxis = 'x') {
-        const ctx = document.getElementById(ctxId).getContext('2d');
-        new Chart(ctx, {
+        new Chart(ctx('returnRateChart'), {
+            type: 'line',
+            data: {
+                labels: Object.keys(@json($returnRateByDay)),
+                datasets: [{
+                    label: 'Taux (%)',
+                    data: Object.values(@json($returnRateByDay)),
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220,53,69,0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+
+        new Chart(ctx('sellerChart'), {
             type: 'bar',
             data: {
-                labels: labels,
+                labels: @json($salesBySeller->pluck('vendeur')),
                 datasets: [{
-                    label: label,
-                    data: data,
-                    backgroundColor: backgroundColor
+                    label: 'CA Net',
+                    data: @json($salesBySeller->pluck('ca')),
+                    backgroundColor: '#fd7e14'
                 }]
             },
-            options: {
-                indexAxis: indexAxis,
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
-            }
+            options: { responsive: true, plugins: { legend: { display: false } } }
         });
-    }
 
-    // Fonction générique pour doughnut chart
-    function createDoughnutChart(ctxId, labels, data) {
-        const ctx = document.getElementById(ctxId).getContext('2d');
-        new Chart(ctx, {
+        new Chart(ctx('topClientsChart'), {
+            type: 'bar',
+            data: {
+                labels: @json($topClients->pluck('client')),
+                datasets: [{
+                    label: 'CA Net',
+                    data: @json($topClients->pluck('ca')),
+                    backgroundColor: '#1d7af3'
+                }]
+            },
+            options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } } }
+        });
+
+        new Chart(ctx('statusChart'), {
             type: 'doughnut',
             data: {
-                labels: labels,
+                labels: @json(array_keys($statusRepartition)),
                 datasets: [{
-                    data: data,
-                    backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#6c757d'],
-                    borderWidth: 2,
-                    borderColor: '#fff'
+                    data: @json(array_values($statusRepartition)),
+                    backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#6c757d']
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((context.parsed / total) * 100);
-                                return `${context.label}: ${context.parsed} BL (${percentage}%)`;
-                            }
-                        }
-                    }
-                }
-            }
+            options: { responsive: true, plugins: { legend: { display: false } } }
         });
-    }
 
-    // Derniers 30 jours
-    createLineChart('caNetChartLast30', @json(array_keys($last30CaNetByDay)), @json(array_values($last30CaNetByDay)), 'CA Net (€)', '#28a745', 'rgba(40, 167, 69, 0.1)');
-    createBarChart('topClientsChartLast30', @json($last30TopClients->pluck('client')), @json($last30TopClients->pluck('ca')), 'CA Net (€)', '#1d7af3', 'y');
-    createDoughnutChart('statusChartLast30', @json(array_keys($last30StatusRepartition)), @json(array_values($last30StatusRepartition)));
-    createBarChart('sellerChartLast30', @json($last30SalesBySeller->pluck('vendeur')), @json($last30SalesBySeller->pluck('ca')), 'CA Net (€)', '#fd7e14');
-    createLineChart('returnRateChartLast30', @json(array_keys($last30ReturnRateByDay)), @json(array_values($last30ReturnRateByDay)), 'Taux de retour (%)', '#dc3545', 'rgba(220, 53, 69, 0.1)');
-
-    // Ce mois
-    createLineChart('caNetChartThisMonth', @json(array_keys($thisMonthCaNetByDay)), @json(array_values($thisMonthCaNetByDay)), 'CA Net (€)', '#28a745', 'rgba(40, 167, 69, 0.1)');
-    createBarChart('topClientsChartThisMonth', @json($thisMonthTopClients->pluck('client')), @json($thisMonthTopClients->pluck('ca')), 'CA Net (€)', '#1d7af3', 'y');
-    createDoughnutChart('statusChartThisMonth', @json(array_keys($thisMonthStatusRepartition)), @json(array_values($thisMonthStatusRepartition)));
-    createBarChart('sellerChartThisMonth', @json($thisMonthSalesBySeller->pluck('vendeur')), @json($thisMonthSalesBySeller->pluck('ca')), 'CA Net (€)', '#fd7e14');
-    createLineChart('returnRateChartThisMonth', @json(array_keys($thisMonthReturnRateByDay)), @json(array_values($thisMonthReturnRateByDay)), 'Taux de retour (%)', '#dc3545', 'rgba(220, 53, 69, 0.1)');
-
-    // Aujourd'hui
-    createLineChart('caNetChartToday', @json(array_keys($todayCaNetByDay)), @json(array_values($todayCaNetByDay)), 'CA Net (€)', '#28a745', 'rgba(40, 167, 69, 0.1)');
-    createBarChart('topClientsChartToday', @json($todayTopClients->pluck('client')), @json($todayTopClients->pluck('ca')), 'CA Net (€)', '#1d7af3', 'y');
-    createDoughnutChart('statusChartToday', @json(array_keys($todayStatusRepartition)), @json(array_values($todayStatusRepartition)));
-    createBarChart('sellerChartToday', @json($todaySalesBySeller->pluck('vendeur')), @json($todaySalesBySeller->pluck('ca')), 'CA Net (€)', '#fd7e14');
-    createLineChart('returnRateChartToday', @json(array_keys($todayReturnRateByDay)), @json(array_values($todayReturnRateByDay)), 'Taux de retour (%)', '#dc3545', 'rgba(220, 53, 69, 0.1)');
-
-    // Comparatif 3 mois
-    createBarChart('monthsCaChart', @json(array_keys($monthsCa)), @json(array_values($monthsCa)), 'CA Net (€)', '#28a745');
-});
+        new Chart(ctx('monthsCaChart'), {
+            type: 'bar',
+            data: {
+                labels: @json(array_keys($monthsCa)),
+                datasets: [{
+                    label: 'CA Net',
+                    data: @json(array_values($monthsCa)),
+                    backgroundColor: '#28a745'
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+    });
 </script>
 </body>
 </html>
