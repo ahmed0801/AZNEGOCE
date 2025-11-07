@@ -711,8 +711,8 @@
                                         </table>
                                     </div>
                                     <div class="total-display mt-2 text-end">
-                                        <h5 class="mb-1">Total HT : <span id="total_ht_global" class="text-success fw-bold">0,00</span> €</h5>
-                                        <h6 class="mb-0">Total TTC : <span id="total_ttc_global" class="text-danger fw-bold">0,00</span> €</h6>
+                                        <h6 class="mb-1">Total HT : <span id="total_ht_global" class="text-danger fw-bold">0,00</span> €</h6>
+                                        <h5 class="mb-0">Total TTC : <span id="total_ttc_global" class="text-success fw-bold">0,00</span> €</h5>
                                     </div>
                                     <!-- <a href="/articles" target="_blank" type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Aller a la Page Articles</a> -->
                                     <a href="/articles" 
