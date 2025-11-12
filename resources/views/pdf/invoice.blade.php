@@ -173,6 +173,38 @@ td {
     padding-left: 15px;
     list-style-type: circle;
 }
+
+
+
+/* === ENCAISSEMENTS === */
+.enc-payment-table {
+    font-size: 11px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+}
+.enc-payment-table th {
+    background-color: #e8f5e8;
+    color: #1e7e34;
+    font-weight: bold;
+    padding: 5px;
+    border: 1px solid #28a745;
+    text-align: left;
+}
+.enc-payment-table td {
+    padding: 4px;
+    border: 1px solid #ddd;
+}
+.enc-payment-table .total-row {
+    background-color: #f0fdf0;
+    font-weight: bold;
+}
+.enc-payment-table .amount {
+    text-align: right;
+    color: #1e7e34;
+}
+
+
 </style>
 </head>
 
@@ -249,6 +281,49 @@ td {
             </tr>
         </table>
     </div>
+
+<!-- === STATUT PAIEMENT + ENCAISSEMENTS === -->
+<div style="margin-top: 10px; border: 2px solid #28a745; border-radius: 15px; padding: 4px; background-color: #f8fff8;">
+    <p style="margin: 0 0 8px 0; font-weight: bold; color: #1e7e34;">
+        @if($invoice->paid)
+            Payée
+        @else
+            Non payé : {{ number_format($invoice->getRemainingBalanceAttribute(), 2, ',', ' ') }} €
+        @endif
+    </p>
+
+    @if($invoice->payments->count() > 0)
+        <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+
+            <tbody>
+                @foreach($invoice->payments as $payment)
+                    <tr>
+                        <td style="padding: 4px; border: 1px solid #ddd;">{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
+                        <td style="padding: 4px; border: 1px solid #ddd;">{{$payment->payment_mode }}</td>
+                        <td style="padding: 4px; border: 1px solid #ddd; text-align: right; font-weight: bold; color: #1e7e34;">
+                            {{ number_format(abs($payment->amount), 2, ',', ' ') }} €
+                        </td>
+                        <td style="padding: 4px; border: 1px solid #ddd;">{{ $payment->reference ?? '-' }}</td>
+                    </tr>
+                @endforeach
+                <tr style="background-color: #f0fdf0;">
+                    <td colspan="2" style="padding: 5px; text-align: right; font-weight: bold;">Total encaissé :</td>
+                    <td style="padding: 5px; text-align: right; font-weight: bold; color: #1e7e34;">
+                        {{ number_format($invoice->payments->sum('amount'), 2, ',', ' ') }} €
+                    </td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    @else
+        <p style="margin: 0; font-style: italic; color: #6c757d;">Aucun encaissement enregistré.</p>
+    @endif
+</div>
+
+
+
+
+
 
     <div class="conditions">
         <h3>Conditions Générales de Vente</h3>

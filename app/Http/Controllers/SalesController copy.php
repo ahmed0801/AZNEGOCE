@@ -455,55 +455,41 @@ public function storeDirectDeliveryNote(Request $request)
 
                     // === GESTION ARTICLE DIVERS (is_new_item) ===
                     if ($isNewItem) {
-                        $request->validate([
-                            "lines.$index.item_name" => 'required|string|max:255',
-                            "lines.$index.unit_price_ht" => 'required|numeric|min:0',
-                        ]);
+    $request->validate([
+        "lines.$index.item_name" => 'required|string|max:255',
+        "lines.$index.unit_price_ht" => 'required|numeric|min:0',
+    ]);
 
-                        $baseCode = $line['article_code'] ?? 'DIVERS';
+    $code = trim($line['article_code'] ?? 'DIVERS');
 
-                        // Forcer préfixe DIV-
-                        if (!str_starts_with($baseCode, 'DIV-')) {
-                            $baseCode = 'DIV-' . ltrim($baseCode, 'DIV-');
-                        }
+    $item = Item::where('code', $code)->first();
 
-                        $code = $baseCode;
-                        $counter = 0;
+    if ($item) {
+        // Mise à jour de l'article existant
+        $item->update([
+            'name' => $line['item_name'],
+            'sale_price' => $line['unit_price_ht'],
+            'cost_price' => $line['unit_price_ht'],
+            'location' => 'Divers',
+            'is_active' => 1,
+        ]);
+        \Log::info("Article divers mis à jour", ['code' => $code]);
+    } else {
+        // Création uniquement si inexistant
+        $item = Item::create([
+            'code' => $code,
+            'name' => $line['item_name'],
+            'sale_price' => $line['unit_price_ht'],
+            'cost_price' => $line['unit_price_ht'],
+            'is_active' => 1,
+            'store_id' => $request->store_id ?? 1,
+            'location' => 'Divers',
+        ]);
+        \Log::info("Nouvel article divers créé", ['code' => $code]);
+    }
 
-                        // Générer code unique avec points
-                        while (Item::where('code', $code)->exists()) {
-                            $counter++;
-                            $code = $baseCode . str_repeat('.', $counter);
-                        }
-
-                        // Validation finale
-                        $validator = Validator::make(
-                            ['code' => $code],
-                            ['code' => 'unique:items,code']
-                        );
-
-                        if ($validator->fails()) {
-                            throw new \Exception("Impossible de générer une référence unique pour l'article divers.");
-                        }
-
-                        $item = Item::create([
-                            'code' => $code,
-                            'name' => $line['item_name'],
-                            'sale_price' => $line['unit_price_ht'],
-                            'cost_price' => $line['unit_price_ht'],
-                            'is_active' => 1,
-                            'store_id' => $request->store_id ?? 1,
-                            'location' => 'Divers',
-                        ]);
-
-                        // Mettre à jour la ligne avec le code généré
-                        $line['article_code'] = $code;
-                    } else {
-                        $item = Item::where('code', $articleCode)->first();
-                        if (!$item) {
-                            throw new \Exception("Article {$articleCode} introuvable.");
-                        }
-                    }
+    $line['article_code'] = $item->code;
+}
 
                     // Vérification stock si validée
                     if ($status === 'validée' && $item->getStockQuantityAttribute() < $line['ordered_quantity']) {
@@ -634,48 +620,31 @@ if ($isNewItem) {
         "lines.$index.unit_price_ht" => 'required|numeric|min:0',
     ]);
 
-    // === GÉNÉRATION RÉFÉRENCE UNIQUE AVEC DIV- ===
-    $baseCode = $line['article_code'] ?? 'DIVERS';
-    $originalCode = $baseCode;
+    $code = trim($line['article_code'] ?? 'DIVERS');
 
-    // Forcer le préfixe DIV-
-    if (!str_starts_with($baseCode, 'DIV-')) {
-        $baseCode = 'DIV-' . ltrim($baseCode, 'DIV-');
+    $item = Item::where('code', $code)->first();
+
+    if ($item) {
+        $item->update([
+            'name' => $line['item_name'],
+            'sale_price' => $line['unit_price_ht'],
+            'cost_price' => $line['unit_price_ht'],
+            'location' => 'Divers',
+            'is_active' => 1,
+        ]);
+    } else {
+        $item = Item::create([
+            'code' => $code,
+            'name' => $line['item_name'],
+            'sale_price' => $line['unit_price_ht'],
+            'cost_price' => $line['unit_price_ht'],
+            'is_active' => 1,
+            'store_id' => $request->store_id ?? 1,
+            'location' => 'Divers',
+        ]);
     }
 
-    $code = $baseCode;
-    $suffix = '';
-    $counter = 0;
-
-    // Tant que le code existe → ajouter un point
-    while (Item::where('code', $code)->exists()) {
-        $counter++;
-        $suffix = str_repeat('.', $counter);
-        $code = $baseCode . $suffix;
-    }
-
-    // Validation finale d'unicité
-    $validator = Validator::make(
-        ['code' => $code],
-        ['code' => 'unique:items,code']
-    );
-
-    if ($validator->fails()) {
-        throw new \Exception("Impossible de générer une référence unique pour l'article divers.");
-    }
-
-    $item = Item::create([
-        'code' => $code,
-        'name' => $line['item_name'],
-        'sale_price' => $line['unit_price_ht'],
-        'cost_price' => $line['unit_price_ht'],
-        'is_active' => 1,
-        'store_id' => $request->store_id ?? 1,
-        'location' => 'Divers',
-    ]);
-
-    // Mise à jour de la ligne avec le code généré
-    $line['article_code'] = $code;
+    $line['article_code'] = $item->code;
 } else {
     $item = Item::where('code', $articleCode)->first();
     if (!$item) {
@@ -1382,56 +1351,43 @@ public function exportSingle($id)
                     $item = null;
 
                     // === GESTION ARTICLE DIVERS (is_new_item) ===
-                    if ($isNewItem) {
-                        $request->validate([
-                            "lines.$index.item_name" => 'required|string|max:255',
-                            "lines.$index.unit_price_ht" => 'required|numeric|min:0',
-                        ]);
+                  if ($isNewItem) {
+    $request->validate([
+        "lines.$index.item_name" => 'required|string|max:255',
+        "lines.$index.unit_price_ht" => 'required|numeric|min:0',
+    ]);
 
-                        $baseCode = $line['article_code'] ?? 'DIVERS';
+    $code = trim($line['article_code'] ?? 'DIVERS');
 
-                        // Forcer préfixe DIV-
-                        if (!str_starts_with($baseCode, 'DIV-')) {
-                            $baseCode = 'DIV-' . ltrim($baseCode, 'DIV-');
-                        }
+    $item = Item::where('code', $code)->first();
 
-                        $code = $baseCode;
-                        $counter = 0;
+    if ($item) {
+        $item->update([
+            'name' => $line['item_name'],
+            'sale_price' => $line['unit_price_ht'],
+            'cost_price' => $line['unit_price_ht'],
+            'location' => 'Divers',
+            'is_active' => 1,
+        ]);
+    } else {
+        $item = Item::create([
+            'code' => $code,
+            'name' => $line['item_name'],
+            'sale_price' => $line['unit_price_ht'],
+            'cost_price' => $line['unit_price_ht'],
+            'is_active' => 1,
+            'store_id' => $request->store_id ?? 1,
+            'location' => 'Divers',
+        ]);
+    }
 
-                        // Générer code unique avec points
-                        while (Item::where('code', $code)->exists()) {
-                            $counter++;
-                            $code = $baseCode . str_repeat('.', $counter);
-                        }
-
-                        // Validation finale
-                        $validator = Validator::make(
-                            ['code' => $code],
-                            ['code' => 'unique:items,code']
-                        );
-
-                        if ($validator->fails()) {
-                            throw new \Exception("Impossible de générer une référence unique pour l'article divers.");
-                        }
-
-                        $item = Item::create([
-                            'code' => $code,
-                            'name' => $line['item_name'],
-                            'sale_price' => $line['unit_price_ht'],
-                            'cost_price' => $line['unit_price_ht'],
-                            'is_active' => 1,
-                            'store_id' => $request->store_id ?? 1,
-                            'location' => 'Divers',
-                        ]);
-
-                        // Mettre à jour la ligne avec le code généré
-                        $line['article_code'] = $code;
-                    } else {
-                        $item = Item::where('code', $articleCode)->first();
-                        if (!$item) {
-                            throw new \Exception("Article {$articleCode} introuvable.");
-                        }
-                    }
+    $line['article_code'] = $item->code;
+} else {
+    $item = Item::where('code', $articleCode)->first();
+    if (!$item) {
+        throw new \Exception("Article {$articleCode} introuvable.");
+    }
+}
 
                     // Vérification stock si validée
                     if ($status === 'validée' && $item->getStockQuantityAttribute() < $line['ordered_quantity']) {
