@@ -30,7 +30,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 
     <style>
         .table { width: 100%; margin-bottom: 0; }
@@ -494,6 +494,7 @@
 
     @endif
                                                 @endif
+                                                 <span class="text-muted small"> à {{ $invoice->created_at }}</span>
 
 
                                                                                         @if($invoice->due_date != $invoice->invoice_date)
@@ -618,6 +619,18 @@
                                         </tbody>
                                     </table>
                                     <div class="text-end mt-3">
+
+
+
+
+
+@if($invoice->payments->count() > 0)
+     @foreach($invoice->payments as $payment)
+                                        <span class="badge text-bg-info">{{$payment->payment_mode }} : {{ number_format(abs($payment->amount), 2, ',', ' ') }} €</span>
+@endforeach
+@else 
+<span class="badge text-bg-danger">Aucun encaissement lié a cette facture</span>
+ @endif
                                         <div class="p-3 bg-white border rounded d-inline-block">
                                             <strong>Total HT :</strong> {{ number_format($invoice->total_ht, 2, ',', ' ') }} €<br>
                                             <strong>Total TTC :</strong> {{ number_format($invoice->total_ttc, 2, ',', ' ') }} €
@@ -822,6 +835,8 @@ function addEmailField(id) {
     <script src="{{ asset('assets/js/plugin/jsvectormap/world.js') }}"></script>
     <script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 
     <script>
         $(document).ready(function () {

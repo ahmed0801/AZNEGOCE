@@ -167,6 +167,7 @@
                     </a>
                     <div class="collapse" id="outils">
                         <ul class="nav nav-collapse">
+                            <li><a href="/analytics"><span class="sub-item">Analytics</span></a></li>
                             <li><a href="/tecdoc"><span class="sub-item">TecDoc</span></a></li>
                             <li><a href="/voice"><span class="sub-item">NEGOBOT</span></a></li>
                         </ul>
@@ -493,6 +494,7 @@
 
     @endif
                                                 @endif
+                                                 <span class="text-muted small"> à {{ $invoice->created_at }}</span>
 
 
                                                                                         @if($invoice->due_date != $invoice->invoice_date)
@@ -588,7 +590,8 @@
                                 </div>
 
                                 <div id="lines-{{ $invoice->id }}" class="card-body d-none bg-light">
-                                    <h6 class="fw-bold mb-3"><i class="fa fa-solid fa-car"></i> : {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}</h6>
+                                    <h6 class="fw-bold mb-3"><i class="fa fa-solid fa-car"></i> : {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}                     @if($invoice->notes )<p> Note : {{ $invoice->notes ?? '-' }}</p> @endif
+ </h6>
                                     <table class="table table-sm table-bordered align-middle">
                                         <thead class="table-light text-center">
                                             <tr>
@@ -634,6 +637,11 @@
                                         </div>
                                         <form action="{{ route('salesinvoices.make_payment', $invoice->id) }}" method="POST">
                                             @csrf
+                                          <!-- enregistrer et imprimer -->
+                                                <input type="hidden" name="print_after" id="print_after{{ $invoice->id }}" value="0">
+
+
+
                                             <div class="modal-body">
 
                                             
@@ -678,7 +686,16 @@
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+
+                                                                                                <!-- Nouveau bouton Enregistrer et Imprimer -->
+        <button type="submit" class="btn btn-success" onclick="document.getElementById('print_after{{ $invoice->id }}').value = 1;">
+            Enregistrer et Imprimer
+        </button>
+        
                                                 <button type="submit" class="btn btn-primary">Enregistrer</button>
+
+
+
                                             </div>
                                         </form>
                                     </div>
@@ -817,5 +834,18 @@ function addEmailField(id) {
             section.classList.toggle('d-none');
         }
     </script>
+
+
+
+
+@if(session('print_url'))
+<script>
+    window.open("{{ session('print_url') }}", "_blank");
+</script>
+@endif
+
+
+
+
 </body>
 </html>
