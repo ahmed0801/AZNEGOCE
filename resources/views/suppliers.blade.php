@@ -641,12 +641,12 @@
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Téléphone 1</label>
+            <label class="form-label">Téléphone 1 : Standard</label>
             <input type="text" name="phone1" class="form-control">
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Téléphone 2</label>
+            <label class="form-label">Téléphone 2 : Commercial</label>
             <input type="text" name="phone2" class="form-control">
         </div>
 
@@ -926,7 +926,8 @@
                             <td>{{ $customer->name }}</td>
                             <td>{{ $customer->address }} <br>
                           🏴󠁢󠁹󠁭󠁩󠁿{{ $customer->city }}</td>
-                            <td>📞 {{ $customer->phone1 }} <br>
+                            <td>📞 Standard : {{ $customer->phone1 }} <br>
+                            📞 Commercial : {{ $customer->phone2 }} <br>
                          📧 {{ $customer->email }} </td>
 
                              <td>
@@ -1082,12 +1083,12 @@
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Téléphone 1</label>
+            <label class="form-label">Téléphone 1 : Stadard</label>
             <input type="text" name="phone1" class="form-control" value="{{ $customer->phone1 }}" disabled>
         </div>
 
         <div class="mb-3 col-md-4">
-            <label class="form-label">Téléphone 2</label>
+            <label class="form-label">Téléphone 2 : Commercial</label>
             <input type="text" name="phone2" class="form-control" value="{{ $customer->phone2 }}" disabled>
         </div>
 
