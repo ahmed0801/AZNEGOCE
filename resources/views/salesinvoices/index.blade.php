@@ -469,7 +469,7 @@
                                         <h6 class="mb-0">
                                             <strong>Facture N° : {{ $invoice->numdoc }}
                                                @forelse ($invoice->creditNotes as $credit)
-                                                <span style="color:red; font-weight: bold;"> ⤺ Avoir : {{ $credit->numdoc }}</span>
+                                                <a href="/salesnotes/list" style="color:red; font-weight: bold;"> ⤺ Avoir : {{ $credit->numdoc }}</a>
                                                 @empty
         
     @endforelse
