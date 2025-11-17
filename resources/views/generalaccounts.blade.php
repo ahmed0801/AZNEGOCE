@@ -710,7 +710,7 @@
                                     <tbody>
 <!-- comptes par défaut -->
                                     <tr>
-                                                <td>707.</td>
+                                                <td>70702000</td>
                                                 <td>Ventes de Marchandises</td>
                                                 <td><span class="badge rounded-pill text-bg-light">Compte Systéme</span>
 </td>
@@ -727,7 +727,7 @@
 
 
                                                                         <tr>
-                                                <td>607.</td>
+                                                <td>60700000</td>
                                                 <td>Achat de Marchandises</td>
                                                  <td><span class="badge rounded-pill text-bg-light">Compte Systéme</span>
 </td>
@@ -747,7 +747,7 @@
 
 
                                      <tr>
-                                                <td>44571.</td>
+                                                <td>44571000</td>
                                                 <td>TVA Collectée</td>
                                                  <td><span class="badge rounded-pill text-bg-light">Compte Systéme</span>
 </td>
@@ -767,7 +767,7 @@
 
 
                                      <tr>
-                                                <td>44566.</td>
+                                                <td>44566200</td>
                                                 <td>TVA déductible</td>
                                                  <td><span class="badge rounded-pill text-bg-light">Compte Systéme</span>
 </td>
@@ -790,7 +790,7 @@
 
 
                                                                         <tr>
-                                                <td>411.</td>
+                                                <td>41100000</td>
                                                 <td>Clients</td>
                                                  <td><span class="badge rounded-pill text-bg-light">Compte Systéme</span>
 </td>
@@ -807,7 +807,7 @@
 
 
                                                                         <tr>
-                                                <td>4091.</td>
+                                                <td>40100000</td>
                                                 <td>Fournisseurs</td>
                                                  <td><span class="badge rounded-pill text-bg-light">Compte Systéme</span>
 </td>
@@ -826,8 +826,8 @@
 
 
                                                                         <tr>
-                                                <td>6037.</td>
-                                                <td>stocks de marchandises</td>
+                                                <td>60370000</td>
+                                                <td>Variation stocks marchandises</td>
                                                  <td><span class="badge rounded-pill text-bg-light">Compte Systéme</span>
 </td>
                                                 <td>
@@ -1008,7 +1008,7 @@
                             <div class="modal-dialog modal-xl">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="allAccountingModalLabel">Ecritures Compte : 70. Ventes de Marchandises</h5>
+                                        <h5 class="modal-title" id="allAccountingModalLabel">Ecritures Compte : 70702000 Ventes de Marchandises</h5>
                                         <button type="button" class="btn btn-secondary btn-round ms-2" onclick="showAllBalance()">
                                             <i class="fas fa-balance-scale me-1"></i> Balance Générale
                                         </button>
@@ -1517,7 +1517,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <div class="modal-dialog modal-xl">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="TVAAccountingModalLabel">Ecritures Compte : 4457. TVA Collectée</h5>
+                                        <h5 class="modal-title" id="TVAAccountingModalLabel">Ecritures Compte : 44571000 TVA Collectée</h5>
                                         <button type="button" class="btn btn-secondary btn-round ms-2" onclick="showTVABalance()">
                                             <i class="fas fa-balance-scale me-1"></i> Balance Générale
                                         </button>
@@ -1780,7 +1780,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <div class="modal-dialog modal-xl">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="TVADAccountingModalLabel">Ecritures Compte : 44566. TVA Déductibles</h5>
+                                        <h5 class="modal-title" id="TVADAccountingModalLabel">Ecritures Compte : 44566200 TVA Déductibles</h5>
                                         <button type="button" class="btn btn-secondary btn-round ms-2" onclick="showTVADBalance()">
                                             <i class="fas fa-balance-scale me-1"></i> Balance Générale
                                         </button>
@@ -2042,7 +2042,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <div class="modal-dialog modal-xl">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="allcustomerAccountingModalLabel">Ecritures Compte : 411. Clients</h5>
+                                        <h5 class="modal-title" id="allcustomerAccountingModalLabel">Ecritures Compte : 41100000 Clients</h5>
                                         <button type="button" class="btn btn-secondary btn-round ms-2" onclick="showAllcustomerBalance()">
                                             <i class="fas fa-balance-scale me-1"></i> Balance Générale
                                         </button>
