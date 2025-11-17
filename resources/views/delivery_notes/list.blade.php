@@ -558,13 +558,15 @@
                                     @endforeach
                                 @endif
 
+                                 @endif
+                                 
                                 @if(!$deliveryNote->invoiced)
                                                     <a class="dropdown-item" href="{{ route('salesinvoices.create_direct', $deliveryNote->id) }}">
                                                         <i class="fas fa-file-invoice"></i> Créer facture directe
                                                     </a>
                                                 @endif
 
- @endif
+
 
                                         </div>
                                     </div>

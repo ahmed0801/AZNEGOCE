@@ -410,6 +410,12 @@
                             Nouvelle Commande <i class="fas fa-plus-circle ms-2"></i>
                         </a>
 
+
+                        <a href="/salesnotes/create" class="btn btn-outline-danger btn-round ms-2">
+                            Nouvel Avoir Vente <i class="fas fa-plus-circle ms-2"></i>
+                        </a>
+
+
                         </h4>
 
                         <div class="alert alert-primary" role="alert">
@@ -418,7 +424,7 @@
 
 
 
-                        <form method="GET" action="{{ route('salesinvoices.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+                        <form method="GET" action="{{ route('salesinvoices.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3" >
                             <select name="customer_id" class="form-select form-select-sm select2" style="width: 150px;">
                                 <option value="">Client (Tous)</option>
                                 @foreach($customers as $customer)
@@ -427,8 +433,8 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <select name="status" class="form-select form-select-sm" style="width: 170px;">
-                                <option value="">Statut facture (Tous)</option>
+                            <select name="status" class="form-select form-select-sm" style="width: 140px;">
+                                <option value="">Statut fact. (Tous)</option>
                                 <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
                                 <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
                             </select>
@@ -494,7 +500,7 @@
 
     @endif
                                                 @endif
-                                                 <span class="text-muted small"> à {{ $invoice->created_at }}</span>
+                                                 <span class="text-muted small"> Créée le {{ $invoice->created_at }}</span>
 
 
                                                                                         @if($invoice->due_date != $invoice->invoice_date)
@@ -680,7 +686,7 @@
                                                 </div>
                                                 <div class="mb-3">
                                                     <label for="payment_mode{{ $invoice->id }}" class="form-label">Mode de paiement</label>
-                                                    <select class="form-control select2" id="payment_mode{{ $invoice->id }}" name="payment_mode" required>
+                                                    <select class="form-control" id="payment_mode{{ $invoice->id }}" name="payment_mode" required>
                                                         <option value="">Sélectionner le mode de paiement</option>
                                                        @foreach(\App\Models\PaymentMode::where('type', 'encaissement')->get() as $mode)
                                                             <option value="{{ $mode->name }}">{{ $mode->name }}</option>
@@ -835,12 +841,12 @@ function addEmailField(id) {
     <script src="{{ asset('assets/js/plugin/jsvectormap/world.js') }}"></script>
     <script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 
     <script>
         $(document).ready(function () {
-            $('.select2').select2({ width: '100%' });
+            $('.select2').select2({ width: '20%' });
         });
 
         function toggleLines(id) {

@@ -63,7 +63,7 @@ class SalesInvoicesController extends Controller
     public function createDirectInvoice($deliveryNoteId)
     {
         $deliveryNote = DeliveryNote::with(['lines.item', 'customer','vehicle'])
-            ->whereIn('status', ['expédié', 'livré'])
+            // ->whereIn('status', ['expédié', 'livré'])
             ->findOrFail($deliveryNoteId);
 
         if ($deliveryNote->invoiced) {
@@ -148,7 +148,10 @@ class SalesInvoicesController extends Controller
             ]);
 
             if ($request->action === 'validate') {
-                $deliveryNote->update(['invoiced' => true]);
+                $deliveryNote->update([
+                    'invoiced' => true,
+            'status' => 'expédié',  
+        ]);
 
                                                  // Update customer balance solde client
                      $totalTtc = $totalHt * (1 + $tvaRate / 100);

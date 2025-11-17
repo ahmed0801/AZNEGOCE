@@ -57,6 +57,21 @@
         .card .text-info { color: #17a2b8 !important; }
         .btn-primary { font-size: 1.1rem; padding: 1rem 1.5rem; border-radius: 8px; transition: all 0.3s ease; }
         .btn-primary:hover { background-color: #0056b3; box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); }
+
+
+
+        @keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+.blinking-btn {
+    animation: blink 1.5s infinite;
+}
+
+
+
     </style>
 </head>
 <body>
@@ -399,7 +414,7 @@
                         <div class="alert alert-danger">{{ session('error') }}</div>
                     @endif
 
-                    <h4>📋 Liste des commandes de vente :
+                    <h4>📋 Liste des commandes de vente & Devis :
 
                         <!-- <a href="{{ route('sales.create') }}" class="btn btn-sm btn-success">
                             Nouvelle <i class="fas fa-plus-circle ms-2"></i>
@@ -422,14 +437,14 @@
                             @endforeach
                         </select>
 
-                        <select name="status" class="form-select form-select-sm" style="width: 170px;">
+                        <select name="status" class="form-select form-select-sm" style="width: 130px;">
                             <option value="">Type/Statut</option>
                             <option value="Devis" {{ request('status') == 'Devis' ? 'selected' : '' }}>Devis</option>
                             <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
                             <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
                         </select>
 
-                        <select name="delivery_status" class="form-select form-select-sm" style="width: 170px;">
+                        <select name="delivery_status" class="form-select form-select-sm" style="width: 140px;">
                             <option value="">Statut BL (Tous)</option>
                             <option value="en_cours" {{ request('delivery_status') == 'en_cours' ? 'selected' : '' }}>En cours</option>
                             <option value="livré" {{ request('delivery_status') == 'livré' ? 'selected' : '' }}>Livré</option>
@@ -466,8 +481,26 @@
                                     @endif
                                     @if($order->deliveryNote)
                                         <span class="badge bg-info">Expédition {{ ucfirst($order->deliveryNote->status) }}</span>
+                                        @if(!ucfirst($order->deliveryNote->invoiced))
+
+<a type="button"
+   class="btn btn-danger btn-sm blinking-btn"
+   href="{{ route('salesinvoices.create_direct', ucfirst($order->deliveryNote->id)) }}">
+   cliquer ici pour facturer
+</a>
+@else 
+<span class="badge rounded-pill text-bg-light">Facturé</span>
+@endif
+@elseif($order->status === 'brouillon' or $order->status === 'Devis')
+
+<a type="button"
+   class="btn btn-warning btn-sm blinking-btn"
+   href="{{ route('sales.edit', $order->id) }}">
+   Valider Pour Facturer
+</a>
 
                                     @endif
+
                                 </div>
                                 <div class="btn-group">
                                     <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $order->id }})">
@@ -577,7 +610,7 @@
 
     <script>
         $(document).ready(function () {
-            $('.select2').select2({ width: '100%' });
+            $('.select2').select2({ width: '30%' });
         });
 
         function toggleLines(id) {

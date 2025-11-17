@@ -657,7 +657,7 @@
                                 </div>
                                 <div class="text-end">
                                     <button type="submit" name="action" value="save" class="btn btn-primary px-3">✅ Enregistrer Brouillon</button>
-                                    <button type="submit" name="action" value="validate" class="btn btn-success px-3 ms-2">✔️ Valider BL</button>
+                                    <button type="submit" name="action" value="validate" class="btn btn-success px-3 ms-2">✔️ Valider</button>
                                 </div>
                             </form>
                         </div>

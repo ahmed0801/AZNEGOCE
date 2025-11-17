@@ -461,9 +461,9 @@ public function storeDirectDeliveryNote(Request $request)
     ]);
 
     $code = trim($line['article_code'] ?? 'DIVERS');
+// dd(200);
 
     $item = Item::where('code', $code)->first();
-
     if ($item) {
         // Mise à jour de l'article existant
         $item->update([

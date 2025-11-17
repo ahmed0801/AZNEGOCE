@@ -480,7 +480,7 @@
                                 </table>
                                 <div class="form-group text-end mt-4">
                                     <button type="submit" name="action" value="save" class="btn btn-secondary">Enregistrer comme Brouillon</button>
-                                    <button type="submit" name="action" value="validate" class="btn btn-primary">Valider</button>
+                                    <button type="submit" name="action" value="validate" class="btn btn-success">Valider la Facture</button>
                                     <a href="{{ route('salesinvoices.index') }}" class="btn btn-danger">Annuler</a>
                                 </div>
                             </form>
