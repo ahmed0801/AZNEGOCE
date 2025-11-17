@@ -467,13 +467,17 @@
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
                                     <div>
                                         <h6 class="mb-0">
-                                            <strong>Facture N° : {{ $invoice->numdoc }}</strong> –
+                                            <strong>Facture N° : {{ $invoice->numdoc }}
+                                               @forelse ($invoice->creditNotes as $credit)
+                                                <span style="color:red; font-weight: bold;"> ⤺ Avoir : {{ $credit->numdoc }}</span>
+                                                @empty
+        -
+    @endforelse
+                                             </strong> –
                                             &#x1F482;{{ $invoice->customer->name ?? 'N/A' }}
                                             <span class="text-muted small">({{ $invoice->numclient ?? 'N/A' }})</span>
                                             <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</span>
-
-                                             
-                                             
+                                        
                                         </h6>
                                         @if($invoice->status === 'brouillon')
                                             <span class="badge bg-secondary">{{ ucfirst($invoice->status) }}</span>

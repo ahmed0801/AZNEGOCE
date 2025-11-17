@@ -35,7 +35,7 @@ class SalesInvoicesController extends Controller
 {
     public function invoicesList(Request $request)
     {
-        $query = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])
+        $query = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle','creditNotes' ])
             ->orderBy('updated_at', 'desc');
 
         if ($request->filled('customer_id')) {

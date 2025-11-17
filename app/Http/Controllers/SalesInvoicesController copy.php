@@ -63,7 +63,7 @@ class SalesInvoicesController extends Controller
     public function createDirectInvoice($deliveryNoteId)
     {
         $deliveryNote = DeliveryNote::with(['lines.item', 'customer','vehicle'])
-            ->whereIn('status', ['expédié', 'livré'])
+            // ->whereIn('status', ['expédié', 'livré'])
             ->findOrFail($deliveryNoteId);
 
         if ($deliveryNote->invoiced) {
@@ -148,7 +148,10 @@ class SalesInvoicesController extends Controller
             ]);
 
             if ($request->action === 'validate') {
-                $deliveryNote->update(['invoiced' => true]);
+                $deliveryNote->update([
+                    'invoiced' => true,
+            'status' => 'expédié',  
+        ]);
 
                                                  // Update customer balance solde client
                      $totalTtc = $totalHt * (1 + $tvaRate / 100);
@@ -223,15 +226,13 @@ $customer = Customer::with(['tvaGroup', 'paymentTerm'])->findOrFail($request->cu
                 $paymentTermLabel = strtolower($customer->paymentTerm->label ?? '');
 
 $invoiceDate = Carbon::parse($request->invoice_date);
-if (strpos($paymentTermLabel, 'fin du mois') !== false) {
-    // $dueDate = $invoiceDate->copy()->endOfMonth()->addDays($customer->paymentTerm->days);
-                    $dueDate = $invoiceDate->copy()->endOfMonth();
+$paymentTermLabel = strtolower($customer->paymentTerm->label); // pour éviter les majuscules
 
-} else {
-    // $dueDate = $invoiceDate->copy()->addDays($customer->paymentTerm->days);
-                    $dueDate = $invoiceDate->copy()->addDays($customer->paymentTerm->days);
+    // calcul echeance"
+    $days = $customer->paymentTerm->days?? 0;
+    $dueDate = $invoiceDate->copy()->endOfMonth()->addDays($days);
 
-}
+
 
 
             

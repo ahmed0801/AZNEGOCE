@@ -62,4 +62,11 @@ public function getRemainingBalanceAttribute()
         $this->update(['paid' => $this->getRemainingBalanceAttribute() <= 0]);
     }
 
+
+        public function creditNotes()
+{
+    return $this->hasMany(SalesNote::class, 'sales_invoice_id');
+}
+
+
 }
