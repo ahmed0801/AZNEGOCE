@@ -471,7 +471,7 @@
                                                @forelse ($invoice->creditNotes as $credit)
                                                 <span style="color:red; font-weight: bold;"> ⤺ Avoir : {{ $credit->numdoc }}</span>
                                                 @empty
-        -
+        
     @endforelse
                                              </strong> –
                                             &#x1F482;{{ $invoice->customer->name ?? 'N/A' }}
