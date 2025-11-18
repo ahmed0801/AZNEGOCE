@@ -30,7 +30,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 
     <style>
         .table { width: 100%; margin-bottom: 0; }
@@ -410,6 +410,12 @@
                             Nouvelle Commande <i class="fas fa-plus-circle ms-2"></i>
                         </a>
 
+
+                        <a href="/salesnotes/create" class="btn btn-outline-danger btn-round ms-2">
+                            Nouvel Avoir Vente <i class="fas fa-plus-circle ms-2"></i>
+                        </a>
+
+
                         </h4>
 
                         <div class="alert alert-primary" role="alert">
@@ -418,7 +424,7 @@
 
 
 
-                        <form method="GET" action="{{ route('salesinvoices.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+                        <form method="GET" action="{{ route('salesinvoices.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3" >
                             <select name="customer_id" class="form-select form-select-sm select2" style="width: 150px;">
                                 <option value="">Client (Tous)</option>
                                 @foreach($customers as $customer)
@@ -427,27 +433,48 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <select name="status" class="form-select form-select-sm" style="width: 170px;">
-                                <option value="">Statut facture (Tous)</option>
+
+                            <!-- num facture -->
+                            <input type="text" 
+       name="numdoc" 
+       class="form-control form-control-sm" 
+       style="width: 95px;" 
+       placeholder="N° facture" 
+       value="{{ request('numdoc') }}">
+
+
+       <select name="vendeur" class="form-select form-select-sm" style="width: 122px;">
+    <option value="">Vendeur (Tous)</option>
+    @foreach($vendeurs as $v)
+        <option value="{{ $v }}" {{ request('vendeur') == $v ? 'selected' : '' }}>
+            {{ $v }}
+        </option>
+    @endforeach
+</select>
+
+
+
+                            <select name="status" class="form-select form-select-sm" style="width: 85px;">
+                                <option value="">Statut (Tous)</option>
                                 <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
                                 <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
                             </select>
-                            <select name="paid" class="form-select form-select-sm" style="width: 120px;">
+                            <select name="paid" class="form-select form-select-sm" style="width: 103px;">
                                 <option value="">Payé (Tous)</option>
                                 <option value="1" {{ request('paid') == '1' ? 'selected' : '' }}>Payé</option>
                                 <option value="0" {{ request('paid') == '0' ? 'selected' : '' }}>Non payé</option>
                             </select>
-                            <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début" value="{{ request('date_from') }}">
+                            <input type="date" name="date_from" class="form-control form-control-sm" style="width: 97px;" placeholder="Date début" value="{{ request('date_from') }}">
                             <span class="mx-1">à</span>
-                            <input type="date" name="date_to" class="form-control form-control-sm" style="width: 120px;" placeholder="Date fin" value="{{ request('date_to') }}">
-                            <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                                <i class="fas fa-filter me-1"></i> Filtrer
+                            <input type="date" name="date_to" class="form-control form-control-sm" style="width: 97px;" placeholder="Date fin" value="{{ request('date_to') }}">
+                            <button id="btnFilter"  type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
+                                <i class="fas fa-filter me-1"></i> Filtrer(F8)
                             </button>
                             <button type="submit" name="action" value="export" formaction="{{ route('salesinvoices.export') }}" class="btn btn-outline-success btn-sm px-3">
                                 <i class="fas fa-file-excel me-1"></i> EXCEL
                             </button>
-                            <a href="{{ route('salesinvoices.index') }}" class="btn btn-outline-secondary btn-sm px-3">
-                                <i class="fas fa-undo me-1"></i> Réinitialiser
+                            <a id="btnReset" href="{{ route('salesinvoices.index') }}" class="btn btn-outline-secondary btn-sm px-3">
+                                <i class="fas fa-undo me-1"></i> Réinitialiser(F9)
                             </a>
                         </form>
 
@@ -461,13 +488,17 @@
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
                                     <div>
                                         <h6 class="mb-0">
-                                            <strong>Facture N° : {{ $invoice->numdoc }}</strong> –
+                                            <strong>Facture N° : {{ $invoice->numdoc }}
+                                               @forelse ($invoice->creditNotes as $credit)
+                                                <a href="/salesnotes/list" style="color:red; font-weight: bold;"> ⤺ Avoir : {{ $credit->numdoc }}</a>
+                                                @empty
+        
+    @endforelse
+                                             </strong> –
                                             &#x1F482;{{ $invoice->customer->name ?? 'N/A' }}
                                             <span class="text-muted small">({{ $invoice->numclient ?? 'N/A' }})</span>
                                             <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</span>
-
-                                             
-                                             
+                                        
                                         </h6>
                                         @if($invoice->status === 'brouillon')
                                             <span class="badge bg-secondary">{{ ucfirst($invoice->status) }}</span>
@@ -494,7 +525,7 @@
 
     @endif
                                                 @endif
-                                                 <span class="text-muted small"> à {{ $invoice->created_at }}</span>
+                                                 <span class="text-muted small"> Créée le {{ $invoice->created_at }}</span>
 
 
                                                                                         @if($invoice->due_date != $invoice->invoice_date)
@@ -619,6 +650,18 @@
                                         </tbody>
                                     </table>
                                     <div class="text-end mt-3">
+
+
+
+
+
+@if($invoice->payments->count() > 0)
+     @foreach($invoice->payments as $payment)
+                                        <span class="badge text-bg-info">{{$payment->payment_mode }} : {{ number_format(abs($payment->amount), 2, ',', ' ') }} €</span>
+@endforeach
+@else 
+<span class="badge text-bg-danger">Aucun encaissement lié a cette facture</span>
+ @endif
                                         <div class="p-3 bg-white border rounded d-inline-block">
                                             <strong>Total HT :</strong> {{ number_format($invoice->total_ht, 2, ',', ' ') }} €<br>
                                             <strong>Total TTC :</strong> {{ number_format($invoice->total_ttc, 2, ',', ' ') }} €
@@ -668,7 +711,7 @@
                                                 </div>
                                                 <div class="mb-3">
                                                     <label for="payment_mode{{ $invoice->id }}" class="form-label">Mode de paiement</label>
-                                                    <select class="form-control select2" id="payment_mode{{ $invoice->id }}" name="payment_mode" required>
+                                                    <select class="form-control" id="payment_mode{{ $invoice->id }}" name="payment_mode" required>
                                                         <option value="">Sélectionner le mode de paiement</option>
                                                        @foreach(\App\Models\PaymentMode::where('type', 'encaissement')->get() as $mode)
                                                             <option value="{{ $mode->name }}">{{ $mode->name }}</option>
@@ -823,10 +866,12 @@ function addEmailField(id) {
     <script src="{{ asset('assets/js/plugin/jsvectormap/world.js') }}"></script>
     <script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 
     <script>
         $(document).ready(function () {
-            $('.select2').select2({ width: '100%' });
+            $('.select2').select2({ width: '17%' });
         });
 
         function toggleLines(id) {
@@ -834,6 +879,26 @@ function addEmailField(id) {
             section.classList.toggle('d-none');
         }
     </script>
+
+
+
+<script>
+document.addEventListener('keydown', function(e) {
+
+    // F8 = Filtrer
+    if (e.key === 'F8') {
+        e.preventDefault();
+        document.getElementById('btnFilter').click();
+    }
+
+    // F9 = Réinitialiser
+    if (e.key === 'F9') {
+        e.preventDefault();
+        document.getElementById('btnReset').click();
+    }
+});
+</script>
+
 
 
 

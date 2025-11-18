@@ -454,7 +454,7 @@
 
 
 
-                            <select name="status" class="form-select form-select-sm" style="width: 90px;">
+                            <select name="status" class="form-select form-select-sm" style="width: 80px;">
                                 <option value="">Statut (Tous)</option>
                                 <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
                                 <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
@@ -465,17 +465,20 @@
                                 <option value="0" {{ request('paid') == '0' ? 'selected' : '' }}>Non payé</option>
                             </select>
                             <input type="date" name="date_from" class="form-control form-control-sm" style="width: 97px;" placeholder="Date début" value="{{ request('date_from') }}">
-                            <span class="mx-1">à</span>
+                            <span class="mx-0">à</span>
                             <input type="date" name="date_to" class="form-control form-control-sm" style="width: 97px;" placeholder="Date fin" value="{{ request('date_to') }}">
-                            <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                                <i class="fas fa-filter me-1"></i> Filtrer
+                            <button id="btnFilter"  type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
+                                <i class="fas fa-filter me-1"></i> Filtrer(F8)
                             </button>
+
+                                                        <a id="btnReset" href="{{ route('salesinvoices.index') }}" class="btn btn-outline-secondary btn-sm px-3">
+                                <i class="fas fa-undo me-1"></i> Réinitialiser(F9)
+                            </a>
+                            
                             <button type="submit" name="action" value="export" formaction="{{ route('salesinvoices.export') }}" class="btn btn-outline-success btn-sm px-3">
                                 <i class="fas fa-file-excel me-1"></i> EXCEL
                             </button>
-                            <a href="{{ route('salesinvoices.index') }}" class="btn btn-outline-secondary btn-sm px-3">
-                                <i class="fas fa-undo me-1"></i> Réinitialiser
-                            </a>
+
                         </form>
 
                                                                 <!-- Pagination avec conservation des filtres -->
@@ -879,6 +882,26 @@ function addEmailField(id) {
             section.classList.toggle('d-none');
         }
     </script>
+
+
+
+<script>
+document.addEventListener('keydown', function(e) {
+
+    // F8 = Filtrer
+    if (e.key === 'F8') {
+        e.preventDefault();
+        document.getElementById('btnFilter').click();
+    }
+
+    // F9 = Réinitialiser
+    if (e.key === 'F9') {
+        e.preventDefault();
+        document.getElementById('btnReset').click();
+    }
+});
+</script>
+
 
 
 
