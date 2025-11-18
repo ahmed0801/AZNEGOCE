@@ -77,7 +77,7 @@ class SalesInvoicesController extends Controller
     $vendeurs = User::where('role', 'vendeur')
         ->orderBy('name')
         ->pluck('name')
-        ->unique('name');
+        ->unique();
 
 
         return view('salesinvoices.index', compact('invoices', 'customers','vendeurs'));
