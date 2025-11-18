@@ -119,7 +119,7 @@ td {
 
 /* === TOTALS === */
 .totals-box {
-    margin-top: 10px;
+    margin-top: 5px;
     width: 280px;
     margin-left: auto;
     border: 2px solid #0056b3;
@@ -141,7 +141,7 @@ td {
 
 /* === CONDITIONS === */
 .conditions {
-    margin-top: 20px;
+    margin-top: 5px;
     font-size: 9px;
     color: #333;
     border: 1px solid #007bff;
@@ -181,7 +181,7 @@ td {
     font-size: 11px;
     width: 100%;
     border-collapse: collapse;
-    margin-top: 8px;
+    margin-top: 5px;
 }
 .enc-payment-table th {
     background-color: #e8f5e8;
@@ -229,6 +229,17 @@ td {
                     <p><strong>Client :</strong> {{ $invoice->customer->name ?? '-' }}</p>
                     <!-- <p><strong>N° Client :</strong> {{ $invoice->numclient ?? '-' }}</p> -->
                     <p><strong>Véhicule :</strong> {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}</p>
+                        
+                    @if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
+                                                   @php
+        $firstDeliveryNote = $invoice->deliveryNotes->first();
+    @endphp
+    @if($firstDeliveryNote)
+            <p><strong> Vendeur :</strong>   {{ $firstDeliveryNote->vendeur}}</p>
+
+    @endif
+    @endif
+
                 </div>
             </td>
         </tr>
