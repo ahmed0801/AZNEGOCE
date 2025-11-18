@@ -433,19 +433,40 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <select name="status" class="form-select form-select-sm" style="width: 140px;">
-                                <option value="">Statut fact. (Tous)</option>
+
+                            <!-- num facture -->
+                            <input type="text" 
+       name="numdoc" 
+       class="form-control form-control-sm" 
+       style="width: 95px;" 
+       placeholder="N° facture" 
+       value="{{ request('numdoc') }}">
+
+
+       <select name="vendeur" class="form-select form-select-sm" style="width: 122px;">
+    <option value="">Vendeur (Tous)</option>
+    @foreach($vendeurs as $v)
+        <option value="{{ $v }}" {{ request('vendeur') == $v ? 'selected' : '' }}>
+            {{ $v }}
+        </option>
+    @endforeach
+</select>
+
+
+
+                            <select name="status" class="form-select form-select-sm" style="width: 90px;">
+                                <option value="">Statut (Tous)</option>
                                 <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
                                 <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
                             </select>
-                            <select name="paid" class="form-select form-select-sm" style="width: 120px;">
+                            <select name="paid" class="form-select form-select-sm" style="width: 103px;">
                                 <option value="">Payé (Tous)</option>
                                 <option value="1" {{ request('paid') == '1' ? 'selected' : '' }}>Payé</option>
                                 <option value="0" {{ request('paid') == '0' ? 'selected' : '' }}>Non payé</option>
                             </select>
-                            <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début" value="{{ request('date_from') }}">
+                            <input type="date" name="date_from" class="form-control form-control-sm" style="width: 97px;" placeholder="Date début" value="{{ request('date_from') }}">
                             <span class="mx-1">à</span>
-                            <input type="date" name="date_to" class="form-control form-control-sm" style="width: 120px;" placeholder="Date fin" value="{{ request('date_to') }}">
+                            <input type="date" name="date_to" class="form-control form-control-sm" style="width: 97px;" placeholder="Date fin" value="{{ request('date_to') }}">
                             <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
                                 <i class="fas fa-filter me-1"></i> Filtrer
                             </button>
@@ -850,7 +871,7 @@ function addEmailField(id) {
 
     <script>
         $(document).ready(function () {
-            $('.select2').select2({ width: '20%' });
+            $('.select2').select2({ width: '17%' });
         });
 
         function toggleLines(id) {

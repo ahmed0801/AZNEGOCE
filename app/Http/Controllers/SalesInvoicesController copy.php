@@ -54,6 +54,11 @@ class SalesInvoicesController extends Controller
             $query->whereDate('invoice_date', '<=', $request->date_to);
         }
 
+        // Nouveau filtre par numéro de facture
+    if ($request->filled('numdoc')) {
+        $query->where('numdoc', 'like', '%' . $request->numdoc . '%');
+    }
+
         $invoices = $query->paginate(50);
         $customers = Customer::orderBy('name')->get();
 

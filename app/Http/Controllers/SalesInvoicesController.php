@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\InvoiceMail;
 use App\Mail\OrderReadyMail;
 use App\Models\EmailMessage;
+use App\Models\User;
 
 class SalesInvoicesController extends Controller
 {
@@ -53,11 +54,33 @@ class SalesInvoicesController extends Controller
         if ($request->filled('date_to')) {
             $query->whereDate('invoice_date', '<=', $request->date_to);
         }
+    if ($request->filled('numdoc')) {
+        $query->where('numdoc', 'like', '%' . $request->numdoc . '%');
+    }
+
+    // NOUVEAU : Filtre par vendeur
+    if ($request->filled('vendeur')) {
+        $vendeur = trim($request->vendeur);
+
+        $query->whereHas('deliveryNotes', function ($q) use ($vendeur) {
+            $q->where('vendeur', 'LIKE', "%{$vendeur}%");
+        });
+    }
+
+
 
         $invoices = $query->paginate(50);
         $customers = Customer::orderBy('name')->get();
 
-        return view('salesinvoices.index', compact('invoices', 'customers'));
+
+        // On récupère aussi la liste des vendeurs uniques pour le select
+    $vendeurs = User::where('role', 'vendeur')
+        ->orderBy('name')
+        ->pluck('name')
+        ->unique();
+
+
+        return view('salesinvoices.index', compact('invoices', 'customers','vendeurs'));
     }
 
     public function createDirectInvoice($deliveryNoteId)
