@@ -701,6 +701,7 @@
                                                     <th>Stock</th>
                                                     <th>Qté</th>
                                                     <th>PU HT</th>
+                                                    <th>PU TTC</th>
                                                     <th>Remise %</th>
                                                     <th>Total HT</th>
                                                     <th>Total TTC</th>
@@ -1254,132 +1255,170 @@ $(document).on('click', '.voir-details', function (e) {
 
 
 
-            $(document).on('click', '#search_results div', function () {
-                let customerId = $('#customer_id').val();
-                if (!customerId || customerId === '%%%') {
-                    Swal.fire('Erreur', 'Veuillez sélectionner un client valide avant d\'ajouter un article.', 'error');
-                    return;
-                }
-                let tvaRate = parseFloat($('#customer_id').select2('data')[0]?.tva || 0);
-                if (tvaRate === 0 && $('#customer_id').select2('data')[0]?.tva == null) {
-                    Swal.fire('Erreur', 'Taux TVA non défini pour ce client.', 'error');
-                    console.error('TVA Rate undefined for Customer ID:', customerId);
-                    return;
-                }
-                let code = $(this).data('code');
-                let name = $(this).data('name');
-                let price = parseFloat($(this).data('price')) || 0;
-                let costPrice = parseFloat($(this).data('cost-price')) || 0;
-                let stock = parseFloat($(this).data('stock')) || 0;
-                let location = $(this).data('location') || '-';
-                let isActive = $(this).data('is-active') ? 1 : 0;
+           $(document).on('click', '#search_results div', function () {
+    let customerId = $('#customer_id').val();
+    if (!customerId || customerId === '%%%') {
+        Swal.fire('Erreur', 'Veuillez sélectionner un client valide avant d\'ajouter un article.', 'error');
+        return;
+    }
 
-                let row = `
-                    <tr data-line-id="${lineCount}">
-                        <td>
-                            <div class="d-flex align-items-center gap-1">
-                <span class="font-weight-bold">${code}</span>
-                <button type="button" 
-                        class="btn btn-xs btn-outline-secondary copy-line-code px-1 py-0"
-                        data-code="${code}"
-                        title="Copier la référence">
-                    <i class="fas fa-copy"></i>
-                </button>
-            </div>
-            <br>
-                            <span class="badge bg-${isActive ? 'success' : 'danger'} badge-very-sm">${isActive ? '🟢 actif' : '🔴 bloqué'}</span>
-                            <input type="hidden" name="lines[${lineCount}][article_code]" value="${code}">
-                        </td>
-                        <td>${name}</td>
-                        <td>${costPrice.toFixed(2)} €</td>
-                        <td>
-                            ${price.toFixed(2)} €<br>
-                            <small class="${price >= costPrice ? 'text-success' : 'text-danger'} small-text">
-                                ${price >= costPrice ? '+' : ''}${(price - costPrice).toFixed(2)} €
-                                (${costPrice > 0 ? (((price - costPrice) / costPrice) * 100).toFixed(0) : 0}%)
-                            </small>
-                        </td>
-                        <td>
-                            <button type="button" class="btn btn-outline-primary btn-sm stock-details-btn"
-                                    data-toggle="modal"
-                                    data-target="#stockDetailsModal"
-                                    data-code="${code}"
-                                    data-name="${name}"
-                                    title="Voir les détails du stock">
-                                ${stock.toFixed(0)}
-                            </button><br>
-                            <small class="text-muted" style="font-size: 0.7rem;">📦 ${location}</small>
-                        </td>
-                        <td><input type="number" name="lines[${lineCount}][ordered_quantity]" class="form-control quantity" value="1" min="0"></td>
-                        <td><input type="number" name="lines[${lineCount}][unit_price_ht]" class="form-control unit_price_ht" value="${price.toFixed(2)}" step="0.01"></td>
-                        <td><input type="number" name="lines[${lineCount}][remise]" class="form-control remise" value="0" min="0" max="100" step="0.01"></td>
-                        <td class="text-right total_ht">0,00</td>
-                        <td class="text-right total_ttc">0,00</td>
-                        <td><button type="button" class="btn btn-outline-danger btn-sm remove_line">×</button></td>
-                    </tr>
-                `;
-                $('#lines_body').append(row);
+    let tvaRate = parseFloat($('#customer_id').select2('data')[0]?.tva || 0);
+    if (tvaRate === 0 && $('#customer_id').select2('data')[0]?.tva == null) {
+        Swal.fire('Erreur', 'Taux TVA non défini pour ce client.', 'error');
+        return;
+    }
 
-
-                // === Gestion du bouton "Copier" dans les lignes du tableau ===
-$(document).on('click', '.copy-line-code', function (e) {
-    e.stopPropagation();
     let code = $(this).data('code');
-    navigator.clipboard.writeText(code).then(() => {
-        let btn = $(this);
-        let originalHtml = btn.html();
-        btn.html('<i class="fas fa-check text-success"></i>').prop('disabled', true);
-        setTimeout(() => {
-            btn.html(originalHtml).prop('disabled', false);
-        }, 1000);
-    }).catch(err => {
-        alert('Erreur copie : ' + err);
+    let name = $(this).data('name');
+    let price = parseFloat($(this).data('price')) || 0;
+    let costPrice = parseFloat($(this).data('cost-price')) || 0;
+    let stock = parseFloat($(this).data('stock')) || 0;
+    let location = $(this).data('location') || '-';
+    let isActive = $(this).data('is-active') ? 1 : 0;
+    
+
+    // DÉFINIR LES VARIABLES AVANT LE TEMPLATE
+    let unitPriceHt = price.toFixed(2);
+    let unitPriceTtc = (price * (1 + tvaRate / 100)).toFixed(2);
+
+    let row = `
+        <tr data-line-id="${lineCount}">
+            <td>
+                <div class="d-flex align-items-center gap-1">
+                    <span class="font-weight-bold">${code}</span>
+                    <button type="button"
+                            class="btn btn-xs btn-outline-secondary copy-line-code px-1 py-0"
+                            data-code="${code}"
+                            title="Copier la référence">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <br>
+                <span class="badge bg-${isActive ? 'success' : 'danger'} badge-very-sm">${isActive ? 'actif' : 'bloqué'}</span>
+                <input type="hidden" name="lines[${lineCount}][article_code]" value="${code}">
+            </td>
+            <td>${name}</td>
+            <td>${costPrice.toFixed(2)} €</td>
+            <td>
+                ${price.toFixed(2)} €<br>
+                <small class="${price >= costPrice ? 'text-success' : 'text-danger'} small-text">
+                    ${price >= costPrice ? '+' : ''}${(price - costPrice).toFixed(2)} €
+                    (${costPrice > 0 ? (((price - costPrice) / costPrice) * 100).toFixed(0) : 0}%)
+                </small>
+            </td>
+            <td>
+                <button type="button" class="btn btn-outline-primary btn-sm stock-details-btn"
+                        data-toggle="modal"
+                        data-target="#stockDetailsModal"
+                        data-code="${code}"
+                        data-name="${name}"
+                        title="Voir les détails du stock">
+                    ${stock.toFixed(0)}
+                </button><br>
+                <small class="text-muted" style="font-size: 0.7rem;">${location}</small>
+            </td>
+            <td><input type="number" name="lines[${lineCount}][ordered_quantity]" class="form-control quantity" value="1" min="0"></td>
+            <td>
+                <input type="text" inputmode="decimal" name="lines[${lineCount}][unit_price_ht]"
+                       class="form-control unit_price_ht" value="${unitPriceHt}" step="0.01">
+            </td>
+            <td>
+                <input type="text" inputmode="decimal" name="lines[${lineCount}][unit_price_ttc]"
+                       class="form-control unit_price_ttc" value="${unitPriceTtc}" step="0.01">
+            </td>
+            <td><input type="number" name="lines[${lineCount}][remise]" class="form-control remise" value="0" min="0" max="100" step="0.01"></td>
+            <td class="text-right total_ht">0,00</td>
+            <td class="text-right total_ttc">0,00</td>
+            <td><button type="button" class="btn btn-outline-danger btn-sm remove_line">×</button></td>
+        </tr>
+    `;
+
+    $('#lines_body').append(row);
+
+    // Gestion copie code
+    $(document).on('click', '.copy-line-code', function (e) {
+        e.stopPropagation();
+        let code = $(this).data('code');
+        navigator.clipboard.writeText(code).then(() => {
+            let btn = $(this);
+            let originalHtml = btn.html();
+            btn.html('<i class="fas fa-check text-success"></i>').prop('disabled', true);
+            setTimeout(() => {
+                btn.html(originalHtml).prop('disabled', false);
+            }, 1000);
+        });
     });
+
+    updateLineTotals($('#lines_body tr:last'), tvaRate);
+    lineCount++;
+    $('#search_item').val('');
+    $('#search_results').empty();
+    updateGlobalTotals();
 });
-
-
-
-                updateLineTotals($('#lines_body tr:last'), price, 1, 0, tvaRate);
-                lineCount++;
-                $('#search_item').val('');
-                $('#search_results').empty();
-                updateGlobalTotals();
-                console.log('Added line - Code:', code, 'Price:', price, 'TVA Rate:', tvaRate, 'Customer ID:', customerId);
-            });
 
             $(document).on('click', '.remove_line', function () {
                 $(this).closest('tr').remove();
                 updateGlobalTotals();
             });
 
-            $(document).on('input', '.quantity, .unit_price_ht, .remise', function () {
-                let row = $(this).closest('tr');
-                let unitPriceHt = parseFloat(row.find('.unit_price_ht').val()) || 0;
-                let quantity = parseFloat(row.find('.quantity').val()) || 0;
-                let remise = parseFloat(row.find('.remise').val()) || 0;
-                let customerId = $('#customer_id').val();
-                let tvaRate = customerId && customerId !== '%%%' ? parseFloat($('#customer_id').select2('data')[0]?.tva || 0) : 0;
-                if (customerId && customerId !== '%%%' && $('#customer_id').select2('data')[0]?.tva == null) {
-                    Swal.fire('Erreur', 'Taux TVA non défini pour ce client.', 'error');
-                    console.error('TVA Rate undefined for Customer ID:', customerId);
-                    tvaRate = 0;
-                }
-                updateLineTotals(row, unitPriceHt, quantity, remise, tvaRate);
-                updateGlobalTotals();
-                console.log('Input changed - UnitPriceHt:', unitPriceHt, 'Quantity:', quantity, 'Remise:', remise, 'TVA Rate:', tvaRate, 'Customer ID:', customerId);
-            });
+            $(document).on('input', '.unit_price_ht, .unit_price_ttc, .quantity, .remise', function () {
+    let row = $(this).closest('tr');
+    let tvaRate = $('#tva_rate').val() || 0;
 
-            function updateLineTotals(row, unitPriceHt, quantity, remise, tvaRate) {
-                unitPriceHt = parseFloat(unitPriceHt) || 0;
-                quantity = parseFloat(quantity) || 0;
-                remise = parseFloat(remise) || 0;
-                tvaRate = parseFloat(tvaRate) || 0;
-                let totalHt = unitPriceHt * quantity * (1 - remise / 100);
-                let totalTtc = totalHt * (1 + tvaRate / 100);
-                row.find('.total_ht').text(totalHt.toFixed(2).replace('.', ','));
-                row.find('.total_ttc').text(totalTtc.toFixed(2).replace('.', ','));
-                console.log('Line Totals - HT:', totalHt, 'TTC:', totalTtc, 'TVA Rate:', tvaRate);
-            }
+    // Marquer quel champ a été modifié en dernier
+    if ($(this).hasClass('unit_price_ht')) {
+        row.data('last-modified', 'ht');
+    } else if ($(this).hasClass('unit_price_ttc')) {
+        row.data('last-modified', 'ttc');
+    }
+
+    updateLineTotals(row, tvaRate);
+});
+
+function updateLineTotals(row, tvaRate) {
+    tvaRate = parseFloat(tvaRate) || 0;
+    let quantity = parseFloat(row.find('.quantity').val()) || 0;
+    let remise = parseFloat(row.find('.remise').val()) || 0;
+
+    let $puHt = row.find('.unit_price_ht');
+    let $puTtc = row.find('.unit_price_ttc');
+
+let puHt = parseFloat(($puHt.val() || '0').replace(',', '.')) || 0;
+let puTtc = parseFloat(($puTtc.val() || '0').replace(',', '.')) || 0;
+
+    // --- SI PU TTC est modifié → recalcule PU HT ---
+    if (puTtc > 0 && puHt === 0) {
+        puHt = puTtc / (1 + tvaRate / 100);
+        $puHt.val(puHt.toFixed(2));
+    }
+    // --- SI PU HT est modifié → recalcule PU TTC ---
+    else if (puHt > 0 && puTtc === 0) {
+        puTtc = puHt * (1 + tvaRate / 100);
+        $puTtc.val(puTtc.toFixed(2));
+    }
+    // --- SI LES DEUX SONT REMPLIS → synchronise selon le dernier modifié ---
+    else if (puHt > 0 && puTtc > 0) {
+        // On suppose que l'utilisateur a modifié le champ le plus récemment
+        // → on garde la valeur du champ modifié, on recalcule l'autre
+        let lastModified = row.data('last-modified'); // sera mis à jour dans l'événement
+        if (lastModified === 'ht') {
+            puTtc = puHt * (1 + tvaRate / 100);
+            $puTtc.val(puTtc.toFixed(2));
+        } else {
+            puHt = puTtc / (1 + tvaRate / 100);
+            $puHt.val(puHt.toFixed(2));
+        }
+    }
+
+    // --- Calcul des totaux ---
+    let totalHt = puHt * quantity * (1 - remise / 100);
+    let totalTtc = totalHt * (1 + tvaRate / 100);
+
+    row.find('.total_ht').text(totalHt.toFixed(2).replace('.', ','));
+    row.find('.total_ttc').text(totalTtc.toFixed(2).replace('.', ','));
+
+    updateGlobalTotals();
+}
 
             $(document).on('click', '.stock-details-btn', function (event) {
                 event.preventDefault();
@@ -1683,7 +1722,14 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
                 <td><span class="text-muted">-</span></td>
                 <td><span class="text-muted">-</span></td>
                 <td><input type="number" name="lines[${i}][ordered_quantity]" class="form-control quantity" value="1" min="1" required></td>
-                <td><input type="number" step="0.01" name="lines[${i}][unit_price_ht]" class="form-control unit_price_ht" placeholder="Prix HT" required></td>
+<td>
+    <input type="text" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ht]"
+           class="form-control unit_price_ht" value="0.00" placeholder="0,00">
+</td>
+<td>
+    <input type="text" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ttc]"
+           class="form-control unit_price_ttc" value="0.00" placeholder="0,00">
+</td>
                 <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
                 <td class="text-right total_ht">0,00</td>
                 <td class="text-right total_ttc">0,00</td>
@@ -1697,6 +1743,18 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
     });
 
             });
+
+
+            // === SÉLECTION AUTOMATIQUE DU TEXTE DANS PU HT / PU TTC ===
+$(document).on('focus click', '.unit_price_ht, .unit_price_ttc', function () {
+    this.select();
+});
+
+
+
+
+
+
     </script>
 </body>
 </html>

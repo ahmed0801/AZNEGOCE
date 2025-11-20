@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use PDF;
+use Illuminate\Support\Facades\Http;
 
 class SalesController extends Controller
 {
@@ -378,6 +379,37 @@ $paymentTerms = PaymentTerm::all();
         return view('sales.create_direct_delivery', compact('customers', 'tvaRates','tvaGroups','discountGroups','paymentModes','paymentTerms'));
     }
 
+
+
+
+
+
+
+
+
+
+    private function getTecdocBrands()
+{
+    $response = Http::withHeaders([
+        'X-Api-Key' => env('TECDOC_API_KEY', '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg')
+    ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
+        "getLinkageTargets" => [
+            "provider" => env('TECDOC_PROVIDER_ID', 23454),
+            "linkageTargetCountry" => env('TECDOC_COUNTRY', 'TN'),
+            "lang" => env('TECDOC_LANG', 'fr'),
+            "linkageTargetType" => "P",
+            "perPage" => 0,
+            "page" => 1,
+            "includeMfrFacets" => true
+        ]
+    ]);
+
+    return $response->successful() && isset($response->json()['mfrFacets']['counts'])
+        ? $response->json()['mfrFacets']['counts']
+        : [];
+}
+
+
     public function createDirectDeliveryNote()
 {
     $tvaRates = []; // Empty since tvaRate is fetched via AJAX
@@ -385,7 +417,12 @@ $paymentTerms = PaymentTerm::all();
     $discountGroups = DiscountGroup::all();
     $paymentModes = PaymentMode::all();
     $paymentTerms = PaymentTerm::all();
-    return view('sales.create_direct_delivery', compact('tvaRates', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms'));
+
+    $brands = $this->getTecdocBrands();
+// ou directement le code si tu ne veux pas créer la fonction privée
+
+
+    return view('sales.create_direct_delivery', compact('tvaRates', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms','brands'));
 }
 
 

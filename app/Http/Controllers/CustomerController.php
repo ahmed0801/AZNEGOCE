@@ -594,4 +594,45 @@ public function getAllAccountingEntriesHT()
 
 
 
+
+
+
+
+
+public function quickStoreVehicle(Request $request, $customer)
+{
+    $request->validate([
+        'license_plate' => 'required|string|max:50',
+        'brand_id' => 'required',
+        'brand_name' => 'required|string',
+        'model_id' => 'required',
+        'model_name' => 'required|string',
+        'engine_id' => 'required',
+        'engine_description' => 'required|string',
+        'linkage_target_id' => 'required',
+    ]);
+
+    $customer = Customer::findOrFail($customer);
+
+    $vehicle = Vehicle::create([
+        'customer_id' => $customer->id,
+        'license_plate' => strtoupper($request->license_plate),
+        'brand_id' => $request->brand_id,
+        'brand_name' => $request->brand_name,
+        'model_id' => $request->model_id,
+        'model_name' => $request->model_name,
+        'engine_id' => $request->engine_id,
+        'engine_description' => $request->engine_description,
+        'linkage_target_id' => $request->linkage_target_id,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'vehicle' => $vehicle
+    ]);
+}
+
+
+
+
 }

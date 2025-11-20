@@ -363,6 +363,14 @@ Route::post('/purchase/{id}/ship', [PurchaseController::class, 'markAsShipped'])
     Route::post('/sales/delivery', [SalesController::class, 'storeDirectDeliveryNote'])->name('sales.delivery.store');
 
 
+
+
+Route::post('/customers/{customer}/vehicles/quick-store', [CustomerController::class, 'quickStoreVehicle'])
+     ->name('customer.vehicle.quick-store');
+
+
+
+
 // Sales Invoices
 Route::get('/salesinvoices', [SalesInvoicesController::class, 'invoicesList'])->name('salesinvoices.index');
 Route::get('/salesinvoices/create_direct/{deliveryNoteId}', [SalesInvoicesController::class, 'createDirectInvoice'])->name('salesinvoices.create_direct');

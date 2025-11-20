@@ -603,23 +603,40 @@
                                         </select>
                                         <input type="hidden" name="tva_rate" id="tva_rate" value="0">
                                     </div>
-                                    <div class="col-md-5 col-12 mb-2" id="vehicle_group">
-                                        <label class="form-label">Véhicule</label>
-                                        <div class="input-group">
-                                            <select name="vehicle_id" id="vehicle_id" class="form-control select2">
-                                                <option value="" disabled selected>Sélectionner un véhicule</option>
-                                            </select>
-                                            <div class="input-group-append">
-                                                <hr>
-                                                <a id="loadCatalogBtn" class="btn btn-outline-primary btn-sm px-2 py-1" style="font-size: 0.90rem;" disabled>
-                                                    <i class="fas fa-list"></i> Charger le Catalogue
-                                                </a>
-                                                <a id="viewHistoryBtn" class="btn btn-outline-secondary btn-sm px-2 py-1" style="font-size: 0.90rem;" disabled>
-                                                    <i class="fas fa-history"></i> Voir l'historique
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    
+
+
+                                    
+
+
+                                    <div class="col-md-5 col-12 mb-2" id="vehicle_group" style="display: none;">
+    <label class="form-label d-block">
+        Véhicule <small class="text-muted">(optionnel mais recommandé)</small>
+    </label>
+    <div class="input-group">
+        <select name="vehicle_id" id="vehicle_id" class="form-control select2" style="width: 70%;">
+            <option value="" disabled selected>Sélectionner ou créer un véhicule</option>
+        </select>
+        
+        <!-- Bouton pour ajouter un nouveau véhicule -->
+        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addVehicleInlineModal">
+            <i class="fas fa-plus"></i> Nouveau <i class="fas fa-car"></i>
+        </button>
+
+        <div class="input-group-append ms-2">
+            <a id="loadCatalogBtn" class="btn btn-primary btn-sm" disabled>
+                <i class="fas fa-list"></i> Catalogue
+            </a>
+            <a id="viewHistoryBtn" class="btn btn-secondary btn-sm" disabled>
+                <i class="fas fa-history"></i> Historique
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
+
                                     <div class="col-md-3 col-12 mb-2">
                                         <label class="form-label">Date de commande</label>
                                         <input type="date" name="order_date" id="order_date" value="{{ now()->format('Y-m-d') }}" class="form-control order_date" required>
@@ -1756,5 +1773,206 @@ $(document).on('focus click', '.unit_price_ht, .unit_price_ttc', function () {
 
 
     </script>
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Modal Ajout Rapide Véhicule (dans la page de commande) -->
+<div class="modal fade" id="addVehicleInlineModal" tabindex="-1" aria-labelledby="addVehicleInlineModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addVehicleInlineModalLabel">
+                    <i class="fas fa-car"></i> Associer un nouveau véhicule
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="quickVehicleForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Immatriculation <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="quick_license_plate" required>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Marque <span class="text-danger">*</span></label>
+                            <select id="quick_brand_id" class="form-control select2-brand" style="width:100%;" required>
+                                <option value="">Rechercher une marque...</option>
+                                @foreach($brands as $brand)
+                                    <option value="{{ $brand['id'] }}" data-name="{{ $brand['name'] }}">{{ $brand['name'] }}</option>
+                                @endforeach
+                            </select>
+                            <input type="hidden" id="quick_brand_name">
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Modèle <span class="text-danger">*</span></label>
+                            <select id="quick_model_id" class="form-control select2-model" style="width:100%;" required disabled>
+                                <option value="">D'abord choisir une marque</option>
+                            </select>
+                            <input type="hidden" id="quick_model_name">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Motorisation <span class="text-danger">*</span></label>
+                            <select id="quick_engine_id" class="form-control select2-engine" style="width:100%;" required disabled>
+                                <option value="">D'abord choisir un modèle</option>
+                            </select>
+                            <input type="hidden" id="quick_engine_description">
+                            <input type="hidden" id="quick_linkage_target_id">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Créer et sélectionner
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+// === INITIALISATION SELECT2 DANS LE MODAL RAPIDE ===
+function initQuickVehicleSelect2() {
+    $('.select2-brand, .select2-model, .select2-engine').select2({
+        width: '100%',
+        dropdownParent: $('#addVehicleInlineModal')
+    });
+}
+
+// Réinitialiser et ré-init Select2 à l'ouverture
+$('#addVehicleInlineModal').on('shown.bs.modal', function () {
+    initQuickVehicleSelect2();
+
+    // Réinitialiser les champs
+    $('#quickVehicleForm')[0].reset();
+    $('#quick_model_id, #quick_engine_id').empty().append('<option value="">...</option>').prop('disabled', true);
+    $('#quick_brand_id').val('').trigger('change');
+});
+
+// Marque → Modèle
+$(document).on('change', '#quick_brand_id', function() {
+    const brandId = $(this).val();
+    const brandName = $(this).find('option:selected').data('name') || '';
+    $('#quick_brand_name').val(brandName);
+
+    const $model = $('#quick_model_id').empty().append('<option value="">Chargement...</option>').prop('disabled', true);
+    const $engine = $('#quick_engine_id').empty().append('<option value="">...</option>').prop('disabled', true);
+
+    if (brandId) {
+        fetch(`{{ route('getModels') }}?brand_id=${brandId}`)
+            .then(r => r.json())
+            .then(data => {
+                $model.empty().append('<option value="">Choisir un modèle</option>');
+                data.forEach(m => {
+                    $model.append(`<option value="${m.id}" data-name="${m.name}">${m.name}</option>`);
+                });
+                $model.prop('disabled', false);
+            });
+    }
+});
+
+// Modèle → Motorisation
+$(document).on('change', '#quick_model_id', function() {
+    const modelId = $(this).val();
+    const modelName = $(this).find('option:selected').data('name') || '';
+    $('#quick_model_name').val(modelName);
+
+    const $engine = $('#quick_engine_id').empty().append('<option value="">Chargement...</option>').prop('disabled', true);
+
+    if (modelId) {
+        fetch(`{{ route('getEngines') }}?model_id=${modelId}`)
+            .then(r => r.json())
+            .then(data => {
+                $engine.empty().append('<option value="">Choisir une motorisation</option>');
+                data.forEach(e => {
+                    $engine.append(
+                        `<option value="${e.id}"
+                                 data-description="${e.description}"
+                                 data-linking-target-id="${e.linkageTargetId}">
+                            ${e.description}
+                        </option>`
+                    );
+                });
+                $engine.prop('disabled', false);
+            });
+    }
+});
+
+// Motorisation → champs cachés
+$(document).on('change', '#quick_engine_id', function() {
+    const desc = $(this).find('option:selected').data('description') || '';
+    const link = $(this).find('option:selected').data('linking-target-id') || '';
+    $('#quick_engine_description').val(desc);
+    $('#quick_linkage_target_id').val(link);
+});
+
+// === SOUMISSION DU FORMULAIRE RAPIDE ===
+$('#quickVehicleForm').on('submit', function(e) {
+    e.preventDefault();
+
+    const customerId = $('#customer_id').val();
+    if (!customerId || customerId === '%%%') {
+        Swal.fire('Erreur', 'Veuillez d\'abord sélectionner un client', 'error');
+        return;
+    }
+
+    const formData = {
+        license_plate: $('#quick_license_plate').val(),
+        brand_id: $('#quick_brand_id').val(),
+        brand_name: $('#quick_brand_name').val(),
+        model_id: $('#quick_model_id').val(),
+        model_name: $('#quick_model_name').val(),
+        engine_id: $('#quick_engine_id').val(),
+        engine_description: $('#quick_engine_description').val(),
+        linkage_target_id: $('#quick_linkage_target_id').val(),
+        _token: '{{ csrf_token() }}'
+    };
+
+    $.post(`/customers/${customerId}/vehicles/quick-store`, formData)
+        .done(function(response) {
+            if (response.success) {
+                const veh = response.vehicle;
+
+                // Ajouter le nouveau véhicule dans le select
+                const optionText = `${veh.license_plate} (${veh.brand_name} ${veh.model_name} - ${veh.engine_description})`;
+                const newOption = new Option(optionText, veh.id, true, true);
+                $('#vehicle_id').append(newOption).trigger('change');
+
+                // Fermer le modal
+                $('#addVehicleInlineModal').modal('hide');
+
+                // Mettre à jour les boutons
+                updateCatalogButton();
+                updateHistoryButton();
+
+                Swal.fire('Succès', 'Véhicule créé et sélectionné !', 'success');
+            }
+        })
+        .fail(function(xhr) {
+            Swal.fire('Erreur', xhr.responseJSON?.message || 'Erreur lors de la création', 'error');
+        });
+});
+</script>
+
+
+
+
+
+
 </body>
 </html>
