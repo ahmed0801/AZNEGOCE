@@ -695,8 +695,14 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Rechercher un article</label>
+                                    <label class="form-label">Rechercher un article </label>
                                     <input type="text" id="search_item" class="form-control" placeholder="Par réference ou description, minimum 4 caratéres">
+                                    
+                                    <u><small class="form-text text-muted">
+        Astuce: ajoutez un <strong>%</strong> avant ou après votre mot-clé pour élargir la recherche. Exemple: <code>%pièce</code> ou <code>vis%</code>
+    </small></u>
+
+
                                     <div id="search_results" class="mt-2"></div>
                                 </div>
 
