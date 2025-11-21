@@ -513,7 +513,7 @@
                                              </strong> –
                                             &#x1F482;{{ $invoice->customer->name ?? 'N/A' }}
                                             <span class="text-muted small">({{ $invoice->numclient ?? 'N/A' }})</span>
-                                            <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</span>
+                                            <span class="text-muted small">- 📆 <b>{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</b></span>
                                         
                                         </h6>
                                         @if($invoice->status === 'brouillon')
@@ -541,7 +541,7 @@
 
     @endif
                                                 @endif
-                                                 <span class="text-muted small"> Créée le {{ $invoice->created_at }}</span>
+                                                 <span class="text-muted small"> Créée le <b> {{ $invoice->created_at->format('Y-m-d H:i') }} </b></span>
 
 
                                                                                         @if($invoice->due_date != $invoice->invoice_date)
