@@ -609,29 +609,58 @@
                                     
 
 
-                                    <div class="col-md-5 col-12 mb-2" id="vehicle_group" style="display: none;">
-    <label class="form-label d-block">
-        Véhicule <small class="text-muted">(optionnel mais recommandé)</small>
+                                <div class="col-md-5 col-12 mb-3" id="vehicle_group" style="display: none;">
+    <label class="form-label fw-semibold text-dark">
+       Associer un véhicule 
+        <span class="text-muted fw-normal fs-sm">(Automatique via une plaque d'immat.)</span>
     </label>
-    <div class="input-group">
-        <select name="vehicle_id" id="vehicle_id" class="form-control select2" style="width: 70%;">
-            <option value="" disabled selected>Sélectionner ou créer un véhicule</option>
-        </select>
-        
-        <!-- Bouton pour ajouter un nouveau véhicule -->
-        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addVehicleInlineModal">
-            <i class="fas fa-plus"></i> Nouveau <i class="fas fa-car"></i>
-        </button>
 
-        <div class="input-group-append ms-2">
-            <a id="loadCatalogBtn" class="btn btn-primary btn-sm" disabled>
-                <i class="fas fa-list"></i> Catalogue
-            </a>
-            <a id="viewHistoryBtn" class="btn btn-secondary btn-sm" disabled>
-                <i class="fas fa-history"></i> Historique
-            </a>
-        </div>
+    <!-- === NOUVEAU : Recherche par plaque === -->
+    <div class="input-group input-group-sm mb-3">
+        <span class="input-group-text">
+            <i class="fas fa-search"></i>
+        </span>
+        <input type="text" id="plate_search" class="form-control" placeholder="Ex: AB-123-CD (France)" autocomplete="off">
+        <button type="button" id="searchByPlateBtn" class="btn btn-outline-primary">
+            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+            Rechercher plaque
+        </button>
     </div>
+
+
+
+        <!-- <div class="form-text text-muted mt-2">
+        <small><i class="fas fa-info-circle"></i> Tapez une plaque française pour remplir automatiquement le véhicule</small>
+    </div> -->
+
+
+    <!-- Boutons classiques (Nouveau / Catalogue / Historique) -->
+    
+
+    <!-- Select existant -->
+    <select name="vehicle_id" id="vehicle_id" class="form-select select2-vehicle" data-placeholder="Sélectionner un véhicule..." style="width:100%">
+        <option value=""></option>
+    </select>
+
+
+    <div class="btn-group mr-2" role="group" aria-label="First group">
+
+        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addVehicleInlineModal">
+            <i class="fas fa-plus fa-fw"></i> <span class="d-none d-md-inline">Nouveau (TECDOC)</span> <i class="fas fa-car"></i>
+        </button>
+        
+        <a href="javascript:void(0)" id="loadCatalogBtn" class="btn btn-primary btn-sm" disabled>
+            <i class="fas fa-book-open fa-fw"></i> <span class="d-none d-lg-inline">Catalogue</span>
+        </a>
+        <a href="javascript:void(0)" id="viewHistoryBtn" class="btn btn-secondary btn-sm" disabled>
+            <i class="fas fa-history fa-fw"></i> <span class="d-none d-lg-inline">Historique Vehicule</span>
+        </a>
+    </div>
+
+
+
+
+
 </div>
 
 
@@ -695,11 +724,11 @@
 
 
 
-
+<!-- article divers -->
                                 <div class="mb-3">
                                     <h6 class="font-weight-bold mb-2">Lignes de commande : 
                                         <button type="button" id="add_divers_item" class="btn btn-outline-info btn-sm">
-            + Article Divers
+            + Insertion rapide (Div)
         </button>
 
                                     </h6>
@@ -1061,7 +1090,7 @@
                     $('#vehicle_group').show();
                     let $vehicleSelect = $('#vehicle_id');
                     $vehicleSelect.empty().append('<option value="" disabled selected>Aucun véhicule disponible</option>');
-                    $vehicleSelect.prop('disabled', true).addClass('vehicle-empty');
+                    $vehicleSelect.prop('disabled', false).addClass('vehicle-empty');
 
                     $.ajax({
                         url: '/customers/' + customerId + '/vehicles',
@@ -1785,6 +1814,8 @@ $(document).on('focus click', '.unit_price_ht, .unit_price_ttc', function () {
 
 
 
+
+
 <!-- Modal Ajout Rapide Véhicule (dans la page de commande) -->
 <div class="modal fade" id="addVehicleInlineModal" tabindex="-1" aria-labelledby="addVehicleInlineModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -1844,62 +1875,89 @@ $(document).on('focus click', '.unit_price_ht, .unit_price_ttc', function () {
 </div>
 
 
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-// === INITIALISATION SELECT2 DANS LE MODAL RAPIDE ===
-function initQuickVehicleSelect2() {
-    $('.select2-brand, .select2-model, .select2-engine').select2({
-        width: '100%',
-        dropdownParent: $('#addVehicleInlineModal')
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+$(document).ready(function () {
+    const $modal = $('#addVehicleInlineModal');
+    const $form  = $('#quickVehicleForm');
+
+    // === INITIALISATION SELECT2 DANS LE MODAL (CRUCIAL) ===
+    function initTecdocSelect2() {
+        ['#quick_brand_id', '#quick_model_id', '#quick_engine_id'].forEach(selector => {
+            if ($(selector).hasClass('select2-hidden-accessible')) {
+                $(selector).select2('destroy');
+            }
+        });
+
+        $('#quick_brand_id').select2({
+            width: '100%',
+            placeholder: 'Rechercher une marque...',
+            dropdownParent: $modal
+        });
+        $('#quick_model_id').select2({
+            width: '100%',
+            placeholder: 'Choisir un modèle',
+            allowClear: true,
+            dropdownParent: $modal
+        });
+        $('#quick_engine_id').select2({
+            width: '100%',
+            placeholder: 'Choisir une motorisation',
+            allowClear: true,
+            dropdownParent: $modal
+        });
+    }
+
+    // === OUVERTURE MODAL → RESET + RÉINIT SELECT2 ===
+    $modal.on('shown.bs.modal', function () {
+        $form[0].reset();
+        $('#quick_brand_name, #quick_model_name, #quick_engine_description, #quick_linkage_target_id').val('');
+        $('#quick_model_id, #quick_engine_id')
+            .empty()
+            .append('<option value="">...</option>')
+            .prop('disabled', true);
+
+        initTecdocSelect2();
+        $('#quick_license_plate').focus();
     });
-}
 
-// Réinitialiser et ré-init Select2 à l'ouverture
-$('#addVehicleInlineModal').on('shown.bs.modal', function () {
-    initQuickVehicleSelect2();
+    // === MARQUE → MODÈLES ===
+    $(document).on('change', '#quick_brand_id', function () {
+        const brandId = $(this).val();
+        const brandName = $(this).find('option:selected').text();
+        $('#quick_brand_name').val(brandName);
 
-    // Réinitialiser les champs
-    $('#quickVehicleForm')[0].reset();
-    $('#quick_model_id, #quick_engine_id').empty().append('<option value="">...</option>').prop('disabled', true);
-    $('#quick_brand_id').val('').trigger('change');
-});
+        const $model = $('#quick_model_id').empty().append('<option value="">Chargement...</option>').prop('disabled', true);
+        $('#quick_engine_id').empty().append('<option value="">...</option>').prop('disabled', true);
 
-// Marque → Modèle
-$(document).on('change', '#quick_brand_id', function() {
-    const brandId = $(this).val();
-    const brandName = $(this).find('option:selected').data('name') || '';
-    $('#quick_brand_name').val(brandName);
+        if (!brandId) return;
 
-    const $model = $('#quick_model_id').empty().append('<option value="">Chargement...</option>').prop('disabled', true);
-    const $engine = $('#quick_engine_id').empty().append('<option value="">...</option>').prop('disabled', true);
-
-    if (brandId) {
-        fetch(`{{ route('getModels') }}?brand_id=${brandId}`)
-            .then(r => r.json())
-            .then(data => {
+        $.get('{{ route("getModels") }}', { brand_id: brandId })
+            .done(data => {
                 $model.empty().append('<option value="">Choisir un modèle</option>');
-                data.forEach(m => {
-                    $model.append(`<option value="${m.id}" data-name="${m.name}">${m.name}</option>`);
-                });
+                data.forEach(m => $model.append(`<option value="${m.id}" data-name="${m.name}">${m.name}</option>`));
                 $model.prop('disabled', false);
             });
-    }
-});
+    });
 
-// Modèle → Motorisation
-$(document).on('change', '#quick_model_id', function() {
-    const modelId = $(this).val();
-    const modelName = $(this).find('option:selected').data('name') || '';
-    $('#quick_model_name').val(modelName);
+    // === MODÈLE → MOTORISATIONS ===
+    $(document).on('change', '#quick_model_id', function () {
+        const modelId = $(this).val();
+        const modelName = $(this).find('option:selected').data('name') || $(this).find('option:selected').text();
+        $('#quick_model_name').val(modelName);
 
-    const $engine = $('#quick_engine_id').empty().append('<option value="">Chargement...</option>').prop('disabled', true);
+        const $engine = $('#quick_engine_id').empty().append('<option value="">Chargement...</option>').prop('disabled', true);
 
-    if (modelId) {
-        fetch(`{{ route('getEngines') }}?model_id=${modelId}`)
-            .then(r => r.json())
-            .then(data => {
+        if (!modelId) return;
+
+        $.get('{{ route("getEngines") }}', { model_id: modelId })
+            .done(data => {
                 $engine.empty().append('<option value="">Choisir une motorisation</option>');
-                data.forEach(e => {
+                 data.forEach(e => {
                     $engine.append(
                         `<option value="${e.id}"
                                  data-description="${e.description}"
@@ -1910,66 +1968,136 @@ $(document).on('change', '#quick_model_id', function() {
                 });
                 $engine.prop('disabled', false);
             });
-    }
-});
+    });
 
-// Motorisation → champs cachés
-$(document).on('change', '#quick_engine_id', function() {
-    const desc = $(this).find('option:selected').data('description') || '';
-    const link = $(this).find('option:selected').data('linking-target-id') || '';
-    $('#quick_engine_description').val(desc);
-    $('#quick_linkage_target_id').val(link);
-});
+    // === MOTORISATION → CHAMPS CACHÉS ===
+    $(document).on('change', '#quick_engine_id', function () {
+        const $opt = $(this).find('option:selected');
+        $('#quick_engine_description').val($opt.data('description') || $opt.text());
+        $('#quick_linkage_target_id').val($opt.data('linking-target-id') || $(this).val());
+    });
 
-// === SOUMISSION DU FORMULAIRE RAPIDE ===
-$('#quickVehicleForm').on('submit', function(e) {
+   // === SOUMISSION FORMULAIRE RAPIDE ===
+$form.on('submit', function (e) {
     e.preventDefault();
 
     const customerId = $('#customer_id').val();
     if (!customerId || customerId === '%%%') {
-        Swal.fire('Erreur', 'Veuillez d\'abord sélectionner un client', 'error');
+        Swal.fire('Erreur', 'Sélectionnez un client d\'abord', 'error');
         return;
     }
 
+    // --- ON CONSTRUIT MANUELLEMENT LES DONNÉES À ENVOYER ---
     const formData = {
-        license_plate: $('#quick_license_plate').val(),
+        _token: csrfToken,
+        license_plate: $.trim($('#quick_license_plate').val()).toUpperCase(),
         brand_id: $('#quick_brand_id').val(),
-        brand_name: $('#quick_brand_name').val(),
+        brand_name: $('#quick_brand_id').find('option:selected').text() || $('#quick_brand_name').val(),
         model_id: $('#quick_model_id').val(),
-        model_name: $('#quick_model_name').val(),
+        model_name: $('#quick_model_id').find('option:selected').data('name') || 
+                  $('#quick_model_id').find('option:selected').text() || 
+                  $('#quick_model_name').val(),
         engine_id: $('#quick_engine_id').val(),
-        engine_description: $('#quick_engine_description').val(),
-        linkage_target_id: $('#quick_linkage_target_id').val(),
-        _token: '{{ csrf_token() }}'
+        engine_description: $('#quick_engine_description').val() || 
+                           $('#quick_engine_id').find('option:selected').text(),
+        linkage_target_id: $('#quick_linkage_target_id').val() || $('#quick_engine_id').val(),
     };
 
-    $.post(`/customers/${customerId}/vehicles/quick-store`, formData)
-        .done(function(response) {
-            if (response.success) {
-                const veh = response.vehicle;
+    // Protection supplémentaire : si un champ requis est vide → on bloque
+    const required = ['license_plate', 'brand_id', 'brand_name', 'model_id', 'model_name', 'engine_id', 'engine_description', 'linkage_target_id'];
+    for (let field of required) {
+        if (!formData[field] || formData[field] === '') {
+            Swal.fire('Champ manquant', `Veuillez remplir correctement le champ : ${field.replace(/_/g, ' ')}`, 'warning');
+            return;
+        }
+    }
 
-                // Ajouter le nouveau véhicule dans le select
-                const optionText = `${veh.license_plate} (${veh.brand_name} ${veh.model_name} - ${veh.engine_description})`;
-                const newOption = new Option(optionText, veh.id, true, true);
-                $('#vehicle_id').append(newOption).trigger('change');
+    $.ajax({
+        url: `/customers/${customerId}/vehicles/quick-store`,
+        method: 'POST',
+        data: formData,
+        success: function (res) {
+            if (res.success) {
+                const text = `${formData.license_plate} (${formData.brand_name} ${formData.model_name} - ${formData.engine_description})`;
+                const opt = new Option(text, res.vehicle.id, true, true);
+                $('#vehicle_id').append(opt).trigger('change');
 
-                // Fermer le modal
-                $('#addVehicleInlineModal').modal('hide');
-
-                // Mettre à jour les boutons
+                $modal.modal('hide');
                 updateCatalogButton();
                 updateHistoryButton();
 
                 Swal.fire('Succès', 'Véhicule créé et sélectionné !', 'success');
+            } else {
+                Swal.fire('Erreur', res.message || 'Erreur inconnue', 'error');
             }
-        })
-        .fail(function(xhr) {
-            Swal.fire('Erreur', xhr.responseJSON?.message || 'Erreur lors de la création', 'error');
-        });
+        },
+        error: function (xhr) {
+            console.error('Erreur AJAX quick-store vehicle:', xhr.responseJSON);
+            let errors = xhr.responseJSON?.errors;
+            let msg = 'Erreur lors de la création du véhicule<br><ul>';
+            if (errors) {
+                for (let field in errors) {
+                    msg += `<li>${field} : ${errors[field].join(', ')}</li>`;
+                }
+                msg += '</ul>';
+            } else {
+                msg = xhr.responseJSON?.message || 'Erreur inconnue';
+            }
+            Swal.fire('Erreur validation', msg, 'error');
+        }
+    });
+});
+
+    // === RECHERCHE PAR PLAQUE (France) ===
+    $('#searchByPlateBtn').on('click', async function () {
+        const btn = $(this);
+        const input = $('#plate_search');
+        let plate = input.val().trim().toUpperCase().replace(/\s+/g, '-').replace(/[^A-Z0-9-]/g, '');
+
+        if (!plate || plate.length < 4) return Swal.fire('Attention', 'Plaque invalide', 'warning');
+
+        btn.prop('disabled', true).find('.spinner-border').removeClass('d-none');
+        input.prop('disabled', true);
+
+        try {
+            const customerId = $('#customer_id').val();
+            if (!customerId || customerId === '%%%') throw new Error('Client manquant');
+
+            const resp = await fetch(`https://api.apiplaqueimmatriculation.com/plaque?immatriculation=${plate}&token=TokenDemo2025A&pays=FR`);
+            const json = resp.ok ? await resp.json() : null;
+            const data = json?.data && !json.data.erreur ? json.data : null;
+
+            if (data) {
+                const result = await $.ajax({
+                    url: `/customers/${customerId}/vehicles/from-plate`,
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': csrfToken },
+                    data: {
+                        license_plate: plate,
+                        brand_name: data.marque || 'INCONNUE',
+                        model_name: data.modele || 'Inconnu',
+                        engine_description: data.sra_commercial || data.code_moteur || 'Inconnue'
+                    }
+                });
+
+                if (result.success) {
+                    $('#vehicle_id').append(new Option(result.vehicle.text, result.vehicle.id, true, true)).trigger('change');
+                    Swal.fire({ icon: 'success', title: 'Véhicule créé !', text: `${plate} • ${data.marque} ${data.modele}`, timer: 3000, toast: true, position: 'top-end' });
+                    input.val('');
+                }
+            } else {
+                Swal.fire('Non trouvé', 'Plaque non reconnue. Utilisez "Nouveau" pour créer manuellement.', 'info');
+            }
+        } catch (e) {
+            console.error(e);
+            Swal.fire('Erreur', 'Impossible de créer le véhicule', 'error');
+        } finally {
+            btn.prop('disabled', false).find('.spinner-border').addClass('d-none');
+            input.prop('disabled', false);
+        }
+    });
 });
 </script>
-
-
 
 
 

@@ -378,6 +378,37 @@ $paymentTerms = PaymentTerm::all();
         return view('sales.create_direct_delivery', compact('customers', 'tvaRates','tvaGroups','discountGroups','paymentModes','paymentTerms'));
     }
 
+
+
+
+
+
+
+
+
+
+    private function getTecdocBrands()
+{
+    $response = Http::withHeaders([
+        'X-Api-Key' => env('TECDOC_API_KEY', '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg')
+    ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
+        "getLinkageTargets" => [
+            "provider" => env('TECDOC_PROVIDER_ID', 23454),
+            "linkageTargetCountry" => env('TECDOC_COUNTRY', 'TN'),
+            "lang" => env('TECDOC_LANG', 'fr'),
+            "linkageTargetType" => "P",
+            "perPage" => 0,
+            "page" => 1,
+            "includeMfrFacets" => true
+        ]
+    ]);
+
+    return $response->successful() && isset($response->json()['mfrFacets']['counts'])
+        ? $response->json()['mfrFacets']['counts']
+        : [];
+}
+
+
     public function createDirectDeliveryNote()
 {
     $tvaRates = []; // Empty since tvaRate is fetched via AJAX
@@ -385,6 +416,7 @@ $paymentTerms = PaymentTerm::all();
     $discountGroups = DiscountGroup::all();
     $paymentModes = PaymentMode::all();
     $paymentTerms = PaymentTerm::all();
+    
     return view('sales.create_direct_delivery', compact('tvaRates', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms'));
 }
 
@@ -461,9 +493,9 @@ public function storeDirectDeliveryNote(Request $request)
     ]);
 
     $code = trim($line['article_code'] ?? 'DIVERS');
+// dd(200);
 
     $item = Item::where('code', $code)->first();
-
     if ($item) {
         // Mise à jour de l'article existant
         $item->update([
@@ -1246,28 +1278,36 @@ public function exportSingle($id)
      * Print a single invoice.
      */
     public function printSingleInvoice($id)
-    {
-        $invoice = SalesInvoice::with(['customer', 'lines.item'])->findOrFail($id);
-        $company = CompanyInformation::first() ?? new CompanyInformation([
-            'name' => 'Test Company S.A.R.L',
-            'address' => '123 Rue Fictive, Tunis 1000',
-            'phone' => '+216 12 345 678',
-            'email' => 'contact@testcompany.com',
-            'matricule_fiscal' => '1234567ABC000',
-            'swift' => 'TESTTNTT',
-            'rib' => '123456789012',
-            'iban' => 'TN59 1234 5678 9012 3456 7890',
-            'logo_path' => 'assets/img/test_logo.png',
-        ]);
+{
+    $invoice = SalesInvoice::with([
+        'customer', 
+        'lines.item',
+        'payments' => function ($query) {
+            $query->orderBy('payment_date', 'asc');
+        },
+        'payments.paymentMode' // Pour avoir le libellé
+    ])->findOrFail($id);
 
-        $generator = new BarcodeGeneratorPNG();
-        $barcode = 'data:image/png;base64,' . base64_encode(
-            $generator->getBarcode($invoice->numdoc, $generator::TYPE_CODE_128)
-        );
+    $company = CompanyInformation::first() ?? new CompanyInformation([
+        'name' => 'Test Company S.A.R.L',
+        'address' => '123 Rue Fictive, Tunis 1000',
+        'phone' => '+216 12 345 678',
+        'email' => 'contact@testcompany.com',
+        'matricule_fiscal' => '1234567ABC000',
+        'swift' => 'TESTTNTT',
+        'rib' => '123456789012',
+        'iban' => 'TN59 1234 5678 9012 3456 7890',
+        'logo_path' => 'assets/img/test_logo.png',
+    ]);
 
-        $pdf = PDF::loadView('pdf.sales_invoice', compact('invoice', 'company', 'barcode'));
-        return $pdf->stream("facture_vente_{$invoice->numdoc}.pdf");
-    }
+    $generator = new BarcodeGeneratorPNG();
+    $barcode = 'data:image/png;base64,' . base64_encode(
+        $generator->getBarcode($invoice->numdoc, $generator::TYPE_CODE_128)
+    );
+
+    $pdf = PDF::loadView('pdf.sales_invoice', compact('invoice', 'company', 'barcode'));
+    return $pdf->stream("facture_vente_{$invoice->numdoc}.pdf");
+}
 
     /**
      * Export a single invoice.

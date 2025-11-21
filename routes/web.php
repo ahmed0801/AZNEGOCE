@@ -364,10 +364,13 @@ Route::post('/purchase/{id}/ship', [PurchaseController::class, 'markAsShipped'])
 
 
 
+// 1. Création RAPIDE depuis une simple immatriculation (API plaque ou fallback)
+Route::post('/customers/{customer}/vehicles/from-plate', [CustomerController::class, 'storeFromPlate'])
+    ->name('customers.vehicles.from-plate');
 
+// 2. Création COMPLÈTE via TecDoc (le modal classique)
 Route::post('/customers/{customer}/vehicles/quick-store', [CustomerController::class, 'quickStoreVehicle'])
-     ->name('customer.vehicle.quick-store');
-
+    ->name('customers.vehicles.quick-store');
 
 
 
@@ -490,7 +493,7 @@ Route::post('/payments/{payment}/validate', [PaymentController::class, 'validate
     // routes pour test new recherche immatr
     Route::get('/vehicle/catalog', [ImmatController::class, 'index'])->name('vehicle.catalog.form');
 Route::post('/vehicle/catalog/fetch', [ImmatController::class, 'fetchByPlate'])->name('vehicle.catalog.fetch');
-
+Route::post('/tecdoc/search-by-plate', [VehicleController::class, 'searchByPlate'])->name('tecdoc.search.plate');
 
 //Routes pour Nego bot negobot
 Route::get('/voice-command', [VoiceCommandController::class, 'sendSentenceToModel'])->name('predict');

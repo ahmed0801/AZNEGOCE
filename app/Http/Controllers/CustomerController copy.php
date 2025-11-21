@@ -594,4 +594,87 @@ public function getAllAccountingEntriesHT()
 
 
 
+
+
+
+
+
+public function quickStoreVehicle(Request $request, $customer)
+{
+    
+    $request->validate([
+        'license_plate' => 'required|string|max:50',
+        'brand_id' => 'required',
+        'brand_name' => 'required|string',
+        'model_id' => 'required',
+        'model_name' => 'required|string',
+        'engine_id' => 'required',
+        'engine_description' => 'required|string',
+        'linkage_target_id' => 'required',
+    ]);
+
+    $customer = Customer::findOrFail($customer);
+
+    $vehicle = Vehicle::create([
+        'customer_id' => $customer->id,
+        'license_plate' => strtoupper($request->license_plate),
+        'brand_id' => $request->brand_id,
+        'brand_name' => $request->brand_name,
+        'model_id' => $request->model_id,
+        'model_name' => $request->model_name,
+        'engine_id' => $request->engine_id,
+        'engine_description' => $request->engine_description,
+        'linkage_target_id' => $request->linkage_target_id,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'vehicle' => $vehicle
+    ]);
+}
+
+
+
+
+
+
+// 1. Création ultra-rapide depuis une plaque (même si pas dans TecDoc)
+public function storeFromPlate(Request $request, $customerId)
+{
+    $request->validate([
+        'license_plate' => 'required|string|max:20',
+        'brand_name'    => 'required|string|max:100',
+        'model_name'    => 'nullable|string|max:100',
+        'engine_description' => 'nullable|string|max:150',
+    ]);
+
+    $customer = Customer::findOrFail($customerId);
+
+    $vehicle = Vehicle::updateOrCreate(
+        [
+            'customer_id'   => $customer->id,
+            'license_plate' => strtoupper(str_replace([' ', '-'], '', $request->license_plate)),
+        ],
+        [
+            'brand_id'           => -1, // marque inconnue TecDoc
+            'brand_name'         => $request->brand_name,
+            'model_id'           => -1,
+            'model_name'         => $request->model_name ?? 'Modèle non répertorié',
+            'engine_id'          => -1,
+            'engine_description' => $request->engine_description ?? 'Motorisation inconnue',
+            'linkage_target_id'  => -1,
+        ]
+    );
+
+    return response()->json([
+        'success' => true,
+        'vehicle' => [
+            'id'   => $vehicle->id,
+            'text' => $vehicle->license_plate . ' (' . $vehicle->brand_name . ' ' . $vehicle->model_name . ')'
+        ]
+    ]);
+}
+
+
+
 }

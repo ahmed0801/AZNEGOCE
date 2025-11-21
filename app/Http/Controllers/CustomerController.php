@@ -601,6 +601,7 @@ public function getAllAccountingEntriesHT()
 
 public function quickStoreVehicle(Request $request, $customer)
 {
+    
     $request->validate([
         'license_plate' => 'required|string|max:50',
         'brand_id' => 'required',
@@ -626,12 +627,58 @@ public function quickStoreVehicle(Request $request, $customer)
         'linkage_target_id' => $request->linkage_target_id,
     ]);
 
-    return response()->json([
-        'success' => true,
-        'vehicle' => $vehicle
-    ]);
+return response()->json([
+    'success' => true,
+    'vehicle' => [
+        'id'   => $vehicle->id,
+        'text' => $vehicle->license_plate . ' (' . $vehicle->brand_name . ' ' . $vehicle->model_name . ' - ' . ($vehicle->engine_description ?: 'Motorisation inconnue') . ')',
+    ]
+]);
 }
 
+
+
+
+
+
+// 1. Création ultra-rapide depuis une plaque (même si pas dans TecDoc)
+public function storeFromPlate(Request $request, $customerId)
+{
+    $request->validate([
+        'license_plate' => 'required|string|max:20',
+        'brand_name'    => 'required|string|max:100',
+        'model_name'    => 'nullable|string|max:100',
+        'engine_description' => 'nullable|string|max:150',
+    ]);
+
+    $customer = Customer::findOrFail($customerId);
+
+    $vehicle = Vehicle::updateOrCreate(
+        [
+            'customer_id'   => $customer->id,
+            'license_plate' => strtoupper(str_replace([' ', '-'], '', $request->license_plate)),
+        ],
+        [
+            'brand_id'           => -1, // marque inconnue TecDoc
+            'brand_name'         => $request->brand_name,
+            'model_id'           => -1,
+            'model_name'         => $request->model_name ?? 'Modèle non répertorié',
+            'engine_id'          => -1,
+            'engine_description' => $request->engine_description ?? 'Motorisation inconnue',
+            'linkage_target_id'  => -1,
+        ]
+    );
+
+// Dans storeFromPlate()
+return response()->json([
+    'success' => true,
+    'vehicle' => [
+        'id'   => $vehicle->id,
+        'text' => $vehicle->license_plate . ' (' . $vehicle->brand_name . ' ' . ($vehicle->model_name ?: 'Modèle inconnu') . ' - ' . ($vehicle->engine_description ?: 'Motorisation inconnue') . ')',
+    ]
+]);
+
+}
 
 
 

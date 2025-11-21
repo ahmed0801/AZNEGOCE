@@ -52,4 +52,39 @@ public function pdf($vehicleId)
     return $pdf->stream("historique_vehicule_{$vehicle->id}.pdf");
 }
 
+
+
+
+public function searchByPlate(Request $request)
+{
+    $plate = str_replace([' ', '-'], '', $request->plate);
+
+    $response = Http::post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
+        "getVehicleByLinkage" => [
+            "provider" => 23454,
+            "linkageTargetType" => "P",
+            "linkageTargetCountry" => "FR",
+            "linkageTargetId" => $plate,
+            "lang" => "fr"
+        ]
+    ]);
+
+    if ($response->successful() && isset($response->json()['vehicle'])) {
+        $v = $response->json()['vehicle'];
+        return response()->json([
+            'success' => true,
+            'vehicle' => [
+                'brand'  => $v['mfrName'] ?? '',
+                'model'  => $v['modelName'] ?? '',
+                'engine' => $v['engineCodes'][0] ?? ''
+            ]
+        ]);
+    }
+
+    return response()->json(['success' => false]);
+}
+
+
+
+
 }
