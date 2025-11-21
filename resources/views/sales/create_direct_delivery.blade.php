@@ -1888,28 +1888,7 @@ $(document).on('focus click', '.unit_price_ht, .unit_price_ttc', function () {
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 // ==================== PATCH 405 → TOUT MARCHE EN PROD ====================
-$.ajaxPrefilter(function (options, originalOptions, jqXHR) {
-    if (options.type.toUpperCase() === 'POST') {
-        jqXHR.setRequestHeader('X-HTTP-Method-Override', 'POST');
-        if (options.url.indexOf('?_method=') === -1) {
-            const separator = options.url.indexOf('?') === -1 ? '?' : '&';
-            options.url += separator + '_method=POST&_token=' + encodeURIComponent(csrfToken);
-        }
-        jqXHR.fail(function (xhr, status, error) {
-            if (xhr.status === 405 && !jqXHR.retriedAsGet) {
-                jqXHR.retriedAsGet = true;
-                console.warn('405 → retry en GET', options.url);
-                $.ajax({
-                    url: options.url,
-                    method: 'GET',
-                    data: options.data,
-                    success: options.success,
-                    error: options.error
-                });
-            }
-        });
-    }
-});
+
 
 
 
@@ -2082,52 +2061,81 @@ $form.on('submit', function (e) {
 
     // === RECHERCHE PAR PLAQUE (France) ===
     $('#searchByPlateBtn').on('click', async function () {
-        const btn = $(this);
-        const input = $('#plate_search');
-        let plate = input.val().trim().toUpperCase().replace(/\s+/g, '-').replace(/[^A-Z0-9-]/g, '');
+    const btn = $(this);
+    const input = $('#plate_search');
+    let plate = input.val().trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
 
-        if (!plate || plate.length < 4) return Swal.fire('Attention', 'Plaque invalide', 'warning');
+    if (!plate || plate.length < 4) {
+        return Swal.fire('Plaque invalide', 'Veuillez entrer une plaque correcte', 'warning');
+    }
 
-        btn.prop('disabled', true).find('.spinner-border').removeClass('d-none');
-        input.prop('disabled', true);
+    btn.prop('disabled', true).find('.spinner-border').removeClass('d-none');
+    input.prop('disabled', true);
+
+    try {
+        const customerId = $('#customer_id').val();
+        if (!customerId || customerId === '%%%') {
+            throw new Error('Veuillez d\'abord sélectionner un client');
+        }
+
+        // Appel API plaque (facultatif mais utile)
+        let brand = 'INCONNUE';
+        let model = '';
+        let engine = '';
 
         try {
-            const customerId = $('#customer_id').val();
-            if (!customerId || customerId === '%%%') throw new Error('Client manquant');
-
             const resp = await fetch(`https://api.apiplaqueimmatriculation.com/plaque?immatriculation=${plate}&token=TokenDemo2025A&pays=FR`);
-            const json = resp.ok ? await resp.json() : null;
-            const data = json?.data && !json.data.erreur ? json.data : null;
-
-            if (data) {
-                const result = await $.ajax({
-                    url: `/customers/${customerId}/vehicles/from-plate`,
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': csrfToken },
-                    data: {
-                        license_plate: plate,
-                        brand_name: data.marque || 'INCONNUE',
-                        model_name: data.modele || 'Inconnu',
-                        engine_description: data.sra_commercial || data.code_moteur || 'Inconnue'
-                    }
-                });
-
-                if (result.success) {
-                    $('#vehicle_id').append(new Option(result.vehicle.text, result.vehicle.id, true, true)).trigger('change');
-                    Swal.fire({ icon: 'success', title: 'Véhicule créé !', text: `${plate} • ${data.marque} ${data.modele}`, timer: 3000, toast: true, position: 'top-end' });
-                    input.val('');
-                }
-            } else {
-                Swal.fire('Non trouvé', 'Plaque non reconnue. Utilisez "Nouveau" pour créer manuellement.', 'info');
+            const json = await resp.json();
+            if (json?.data && !json.data.erreur) {
+                brand = json.data.marque || 'INCONNUE';
+                model = json.data.modele || '';
+                engine = json.data.sra_commercial || json.data.code_moteur || '';
             }
         } catch (e) {
-            console.error(e);
-            Swal.fire('Erreur', 'Impossible de créer le véhicule', 'error');
-        } finally {
-            btn.prop('disabled', false).find('.spinner-border').addClass('d-none');
-            input.prop('disabled', false);
+            console.log("API plaque indisponible, on continue sans");
         }
-    });
+
+        // EN GET → PLUS JAMAIS DE 405
+        const query = new URLSearchParams({
+            license_plate: plate,
+            brand_name: brand,
+            model_name: model,
+            engine_description: engine
+        });
+
+        const result = await $.ajax({
+            url: `/customers/${customerId}/vehicles/from-plate?${query}`,
+            method: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            }
+        });
+
+        if (result.success) {
+            const opt = new Option(result.vehicle.text, result.vehicle.id, true, true);
+            $('#vehicle_id').append(opt).trigger('change');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Véhicule ajouté !',
+                text: result.vehicle.text,
+                timer: 2500,
+                toast: true,
+                position: 'top-end'
+            });
+
+            input.val('');
+        }
+
+    } catch (err) {
+        console.error(err);
+        Swal.fire('Erreur', err.message || 'Impossible d\'ajouter le véhicule', 'error');
+    } finally {
+        btn.prop('disabled', false).find('.spinner-border').addClass('d-none');
+        input.prop('disabled', false);
+    }
+});
 });
 </script>
 

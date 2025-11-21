@@ -365,7 +365,8 @@ Route::post('/purchase/{id}/ship', [PurchaseController::class, 'markAsShipped'])
 
 
 // 1. Création RAPIDE depuis une simple immatriculation (API plaque ou fallback)
-Route::post('/customers/{customer}/vehicles/from-plate', [CustomerController::class, 'storeFromPlate'])
+// Route pour créer/retrouver un véhicule par plaque (depuis le BL)
+Route::get('/customers/{customer}/vehicles/from-plate', [CustomerController::class, 'storeFromPlate'])
     ->name('customers.vehicles.from-plate');
 
 // 2. Création COMPLÈTE via TecDoc (le modal classique)
