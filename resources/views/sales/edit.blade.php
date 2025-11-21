@@ -528,6 +528,24 @@
                                 <input type="hidden" name="id" value="{{ $order->id }}">
                                 <div class="row mb-3">
                                     <div class="col-md-6 mb-2">
+
+                                    <a href="/newcustomer"
+   onclick="window.open(this.href, 'popupWindow', 'width=1200,height=700,scrollbars=yes'); return false;"
+   class="btn btn-outline-success btn-round ms-2">
+  Créer ou Modifier des Clients <i class="fas fa-plus-circle ms-1"></i>
+</a>
+
+
+                                    <a href="/articles"
+   onclick="window.open(this.href, 'popupWindow', 'width=1200,height=700,scrollbars=yes'); return false;"
+   class="btn btn-outline-primary btn-round ms-2">
+  Créer ou Modifier des Articles <i class="fas fa-plus-circle ms-1"></i>
+</a>
+
+
+<hr>
+
+
                                         <label class="form-label">Client</label>
                                         <select name="customer_id" id="customer_id" class="form-control select2" required>
                                             <option value="" disabled>Sélectionner un client</option>
@@ -559,8 +577,8 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <p><strong>Nom:</strong> <span id="customer_name">{{ $order->customer->name ?? 'N/A' }}</span></p>
-                                            <p><strong>Code client:</strong> <span id="customer_code">{{ $order->customer->code ?? 'N/A' }}</span></p>
-                                            <p><strong>Taux TVA:</strong> <span id="customer_tva">{{ $order->tva_rate }}</span>%</p>
+                                            <!-- <p><strong>Code client:</strong> <span id="customer_code">{{ $order->customer->code ?? 'N/A' }}</span></p>
+                                            <p><strong>Taux TVA:</strong> <span id="customer_tva">{{ $order->tva_rate }}</span>%</p> -->
                                             <p><strong>Email:</strong> <span id="customer_email">{{ $order->customer->email ?? 'N/A' }}</span></p>
                                             <p><strong>Téléphone 1:</strong> <span id="customer_phone1">{{ $order->customer->phone1 ?? 'N/A' }}</span></p>
                                         </div>
@@ -568,8 +586,8 @@
                                             <p><strong>Téléphone 2:</strong> <span id="customer_phone2">{{ $order->customer->phone2 ?? 'N/A' }}</span></p>
                                             <p><strong>Adresse:</strong> <span id="customer_address">{{ $order->customer->address ?? 'N/A' }}</span></p>
                                             <p><strong>Adresse de livraison:</strong> <span id="customer_address_delivery">{{ $order->customer->address_delivery ?? 'N/A' }}</span></p>
-                                            <p><strong>Ville:</strong> <span id="customer_city">{{ $order->customer->city ?? 'N/A' }}</span></p>
-                                            <p><strong>Pays:</strong> <span id="customer_country">{{ $order->customer->country ?? 'N/A' }}</span></p>
+                                            <!-- <p><strong>Ville:</strong> <span id="customer_city">{{ $order->customer->city ?? 'N/A' }}</span></p>
+                                            <p><strong>Pays:</strong> <span id="customer_country">{{ $order->customer->country ?? 'N/A' }}</span></p> -->
                                         </div>
                                     </div>
                                 </div>
@@ -649,8 +667,10 @@
                                         <h5 class="mb-1">Total HT : <span id="total_ht_global" class="text-success fw-bold">{{ number_format($order->total_ht, 2) }}</span> €</h5>
                                         <h6 class="mb-0">Total TTC : <span id="total_ttc_global" class="text-danger fw-bold">{{ number_format($order->total_ttc, 2) }}</span> €</h6>
                                     </div>
-                                    <a href="/articles" target="_blank" type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Aller à la Page Articles</a>
-                                </div>
+<a href="/articles" 
+                                    onclick="window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); return false;"
+                                     type="button" class="btn btn-outline-success btn-round ms-2">+ Créer ou Modifier des Articles</a>
+                                                                    </div>
                                 <div class="mb-3">
                                     <label class="form-label">Notes / Commentaire</label>
                                     <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de livraison, etc.">{{ $order->notes }}</textarea>
