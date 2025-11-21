@@ -119,7 +119,7 @@ td {
 
 /* === TOTALS === */
 .totals-box {
-    margin-top: 10px;
+    margin-top: 5px;
     width: 280px;
     margin-left: auto;
     border: 2px solid #0056b3;
@@ -141,7 +141,7 @@ td {
 
 /* === CONDITIONS === */
 .conditions {
-    margin-top: 20px;
+    margin-top: 5px;
     font-size: 9px;
     color: #333;
     border: 1px solid #007bff;
@@ -173,6 +173,38 @@ td {
     padding-left: 15px;
     list-style-type: circle;
 }
+
+
+
+/* === ENCAISSEMENTS === */
+.enc-payment-table {
+    font-size: 11px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+}
+.enc-payment-table th {
+    background-color: #e8f5e8;
+    color: #1e7e34;
+    font-weight: bold;
+    padding: 5px;
+    border: 1px solid #28a745;
+    text-align: left;
+}
+.enc-payment-table td {
+    padding: 4px;
+    border: 1px solid #ddd;
+}
+.enc-payment-table .total-row {
+    background-color: #f0fdf0;
+    font-weight: bold;
+}
+.enc-payment-table .amount {
+    text-align: right;
+    color: #1e7e34;
+}
+
+
 </style>
 </head>
 
@@ -185,7 +217,8 @@ td {
             <td class="header-left">
                 <img src="{{ public_path($company->logo_path) }}" alt="Logo">
                 <p class="address">{{ $company->address }}</p>
-                <p>Tél : {{ $company->phone ?? '-' }}</p>
+                <p>Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
+         style="height: 14px; vertical-align: middle; margin-right: 1px;">  {{ $company->phone ?? '-' }}</p>
                 <p>Email : {{ $company->email ?? '-' }}</p>
             </td>
 
@@ -197,6 +230,17 @@ td {
                     <p><strong>Client :</strong> {{ $invoice->customer->name ?? '-' }}</p>
                     <!-- <p><strong>N° Client :</strong> {{ $invoice->numclient ?? '-' }}</p> -->
                     <p><strong>Véhicule :</strong> {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}</p>
+                        
+                    @if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
+                                                   @php
+        $firstDeliveryNote = $invoice->deliveryNotes->first();
+    @endphp
+    @if($firstDeliveryNote)
+            <p><strong> Vendeur :</strong>   {{ $firstDeliveryNote->vendeur}}</p>
+
+    @endif
+    @endif
+
                 </div>
             </td>
         </tr>
@@ -250,6 +294,49 @@ td {
         </table>
     </div>
 
+<!-- === STATUT PAIEMENT + ENCAISSEMENTS === -->
+<div style="margin-top: 10px; border: 2px solid #28a745; border-radius: 15px; padding: 4px; background-color: #f8fff8;">
+    <p style="margin: 0 0 8px 0; font-weight: bold; color: #1e7e34;">
+        @if($invoice->paid)
+            Payée
+        @else
+            Non payé : {{ number_format($invoice->getRemainingBalanceAttribute(), 2, ',', ' ') }} €
+        @endif
+    </p>
+
+    @if($invoice->payments->count() > 0)
+        <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+
+            <tbody>
+                @foreach($invoice->payments as $payment)
+                    <tr>
+                        <td style="padding: 4px; border: 1px solid #ddd;">{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
+                        <td style="padding: 4px; border: 1px solid #ddd;">{{$payment->payment_mode }}</td>
+                        <td style="padding: 4px; border: 1px solid #ddd; text-align: right; font-weight: bold; color: #1e7e34;">
+                            {{ number_format(abs($payment->amount), 2, ',', ' ') }} €
+                        </td>
+                        <td style="padding: 4px; border: 1px solid #ddd;">{{ $payment->reference ?? '-' }}</td>
+                    </tr>
+                @endforeach
+                <tr style="background-color: #f0fdf0;">
+                    <td colspan="2" style="padding: 5px; text-align: right; font-weight: bold;">Total encaissé :</td>
+                    <td style="padding: 5px; text-align: right; font-weight: bold; color: #1e7e34;">
+                        {{ number_format($invoice->payments->sum('amount'), 2, ',', ' ') }} €
+                    </td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    @else
+        <p style="margin: 0; font-style: italic; color: #6c757d;">Aucun encaissement enregistré.</p>
+    @endif
+</div>
+
+
+
+
+
+
     <div class="conditions">
         <h3>Conditions Générales de Vente</h3>
         <ul>
@@ -282,7 +369,8 @@ td {
 
 <!-- === FOOTER === -->
 <footer>
-    <p><strong>{{ $company->name }}</strong> | Tél : {{ $company->phone ?? '-' }} | Email : {{ $company->email ?? '-' }}</p>
+    <p><strong>{{ $company->name }}</strong> | Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
+         style="height: 14px; vertical-align: middle; margin-right: 1px;"> {{ $company->phone ?? '-' }} | Email : {{ $company->email ?? '-' }}</p>
     <p>SIRET : {{ $company->matricule_fiscal }}</p>
     <p class="hours">🕒 Horaires : Lundi à Samedi de 9h à 19h — Fermé le Vendredi de 12h30 à 15h</p>
 </footer>
