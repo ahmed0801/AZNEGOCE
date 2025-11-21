@@ -1887,6 +1887,32 @@ $(document).on('focus click', '.unit_price_ht, .unit_price_ttc', function () {
 <script>
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+// ==================== PATCH 405 → TOUT MARCHE EN PROD ====================
+$.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+    if (options.type.toUpperCase() === 'POST') {
+        jqXHR.setRequestHeader('X-HTTP-Method-Override', 'POST');
+        if (options.url.indexOf('?_method=') === -1) {
+            const separator = options.url.indexOf('?') === -1 ? '?' : '&';
+            options.url += separator + '_method=POST&_token=' + encodeURIComponent(csrfToken);
+        }
+        jqXHR.fail(function (xhr, status, error) {
+            if (xhr.status === 405 && !jqXHR.retriedAsGet) {
+                jqXHR.retriedAsGet = true;
+                console.warn('405 → retry en GET', options.url);
+                $.ajax({
+                    url: options.url,
+                    method: 'GET',
+                    data: options.data,
+                    success: options.success,
+                    error: options.error
+                });
+            }
+        });
+    }
+});
+
+
+
 $(document).ready(function () {
     const $modal = $('#addVehicleInlineModal');
     const $form  = $('#quickVehicleForm');
