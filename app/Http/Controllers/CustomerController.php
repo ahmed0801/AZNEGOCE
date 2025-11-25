@@ -56,7 +56,8 @@ class CustomerController extends Controller
 
         $tvaGroups = TvaGroup::all();
         $discountGroups = DiscountGroup::all();
-        $paymentModes = PaymentMode::all();
+        $paymentModes = PaymentMode::where('type', 'encaissement')->get();
+
         $paymentTerms = PaymentTerm::all();
 
         // Villes uniques pour le filtre
@@ -554,7 +555,8 @@ public function getAllAccountingEntriesHT()
 
         $tvaGroups = TvaGroup::all();
         $discountGroups = DiscountGroup::all();
-        $paymentModes = PaymentMode::all();
+        $paymentModes = PaymentMode::where('type', 'encaissement')->get();
+
         $paymentTerms = PaymentTerm::all();
 
         // Villes uniques pour le filtre
