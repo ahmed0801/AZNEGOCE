@@ -439,7 +439,9 @@
                 <thead class="table-dark">
                     <tr>
                         <th>Client</th>
-                        <th>Cordonnées</th>
+                        <th>Type</th>
+                        <th>Adresse / Ville</th>
+                        <th>Contact</th>
                         <th>Solde</th>
                         <!-- <th>Non.Fact</th> -->
                         <!-- <th>Plafond</th> -->
@@ -451,13 +453,17 @@
                     @foreach ($customers as $customer)
                         <tr>
                             <td>🧑‍💼{{ $customer->code }}<br>{{ $customer->name }}
-                              <br>
+                             
                                   @if ($customer->blocked)
         🔴 
     @else
         🟢 
     @endif
-                                    @switch($customer->type)
+
+                            </td>
+
+                            <td>
+                                                                    @switch($customer->type)
         @case('particulier')
             <span class="badge bg-primary">Particulier</span>
             @break
@@ -468,10 +474,13 @@
             <span class="badge bg-success">Professionnel</span>
             @break
     @endswitch
-
                             </td>
-                            <td>{{ $customer->address }} <br>
-                          🏴󠁢󠁹󠁭󠁩󠁿{{ $customer->city }}<br>📞 {{ $customer->phone1 }} <br>
+
+                            <td>
+{{ $customer->address }} <br>
+                          🏴󠁢󠁹󠁭󠁩󠁿{{ $customer->city }}
+                            </td>
+                            <td>📞 {{ $customer->phone1 }} <br>
                          📧 {{ $customer->email }} </td>
 
 

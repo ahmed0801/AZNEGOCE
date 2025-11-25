@@ -732,9 +732,10 @@
 
 <!-- article divers -->
                                 <div class="mb-3">
-                                    <h6 class="font-weight-bold mb-2">Lignes de commande : 
-                                        <button type="button" id="add_divers_item" class="btn btn-outline-info btn-sm">
-            + Insertion rapide (Div)
+                                    <h6 class="font-weight-bold mb-2">
+                                        <!-- Lignes de commande :  -->
+                                        <button type="button" id="add_divers_item" class="btn btn-outline-primary btn-sm">
+            + Créer un article manuellement
         </button>
 
                                     </h6>

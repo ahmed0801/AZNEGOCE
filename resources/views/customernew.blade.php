@@ -249,7 +249,7 @@
             <input type="text" name="name" class="form-control" required>
         </div>
 
-                <div class="mb-3 col-md-3">
+                <div class="mb-3 col-md-2">
     <label class="form-label">Type de client</label>
     <select name="type" class="form-control" required>
         <option value="particulier" selected>Particulier</option>
@@ -260,19 +260,48 @@
 
 
 
+<div class="mb-3 col-md-3">
+            <label class="form-label">Condition de paiement</label>
+            <select name="payment_term_id" class="form-control" required>
+                <!-- <option value="">-- Choisir --</option> -->
+                @foreach($paymentTerms as $term)
+                    <option value="{{ $term->id }}">{{ $term->label }} : {{ $term->days }} Jours</option>
+                @endforeach
+            </select>
+        </div>
+
+
+
+                <div class="mb-3 col-md-3">
+            <label class="form-label">Mode de paiement</label>
+            <select name="payment_mode_id" class="form-control" required>
+                <!-- <option value="">-- Choisir --</option> -->
+                @foreach($paymentModes as $mode)
+                    <option value="{{ $mode->id }}">{{ $mode->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+
         <div class="mb-3 col-md-5">
             <label class="form-label">Email</label>
             <input type="email" name="email" class="form-control">
         </div>
 
-        <div class="mb-3 col-md-4">
+        <div class="mb-3 col-md-3">
             <label class="form-label">Téléphone 1</label>
             <input type="text" name="phone1" class="form-control">
         </div>
 
-        <div class="mb-3 col-md-4">
+        <div class="mb-3 col-md-3">
             <label class="form-label">Téléphone 2</label>
             <input type="text" name="phone2" class="form-control">
+        </div>
+
+
+                <div class="mb-3 col-md-6">
+            <label class="form-label">Adresse</label>
+            <input type="text" name="address" class="form-control">
         </div>
 
         <div class="mb-3 col-md-4">
@@ -280,9 +309,9 @@
             <input type="text" name="city" class="form-control" value="Paris">
         </div>
 
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Adresse</label>
-            <input type="text" name="address" class="form-control">
+        <div class="mb-3 col-md-2">
+            <label class="form-label">Pays</label>
+            <input type="text" name="country" class="form-control" value="France">
         </div>
 
         <div class="mb-3 col-md-6">
@@ -290,10 +319,7 @@
             <input type="text" name="address_delivery" class="form-control">
         </div>
 
-        <div class="mb-3 col-md-2">
-            <label class="form-label">Pays</label>
-            <input type="text" name="country" class="form-control" value="France">
-        </div>
+
 
         <div class="mb-3 col-md-4">
             <label class="form-label">SIRET</label>
@@ -305,7 +331,7 @@
             <input type="text" name="bank_no" class="form-control">
         </div>
 
-        <div class="mb-3 col-md-3">
+        <div class="mb-3 col-md-2">
             <label class="form-label">Solde</label>
             <input type="number" step="0.01" name="solde" class="form-control" value="0" readonly>
         </div>
@@ -340,25 +366,9 @@
             </select>
         </div>
 
-        <div class="mb-3 col-md-3">
-            <label class="form-label">Mode de paiement</label>
-            <select name="payment_mode_id" class="form-control" required>
-                <!-- <option value="">-- Choisir --</option> -->
-                @foreach($paymentModes as $mode)
-                    <option value="{{ $mode->id }}">{{ $mode->name }}</option>
-                @endforeach
-            </select>
-        </div>
 
-        <div class="mb-3 col-md-3">
-            <label class="form-label">Condition de paiement</label>
-            <select name="payment_term_id" class="form-control" required>
-                <!-- <option value="">-- Choisir --</option> -->
-                @foreach($paymentTerms as $term)
-                    <option value="{{ $term->id }}">{{ $term->label }} : {{ $term->days }} Jours</option>
-                @endforeach
-            </select>
-        </div>
+
+        
     </div>
 
     <div class="modal-footer">
