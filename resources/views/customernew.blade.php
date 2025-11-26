@@ -515,7 +515,7 @@
                             <td>
                                 <!-- Bouton Modifier -->
                                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ $customer->id }}">
-                                    <i class="fas fa-edit"></i>
+                                    Editer <i class="fas fa-edit"></i>
                                 </button>
 
 
@@ -741,14 +741,13 @@
 
 
 
-
-
+<hr>
                                 <!-- Formulaire suppression -->
                                 <form action="{{ route('customer.destroy', $customer->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ce client ?')">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-sm btn-danger">
-                                        <i class="fas fa-trash-alt"></i>
+                                        Supp. <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </form>
                             </td>

@@ -771,7 +771,7 @@
                                     <!-- <a href="/articles" target="_blank" type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Aller a la Page Articles</a> -->
                                     <a href="/articles" 
                                     onclick="window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); return false;"
-                                     type="button" class="btn btn-outline-success btn-round ms-2">+ Créer ou Modifier des Articles</a>
+                                     type="button" class="btn btn-outline-success btn-round ms-2">⟰ Liste des Articles</a>
 
                                 </div>
                                 <div class="mb-3">

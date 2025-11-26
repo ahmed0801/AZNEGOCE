@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use PDF;
+use Illuminate\Support\Facades\Http;
 
 class SalesController extends Controller
 {
@@ -416,8 +417,12 @@ $paymentTerms = PaymentTerm::all();
     $discountGroups = DiscountGroup::all();
     $paymentModes = PaymentMode::all();
     $paymentTerms = PaymentTerm::all();
-    
-    return view('sales.create_direct_delivery', compact('tvaRates', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms'));
+
+    $brands = $this->getTecdocBrands();
+// ou directement le code si tu ne veux pas créer la fonction privée
+
+
+    return view('sales.create_direct_delivery', compact('tvaRates', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms','brands'));
 }
 
 
