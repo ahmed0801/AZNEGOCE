@@ -136,7 +136,7 @@
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         #search_results {
-            background: #fff;
+            background: #eaf3fcff;
             border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             max-height: 180px;
