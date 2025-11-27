@@ -237,6 +237,15 @@
             font-weight: bold;
             color: #007bff;
         }
+
+
+
+        #vehicle_id option[value=""] {
+    font-style: italic;
+    color: #6c757d !important;
+}
+
+
     </style>
 </head>
 <body>
@@ -620,7 +629,7 @@
         <span class="input-group-text">
             <i class="fas fa-search"></i>
         </span>
-        <input type="text" id="plate_search" class="form-control" placeholder="Ex: AB-123-CD (France)" autocomplete="off">
+        <input type="text" id="plate_search" class="form-control" placeholder="Ex: AB-123-CD" autocomplete="off">
         <button type="button" id="searchByPlateBtn" class="btn btn-outline-primary">
             <span class="spinner-border spinner-border-sm d-none" role="status"></span>
             Rechercher plaque
@@ -638,9 +647,9 @@
     
 
     <!-- Select existant -->
-    <select name="vehicle_id" id="vehicle_id" class="form-select select2-vehicle" data-placeholder="Sélectionner un véhicule..." style="width:100%">
-        <option value=""></option>
-    </select>
+<select name="vehicle_id" id="vehicle_id" class="form-select select2-vehicle" data-placeholder="Sélectionner un véhicule...">
+    <option value="">Aucun véhicule</option>
+</select>
 
 
     <div class="btn-group mr-2" role="group" aria-label="First group">
@@ -1105,18 +1114,29 @@
                         success: function (data) {
                             console.log('Vehicles fetched for Customer ID:', customerId, 'Data:', data);
                             $vehicleSelect.empty();
-                            if (data.length > 0) {
-                                $vehicleSelect.append('<option value="" disabled selected>Sélectionner un véhicule</option>');
-                                data.forEach((vehicle, index) => {
-                                    let vehicleText = `${vehicle.license_plate} (${vehicle.brand_name} ${vehicle.model_name} - ${vehicle.engine_description})`;
-                                    $vehicleSelect.append(`<option value="${vehicle.id}" ${index === 0 ? 'selected' : ''}>${vehicleText}</option>`);
-                                });
-                                $vehicleSelect.prop('disabled', false).removeClass('vehicle-empty');
-                            } else {
-                                $vehicleSelect.append('<option value="" disabled selected>Aucun véhicule disponible</option>');
-                                $vehicleSelect.addClass('vehicle-empty');
-                            }
-                            $vehicleSelect.select2({ width: '100%' });
+                            
+                            // Toujours proposer "Aucun véhicule" comme première option VALIDE
+$vehicleSelect.empty();
+$vehicleSelect.append('<option value="">Aucun véhicule</option>'); // ← value="" et PAS disabled !
+
+if (data.length > 0) {
+    data.forEach(vehicle => {
+        let vehicleText = `${vehicle.license_plate} (${vehicle.brand_name} ${vehicle.model_name} - ${vehicle.engine_description})`;
+        $vehicleSelect.append(`<option value="${vehicle.id}">${vehicleText}</option>`);
+    });
+    // Optionnel : pré-sélectionner le premier véhicule
+    // $vehicleSelect.val(data[0].id);
+} else {
+    $vehicleSelect.append('<option value="" disabled>(Aucun véhicule enregistré)</option>');
+}
+
+$vehicleSelect.prop('disabled', false).removeClass('vehicle-empty');
+
+                            $vehicleSelect.select2({
+    width: '100%',
+    placeholder: 'Aucun véhicule',
+    allowClear: true
+});
                             updateCatalogButton();
                             updateHistoryButton();
                         },
@@ -1146,7 +1166,12 @@
 
                     $('#vehicle_group').hide();
                     $('#vehicle_id').empty().append('<option value="" disabled selected>Aucun véhicule disponible</option>').addClass('vehicle-empty');
-                    $('#vehicle_id').select2({ width: '100%' });
+                    $('#vehicle_id').select2({
+    width: '100%',
+    placeholder: 'Aucun véhicule',
+    allowClear: true  // ← Permet de désélectionner
+});
+
                     updateCatalogButton();
                     updateHistoryButton();
                 }

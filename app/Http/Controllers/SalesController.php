@@ -485,71 +485,98 @@ public function storeDirectDeliveryNote(Request $request)
 
                 $total = 0;
 
-                foreach ($request->lines as $index => $line) {
-                    $articleCode = $line['article_code'] ?? null;
-                    $isNewItem = !empty($line['is_new_item']);
-                    $item = null;
+foreach ($request->lines as $index => $line) {
+    $articleCode = $line['article_code'] ?? null;
+    $isNewItem = !empty($line['is_new_item']);
+    $item = null;
 
-                    // === GESTION ARTICLE DIVERS (is_new_item) ===
-                    if ($isNewItem) {
-    $request->validate([
-        "lines.$index.item_name" => 'required|string|max:255',
-        "lines.$index.unit_price_ht" => 'required|numeric|min:0',
-    ]);
-
-    $code = trim($line['article_code'] ?? 'DIVERS');
-// dd(200);
-
-    $item = Item::where('code', $code)->first();
-    if ($item) {
-        // Mise à jour de l'article existant
-        $item->update([
-            'name' => $line['item_name'],
-            'sale_price' => $line['unit_price_ht'],
-            'cost_price' => $line['unit_price_ht'],
-            'location' => 'Divers',
-            'is_active' => 1,
+    // === CAS 1 : Nouvel article "Divers" (créé à la volée) ===
+    if ($isNewItem) {
+        $request->validate([
+            "lines.$index.item_name" => 'required|string|max:255',
+            "lines.$index.unit_price_ht" => 'required|numeric|min:0',
         ]);
-        \Log::info("Article divers mis à jour", ['code' => $code]);
-    } else {
-        // Création uniquement si inexistant
-        $item = Item::create([
-            'code' => $code,
-            'name' => $line['item_name'],
-            'sale_price' => $line['unit_price_ht'],
-            'cost_price' => $line['unit_price_ht'],
-            'is_active' => 1,
-            'store_id' => $request->store_id ?? 1,
-            'location' => 'Divers',
-        ]);
-        \Log::info("Nouvel article divers créé", ['code' => $code]);
+
+        $code = trim($line['article_code'] ?? 'DIVERS');
+
+        $item = Item::where('code', $code)->first();
+
+        if ($item) {
+            $item->update([
+                'name' => $line['item_name'],
+                'sale_price' => $line['unit_price_ht'],
+                'cost_price' => $line['unit_price_ht'],
+                'location' => 'Divers',
+                'is_active' => 1,
+            ]);
+        } else {
+            $item = Item::create([
+                'code' => $code,
+                'name' => $line['item_name'],
+                'sale_price' => $line['unit_price_ht'],
+                'cost_price' => $line['unit_price_ht'],
+                'is_active' => 1,
+                'store_id' => $request->store_id ?? 1,
+                'location' => 'Divers',
+            ]);
+        }
+    }
+    // === CAS 2 : Article existant (normal) ===
+    else {
+        $item = Item::where('code', $articleCode)->first();
+
+        if (!$item) {
+            throw ValidationException::withMessages([
+                "lines.$index.article_code" => "L'article avec le code '$articleCode' n'existe pas."
+            ]);
+        }
     }
 
-    $line['article_code'] = $item->code;
+    // === À partir d'ici, $item est TOUJOURS un objet valide ===
+    $remise = $line['remise'] ?? 0;
+    $ligne_total = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - $remise / 100);
+    $unit_price_ttc = $line['unit_price_ht'] * (1 - $remise / 100) * (1 + $tvaRate / 100);
+    $total_ligne_ttc = $ligne_total * (1 + $tvaRate / 100);
+    $total += $ligne_total;
+
+    // Vérification stock uniquement si on valide
+    if ($status === 'validée') {
+        if ($item->getStockQuantityAttribute() < $line['ordered_quantity']) {
+            throw new \Exception("Stock insuffisant pour l'article {$item->code} ({$item->name}).");
+        }
+
+        // Déduction du stock (comme dans l'autre fonction)
+        $storeId = $order->store_id ?? 1;
+        $stock = Stock::firstOrNew([
+            'item_id' => $item->id,
+            'store_id' => $storeId,
+        ]);
+        $stock->quantity = ($stock->quantity ?? 0) - $line['ordered_quantity'];
+        $stock->save();
+
+        StockMovement::create([
+            'item_id' => $item->id,
+            'store_id' => $storeId,
+            'type' => 'vente',
+            'quantity' => -$line['ordered_quantity'],
+            'cost_price' => $line['unit_price_ht'] * (1 - $remise / 100),
+            'supplier_name' => $customer->name,
+            'reason' => 'Livraison directe depuis commande #' . $order->numdoc,
+            'reference' => $order->numdoc,
+        ]);
+    }
+
+    SalesOrderLine::create([
+        'sales_order_id' => $order->id,
+        'article_code' => $item->code, // maintenant $item est toujours valide
+        'ordered_quantity' => $line['ordered_quantity'],
+        'unit_price_ht' => $line['unit_price_ht'],
+        'unit_price_ttc' => $unit_price_ttc,
+        'remise' => $remise,
+        'total_ligne_ht' => $ligne_total,
+        'total_ligne_ttc' => $total_ligne_ttc,
+    ]);
 }
-
-                    // Vérification stock si validée
-                    if ($status === 'validée' && $item->getStockQuantityAttribute() < $line['ordered_quantity']) {
-                        throw new \Exception("Stock insuffisant pour l'article {$item->code}.");
-                    }
-
-                    $remise = $line['remise'] ?? 0;
-                    $ligne_total = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - $remise / 100);
-                    $unit_price_ttc = $line['unit_price_ht'] * (1 - $remise / 100) * (1 + $tvaRate / 100);
-                    $total_ligne_ttc = $ligne_total * (1 + $tvaRate / 100);
-                    $total += $ligne_total;
-
-                    SalesOrderLine::create([
-                        'sales_order_id' => $order->id,
-                        'article_code' => $item->code,
-                        'ordered_quantity' => $line['ordered_quantity'],
-                        'unit_price_ht' => $line['unit_price_ht'],
-                        'unit_price_ttc' => $unit_price_ttc,
-                        'remise' => $remise,
-                        'total_ligne_ht' => $ligne_total,
-                        'total_ligne_ttc' => $total_ligne_ttc,
-                    ]);
-                }
 
                 $order->update([
                     'total_ht' => $total,
