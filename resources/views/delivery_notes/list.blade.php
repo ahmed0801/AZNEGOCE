@@ -404,7 +404,25 @@
                             Nouvelle Commande <i class="fas fa-plus-circle ms-2"></i>
                         </a>
                         
-                        <a href="{{ route('salesinvoices.create_grouped') }}" class="btn btn-outline-success btn-round ms-2">Nouvelle Facture groupée <i class="fas fa-file-invoice ms-2"></i></a>
+<a href="{{ route('salesinvoices.create_grouped') }}"
+   class="btn btn-outline-success btn-round ms-2">
+
+
+    <!-- Icône d’information -->
+<span 
+    style="cursor: pointer;"
+    data-bs-toggle="popover"
+    data-bs-trigger="hover focus"
+    data-bs-placement="right"
+    title="À quoi sert cette fonction ?"
+    data-bs-content="Ce bouton permet de collecter tous les BL et retours non facturés d’un client afin de générer une seule facture groupée. Très utile pour les factures de fin de mois des garages, professionnels ou clients réguliers.">
+
+    Nouvelle Facture Groupée <i class="fas fa-plus-circle ms-2"></i>
+
+</span>
+
+
+</a>
                     </h4>
 
                     <form method="GET" action="{{ route('delivery_notes.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
