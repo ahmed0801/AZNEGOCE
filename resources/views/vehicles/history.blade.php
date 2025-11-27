@@ -47,7 +47,7 @@
         </div>
         <div class="pdf-button-top">
             <a href="{{ route('vehicles.history.pdf', $vehicle->id) }}" target="_blank" class="btn btn-primary">
-                <i class="bi bi-file-earmark-pdf"></i> Générer l’historique de réparation
+                <i class="bi bi-file-earmark-pdf"></i> Générer l’historique de ce véhicule
             </a>
         </div>
     </div>
@@ -107,7 +107,7 @@
 
     <div class="text-end mb-4">
         <a href="{{ route('vehicles.history.pdf', $vehicle->id) }}" target="_blank" class="btn btn-primary">
-            <i class="bi bi-file-earmark-pdf"></i> Générer l’historique de réparation
+            <i class="bi bi-file-earmark-pdf"></i> Générer l’historique de ce véhicule
         </a>
     </div>
 

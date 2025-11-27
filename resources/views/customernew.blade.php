@@ -265,7 +265,9 @@
             <select name="payment_term_id" class="form-control" required>
                 <!-- <option value="">-- Choisir --</option> -->
                 @foreach($paymentTerms as $term)
-                    <option value="{{ $term->id }}">{{ $term->label }} : {{ $term->days }} Jours</option>
+                    <option value="{{ $term->id }}">{{ $term->label }}
+                         <!-- : {{ $term->days }} Jours -->
+                        </option>
                 @endforeach
             </select>
         </div>
@@ -900,7 +902,8 @@
                 <option value="">-- Choisir --</option>
                 @foreach($paymentTerms as $term)
                     <option value="{{ $term->id }}" {{ $customer->payment_term_id == $term->id ? 'selected' : '' }}>
-                        {{ $term->label }} : {{ $term->days }} Jours
+                        {{ $term->label }}
+                         <!-- : {{ $term->days }} Jours -->
                     </option>
                 @endforeach
             </select>
