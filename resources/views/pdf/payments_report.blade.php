@@ -36,11 +36,41 @@
 </div>
 
 <div class="filters">
-    <strong>Filtres :</strong><br>
-    Du {{ $request->date_from ? \Carbon\Carbon::parse($request->date_from)->format('d/m/Y') : 'Début' }}
-    à {{ $request->date_to ? \Carbon\Carbon::parse($request->date_to)->format('d/m/Y') : 'Fin' }}<br>
-    Client : {{ $request->customer_id ? (\App\Models\Customer::find($request->customer_id)->name ?? 'Supprimé') : 'Tous' }}<br>
-    Mode : {{ $request->payment_mode ?: 'Tous' }}
+    <strong>Filtres appliqués :</strong><br>
+
+    @php
+        $from = $request->date_from ? \Carbon\Carbon::parse($request->date_from)->format('d/m/Y') : null;
+        $to   = $request->date_to   ? \Carbon\Carbon::parse($request->date_to)->format('d/m/Y')   : null;
+    @endphp
+
+    <strong>
+        @if($from && $to && $from === $to)
+            <!-- Même jour → on affiche juste la date en rouge gras -->
+            <span style="color: red; font-weight: bold;">Le {{ $from }}</span>
+        @else
+            <!-- Période classique → Du ... au ... en rouge gras -->
+            <span style="color: red; font-weight: bold;">
+                Du {{ $from ?: 'Début' }} au {{ $to ?: 'Fin' }}
+            </span>
+        @endif
+    </strong>
+    <br>
+
+    Client : 
+    <strong>
+        {{ $request->customer_id ? (\App\Models\Customer::find($request->customer_id)->name ?? 'Client supprimé') : 'Tous les clients' }}
+    </strong>
+    <br>
+
+    @if($request->payment_mode)
+        Mode : <strong>{{ $request->payment_mode }}</strong>
+    @else
+        Mode : <strong>Tous les modes</strong>
+    @endif
+
+    @if($request->filled('type') && $request->type === 'encaissement')
+        <br><em style="color: #d32f2f; font-weight: bold;">* Journal des Encaissements uniquement</em>
+    @endif
 </div>
 <div class="clearfix"></div>
 
