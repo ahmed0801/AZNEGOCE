@@ -14,6 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PaymentsExport;
 use App\Models\AccountTransfer;
+use App\Models\CompanyInformation;
 use App\Models\GeneralAccount;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -371,6 +372,16 @@ public function exportPdf(Request $request)
 {
     $query = Payment::with(['payable', 'customer', 'supplier', 'paymentMode', 'transfers.toAccount', 'account']);
     
+
+
+    // NOUVEAU : Filtrer uniquement les encaissements si demandé
+    if ($request->filled('type') && $request->type === 'encaissement') {
+        $query->whereNotNull('customer_id');        // Encaissement = paiement d'un client
+        $query->whereNull('supplier_id');           // Pas de fournisseur
+        // Optionnel : tu peux aussi forcer payable_type vers facture/vente si tu veux
+    }
+
+
     if ($request->filled('date_from')) {
         $query->where('payment_date', '>=', $request->date_from);
     }
@@ -395,16 +406,50 @@ public function exportPdf(Request $request)
         $query->where('lettrage_code', 'like', '%' . $request->lettrage_code . '%');
     }
 
-    $payments = $query->latest()->get();
-    $company = \App\Models\CompanyInformation::first() ?? new \App\Models\CompanyInformation([
-        'name' => 'AZ NEGOCE',
-        'address' => '123 Rue Fictive, Tunis 1000',
-        'phone' => '+216 12 345 678',
-        'email' => 'contact@aznegoce.com',
-    ]);
+$payments = $query->latest()->get();
 
-    $pdf = Pdf::loadView('pdf.payments_report', compact('payments', 'company', 'request'));
-    return $pdf->download('payments_report_' . Carbon::now()->format('Ymd') . '.pdf');
+    // On groupe par mode de paiement (clé = nom du mode, valeur = collection de paiements)
+    $paymentsByMode = $payments->groupBy('payment_mode')->sortKeys();
+
+    // Total général
+    $grandTotal = $payments->sum('amount');
+
+
+
+        // Optionnel : changer le titre dans le PDF si c’est un journal d’encaissement
+    $title = $request->type === 'encaissement' ? 'Journal des Encaissements' : 'Rapport des Règlements';
+
+
+
+    
+// COMPANY INFO – CORRIGÉ
+    $company = CompanyInformation::firstOr(function () {
+        return new CompanyInformation([
+            'name'    => 'AZ NEGOCE',
+            'address' => '123 Rue Fictive, Tunis 1000',
+            'phone'   => '+216 12 345 678',
+            'email'   => 'contact@aznegoce.com',
+        ]);
+    });
+
+    $pdf = Pdf::loadView('pdf.payments_report', compact(
+        'paymentsByMode',
+        'grandTotal',
+        'company',
+        'request',
+        'title'          // ← Ajouté ici
+    ));
+
+
+
+
+    $filename = $request->type === 'encaissement'
+        ? 'journal_encaissements_'
+        : 'rapport_reglements_';
+
+
+
+    return $pdf->download($filename . now()->format('Ymd_His') . '.pdf');
 }
 
 

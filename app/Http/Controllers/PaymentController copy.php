@@ -459,17 +459,31 @@ public function exportPdf(Request $request)
                 'remaining_balance' => $remainingBalance,
             ]);
 
-            DB::commit();
-            return redirect()->back()->with('success', 'Paiement enregistré avec succès.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('Payment creation failed for sales invoice', [
-                'invoice_id' => $invoice->id,
-                'error' => $e->getMessage(),
-            ]);
-            return redirect()->back()->with('error', 'Erreur lors de l\'enregistrement du paiement: ' . $e->getMessage())->withInput();
-        }
+  DB::commit();
+
+    // <-- Ici, juste après commit
+    if ($request->input('print_after')) {
+    // On stocke l'URL du PDF dans la session
+    session()->flash('print_url', route('salesinvoices.print', $invoice->id));
+
+    // On renvoie quand même un redirect back
+    return redirect()->back()->with('success', 'Paiement enregistré avec succès.');
     }
+
+    return redirect()->back()->with('success', 'Paiement enregistré avec succès.');
+
+} catch (\Exception $e) {
+    DB::rollBack();
+    \Log::error('Payment creation failed for sales invoice', [
+        'invoice_id' => $invoice->id,
+        'error' => $e->getMessage(),
+    ]);
+
+    return redirect()->back()->with('error', 'Erreur lors de l\'enregistrement du paiement: ' . $e->getMessage())->withInput();
+}
+    }
+
+
 
     public function makePaymentPurchase(Request $request, $id)
     {

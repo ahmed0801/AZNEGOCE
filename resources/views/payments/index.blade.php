@@ -401,9 +401,20 @@
                                 <button class="btn btn-label-warning btn-round me-2" data-bs-toggle="modal" data-bs-target="#withdrawModal">
                                     <span class="btn-label"><i class="fas fa-minus-circle"></i></span> Retrait Compte
                                 </button>
-                                <a href="{{ route('payments.export_pdf') }}?{{ request()->getQueryString() }}" class="btn btn-label-success btn-round me-2">
-                                    <span class="btn-label"><i class="fas fa-file-pdf"></i></span> Exporter PDF
-                                </a>
+                                
+                                <!-- Nouveau bouton qui ouvre le modal -->
+<button type="button" class="btn btn-label-success btn-round me-2" data-bs-toggle="modal" data-bs-target="#exportPdfModal">
+    <span class="btn-label"><i class="fas fa-file-pdf"></i></span> Journal Global
+</button>
+
+<!-- NOUVEAU : Journal des Encaissements (seulement les encaissements clients) -->
+    <button type="button" class="btn btn-label-info btn-round me-2" data-bs-toggle="modal" data-bs-target="#exportEncaissementsModal">
+        <i class="fas fa-euro-sign"></i> Journal Encaissements
+    </button>
+
+
+
+
                                 <a href="{{ route('payments.export_excel') }}?{{ request()->getQueryString() }}" class="btn btn-label-success btn-round">
                                     <span class="btn-label"><i class="fas fa-file-excel"></i></span> Exporter Excel
                                 </a>
@@ -872,5 +883,130 @@
             });
         });
     </script>
+
+
+
+
+
+
+
+
+
+<div class="modal fade" id="exportPdfModal" tabindex="-1" aria-labelledby="exportPdfModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="exportPdfModalLabel">
+                    <i class="fas fa-file-pdf"></i> Exporter en PDF
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="GET" action="{{ route('payments.export_pdf') }}" target="_blank">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Date de début</label>
+                        <input type="date" name="date_from" class="form-control" 
+                               value="{{ request('date_from', now()->startOfMonth()->format('Y-m-d')) }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Date de fin</label>
+                        <input type="date" name="date_to" class="form-control" 
+                               value="{{ request('date_to', now()->endOfMonth()->format('Y-m-d')) }}" required>
+                    </div>
+
+                    <!-- Garde les filtres actuels (client, fournisseur, mode, lettrage, etc.) -->
+                    @foreach(request()->except(['date_from', 'date_to', 'page']) as $key => $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endforeach
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-file-pdf"></i> Générer le PDF
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Modal : Journal des Encaissements (seulement les encaissements clients) -->
+<div class="modal fade" id="exportEncaissementsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-euro-sign"></i> Journal des Encaissements
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="GET" action="{{ route('payments.export_pdf') }}" target="_blank">
+                <!-- On force le type "encaissement" -->
+                <input type="hidden" name="type" value="encaissement">
+
+                
+
+<div class="modal-body">
+    <p class="text-muted small">Seuls les <strong>Réglements clients</strong> seront inclus.</p>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Date de début</label>
+        <input type="date" name="date_from" class="form-control"
+               value="{{ request('date_from', now()->startOfMonth()->format('Y-m-d')) }}" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-bold">Date de fin</label>
+        <input type="date" name="date_to" class="form-control"
+               value="{{ request('date_to', now()->endOfMonth()->format('Y-m-d')) }}" required>
+    </div>
+
+    <input type="hidden" name="type" value="encaissement">
+
+    @php
+        $otherParams = request()->except(['date_from', 'date_to', 'page', 'type']);
+    @endphp
+    @foreach($otherParams as $key => $value)
+        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+    @endforeach
+</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-file-pdf"></i> Générer Journal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </body>
 </html>
