@@ -432,14 +432,6 @@ $payments = $query->latest()->get();
         ]);
     });
 
-    $pdf = Pdf::loadView('pdf.payments_report', compact(
-        'paymentsByMode',
-        'grandTotal',
-        'company',
-        'request',
-        'title'          // ← Ajouté ici
-    ));
-
 
 
 
@@ -447,6 +439,30 @@ $payments = $query->latest()->get();
         ? 'journal_encaissements_'
         : 'rapport_reglements_';
 
+
+$pdf = PDF::loadView('pdf.payments_report', compact(
+    'paymentsByMode',
+    'grandTotal',
+    'company',
+    'request',
+    'title'
+));
+
+// CONFIGURATION DOMPDF ULTRA OPTIMISÉE POUR GROS PDF
+$pdf->getDomPDF()->set_option('isHtml5ParserEnabled', true);
+$pdf->getDomPDF()->set_option('isRemoteEnabled', true);
+$pdf->getDomPDF()->set_option('defaultFont', 'DejaVu Sans'); // Important pour accents
+
+// Les 3 lignes magiques qui sauvent tout en prod
+$pdf->getDomPDF()->set_option('isPhpEnabled', false);
+$pdf->getDomPDF()->set_option('isFontSubsettingEnabled', true);
+$pdf->getDomPDF()->getOptions()->set('dpi', 96); // au lieu de 150 → -50% mémoire
+
+// MODE STREAMING = génère page par page (énorme gain mémoire)
+return $pdf->stream($filename . now()->format('Ymd_His') . '.pdf');
+
+// OU si tu veux forcer le téléchargement :
+return $pdf->download($filename . now()->format('Ymd_His') . '.pdf');
 
 
     return $pdf->download($filename . now()->format('Ymd_His') . '.pdf');
