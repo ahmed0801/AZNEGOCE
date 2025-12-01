@@ -367,106 +367,74 @@ public function cancelPayment(Request $request, $id)
 
 
 
-    
-public function exportPdf(Request $request)
+   public function exportPdf(Request $request)
 {
-    $query = Payment::with(['payable', 'customer', 'supplier', 'paymentMode', 'transfers.toAccount', 'account']);
-    
+    try {
+        ini_set('memory_limit', '512M');        // Force la mémoire
+        set_time_limit(120);                    // 2 minutes max
 
+        $query = Payment::with(['payable', 'customer', 'supplier', 'paymentMode', 'transfers.toAccount', 'account']);
 
-    // NOUVEAU : Filtrer uniquement les encaissements si demandé
-    if ($request->filled('type') && $request->type === 'encaissement') {
-        $query->whereNotNull('customer_id');        // Encaissement = paiement d'un client
-        $query->whereNull('supplier_id');           // Pas de fournisseur
-        // Optionnel : tu peux aussi forcer payable_type vers facture/vente si tu veux
-    }
+        if ($request->filled('type') && $request->type === 'encaissement') {
+            $query->whereNotNull('customer_id')->whereNull('supplier_id');
+        }
 
+        if ($request->filled('date_from')) {
+            $query->whereDate('payment_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('payment_date', '<=', $request->date_to);
+        }
+        if ($request->filled('payment_mode')) $query->where('payment_mode', $request->payment_mode);
+        if ($request->filled('customer_id')) $query->where('customer_id', $request->customer_id);
+        if ($request->filled('supplier_id')) $query->where('supplier_id', $request->supplier_id);
 
-    if ($request->filled('date_from')) {
-        $query->where('payment_date', '>=', $request->date_from);
-    }
-    
-    if ($request->filled('date_to')) {
-        $query->where('payment_date', '<=', $request->date_to);
-    }
-    
-    if ($request->filled('payment_mode')) {
-        $query->where('payment_mode', $request->payment_mode);
-    }
+        $payments = $query->latest()->get();
 
-    if ($request->filled('customer_id')) {
-        $query->where('customer_id', $request->customer_id);
-    }
-    
-    if ($request->filled('supplier_id')) {
-        $query->where('supplier_id', $request->supplier_id);
-    }
+        // Blocage si trop lourd
+        if ($payments->count() > 4000) {
+            return response()->json(['error' => 'Trop de lignes pour PDF'], 400);
+        }
 
-    if ($request->filled('lettrage_code')) {
-        $query->where('lettrage_code', 'like', '%' . $request->lettrage_code . '%');
-    }
+        $paymentsByMode = $payments->groupBy('payment_mode')->sortKeys();
+        $grandTotal = $payments->sum('amount');
+        $title = $request->type === 'encaissement' ? 'Journal des Encaissements' : 'Rapport des Règlements';
 
-$payments = $query->latest()->get();
-
-    // On groupe par mode de paiement (clé = nom du mode, valeur = collection de paiements)
-    $paymentsByMode = $payments->groupBy('payment_mode')->sortKeys();
-
-    // Total général
-    $grandTotal = $payments->sum('amount');
-
-
-
-        // Optionnel : changer le titre dans le PDF si c’est un journal d’encaissement
-    $title = $request->type === 'encaissement' ? 'Journal des Encaissements' : 'Rapport des Règlements';
-
-
-
-    
-// COMPANY INFO – CORRIGÉ
-    $company = CompanyInformation::firstOr(function () {
-        return new CompanyInformation([
-            'name'    => 'AZ NEGOCE',
-            'address' => '123 Rue Fictive, Tunis 1000',
-            'phone'   => '+216 12 345 678',
-            'email'   => 'contact@aznegoce.com',
+        $company = CompanyInformation::first() ?? new CompanyInformation([
+            'name' => 'AZ NEGOCE', 'address' => '123 Rue Fictive', 'phone' => 'XX XX XX XX XX', 'email' => 'contact@aznegoce.com'
         ]);
-    });
 
+        // PDF avec options forcées
+        $pdf = Pdf::loadView('pdf.payments_report', compact(
+            'paymentsByMode', 'grandTotal', 'company', 'request', 'title'
+        ));
 
+        $pdf->setPaper('a4', 'portrait');
+        $pdf->setOptions([
+            'defaultFont' => 'DejaVu Sans',
+            'isRemoteEnabled' => true,
+            'isHtml5ParserEnabled' => true,
+            'isFontSubsettingEnabled' => true,
+            'dpi' => 96,
+        ]);
 
+        $filename = $request->type === 'encaissement' ? 'journal_encaissements' : 'rapport_reglements';
+        $filename .= '_' . now()->format('Ymd_His');
 
-    $filename = $request->type === 'encaissement'
-        ? 'journal_encaissements_'
-        : 'rapport_reglements_';
+        return $pdf->download($filename . '.pdf');
 
+    } catch (\Exception $e) {
+        \Log::error('PDF Export Error: ' . $e->getMessage());
+        \Log::error($e->getTraceAsString());
 
-$pdf = PDF::loadView('pdf.payments_report', compact(
-    'paymentsByMode',
-    'grandTotal',
-    'company',
-    'request',
-    'title'
-));
+        if (config('app.debug')) {
+            return response('Erreur PDF : ' . $e->getMessage() . '<br>' . $e->getFile() . ':' . $e->getLine(), 500);
+        }
 
-// CONFIGURATION DOMPDF ULTRA OPTIMISÉE POUR GROS PDF
-$pdf->getDomPDF()->set_option('isHtml5ParserEnabled', true);
-$pdf->getDomPDF()->set_option('isRemoteEnabled', true);
-$pdf->getDomPDF()->set_option('defaultFont', 'DejaVu Sans'); // Important pour accents
-
-// Les 3 lignes magiques qui sauvent tout en prod
-$pdf->getDomPDF()->set_option('isPhpEnabled', false);
-$pdf->getDomPDF()->set_option('isFontSubsettingEnabled', true);
-$pdf->getDomPDF()->getOptions()->set('dpi', 96); // au lieu de 150 → -50% mémoire
-
-// MODE STREAMING = génère page par page (énorme gain mémoire)
-return $pdf->stream($filename . now()->format('Ymd_His') . '.pdf');
-
-// OU si tu veux forcer le téléchargement :
-return $pdf->download($filename . now()->format('Ymd_His') . '.pdf');
-
-
-    return $pdf->download($filename . now()->format('Ymd_His') . '.pdf');
+        return response('Erreur serveur lors de la génération du PDF. Contactez l’administrateur.', 500);
+    }
 }
+
 
 
 
