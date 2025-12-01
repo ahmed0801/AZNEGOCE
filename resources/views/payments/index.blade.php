@@ -906,12 +906,12 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Date de début</label>
                         <input type="date" name="date_from" class="form-control" 
-                               value="{{ request('date_from', now()->startOfMonth()->format('Y-m-d')) }}" required>
+                               value="{{ request('date_from', now()->format('Y-m-d')) }}" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Date de fin</label>
                         <input type="date" name="date_to" class="form-control" 
-                               value="{{ request('date_to', now()->endOfMonth()->format('Y-m-d')) }}" required>
+                               value="{{ request('date_to', now()->format('Y-m-d')) }}" required>
                     </div>
 
                     <!-- Garde les filtres actuels (client, fournisseur, mode, lettrage, etc.) -->
@@ -966,12 +966,14 @@
     <div class="mb-3">
         <label class="form-label fw-bold">Date de début</label>
         <input type="date" name="date_from" class="form-control"
-               value="{{ request('date_from', now()->startOfMonth()->format('Y-m-d')) }}" required>
+               value="{{ request('date_from', now()->format('Y-m-d')) }}" required>
+                              <!-- value="{{ request('date_from', now()->startOfMonth()->format('Y-m-d')) }}" required> -->
+
     </div>
     <div class="mb-3">
         <label class="form-label fw-bold">Date de fin</label>
         <input type="date" name="date_to" class="form-control"
-               value="{{ request('date_to', now()->endOfMonth()->format('Y-m-d')) }}" required>
+               value="{{ request('date_to', now()->format('Y-m-d')) }}" required>
     </div>
 
     <input type="hidden" name="type" value="encaissement">
