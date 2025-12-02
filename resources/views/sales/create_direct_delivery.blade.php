@@ -1575,11 +1575,7 @@ $(document).on('click', '.voir-details', function (e) {
 
 
             <td>
-                ${price.toFixed(2)} €<br>
-                <small class="${price >= costPrice ? 'text-success' : 'text-danger'} small-text">
-                    ${price >= costPrice ? '+' : ''}${(price - costPrice).toFixed(2)} €
-                    (${costPrice > 0 ? (((price - costPrice) / costPrice) * 100).toFixed(0) : 0}%)
-                </small>
+                ${price.toFixed(2)} €
             </td>
             <td>
                 <button type="button" class="btn btn-outline-primary btn-sm stock-details-btn"
