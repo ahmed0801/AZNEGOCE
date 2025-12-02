@@ -246,6 +246,121 @@
 }
 
 
+
+
+
+
+.purchase-price-block {
+    font-size: 0.82rem;
+    line-height: 1.2;
+}
+
+.net-price {
+    min-width: 70px;
+    font-weight: 600;
+    color: #28a745 !important;
+}
+
+.margin-display {
+    font-weight: 600;
+}
+
+
+
+
+
+
+
+
+
+
+/* === FORCER LES CHAMPS NUMÉRIQUES À ÊTRE TRÈS COMPACTS === */
+#lines_table .quantity,
+#lines_table .unit_price_ht,
+#lines_table .unit_price_ttc,
+#lines_table .remise,
+#lines_table .cost-price-input,
+#lines_table .purchase-discount {
+    width: 62px !important;     /* Taille ultra-compacte */
+    min-width: 62px !important;
+    max-width: 62px !important;
+    padding: 0.25rem 0.35rem !important;
+    font-size: 0.80rem !important;
+    text-align: center;
+}
+
+/* Sur mobile : encore plus petit si besoin */
+@media (max-width: 768px) {
+    #lines_table .quantity,
+    #lines_table .unit_price_ht,
+    #lines_table .unit_price_ttc,
+    #lines_table .remise,
+    #lines_table .cost-price-input,
+    #lines_table .purchase-discount {
+        width: 55px !important;
+        min-width: 55px !important;
+        font-size: 0.75rem !important;
+        padding: 0.2rem 0.3rem !important;
+    }
+}
+
+/* Option bonus : centrer les colonnes numériques */
+#lines_table td.text-right,
+#lines_table th.text-center {
+    text-align: center !important;
+}
+
+/* Réduire légèrement les colonnes "Stock" et boutons */
+#lines_table th:nth-child(5),  /* Stock */
+#lines_table td:nth-child(5),
+#lines_table th:nth-child(12), /* Bouton supprimer */
+#lines_table td:nth-child(12) {
+    width: 70px;
+    min-width: 70px;
+}
+
+/* Réduire les colonnes Qté, PU HT, PU TTC, Remise */
+#lines_table th:nth-child(6), td:nth-child(6),  /* Qté */
+#lines_table th:nth-child(7), td:nth-child(7),  /* PU HT */
+#lines_table th:nth-child(8), td:nth-child(8),  /* PU TTC */
+#lines_table th:nth-child(9), td:nth-child(9) { /* Remise % */
+    width: 70px !important;
+    min-width: 70px !important;
+}
+
+
+
+
+
+
+
+
+/* === EN-TÊTE ULTRA-COMPACT === */
+#lines_table thead th {
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.80rem !important;
+    font-weight: 600;
+    vertical-align: middle;
+    line-height: 1.2;
+    height: 42px !important;
+}
+
+/* Supprime le padding inutile sur les petites colonnes */
+#lines_table th.py-1,
+#lines_table td.py-1 {
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+}
+
+/* Force la hauteur fixe de la ligne d'en-tête */
+#lines_table thead tr {
+    height: 42px !important;
+}
+
+/* Ligne de séparation plus fine */
+#lines_table thead {
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+}
     </style>
 </head>
 <body>
@@ -789,22 +904,25 @@
 
                                     <div class="table-responsive">
                                         <table class="table table-striped table-bordered table-text-small" id="lines_table">
-                                            <thead class="table-dark">
-                                                <tr>
-                                                    <th>Réference</th>
-                                                    <th>Désignation</th>
-                                                    <th>Prix A.HT</th>
-                                                    <th>Prix V.HT</th>
-                                                    <th>Stock</th>
-                                                    <th>Qté</th>
-                                                    <th>PU HT</th>
-                                                    <th>PU TTC</th>
-                                                    <th>Remise %</th>
-                                                    <th>Total HT</th>
-                                                    <th>Total TTC</th>
-                                                    <th></th>
-                                                </tr>
-                                            </thead>
+                                           <thead class="table-dark text-white">
+    <tr style="height: 42px;">
+        <th class="py-1">Référence</th>
+        <th class="py-1">Désignation</th>
+        <th class="py-1 text-center">
+            <div class="small fw-bold">Prix Achat HT</div>
+            <div class="text-info" style="font-size: 0.63rem; line-height: 1;">Remise → Prix Net → Marge</div>
+        </th>
+        <th class="py-1 text-center">Prix V.HT</th>
+        <th class="py-1 text-center">Stock</th>
+        <th class="py-1 text-center">Qté</th>
+        <th class="py-1 text-center">PU HT</th>
+        <th class="py-1 text-center">PU TTC</th>
+        <th class="py-1 text-center">Rem %</th>
+        <th class="py-1 text-center">Total HT</th>
+        <th class="py-1 text-center">Total TTC</th>
+        <th class="py-1"></th>
+    </tr>
+</thead>
                                             <tbody id="lines_body"></tbody>
                                         </table>
                                     </div>
@@ -1425,7 +1543,37 @@ $(document).on('click', '.voir-details', function (e) {
                 <input type="hidden" name="lines[${lineCount}][article_code]" value="${code}">
             </td>
             <td>${name}</td>
-            <td>${costPrice.toFixed(2)} €</td>
+           
+           <td class="p-1">
+    <div class="purchase-price-block">
+        <!-- Prix d'achat HT (affiché) -->
+        <div class="input-group input-group-sm mb-1">
+            <span class="input-group-text">€</span>
+            <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
+                   value="${costPrice.toFixed(2)}" data-original-cost="${costPrice.toFixed(2)}">
+        </div>
+
+        <!-- Remise achat + Prix net -->
+        <div class="d-flex gap-1 align-items-center justify-content-between">
+            <div class="input-group input-group-sm" style="width: 105px;">
+                <input type="number" min="0" max="100" step="0.1"
+                       class="form-control form-control-sm text-end purchase-discount"
+                       value="0" placeholder="Rem%">
+                <span class="input-group-text">%</span>
+            </div>
+            <span class="text-muted small">→</span>
+            <span class="fw-bold text-success net-price">0,00 €</span>
+        </div>
+
+        <!-- Marge estimée -->
+        <small class="text-muted d-block text-end mt-1">
+            Marge : <span class="margin-display text-primary fw-bold">0%</span>
+            (<span class="margin-euro text-primary">0,00 €</span>)
+        </small>
+    </div>
+</td>
+
+
             <td>
                 ${price.toFixed(2)} €<br>
                 <small class="${price >= costPrice ? 'text-success' : 'text-danger'} small-text">
@@ -1461,6 +1609,12 @@ $(document).on('click', '.voir-details', function (e) {
     `;
 
     $('#lines_body').append(row);
+    // FORCE LE CALCUL IMMÉDIAT DE LA MARGE DÈS L'AJOUT
+let $newRow = $('#lines_body tr:last');
+$newRow.find('.purchase-discount').val('0');
+$newRow.find('.remise').val('0');
+updatePurchaseMargin($newRow);           // ← Maintenant ça marche !
+updateLineTotals($newRow, parseFloat($('#tva_rate').val()) || 0);
 
     // Gestion copie code
     $(document).on('click', '.copy-line-code', function (e) {
@@ -1502,6 +1656,96 @@ $(document).on('click', '.voir-details', function (e) {
     updateLineTotals(row, tvaRate);
 });
 
+
+
+
+ // Fonction unique de recalcul du bloc "prix d'achat → marge"
+// === DÉPLACÉE EN DEHORS DE TOUTE FONCTION ===
+// Une seule alerte à la fois pour tout le tableau
+let negativeMarginTimeout = null;
+
+function updatePurchaseMargin(row) {
+    let costPrice       = parseFloat(row.find('.cost-price-input').val().replace(',', '.')) || 0;
+    let purchaseDiscount= parseFloat(row.find('.purchase-discount').val().replace(',', '.')) || 0;
+    let saleDiscount    = parseFloat(row.find('.remise').val().replace(',', '.')) || 0;
+    let salePriceHt     = parseFloat(row.find('.unit_price_ht').val().replace(',', '.')) || 0;
+
+    let netCost      = round(costPrice * (1 - purchaseDiscount / 100), 4);
+    let realSalePrice= round(salePriceHt * (1 - saleDiscount / 100), 4);
+
+    row.find('.net-price').text(netCost.toFixed(2).replace('.', ',') + ' €');
+
+    // ─── CAS NORMAL ───
+    if (realSalePrice > 0 && netCost > 0) {
+        let marginPct = ((realSalePrice - netCost) / netCost) * 100;
+        let marginEur = realSalePrice - netCost;
+
+        row.find('.margin-display').text(marginPct.toFixed(1) + '%');
+        row.find('.margin-euro').text(marginEur.toFixed(2).replace('.', ',') + ' €');
+
+        let $m = row.find('.margin-display');
+        $m.removeClass('text-danger text-warning text-success');
+        if (marginPct >= 50) $m.addClass('text-success');
+        else if (marginPct >= 30) $m.addClass('text-warning');
+        else $m.addClass('text-danger');
+
+        // ─── ALERTE MARGE NÉGATIVE ───
+        if (marginPct < 0) {
+            // On annule l’ancienne alerte si elle existe
+            if (negativeMarginTimeout) clearTimeout(negativeMarginTimeout);
+
+            negativeMarginTimeout = setTimeout(() => {
+                const code = row.find('td:nth-child(1) .font-weight-bold').text().trim() || '???';
+                const name = row.find('td:nth-child(2)').text().trim();
+                const shortName = name.length > 50 ? name.substring(0,47)+'...' : name;
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'VENTE À PERTE !',
+                    html: `
+                        <div class="text-start small">
+                            <b>${code}</b><br>${shortName}<br><br>
+                            Prix d'achat net : <b class="text-danger">${netCost.toFixed(2)} €</b><br>
+                            Prix de vente net HT : <b class="text-danger">${realSalePrice.toFixed(2)} €</b><br><br>
+                            → Perte de <b class="text-danger">${Math.abs(marginEur).toFixed(2)} €</b> 
+                            (${marginPct.toFixed(1)}%)
+                        </div>`,
+                    confirmButtonText: 'OK, je continue quand même',
+                    confirmButtonColor: '#d33',
+                    allowOutsideClick: false,
+                    timer: 10000,
+                    timerProgressBar: true
+                });
+
+                negativeMarginTimeout = null; // on remet à zéro après affichage
+            }, 1800); // 1,5 seconde de délai
+        } else {
+            // marge positive → on annule l’alerte en attente
+            if (negativeMarginTimeout) {
+                clearTimeout(negativeMarginTimeout);
+                negativeMarginTimeout = null;
+            }
+        }
+    } 
+    // ─── CAS VIDE / ZÉRO ───
+    else {
+        row.find('.margin-display').text('—');
+        row.find('.margin-euro').text('—');
+        if (negativeMarginTimeout) {
+            clearTimeout(negativeMarginTimeout);
+            negativeMarginTimeout = null;
+        }
+    }
+}
+
+// Déclenchement sur TOUS les champs qui influencent la marge
+$(document).on('input change', '.remise, .cost-price-input, .purchase-discount, .unit_price_ht, .unit_price_ttc', function () {
+    const row = $(this).closest('tr');
+    updatePurchaseMargin(row);
+});
+
+
+
 function updateLineTotals(row, tvaRate) {
     tvaRate = parseFloat(tvaRate) || 0;
     let quantity = parseFloat(row.find('.quantity').val().replace(',', '.')) || 0;
@@ -1526,6 +1770,29 @@ function updateLineTotals(row, tvaRate) {
         $puTtc.val(puTtc.toFixed(2));
     }
     // Si les deux sont à 0 → on ne touche à rien
+
+
+
+
+    
+    
+
+
+
+
+
+   
+
+
+
+
+
+
+
+
+
+
+
 
     // Calcul du total
     let totalHtAvantRemise = round(puHt * quantity);
