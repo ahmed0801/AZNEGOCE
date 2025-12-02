@@ -747,36 +747,38 @@
             + Créer un article manuellement
         </button>
 
+        <!-- NOUVEAU : Groupe de boutons fournisseurs -->
         <span class="text-muted small">|</span>
         <span class="text-muted small d-none d-md-inline">Recherche externe :</span>
 
-        <!-- GROUPE DE BOUTONS → OUVERTURE EN GRANDE POPUP -->
         <div class="btn-group btn-group-sm" role="group">
-            <button type="button" class="btn btn-outline-info" onclick="openSupplier('Destock Pièces Auto', 'https://destockpiecesauto.autodata.fr/databox.php#vehicule/immat')">
-                DataBox
-            </button>
-            <button type="button" class="btn btn-outline-success" onclick="openSupplier('AZ Negoce', 'https://aznegoce.inoshop.net/search')">
-                AZ
-            </button>
-            <button type="button" class="btn btn-outline-warning" onclick="openSupplier('APCAT', 'https://apcat.eu/')">
-                AP
-            </button>
-            <button type="button" class="btn btn-outline-danger" onclick="openSupplier('OttoGo', 'https://ottogo.inoshop.net/search')">
-                OttoGo
-            </button>
-
-            <!-- Menu déroulant "Plus" -->
+            <a href="https://destockpiecesauto.autodata.fr/databox.php#vehicule/immat" target="_blank"
+               class="btn btn-outline-dark" title="Destock Pièces Auto">
+                 DataBox
+            </a>
+            <a href="https://aznegoce.inoshop.net/search" target="_blank"
+               class="btn btn-outline-success" title="AZ Negoce">
+                 AZ
+            </a>
+            <a href="https://apcat.eu/" target="_blank"
+               class="btn btn-outline-warning" title="APCAT">
+                 AP
+            </a>
+            <a href="https://ottogo.inoshop.net/search" target="_blank"
+               class="btn btn-outline-danger" title="OttoGo">
+                 OttoGo
+            </a>
             <div class="btn-group btn-group-sm" role="group">
                 <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
                     Plus
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow">
-                    <li><a class="dropdown-item" href="#" onclick="openSupplier('KS Distrib', 'https://ksdistribpro.fr/index.php'); return false;">KS Distrib</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="openSupplier('MyMGA', 'https://mymga.fr/'); return false;">MyMGA</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="openSupplier('Formule 1', 'https://formule1.acrgroup.fr/CCDISP.HTM'); return false;">Formule 1</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="openSupplier('IDLP', 'https://www.idlp.fr/'); return false;">IDLP</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="openSupplier('Shop IDLP', 'https://shopgroupeidlp.fr:5083/CCDISP.HTM'); return false;">Shop IDLP</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="openSupplier('CAL92', 'http://siteweb.cal92.fr/'); return false;">CAL92</a></li>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="https://ksdistribpro.fr/index.php" target="_blank">KS Distrib</a></li>
+                    <li><a class="dropdown-item" href="https://mymga.fr/" target="_blank">MyMGA</a></li>
+                    <li><a class="dropdown-item" href="https://formule1.acrgroup.fr/CCDISP.HTM" target="_blank">Formule 1</a></li>
+                    <li><a class="dropdown-item" href="https://www.idlp.fr/" target="_blank">IDLP</a></li>
+                    <li><a class="dropdown-item" href="https://shopgroupeidlp.fr:5083/CCDISP.HTM" target="_blank">Shop IDLP</a></li>
+                    <li><a class="dropdown-item" href="http://siteweb.cal92.fr/" target="_blank">CAL92</a></li>
                 </ul>
             </div>
         </div>
@@ -2207,35 +2209,5 @@ $form.on('submit', function (e) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- popup fournisseur -->
-<script>
-function openSupplier(name, url) {
-    const width = 1400;
-    const height = 900;
-    const left = (screen.width / 2) - (width / 2);
-    const top = (screen.height / 2) - (height / 2);
-
-    window.open(
-        url,
-        name.replace(/[^a-zA-Z0-9]/g, '_'), // nom de fenêtre propre
-        `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=yes,status=yes`
-    );
-}
-</script>
 </body>
 </html>

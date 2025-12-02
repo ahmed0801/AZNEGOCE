@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
         protected function schedule(\Illuminate\Console\Scheduling\Schedule $schedule)
 {
     // Exécution chaque nuit à 02h00
-    $schedule->command('golda:import')->dailyAt('00:02')
+    $schedule->command('golda:import')->weeklyOn(6, '23:30')  // 6 = samedi (0=dimanche, 1=lundi, ..., 6=samedi)
     ->appendOutputTo(storage_path('logs/golda_schedule.log'))
         ->timezone('Europe/Paris');
 }
