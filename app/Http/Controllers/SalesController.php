@@ -1184,7 +1184,7 @@ public function validateOrder($id)
             $searchTerm = $request->query('query');
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('code','like',$searchTerm)
-                ->orWhere('code', 'like', $searchTerm . '.%')   // match "1234."
+                ->orWhere('code', 'like', $searchTerm . '%')   // match "1234."
                   ->orWhere('name', 'like',$searchTerm . '%');
 
             });

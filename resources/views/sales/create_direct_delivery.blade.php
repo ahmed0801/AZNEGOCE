@@ -741,13 +741,46 @@
 
 <!-- article divers -->
                                 <div class="mb-3">
-                                    <h6 class="font-weight-bold mb-2">
-                                        <!-- Lignes de commande :  -->
-                                        <button type="button" id="add_divers_item" class="btn btn-outline-primary btn-sm">
+                                    <h6 class="font-weight-bold mb-2 d-flex align-items-center flex-wrap gap-2">
+        <!-- Bouton création manuelle -->
+        <button type="button" id="add_divers_item" class="btn btn-outline-primary btn-sm">
             + Créer un article manuellement
         </button>
 
-                                    </h6>
+        <span class="text-muted small">|</span>
+        <span class="text-muted small d-none d-md-inline">Recherche externe :</span>
+
+        <!-- GROUPE DE BOUTONS → OUVERTURE EN GRANDE POPUP -->
+        <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-info" onclick="openSupplier('Destock Pièces Auto', 'https://destockpiecesauto.autodata.fr/databox.php#vehicule/immat')">
+                DataBox
+            </button>
+            <button type="button" class="btn btn-outline-success" onclick="openSupplier('AZ Negoce', 'https://aznegoce.inoshop.net/search')">
+                AZ
+            </button>
+            <button type="button" class="btn btn-outline-warning" onclick="openSupplier('APCAT', 'https://apcat.eu/')">
+                AP
+            </button>
+            <button type="button" class="btn btn-outline-danger" onclick="openSupplier('OttoGo', 'https://ottogo.inoshop.net/search')">
+                OttoGo
+            </button>
+
+            <!-- Menu déroulant "Plus" -->
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                    Plus
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <li><a class="dropdown-item" href="#" onclick="openSupplier('KS Distrib', 'https://ksdistribpro.fr/index.php'); return false;">KS Distrib</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="openSupplier('MyMGA', 'https://mymga.fr/'); return false;">MyMGA</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="openSupplier('Formule 1', 'https://formule1.acrgroup.fr/CCDISP.HTM'); return false;">Formule 1</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="openSupplier('IDLP', 'https://www.idlp.fr/'); return false;">IDLP</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="openSupplier('Shop IDLP', 'https://shopgroupeidlp.fr:5083/CCDISP.HTM'); return false;">Shop IDLP</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="openSupplier('CAL92', 'http://siteweb.cal92.fr/'); return false;">CAL92</a></li>
+                </ul>
+            </div>
+        </div>
+    </h6>
 
                                     <!-- AJOUTE LE BOUTON ICI -->
 
@@ -2174,5 +2207,35 @@ $form.on('submit', function (e) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- popup fournisseur -->
+<script>
+function openSupplier(name, url) {
+    const width = 1400;
+    const height = 900;
+    const left = (screen.width / 2) - (width / 2);
+    const top = (screen.height / 2) - (height / 2);
+
+    window.open(
+        url,
+        name.replace(/[^a-zA-Z0-9]/g, '_'), // nom de fenêtre propre
+        `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=yes,status=yes`
+    );
+}
+</script>
 </body>
 </html>

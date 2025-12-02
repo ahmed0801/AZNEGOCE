@@ -72,7 +72,31 @@ class ImportGoldaTarifs extends Command
 
         // --- Boucle principale : fournisseurs ---
         foreach ($records as $row) {
-            $fournisseurName = trim($row['Nom_Fournisseur'] ?? '');
+
+            // eliminer des fournisseurs
+            // $fournisseurName = trim($row['Nom_Fournisseur'] ?? '');
+ $fournisseurName = trim($row['Nom_Fournisseur'] ?? '');
+
+    // 🚫 Liste des fournisseurs à ignorer
+    $fournisseursIgnorer = [
+        'C-CARPARTS',
+        'DRiV',
+        'ELECTRICFIL SERVICE',
+        'FRANCELEC',
+        'IRONTEK',
+        'LRT AUTOMOTIVE GmbH',
+        'EXADIS',
+        
+    ];
+
+    // Si le fournisseur est dans la liste noire, on saute totalement son traitement
+    if (in_array(strtoupper($fournisseurName), array_map('strtoupper', $fournisseursIgnorer))) {
+        $this->info("⏩ Fournisseur ignoré : {$fournisseurName}");
+        continue;
+    }
+
+
+
             $prefixe = trim($row['Prefixe_Tarif'] ?? '');
             $fichierTarif = trim($row['Nom_Fichier_CSV'] ?? '');
             $fichierSupprimes = trim($row['Nom_Fichier_Articles_Supprimes'] ?? '');

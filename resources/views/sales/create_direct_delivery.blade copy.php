@@ -136,7 +136,7 @@
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         #search_results {
-            background: #fff;
+            background: #eaf3fcff;
             border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             max-height: 180px;
@@ -943,6 +943,20 @@
 
     <script>
         $(document).ready(function () {
+
+
+            // === ARRONDISSEMENT PROPRE (évite 0.999999999) ===
+function round(value, decimals = 2) {
+    return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+}
+
+// === FORMAT FRANÇAIS (1 234,56) ===
+function formatFrench(number) {
+    return number.toFixed(2).replace('.', ',');
+}
+
+
+
             // Initialize Select2 with AJAX for customer search
             $('#customer_id').select2({
                 width: '100%',
@@ -1015,22 +1029,22 @@
             // Initialize vehicle select as hidden
             $('#vehicle_group').hide();
 
-            function updateGlobalTotals() {
-                let totalHtGlobal = 0;
-                let totalTtcGlobal = 0;
-                $('#lines_body tr').each(function () {
-                    // ✅ Remplace la virgule avant conversion
-        let totalHt = parseFloat($(this).find('.total_ht').text().replace(',', '.')) || 0;
-        let totalTtc = parseFloat($(this).find('.total_ttc').text().replace(',', '.')) || 0;
-                    // ✅ Arrondir à 2 décimales avant l'addition
-        totalHtGlobal += Math.round(totalHt * 100) / 100;
-        totalTtcGlobal += Math.round(totalTtc * 100) / 100;
+function updateGlobalTotals() {
+    let totalHtGlobal = 0;
+    let totalTtcGlobal = 0;
 
-                });
-                $('#total_ht_global').text(totalHtGlobal.toFixed(2).replace('.', ','));
-                $('#total_ttc_global').text(totalTtcGlobal.toFixed(2).replace('.', ','));
-                console.log('Global Totals - HT:', totalHtGlobal, 'TTC:', totalTtcGlobal);
-            }
+    $('#lines_body tr').each(function () {
+        let ht = parseFloat($(this).find('.total_ht').text().replace(',', '.')) || 0;
+        let ttc = parseFloat($(this).find('.total_ttc').text().replace(',', '.')) || 0;
+        totalHtGlobal += round(ht);
+        totalTtcGlobal += round(ttc);
+    });
+
+    $('#total_ht_global').text(formatFrench(totalHtGlobal));
+    $('#total_ttc_global').text(formatFrench(totalTtcGlobal));
+
+    console.log('Global Totals - HT:', totalHtGlobal, 'TTC:', totalTtcGlobal);
+}
 
             function updateCatalogButton() {
                 let customerId = $('#customer_id').val();
@@ -1397,11 +1411,11 @@ $(document).on('click', '.voir-details', function (e) {
             </td>
             <td><input type="number" name="lines[${lineCount}][ordered_quantity]" class="form-control quantity" value="1" min="0"></td>
             <td>
-                <input type="text" inputmode="decimal" name="lines[${lineCount}][unit_price_ht]"
+                <input type="number" inputmode="decimal" name="lines[${lineCount}][unit_price_ht]"
                        class="form-control unit_price_ht" value="${unitPriceHt}" step="0.01">
             </td>
             <td>
-                <input type="text" inputmode="decimal" name="lines[${lineCount}][unit_price_ttc]"
+                <input type="number" inputmode="decimal" name="lines[${lineCount}][unit_price_ttc]"
                        class="form-control unit_price_ttc" value="${unitPriceTtc}" step="0.01">
             </td>
             <td><input type="number" name="lines[${lineCount}][remise]" class="form-control remise" value="0" min="0" max="100" step="0.01"></td>
@@ -1455,45 +1469,37 @@ $(document).on('click', '.voir-details', function (e) {
 
 function updateLineTotals(row, tvaRate) {
     tvaRate = parseFloat(tvaRate) || 0;
-    let quantity = parseFloat(row.find('.quantity').val()) || 0;
-    let remise = parseFloat(row.find('.remise').val()) || 0;
-
+    let quantity = parseFloat(row.find('.quantity').val().replace(',', '.')) || 0;
+    let remise = parseFloat(row.find('.remise').val().replace(',', '.')) || 0;
     let $puHt = row.find('.unit_price_ht');
     let $puTtc = row.find('.unit_price_ttc');
 
-let puHt = parseFloat(($puHt.val() || '0').replace(',', '.')) || 0;
-let puTtc = parseFloat(($puTtc.val() || '0').replace(',', '.')) || 0;
+    let puHt = parseFloat($puHt.val().replace(',', '.')) || 0;
+    let puTtc = parseFloat($puTtc.val().replace(',', '.')) || 0;
 
-    // --- SI PU TTC est modifié → recalcule PU HT ---
-    if (puTtc > 0 && puHt === 0) {
-        puHt = puTtc / (1 + tvaRate / 100);
+    // On récupère quel champ a été modifié en dernier
+    let lastModified = row.data('last-modified') || 'ht'; // par défaut HT
+
+    // Synchronisation intelligente
+    if (lastModified === 'ttc' && puTtc > 0) {
+        // L'utilisateur a tapé dans TTC → on recalcule le HT
+        puHt = round(puTtc / (1 + tvaRate / 100));
         $puHt.val(puHt.toFixed(2));
-    }
-    // --- SI PU HT est modifié → recalcule PU TTC ---
-    else if (puHt > 0 && puTtc === 0) {
-        puTtc = puHt * (1 + tvaRate / 100);
+    } else if (lastModified === 'ht' && puHt > 0) {
+        // L'utilisateur a tapé dans HT → on recalcule le TTC
+        puTtc = round(puHt * (1 + tvaRate / 100));
         $puTtc.val(puTtc.toFixed(2));
     }
-    // --- SI LES DEUX SONT REMPLIS → synchronise selon le dernier modifié ---
-    else if (puHt > 0 && puTtc > 0) {
-        // On suppose que l'utilisateur a modifié le champ le plus récemment
-        // → on garde la valeur du champ modifié, on recalcule l'autre
-        let lastModified = row.data('last-modified'); // sera mis à jour dans l'événement
-        if (lastModified === 'ht') {
-            puTtc = puHt * (1 + tvaRate / 100);
-            $puTtc.val(puTtc.toFixed(2));
-        } else {
-            puHt = puTtc / (1 + tvaRate / 100);
-            $puHt.val(puHt.toFixed(2));
-        }
-    }
+    // Si les deux sont à 0 → on ne touche à rien
 
-    // --- Calcul des totaux ---
-    let totalHt = puHt * quantity * (1 - remise / 100);
-    let totalTtc = totalHt * (1 + tvaRate / 100);
+    // Calcul du total
+    let totalHtAvantRemise = round(puHt * quantity);
+    let remiseAmount = round(totalHtAvantRemise * (remise / 100));
+    let totalHt = round(totalHtAvantRemise - remiseAmount);
+    let totalTtc = round(totalHt * (1 + tvaRate / 100));
 
-    row.find('.total_ht').text(totalHt.toFixed(2).replace('.', ','));
-    row.find('.total_ttc').text(totalTtc.toFixed(2).replace('.', ','));
+    row.find('.total_ht').text(formatFrench(totalHt));
+    row.find('.total_ttc').text(formatFrench(totalTtc));
 
     updateGlobalTotals();
 }
@@ -1801,11 +1807,11 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
                 <td><span class="text-muted">-</span></td>
                 <td><input type="number" name="lines[${i}][ordered_quantity]" class="form-control quantity" value="1" min="1" required></td>
 <td>
-    <input type="text" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ht]"
+    <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ht]"
            class="form-control unit_price_ht" value="0.00" placeholder="0,00">
 </td>
 <td>
-    <input type="text" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ttc]"
+    <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ttc]"
            class="form-control unit_price_ttc" value="0.00" placeholder="0,00">
 </td>
                 <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
