@@ -912,7 +912,7 @@
             <div class="small fw-bold">Prix Achat HT</div>
             <div class="text-info" style="font-size: 0.63rem; line-height: 1;">Remise → Prix Net → Marge</div>
         </th>
-        <th class="py-1 text-center">Prix V.HT</th>
+        <!-- <th class="py-1 text-center">Prix V.HT</th> -->
         <th class="py-1 text-center">Stock</th>
         <th class="py-1 text-center">Qté</th>
         <th class="py-1 text-center">PU HT</th>
@@ -1574,9 +1574,7 @@ $(document).on('click', '.voir-details', function (e) {
 </td>
 
 
-            <td>
-                ${price.toFixed(2)} €
-            </td>
+
             <td>
                 <button type="button" class="btn btn-outline-primary btn-sm stock-details-btn"
                         data-toggle="modal"
@@ -2121,9 +2119,38 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
                 <td>
                     <input type="text" name="lines[${i}][item_name]" class="form-control form-control-sm" placeholder="Désignation" required>
                 </td>
-                <td><span class="text-muted">-</span></td>
-                <td><span class="text-muted">-</span></td>
-                <td><span class="text-muted">-</span></td>
+
+
+
+<td class="p-1">
+    <div class="purchase-price-block">
+        <!-- Prix d'achat HT saisissable -->
+        <div class="input-group input-group-sm mb-1">
+            <span class="input-group-text">€</span>
+            <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
+                   value="0.00" placeholder="Prix achat HT">
+        </div>
+        <!-- Remise achat + Prix net -->
+        <div class="d-flex gap-1 align-items-center justify-content-between">
+            <div class="input-group input-group-sm" style="width: 105px;">
+                <input type="number" min="0" max="100" step="0.1"
+                       class="form-control form-control-sm text-end purchase-discount"
+                       value="0" placeholder="Rem%">
+                <span class="input-group-text">%</span>
+            </div>
+            <span class="text-muted small">→</span>
+            <span class="fw-bold text-success net-price">0,00 €</span>
+        </div>
+        <!-- Marge estimée -->
+        <small class="text-muted d-block text-end mt-1">
+            Marge : <span class="margin-display text-primary fw-bold">0%</span>
+            (<span class="margin-euro text-primary">0,00 €</span>)
+        </small>
+    </div>
+</td>                <td><span class="text-muted">-</span></td>
+
+
+
                 <td><input type="number" name="lines[${i}][ordered_quantity]" class="form-control quantity" value="1" min="1" required></td>
 <td>
     <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ht]"

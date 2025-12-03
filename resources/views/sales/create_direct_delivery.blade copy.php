@@ -1574,6 +1574,7 @@ $(document).on('click', '.voir-details', function (e) {
 </td>
 
 
+
             <td>
                 <button type="button" class="btn btn-outline-primary btn-sm stock-details-btn"
                         data-toggle="modal"
@@ -1589,12 +1590,6 @@ $(document).on('click', '.voir-details', function (e) {
             <td>
                 <input type="number" inputmode="decimal" name="lines[${lineCount}][unit_price_ht]"
                        class="form-control unit_price_ht" value="${unitPriceHt}" step="0.01">
-
-                       <small class="text-muted d-block text-end mt-1">
-            Initial : <span class="margin-display text-primary fw-bold">${price.toFixed(2)} €</span>
-            
-        </small>
-
             </td>
             <td>
                 <input type="number" inputmode="decimal" name="lines[${lineCount}][unit_price_ttc]"
@@ -1661,20 +1656,21 @@ updateLineTotals($newRow, parseFloat($('#tva_rate').val()) || 0);
  // Fonction unique de recalcul du bloc "prix d'achat → marge"
 // === DÉPLACÉE EN DEHORS DE TOUTE FONCTION ===
 // Une seule alerte à la fois pour tout le tableau
+// Variable globale pour gérer le toast + timeout
 let negativeMarginTimeout = null;
+let negativeMarginToastShown = null;
 
 function updatePurchaseMargin(row) {
-    let costPrice       = parseFloat(row.find('.cost-price-input').val().replace(',', '.')) || 0;
-    let purchaseDiscount= parseFloat(row.find('.purchase-discount').val().replace(',', '.')) || 0;
-    let saleDiscount    = parseFloat(row.find('.remise').val().replace(',', '.')) || 0;
-    let salePriceHt     = parseFloat(row.find('.unit_price_ht').val().replace(',', '.')) || 0;
+    let costPrice = parseFloat(row.find('.cost-price-input').val().replace(',', '.')) || 0;
+    let purchaseDiscount = parseFloat(row.find('.purchase-discount').val().replace(',', '.')) || 0;
+    let saleDiscount = parseFloat(row.find('.remise').val().replace(',', '.')) || 0;
+    let salePriceHt = parseFloat(row.find('.unit_price_ht').val().replace(',', '.')) || 0;
 
-    let netCost      = round(costPrice * (1 - purchaseDiscount / 100), 4);
-    let realSalePrice= round(salePriceHt * (1 - saleDiscount / 100), 4);
+    let netCost = round(costPrice * (1 - purchaseDiscount / 100), 4);
+    let realSalePrice = round(salePriceHt * (1 - saleDiscount / 100), 4);
 
     row.find('.net-price').text(netCost.toFixed(2).replace('.', ',') + ' €');
 
-    // ─── CAS NORMAL ───
     if (realSalePrice > 0 && netCost > 0) {
         let marginPct = ((realSalePrice - netCost) / netCost) * 100;
         let marginEur = realSalePrice - netCost;
@@ -1688,51 +1684,71 @@ function updatePurchaseMargin(row) {
         else if (marginPct >= 30) $m.addClass('text-warning');
         else $m.addClass('text-danger');
 
-        // ─── ALERTE MARGE NÉGATIVE ───
+        // ALERTE TOAST UNIQUEMENT SI MARGE NÉGATIVE + DÉLAI DE 1.7s
         if (marginPct < 0) {
-            // On annule l’ancienne alerte si elle existe
+            // On annule tout ce qui est en cours
             if (negativeMarginTimeout) clearTimeout(negativeMarginTimeout);
+            if (negativeMarginToastShown) negativeMarginToastShown.close();
 
             negativeMarginTimeout = setTimeout(() => {
                 const code = row.find('td:nth-child(1) .font-weight-bold').text().trim() || '???';
                 const name = row.find('td:nth-child(2)').text().trim();
-                const shortName = name.length > 50 ? name.substring(0,47)+'...' : name;
+                const shortName = name.length > 45 ? name.substring(0,42)+'...' : name;
 
-                Swal.fire({
+                negativeMarginToastShown = Swal.fire({
+                    toast: true,
+                    position: 'top-end',
                     icon: 'warning',
                     title: 'VENTE À PERTE !',
                     html: `
-                        <div class="text-start small">
-                            <b>${code}</b><br>${shortName}<br><br>
-                            Prix d'achat net : <b class="text-danger">${netCost.toFixed(2)} €</b><br>
-                            Prix de vente net HT : <b class="text-danger">${realSalePrice.toFixed(2)} €</b><br><br>
-                            → Perte de <b class="text-danger">${Math.abs(marginEur).toFixed(2)} €</b> 
-                            (${marginPct.toFixed(1)}%)
-                        </div>`,
-                    confirmButtonText: 'OK, je continue quand même',
-                    confirmButtonColor: '#d33',
-                    allowOutsideClick: false,
-                    timer: 10000,
-                    timerProgressBar: true
+                        <div class="text-start small ms-3">
+                            <b>${code}</b> – ${shortName}<br>
+                            Achat net : <b>${netCost.toFixed(2)} €</b> → 
+                            Vente net HT : <b>${realSalePrice.toFixed(2)} €</b><br>
+                            <span class="text-danger fw-bold">
+                                Perte : ${Math.abs(marginEur).toFixed(2)} € (${marginPct.toFixed(1)}%)
+                            </span>
+                        </div>
+                    `,
+                    showConfirmButton: false,
+                    timer: 8000,
+                    timerProgressBar: true,
+                    padding: '0.9rem 1.2rem',
+                    background: '#fff8e1',
+                    customClass: {
+                        popup: 'animated fadeInDown faster',
+                        title: 'mb-1 fw-bold',
+                        htmlContainer: 'm-0'
+                    },
+                    didClose: () => {
+                        negativeMarginToastShown = null;
+                    }
                 });
 
-                negativeMarginTimeout = null; // on remet à zéro après affichage
-            }, 1800); // 1,5 seconde de délai
+                negativeMarginTimeout = null;
+            }, 1700); // 1.7 seconde de délai
+
         } else {
-            // marge positive → on annule l’alerte en attente
+            // Marge positive → on annule le toast en attente + on ferme celui affiché
             if (negativeMarginTimeout) {
                 clearTimeout(negativeMarginTimeout);
                 negativeMarginTimeout = null;
             }
+            if (negativeMarginToastShown) {
+                negativeMarginToastShown.close();
+                negativeMarginToastShown = null;
+            }
         }
-    } 
-    // ─── CAS VIDE / ZÉRO ───
-    else {
+    } else {
         row.find('.margin-display').text('—');
         row.find('.margin-euro').text('—');
         if (negativeMarginTimeout) {
             clearTimeout(negativeMarginTimeout);
             negativeMarginTimeout = null;
+        }
+        if (negativeMarginToastShown) {
+            negativeMarginToastShown.close();
+            negativeMarginToastShown = null;
         }
     }
 }
@@ -2103,8 +2119,38 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
                 <td>
                     <input type="text" name="lines[${i}][item_name]" class="form-control form-control-sm" placeholder="Désignation" required>
                 </td>
-                <td><span class="text-muted">-</span></td>
-                <td><span class="text-muted">-</span></td>
+
+
+
+<td class="p-1">
+    <div class="purchase-price-block">
+        <!-- Prix d'achat HT saisissable -->
+        <div class="input-group input-group-sm mb-1">
+            <span class="input-group-text">€</span>
+            <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
+                   value="0.00" placeholder="Prix achat HT">
+        </div>
+        <!-- Remise achat + Prix net -->
+        <div class="d-flex gap-1 align-items-center justify-content-between">
+            <div class="input-group input-group-sm" style="width: 105px;">
+                <input type="number" min="0" max="100" step="0.1"
+                       class="form-control form-control-sm text-end purchase-discount"
+                       value="0" placeholder="Rem%">
+                <span class="input-group-text">%</span>
+            </div>
+            <span class="text-muted small">→</span>
+            <span class="fw-bold text-success net-price">0,00 €</span>
+        </div>
+        <!-- Marge estimée -->
+        <small class="text-muted d-block text-end mt-1">
+            Marge : <span class="margin-display text-primary fw-bold">0%</span>
+            (<span class="margin-euro text-primary">0,00 €</span>)
+        </small>
+    </div>
+</td>                <td><span class="text-muted">-</span></td>
+
+
+
                 <td><input type="number" name="lines[${i}][ordered_quantity]" class="form-control quantity" value="1" min="1" required></td>
 <td>
     <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ht]"

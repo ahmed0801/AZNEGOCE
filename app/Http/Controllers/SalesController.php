@@ -422,6 +422,12 @@ $paymentTerms = PaymentTerm::all();
 // ou directement le code si tu ne veux pas créer la fonction privée
 
 
+// $suppliers = Supplier::where('name', 'name')
+//                     ->orderBy('name')
+//                     ->get(['id', 'name', 'code']);
+
+
+
     return view('sales.create_direct_delivery', compact('tvaRates', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms','brands'));
 }
 
