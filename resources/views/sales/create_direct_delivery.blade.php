@@ -1098,14 +1098,17 @@
         $(document).ready(function () {
 
 
-            // === ARRONDISSEMENT PROPRE (évite 0.999999999) ===
-function round(value, decimals = 2) {
-    return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+// === ARRONDISSEMENT & FORMATAGE (VERSION 2025 – ZÉRO BUG) ===
+function round(number, decimals = 2) {
+    const factor = Math.pow(10, decimals);
+    return Math.round((number * factor) + Number.EPSILON) / factor;
 }
 
-// === FORMAT FRANÇAIS (1 234,56) ===
-function formatFrench(number) {
-    return number.toFixed(2).replace('.', ',');
+function formatFrench(number, decimals = 2) {
+    return round(number, decimals).toLocaleString('fr-FR', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+    });
 }
 
 
@@ -1187,11 +1190,18 @@ function updateGlobalTotals() {
     let totalTtcGlobal = 0;
 
     $('#lines_body tr').each(function () {
-        let ht = parseFloat($(this).find('.total_ht').text().replace(',', '.')) || 0;
-        let ttc = parseFloat($(this).find('.total_ttc').text().replace(',', '.')) || 0;
+let htText  = $(this).find('.total_ht').text().replace(/[^\d,\.-]/g, '').replace(',', '.');
+        let ttcText = $(this).find('.total_ttc').text().replace(/[^\d,\.-]/g, '').replace(',', '.');
+        let ht  = parseFloat(htText)  || 0;
+        let ttc = parseFloat(ttcText) || 0;
+
         totalHtGlobal += round(ht);
         totalTtcGlobal += round(ttc);
     });
+
+    // Arrondi final (par sécurité)
+    totalHtGlobal  = round(totalHtGlobal, 2);
+    totalTtcGlobal = round(totalTtcGlobal, 2);
 
     $('#total_ht_global').text(formatFrench(totalHtGlobal));
     $('#total_ttc_global').text(formatFrench(totalTtcGlobal));
@@ -1815,8 +1825,8 @@ function updateLineTotals(row, tvaRate) {
     let totalHt = round(totalHtAvantRemise - remiseAmount);
     let totalTtc = round(totalHt * (1 + tvaRate / 100));
 
-    row.find('.total_ht').text(formatFrench(totalHt));
-    row.find('.total_ttc').text(formatFrench(totalTtc));
+row.find('.total_ht').text(formatFrench(round(totalHt, 2)));
+row.find('.total_ttc').text(formatFrench(round(totalTtc, 2)));
 
     updateGlobalTotals();
 }
