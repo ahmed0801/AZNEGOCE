@@ -171,7 +171,11 @@ $sale_price = round($price * (1 + $margin / 100), 2);
     // 'codefournisseur' => $supplier->code,
     // 'name' => $name,
     'cost_price' => $price,
-    'sale_price' => $sale_price,
+
+    // ca c'est pour lamarge par famille
+    // 'sale_price' => $sale_price, 
+
+
     // 'barcode' => $ean,
     // 'Poids' => $poids,
     // 'Hauteur' => $hauteur,
