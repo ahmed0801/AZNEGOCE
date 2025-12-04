@@ -1354,10 +1354,7 @@ $vehicleSelect.prop('disabled', false).removeClass('vehicle-empty');
                 }
 
                 $('#lines_body tr').each(function () {
-                    let unitPriceHt = parseFloat($(this).find('.unit_price_ht').val()) || 0;
-                    let quantity = parseFloat($(this).find('.quantity').val()) || 0;
-                    let remise = parseFloat($(this).find('.remise').val()) || 0;
-                    updateLineTotals($(this), unitPriceHt, quantity, remise, tvaRate);
+                    updateGlobalTotals();  // ← Ça suffit !
                 });
 
                 updateGlobalTotals();
