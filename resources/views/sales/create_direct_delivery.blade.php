@@ -1916,6 +1916,25 @@ row.find('.total_ttc').text(formatFrench(round(totalTtc, 2)));
             });
 
             $('#salesForm').on('submit', function (e) {
+
+
+            // Force la resynchronisation des valeurs affichées → envoyées
+    $('#lines_body tr').each(function() {
+        let $row = $(this);
+        let puHt = parseFloat($row.find('.unit_price_ht').val().replace(',', '.')) || 0;
+        let puTtc = parseFloat($row.find('.unit_price_ttc').val().replace(',', '.')) || 0;
+        let qty = parseFloat($row.find('.quantity').val().replace(',', '.')) || 0;
+        let remise = parseFloat($row.find('.remise').val().replace(',', '.')) || 0;
+
+        // Réécrit proprement les valeurs avant envoi
+        $row.find('.unit_price_ht').val(puHt.toFixed(2));
+        $row.find('.unit_price_ttc').val(puTtc.toFixed(2));
+        $row.find('.quantity').val(qty.toFixed(2));
+        $row.find('.remise').val(remise.toFixed(2));
+    });
+
+
+    
                 const actionValue = $(this).find('button[type="submit"]:focus').val();
                 if (actionValue === 'validate_and_invoice') {
                     e.preventDefault();
