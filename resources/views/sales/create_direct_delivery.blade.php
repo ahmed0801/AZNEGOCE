@@ -1605,7 +1605,7 @@ $(document).on('click', '.voir-details', function (e) {
             <td><input type="number" name="lines[${lineCount}][remise]" class="form-control remise" value="0" min="0" max="100" step="0.01"></td>
             <td class="text-right total_ht">0,00</td>
             <td class="text-right total_ttc">0,00</td>
-            <td><button type="button" class="btn btn-outline-danger btn-sm remove_line">×</button></td>
+            <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"> <i class="fas fa-trash-alt"></i> </button></td>
         </tr>
     `;
 
@@ -2189,7 +2189,7 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
                 <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
                 <td class="text-right total_ht">0,00</td>
                 <td class="text-right total_ttc">0,00</td>
-                <td><button type="button" class="btn btn-outline-danger btn-sm remove_line">×</button></td>
+                <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"><i class="fas fa-trash-alt"></i></button></td>
             </tr>
         `;
 

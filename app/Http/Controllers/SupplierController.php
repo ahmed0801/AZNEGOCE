@@ -88,6 +88,8 @@ public function index(Request $request)
         $request->validate([
         'name' => 'required|string|max:255',
         'email' => 'nullable|email|max:255',
+        'has_b2b' => 'sometimes|boolean',
+        'b2b_url' => 'nullable|url',
         'phone1' => 'nullable|string|max:20',
         'phone2' => 'nullable|string|max:20',
         'address' => 'nullable|string|max:255',
@@ -126,6 +128,8 @@ public function index(Request $request)
          $request->validate([
         'name' => 'required|string|max:255',
         'email' => 'nullable|email|max:255',
+        'has_b2b' => 'sometimes|boolean',
+        'b2b_url' => 'nullable|url',
         'phone1' => 'nullable|string|max:20',
         'phone2' => 'nullable|string|max:20',
         'address' => 'nullable|string|max:255',

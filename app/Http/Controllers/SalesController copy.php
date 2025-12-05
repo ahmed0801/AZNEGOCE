@@ -422,6 +422,12 @@ $paymentTerms = PaymentTerm::all();
 // ou directement le code si tu ne veux pas créer la fonction privée
 
 
+// $suppliers = Supplier::where('name', 'name')
+//                     ->orderBy('name')
+//                     ->get(['id', 'name', 'code']);
+
+
+
     return view('sales.create_direct_delivery', compact('tvaRates', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms','brands'));
 }
 
@@ -671,6 +677,16 @@ public function storedeliveryandinvoice(Request $request)
 
                 // === BOUCLE SUR LES LIGNES ===
                 foreach ($request->lines as $index => $line) {
+
+// ajoute ca correctif total
+                    $line['unit_price_ht']    = (float) str_replace(',', '.', $line['unit_price_ht'] ?? 0);
+    $line['ordered_quantity'] = (float) str_replace(',', '.', $line['ordered_quantity'] ?? 0);
+    $line['remise']           = (float) str_replace(',', '.', $line['remise'] ?? 0);
+
+// fin correctif total
+
+
+
                     $articleCode = $line['article_code'] ?? null;
                     $isNewItem = !empty($line['is_new_item']);
 
