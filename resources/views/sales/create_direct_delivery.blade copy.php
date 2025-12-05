@@ -1354,10 +1354,7 @@ $vehicleSelect.prop('disabled', false).removeClass('vehicle-empty');
                 }
 
                 $('#lines_body tr').each(function () {
-                    let unitPriceHt = parseFloat($(this).find('.unit_price_ht').val()) || 0;
-                    let quantity = parseFloat($(this).find('.quantity').val()) || 0;
-                    let remise = parseFloat($(this).find('.remise').val()) || 0;
-                    updateLineTotals($(this), unitPriceHt, quantity, remise, tvaRate);
+                    updateGlobalTotals();  // ← Ça suffit !
                 });
 
                 updateGlobalTotals();
@@ -1608,7 +1605,7 @@ $(document).on('click', '.voir-details', function (e) {
             <td><input type="number" name="lines[${lineCount}][remise]" class="form-control remise" value="0" min="0" max="100" step="0.01"></td>
             <td class="text-right total_ht">0,00</td>
             <td class="text-right total_ttc">0,00</td>
-            <td><button type="button" class="btn btn-outline-danger btn-sm remove_line">×</button></td>
+            <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"> <i class="fas fa-trash-alt"></i> </button></td>
         </tr>
     `;
 
@@ -1916,6 +1913,25 @@ row.find('.total_ttc').text(formatFrench(round(totalTtc, 2)));
             });
 
             $('#salesForm').on('submit', function (e) {
+
+
+            // Force la resynchronisation des valeurs affichées → envoyées
+    $('#lines_body tr').each(function() {
+        let $row = $(this);
+        let puHt = parseFloat($row.find('.unit_price_ht').val().replace(',', '.')) || 0;
+        let puTtc = parseFloat($row.find('.unit_price_ttc').val().replace(',', '.')) || 0;
+        let qty = parseFloat($row.find('.quantity').val().replace(',', '.')) || 0;
+        let remise = parseFloat($row.find('.remise').val().replace(',', '.')) || 0;
+
+        // Réécrit proprement les valeurs avant envoi
+        $row.find('.unit_price_ht').val(puHt.toFixed(2));
+        $row.find('.unit_price_ttc').val(puTtc.toFixed(2));
+        $row.find('.quantity').val(qty.toFixed(2));
+        $row.find('.remise').val(remise.toFixed(2));
+    });
+
+
+    
                 const actionValue = $(this).find('button[type="submit"]:focus').val();
                 if (actionValue === 'validate_and_invoice') {
                     e.preventDefault();
@@ -2173,7 +2189,7 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
                 <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
                 <td class="text-right total_ht">0,00</td>
                 <td class="text-right total_ttc">0,00</td>
-                <td><button type="button" class="btn btn-outline-danger btn-sm remove_line">×</button></td>
+                <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"><i class="fas fa-trash-alt"></i></button></td>
             </tr>
         `;
 

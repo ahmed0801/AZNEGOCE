@@ -422,13 +422,20 @@ $paymentTerms = PaymentTerm::all();
 // ou directement le code si tu ne veux pas créer la fonction privée
 
 
-// $suppliers = Supplier::where('name', 'name')
-//                     ->orderBy('name')
-//                     ->get(['id', 'name', 'code']);
+// CORRECTION :
+    $suppliers = Supplier::where('has_b2b', true)
+                     ->orderBy('name')->get(['id', 'name', 'code']);
+    // OU si tu veux filtrer les actifs :
+    // $suppliers = Supplier::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']);
 
+    $suppliersForSelect2 = $suppliers->map(function($s) {
+        return [
+            'id'   => $s->id,
+            'text' => $s->name . ' (' . ($s->code ?? 'N/A') . ')'
+        ];
+    })->toArray();
 
-
-    return view('sales.create_direct_delivery', compact('tvaRates', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms','brands'));
+    return view('sales.create_direct_delivery', compact('tvaRates', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms','brands','suppliers','suppliersForSelect2'));
 }
 
 
@@ -492,6 +499,19 @@ public function storeDirectDeliveryNote(Request $request)
                 $total = 0;
 
 foreach ($request->lines as $index => $line) {
+
+
+
+    // ajoute ca correctif total
+                    $line['unit_price_ht']    = (float) str_replace(',', '.', $line['unit_price_ht'] ?? 0);
+    $line['ordered_quantity'] = (float) str_replace(',', '.', $line['ordered_quantity'] ?? 0);
+    $line['remise']           = (float) str_replace(',', '.', $line['remise'] ?? 0);
+
+// fin correctif total
+
+
+
+
     $articleCode = $line['article_code'] ?? null;
     $isNewItem = !empty($line['is_new_item']);
     $item = null;
@@ -1224,6 +1244,7 @@ public function validateOrder($id)
                 'description' => $item->description,
                 'brand' => $item->brand->name ?? null,
                 'supplier' => $item->supplier->name ?? null,
+                'supplier_id'   => $item->supplier->id ?? null,        // ← LIGNE À AJOUTER
                 'stock_quantity' => $item->getStockQuantityAttribute(),
                 'cost_price' => $item->cost_price,
                 'sale_price' => $item->sale_price,
@@ -1435,6 +1456,19 @@ public function exportSingle($id)
                 $total = 0;
 
                 foreach ($request->lines as $index => $line) {
+
+
+
+
+                    // ajoute ca correctif total
+                    $line['unit_price_ht']    = (float) str_replace(',', '.', $line['unit_price_ht'] ?? 0);
+    $line['ordered_quantity'] = (float) str_replace(',', '.', $line['ordered_quantity'] ?? 0);
+    $line['remise']           = (float) str_replace(',', '.', $line['remise'] ?? 0);
+
+// fin correctif total
+
+
+
                     $articleCode = $line['article_code'] ?? null;
                     $isNewItem = !empty($line['is_new_item']);
                     $item = null;
