@@ -483,6 +483,7 @@ public function getAllAccountingEntriesHT()
         ->orWhere('code', 'LIKE', "%{$query}%")
         ->orWhere('email', 'LIKE', "%{$query}%")
         ->take(50)
+        ->latest()
         ->get()
         ->map(function ($customer) {
             return [
