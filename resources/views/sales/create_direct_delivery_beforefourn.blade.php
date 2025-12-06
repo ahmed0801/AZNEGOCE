@@ -862,12 +862,6 @@
             + Créer un article manuellement
         </button>
 
-
-        <button type="button" id="add_divers_item" data-type="consigne" class="btn btn-outline-dark btn-sm">
-            + Consigne
-        </button>
-
-
         <!-- NOUVEAU : Groupe de boutons fournisseurs -->
         <span class="text-muted small">|</span>
         <span class="text-muted small d-none d-md-inline">Recherche externe :</span>
@@ -1099,21 +1093,6 @@
     <script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-
-
-
-
-
-
-<script>
-// Liste des fournisseurs (prête à l'emploi pour Select2)
-window.suppliersList = @json($suppliersForSelect2);
-
-// DEBUG : Vérifie dans la console que c'est bien chargé
-console.log('Fournisseurs chargés :', window.suppliersList);
-</script>
-
 
     <script>
         $(document).ready(function () {
@@ -1418,8 +1397,7 @@ $vehicleSelect.prop('disabled', false).removeClass('vehicle-empty');
                                              data-cost-price="${item.cost_price}"
                                              data-stock="${item.stock_quantity || 0}"
                                              data-location="${item.location || ''}"
-                                             data-is-active="${item.is_active}"
-                                             data-supplier-id="${item.supplier_id || ''}">
+                                             data-is-active="${item.is_active}">
                                             <span class="badge rounded-pill text-bg-light"><b> ${item.code}</b>
                                              
                                             <button class="btn btn-xs btn-outline-secondary copy-code px-1 py-0"
@@ -1527,22 +1505,6 @@ $(document).on('click', '.voir-details', function (e) {
 
 
 
-// === INITIALISATION SELECT2 FOURNISSEURS + PRÉ-SÉLECTION ===
-function initSupplierSelect($select, supplierId = null) {
-    $select.select2({
-        width: '100%',
-        placeholder: 'Fournisseur',
-        allowClear: true,
-        data: window.suppliersList
-    });
-
-    if (supplierId) {
-        $select.val(supplierId).trigger('change');
-    }
-}
-
-
-
 
 
            $(document).on('click', '#search_results div', function () {
@@ -1592,17 +1554,11 @@ function initSupplierSelect($select, supplierId = null) {
            <td class="p-1">
     <div class="purchase-price-block">
         <!-- Prix d'achat HT (affiché) -->
-<!-- Prix d'achat HT + Fournisseur -->
-<div class="d-flex gap-1 align-items-center mb-1">
-    <div class="input-group input-group-sm flex-fill">
-        <span class="input-group-text">€</span>
-        <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
-               value="${costPrice.toFixed(2)}" data-original-cost="${costPrice.toFixed(2)}">
-    </div>
-    <select class="form-select form-select-sm supplier-select" style="width: 140px;" name="lines[${lineCount}][supplier_id]">
-        <option value="">Fournisseur</option>
-    </select>
-</div>
+        <div class="input-group input-group-sm mb-1">
+            <span class="input-group-text">€</span>
+            <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
+                   value="${costPrice.toFixed(2)}" data-original-cost="${costPrice.toFixed(2)}">
+        </div>
 
         <!-- Remise achat + Prix net -->
         <div class="d-flex gap-1 align-items-center justify-content-between">
@@ -1653,14 +1609,9 @@ function initSupplierSelect($select, supplierId = null) {
         </tr>
     `;
 
-
-    let supplierId = $(this).data('supplier-id') || ''; // si tu as supplier_id dans la recherche AJAX
-
     $('#lines_body').append(row);
     // FORCE LE CALCUL IMMÉDIAT DE LA MARGE DÈS L'AJOUT
 let $newRow = $('#lines_body tr:last');
-let $supplierSelect = $newRow.find('.supplier-select');
-initSupplierSelect($supplierSelect, supplierId); // supplierId vient de data-supplier-id ou null
 $newRow.find('.purchase-discount').val('0');
 $newRow.find('.remise').val('0');
 updatePurchaseMargin($newRow);           // ← Maintenant ça marche !
@@ -2185,44 +2136,26 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
         let i = lineCount;  // ← INDEX UNIQUE
         lineCount++;        // ← INCRÉMENTÉ ICI
 
-
-        const isConsigne = $(this).data('type') === 'consigne';
-
         let rowHtml = `
             <tr class="divers-line" data-line-id="divers_${i}">
                 <td>
-<input type="text" 
-                       name="lines[${i}][article_code]" 
-                       class="form-control form-control-sm bg-light" 
-                       value="${isConsigne ? 'CONSIGNE' : ''}" 
-                       placeholder="Réf (ex: DIV001)" 
-                       ${isConsigne ? 'readonly' : 'required'}>
-                                           <input type="hidden" name="lines[${i}][is_new_item]" value="1">
+                    <input type="text" name="lines[${i}][article_code]" class="form-control form-control-sm" placeholder="Réf (ex: DIV001)" required>
+                    <input type="hidden" name="lines[${i}][is_new_item]" value="1">
                 </td>
-<td>
-                <input type="text" 
-                       name="lines[${i}][item_name]" 
-                       class="form-control form-control-sm bg-light" 
-                       value="${isConsigne ? 'CONSIGNE' : ''}" 
-                       placeholder="Désignation" 
-                       ${isConsigne ? 'readonly' : 'required'}>
-            </td>
+                <td>
+                    <input type="text" name="lines[${i}][item_name]" class="form-control form-control-sm" placeholder="Désignation" required>
+                </td>
 
 
 
 <td class="p-1">
     <div class="purchase-price-block">
         <!-- Prix d'achat HT saisissable -->
-<div class="d-flex gap-1 align-items-center mb-1">
-    <div class="input-group input-group-sm flex-fill">
-        <span class="input-group-text">€</span>
-        <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
-               value="0.00" placeholder="Prix achat HT">
-    </div>
-    <select class="form-select form-select-sm supplier-select" style="width: 140px;" name="lines[${i}][supplier_id]">
-        <option value="">Fournisseur</option>
-    </select>
-</div>
+        <div class="input-group input-group-sm mb-1">
+            <span class="input-group-text">€</span>
+            <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
+                   value="0.00" placeholder="Prix achat HT">
+        </div>
         <!-- Remise achat + Prix net -->
         <div class="d-flex gap-1 align-items-center justify-content-between">
             <div class="input-group input-group-sm" style="width: 105px;">
@@ -2261,11 +2194,6 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
         `;
 
         $('#lines_body').append(rowHtml);
-        let $newRow = $('#lines_body tr:last');
-        let $supplierSelect = $newRow.find('.supplier-select');
-
-initSupplierSelect($supplierSelect); // pas de fournisseur par défaut → vide
-
         lineCount++;
         updateGlobalTotals();
     });
