@@ -103,11 +103,16 @@ class ImportGoldaTarifs extends Command
 
             if (empty($fournisseurName)) continue;
 
-            $supplier = Supplier::firstOrCreate(
-                ['name' => $fournisseurName],
-                ['code' => $prefixe]
-                // ,['tva_group_id' => 1]
-            );
+// 🔍 Vérifier fournisseur par CODE, jamais par nom
+$supplier = Supplier::where('code', $prefixe)->first();
+
+if (!$supplier) {
+    $supplier = Supplier::create([
+        'code' => $prefixe,
+        'name' => $fournisseurName
+    ]);
+}
+
 
             $this->info("➡️ Traitement fournisseur : {$fournisseurName} ({$prefixe})");
             $supplierReport = [

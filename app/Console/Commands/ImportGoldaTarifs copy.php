@@ -168,23 +168,27 @@ $sale_price = round($price * (1 + $margin / 100), 2);
 
                         if ($item) {
                             $item->update([
-    'codefournisseur' => $supplier->code,
-    'name' => $name,
+    // 'codefournisseur' => $supplier->code,
+    // 'name' => $name,
     'cost_price' => $price,
-    'sale_price' => $sale_price,
-    'barcode' => $ean,
-    'Poids' => $poids,
-    'Hauteur' => $hauteur,
-    'Longueur' => $longueur,
-    'Largeur' => $largeur,
-    'Ref_TecDoc' => $refTecDoc,
-    'Code_pays' => $codePays,
-    'Code_douane' => $codeDouane,
-    'category_id' => $category_id,
-    'is_active' => true,
-    'unit_id' => 1,
-    'tva_group_id' => 1,
-    'store_id' => 1
+
+    // ca c'est pour lamarge par famille
+    // 'sale_price' => $sale_price, 
+
+
+    // 'barcode' => $ean,
+    // 'Poids' => $poids,
+    // 'Hauteur' => $hauteur,
+    // 'Longueur' => $longueur,
+    // 'Largeur' => $largeur,
+    // 'Ref_TecDoc' => $refTecDoc,
+    // 'Code_pays' => $codePays,
+    // 'Code_douane' => $codeDouane,
+    // 'category_id' => $category_id,
+    // 'is_active' => true,
+    // 'unit_id' => 1,
+    // 'tva_group_id' => 1,
+    // 'store_id' => 1
                             ]);
                         } else {
                             Item::create([
@@ -266,7 +270,7 @@ $sale_price = round($price * (1 + $margin / 100), 2);
 
 // --- Send email report ---
         try {
-            $messageText = "Hello, je suis un robot développé et programmé par votre développeur Ahmed pour que je tourne chaque soirée et j'intègre automatiquement toutes nouveaux articles dans GOLDA et les mises à jour des prix pour chaque fournisseur. Ahmed m'a programmé aussi pour vous envoyer ce rapport complet et détaillant du dernier résultat de l'importation.";
+            $messageText = "Hello, je suis un agent développé et programmé par votre développeur ERP pour que je tourne chaque soirée et j'intègre automatiquement toutes nouveaux articles dans GOLDA et les mises à jour des prix pour chaque fournisseur. Ahmed m'a programmé aussi pour vous envoyer ce rapport complet et détaillant du dernier résultat de l'importation.";
             Mail::to(['ahmedarfaoui1600@gmail.com', 'ahmed.arfaoui@premagros.com'])->send(new GoldaImportReport($report, $totalActiveItems, $messageText));
             $this->info("📧 Rapport envoyé par email à ahmedarfaoui@gmail.com et abidi.mourad@orange.fr");
         } catch (\Exception $e) {
