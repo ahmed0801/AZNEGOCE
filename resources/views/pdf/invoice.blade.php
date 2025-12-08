@@ -72,7 +72,7 @@ body {
 .header-right .details {
     margin-top: 6px;
     font-size: 12px;
-    line-height: 1.6;
+    line-height: 1.1;
     text-align: right;
 }
 .header-right .details strong {
@@ -257,6 +257,9 @@ td {
                 <div class="details">
                     <p><strong>Date :</strong> {{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</p>
                     <p><strong>Client :</strong> {{ $invoice->customer->name ?? '-' }}</p>
+                    @if($invoice->customer->address)
+                    <p><strong>Adresse :</strong> {{ $invoice->customer->address ?? '-' }}</p>
+                    @endif
                     <!-- <p><strong>N° Client :</strong> {{ $invoice->numclient ?? '-' }}</p> -->
                     <p><strong>Véhicule :</strong> {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}</p>
                         

@@ -1217,6 +1217,9 @@ public function validateOrder($id)
         $query = Item::with(['brand', 'supplier', 'tvaGroup', 'stocks']);
 
         if ($request->filled('query')) {
+
+
+            
             $searchTerm = $request->query('query');
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('code','like',$searchTerm)
