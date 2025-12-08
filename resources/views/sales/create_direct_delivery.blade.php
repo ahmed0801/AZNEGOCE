@@ -2211,12 +2211,12 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
 
 
 <td class="p-1">
-    <div class="purchase-price-block">
+    <div class="purchase-price-block ${isConsigne? 'd-none': ''}">
         <!-- Prix d'achat HT saisissable -->
 <div class="d-flex gap-1 align-items-center mb-1">
     <div class="input-group input-group-sm flex-fill">
         <span class="input-group-text">€</span>
-        <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
+        <input   type="${isConsigne ? 'hidden' : 'number'}"     step="0.01" class="form-control form-control-sm text-end cost-price-input"
                value="0.00" placeholder="Prix achat HT">
     </div>
     <select class="form-select form-select-sm supplier-select" style="width: 140px;" name="lines[${i}][supplier_id]">
@@ -2226,16 +2226,16 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
         <!-- Remise achat + Prix net -->
         <div class="d-flex gap-1 align-items-center justify-content-between">
             <div class="input-group input-group-sm" style="width: 105px;">
-                <input type="number" min="0" max="100" step="0.1"
+                <input type="${isConsigne ? 'hidden' : 'number'}"  min="0" max="100" step="0.1"
                        class="form-control form-control-sm text-end purchase-discount"
                        value="0" placeholder="Rem%">
                 <span class="input-group-text">%</span>
             </div>
-            <span class="text-muted small">→</span>
-            <span class="fw-bold text-success net-price">0,00 €</span>
+            <span class="text-muted small ${isConsigne? 'd-none': ''}">→</span>
+            <span class="fw-bold text-success net-price ${isConsigne? 'd-none': ''}">0,00 €</span>
         </div>
         <!-- Marge estimée -->
-        <small class="text-muted d-block text-end mt-1">
+        <small class="text-muted d-block text-end mt-1 ${isConsigne? 'd-none': ''}">
             Marge : <span class="margin-display text-primary fw-bold">0%</span>
             (<span class="margin-euro text-primary">0,00 €</span>)
         </small>
