@@ -713,11 +713,23 @@
                                 @csrf
                                 <div class="row mb-3">
                                     <div class="col-md-4 col-12 mb-2">
-<a href="/newcustomer"
-   onclick="window.open(this.href, 'popupWindow', 'width=1200,height=700,scrollbars=yes'); return false;"
-   class="btn btn-outline-success btn-round ms-2">
-  Créer ou Modifier des Clients <i class="fas fa-plus-circle ms-1"></i>
-</a>
+
+
+<!-- BOUTON DANS LA PAGE COMMANDE -->
+<button type="button" 
+        id="openCreateCustomerModal" 
+        class="btn btn-outline-success btn-round ms-2">
+    Nouveau Client <i class="fas fa-plus-circle ms-1"></i>
+</button>
+
+<button type="button" 
+        
+        class="btn btn-outline-primary btn-round ms-2">
+    Liste des Clients ⟰ 
+</button>
+
+
+
 <hr>
 
                                                                                     
@@ -2614,6 +2626,41 @@ $form.on('submit', function (e) {
 });
 });
 </script>
+
+
+
+
+
+
+
+
+
+<script>
+// Ouvre automatiquement le modal de création client dans la popup /newcustomer
+$(document).on('click', '#openCreateCustomerModal', function () {
+    const popup = window.open('/newcustomer', 'createCustomerPopup', 'width=1200,height=700,scrollbars=yes,resizable=yes');
+    
+    const checkPopup = setInterval(() => {
+        try {
+            if (popup.document && popup.document.body && popup.document.querySelector('#createItemModal')) {
+                clearInterval(checkPopup);
+                
+                const modalElement = popup.document.querySelector('#createItemModal');
+                const modal = new popup.bootstrap.Modal(modalElement);
+                modal.show();
+                
+                setTimeout(() => {
+                    const nameInput = popup.document.querySelector('input[name="name"]');
+                    if (nameInput) nameInput.focus();
+                }, 500);
+            }
+        } catch (e) {
+            // Popup bloquée ou non chargée
+        }
+    }, 100);
+});
+</script>
+
 
 
 
