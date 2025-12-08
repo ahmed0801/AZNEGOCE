@@ -722,11 +722,13 @@
     Nouveau Client <i class="fas fa-plus-circle ms-1"></i>
 </button>
 
-<button type="button" 
-        
-        class="btn btn-outline-primary btn-round ms-2">
+<a href="/newcustomer"
+   onclick="window.open(this.href, 'popupWindow', 'width=1200,height=700,scrollbars=yes'); return false;"
+   class="btn btn-outline-primary btn-round ms-2">
     Liste des Clients ⟰ 
-</button>
+</a>
+
+
 
 
 
