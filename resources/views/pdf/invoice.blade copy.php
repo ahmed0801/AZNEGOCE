@@ -141,7 +141,7 @@ td {
 
 /* === CONDITIONS === */
 .conditions {
-    margin-top: 5px;
+    margin-top: 4px;
     font-size: 9px;
     color: #333;
     border: 1px solid #007bff;
@@ -296,13 +296,7 @@ td {
 
 <!-- === STATUT PAIEMENT + ENCAISSEMENTS === -->
 <div style="margin-top: 10px; border: 2px solid #28a745; border-radius: 15px; padding: 4px; background-color: #f8fff8;">
-    <p style="margin: 0 0 8px 0; font-weight: bold; color: #1e7e34;">
-        @if($invoice->paid)
-            Payée
-        @else
-            Non payé : {{ number_format($invoice->getRemainingBalanceAttribute(), 2, ',', ' ') }} €
-        @endif
-    </p>
+
 
     @if($invoice->payments->count() > 0)
         <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
@@ -319,7 +313,16 @@ td {
                     </tr>
                 @endforeach
                 <tr style="background-color: #f0fdf0;">
-                    <td colspan="2" style="padding: 5px; text-align: right; font-weight: bold;">Total encaissé :</td>
+
+<td style="padding: 5px; text-align: right; font-weight: bold; color: #1e7e34;">
+                @if($invoice->paid)
+            Payée
+        @else
+            Non payé : {{ number_format($invoice->getRemainingBalanceAttribute(), 2, ',', ' ') }} €
+        @endif
+
+</td>
+                    <td style="padding: 5px; text-align: right; font-weight: bold;">Total encaissé :</td>
                     <td style="padding: 5px; text-align: right; font-weight: bold; color: #1e7e34;">
                         {{ number_format($invoice->payments->sum('amount'), 2, ',', ' ') }} €
                     </td>
@@ -344,10 +347,8 @@ td {
             <li>Aucun retour ne sera accepté après <strong>15 jours</strong>.</li>
             <li>Tout retour sera refusé si :
                 <ul>
-                    <li>l’emballage d’origine est détérioré, marqué ou scotché ;</li>
-                    <li>le produit présente des traces de montage ;</li>
-                    <li>les pièces ne correspondent pas à la référence d’origine ;</li>
-                    <li>des pièces sont manquantes dans l’emballage.</li>
+                    <li>l’emballage d’origine est détérioré, marqué ou scotché / le produit présente des traces de montage.</li>
+                    <li>les pièces ne correspondent pas à la référence d’origine / des pièces sont manquantes dans l’emballage.</li>
                 </ul>
             </li>
             <li>Pour un retour ou une garantie, <strong>la facture est obligatoire</strong>.</li>
@@ -355,8 +356,7 @@ td {
             <li>Le traitement des garanties fournisseurs peut nécessiter <strong>2 à 3 mois</strong>.</li>
             <li>Articles en échange standard :
                 <ul>
-                    <li>la consigne doit être retournée dans la boîte d’origine ;</li>
-                    <li>elle ne doit présenter aucun dommage physique (cassures, fissures, etc.) ;</li>
+                    <li>la consigne doit être retournée dans la boîte d’origine / elle ne doit présenter aucun dommage physique (cassures, fissures, etc.)</li>
                     <li>elle doit être <strong>identique à la pièce commandée</strong> pour remboursement.</li>
                 </ul>
             </li>

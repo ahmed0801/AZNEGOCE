@@ -4,12 +4,13 @@
 <meta charset="UTF-8">
 <title>Facture #{{ $invoice->numdoc }}</title>
 <style>
-@page { margin: 10mm 10mm; }
-
+@page { 
+    margin: 8mm 10mm 4mm 10mm; /* on réduit un peu le haut et le bas */
+}
 body {
     font-family: 'DejaVu Sans', Arial, sans-serif;
     color: #2c3e50;
-    font-size: 12px;
+    font-size: 10px;
     margin: 0;
     padding: 0;
 }
@@ -19,7 +20,7 @@ body {
     border: 2px solid #007bff;
     border-radius: 8px;
     padding: 10px 15px;
-    margin-bottom: 15px;
+    margin-bottom: 6px;
     background-color: #f8fbff;
 }
 
@@ -129,7 +130,7 @@ td {
 }
 .totals-box td {
     border: none;
-    padding: 3px;
+    padding: 2px;
 }
 .totals-box td.label {
     text-align: left;
@@ -140,37 +141,65 @@ td {
 }
 
 /* === CONDITIONS === */
+/* === CONDITIONS DE VENTE EN 2 COLONNES === */
+/* === CONDITIONS DE VENTE EN 2 COLONNES (compatible DomPDF) === */
 .conditions {
-    margin-top: 4px;
-    font-size: 9px;
+    margin-top: 3px;
+    font-size: 8px;
+    line-height: 1.3;
     color: #333;
-    border: 1px solid #007bff;
-    border-radius: 6px;
-    padding: 8px 10px;
+    border: 1.5px solid #007bff;
+    border-radius: 8px;
+    padding: 10px;
     background: #f8fbff;
     page-break-inside: avoid;
+    overflow: hidden;
 }
 
 .conditions h3 {
     text-align: center;
     color: #0056b3;
     font-size: 11px;
-    margin-bottom: 6px;
+    margin: 0 0 2px 0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
+.columns {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.col {
+    display: table-cell;
+    width: 50%;
+    padding: 0 10px;
+    vertical-align: top;
+}
+
+.col:first-child {
+    padding-left: 0;
+    border-right: 1px dotted #007bff;
+}
+
+.col:last-child {
+    padding-right: 0;
+}
+
 .conditions ul {
     margin: 0;
-    padding-left: 15px;
+    padding-left: 16px;
+    list-style-type: disc;
 }
+
 .conditions li {
-    margin-bottom: 3px;
-    line-height: 1.3;
+    margin-bottom: 4px;
 }
+
 .conditions li ul {
-    margin-top: 2px;
-    padding-left: 15px;
+    margin: 3px 0 0 0;
+    padding-left: 14px;
     list-style-type: circle;
 }
 
@@ -178,7 +207,7 @@ td {
 
 /* === ENCAISSEMENTS === */
 .enc-payment-table {
-    font-size: 11px;
+    font-size: 10px;
     width: 100%;
     border-collapse: collapse;
     margin-top: 5px;
@@ -340,31 +369,42 @@ td {
 
 
 
-    <div class="conditions">
-        <h3>Conditions Générales de Vente</h3>
-        <ul>
-            <li>En cas de désistement, aucun remboursement ne sera effectué — seul un avoir pourra être proposé.</li>
-            <li>Aucun retour ne sera accepté après <strong>15 jours</strong>.</li>
-            <li>Tout retour sera refusé si :
-                <ul>
-                    <li>l’emballage d’origine est détérioré, marqué ou scotché / le produit présente des traces de montage.</li>
-                    <li>les pièces ne correspondent pas à la référence d’origine / des pièces sont manquantes dans l’emballage.</li>
-                </ul>
-            </li>
-            <li>Pour un retour ou une garantie, <strong>la facture est obligatoire</strong>.</li>
-            <li>Les pièces électriques ne sont <strong>ni reprises, ni échangées</strong>.</li>
-            <li>Le traitement des garanties fournisseurs peut nécessiter <strong>2 à 3 mois</strong>.</li>
-            <li>Articles en échange standard :
-                <ul>
-                    <li>la consigne doit être retournée dans la boîte d’origine / elle ne doit présenter aucun dommage physique (cassures, fissures, etc.)</li>
-                    <li>elle doit être <strong>identique à la pièce commandée</strong> pour remboursement.</li>
-                </ul>
-            </li>
-            <li>Les pièces avec un délai ≥ 24h ne sont ni reprises ni échangées, sauf en cas de dysfonctionnement.</li>
-            <li>Les commandes sont disponibles <strong>7 jours</strong> au magasin avant retour fournisseur.</li>
-            <li><strong style="color:#c0392b;">Aucune pièce ne sera servie sans présentation de la facture.</strong></li>
-        </ul>
+   <!-- Remplace tout ton bloc .conditions actuel par ÇA : -->
+<div class="conditions">
+    <h3>Conditions Générales de Vente</h3>
+    
+    <div class="columns">
+        <div class="col">
+            <ul>
+                <li>En cas de désistement, aucun remboursement ne sera effectué — seul un avoir pourra être proposé.</li>
+                <li>Aucun retour ne sera accepté après <strong>15 jours</strong>.</li>
+                <li>Tout retour sera refusé si :
+                    <ul>
+                        <li>l’emballage d’origine est détérioré, marqué ou scotché / le produit présente des traces de montage.</li>
+                        <li>les pièces ne correspondent pas à la référence d’origine / des pièces sont manquantes dans l’emballage.</li>
+                    </ul>
+                </li>
+                <li>Pour un retour ou une garantie, <strong>la facture est obligatoire</strong>.</li>
+                <li>Les pièces électriques ne sont <strong>ni reprises, ni échangées</strong>.</li>
+            </ul>
+        </div>
+        
+        <div class="col">
+            <ul>
+                <li>Le traitement des garanties fournisseurs peut nécessiter <strong>2 à 3 mois</strong>.</li>
+                <li>Articles en échange standard :
+                    <ul>
+                        <li>la consigne doit être retournée dans la boîte d’origine / elle ne doit présenter aucun dommage physique (cassures, fissures, etc.)</li>
+                        <li>elle doit être <strong>identique à la pièce commandée</strong> pour remboursement.</li>
+                    </ul>
+                </li>
+                <li>Les pièces avec un délai ≥ 24h ne sont ni reprises ni échangées, sauf en cas de dysfonctionnement.</li>
+                <li>Les commandes sont disponibles <strong>7 jours</strong> au magasin avant retour fournisseur.</li>
+                <li style="color:#c0392b; font-weight:bold;">Aucune pièce ne sera servie sans présentation de la facture.</li>
+            </ul>
+        </div>
     </div>
+</div>
 </main>
 
 <!-- === FOOTER === -->
