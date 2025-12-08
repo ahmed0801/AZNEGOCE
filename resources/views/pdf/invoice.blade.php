@@ -120,7 +120,7 @@ td {
 
 /* === TOTALS === */
 .totals-box {
-    margin-top: 5px;
+    margin-top: 4px;
     width: 280px;
     margin-left: auto;
     border: 2px solid #0056b3;
