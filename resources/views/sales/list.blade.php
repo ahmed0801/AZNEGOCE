@@ -498,8 +498,10 @@
    href="{{ route('sales.edit', $order->id) }}">
    Valider Pour Facturer
 </a>
-
                                     @endif
+
+                                                <span class="badge rounded-pill text-bg-light"><i class="fas fa-user-tie"></i> Vendeur :  {{ $order->vendeur}}</span>
+
 
                                 </div>
                                 <div class="btn-group">
