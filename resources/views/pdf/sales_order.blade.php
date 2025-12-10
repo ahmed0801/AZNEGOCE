@@ -203,6 +203,8 @@ footer .hours {
                     <p><strong>Client :</strong> {{ $order->customer->name ?? '-' }}</p>
                     <p><strong>Véhicule :</strong> {{ $order->vehicle ? ($order->vehicle->license_plate . ' (' . $order->vehicle->brand_name . ' ' . $order->vehicle->model_name . ')') : '-' }}</p>
                     <!-- <p><strong>Statut :</strong> {{ ucfirst($order->status) }}</p> -->
+                                                      <p><strong> Vendeur :</strong>   {{ $order->vendeur}}</p>
+
                 </div>
                 <p class="validite">Validité de l’offre : <strong>30 jours hors promotion</strong></p>
             </td>
