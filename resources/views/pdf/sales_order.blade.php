@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <title>Commande #{{ $order->numdoc }}</title>
 <style>
-@page { margin: 10mm 10mm; }
+@page { 
+    margin: 8mm 10mm 4mm 10mm; /* on réduit un peu le haut et le bas */
+}
 
 body {
     font-family: 'DejaVu Sans', Arial, sans-serif;
@@ -70,7 +72,7 @@ body {
 }
 .header-right .details {
     margin-top: 6px;
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1.6;
     text-align: right;
 }
@@ -94,23 +96,23 @@ th {
     background-color: #007bff;
     color: white;
     font-weight: bold;
-    padding: 6px;
+    padding: 5px;
     border: 1px solid #0056b3;
 }
 td {
-    padding: 6px;
+    padding: 5px;
     border: 1px solid #ddd;
 }
 .items-table tr:nth-child(even) { background-color: #f9f9f9; }
 
 /* === TOTALS === */
 .totals-box {
-    margin-top: 10px;
+    margin-top: 5px;
     width: 280px;
     margin-left: auto;
     border: 2px solid #0056b3;
     border-radius: 6px;
-    padding: 6px 10px;
+    padding: 4px 10px;
     background-color: #f8fbff;
 }
 .totals-box td {
@@ -127,7 +129,7 @@ td {
 
 /* === CONDITIONS === */
 .conditions {
-    margin-top: 15px;
+    margin-top: 7px;
     font-size: 9px;
     color: #333;
     border: 1px solid #007bff;
@@ -139,8 +141,8 @@ td {
 .conditions h3 {
     text-align: center;
     color: #0056b3;
-    font-size: 11px;
-    margin-bottom: 6px;
+    font-size: 10px;
+    margin-bottom: 2px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -167,7 +169,7 @@ footer {
     background-color: #f8f9fa;
     color: #333;
     border-top: 2px solid #007bff;
-    font-size: 10px;
+    font-size: 9px;
     text-align: center;
     padding: 6px 15px;
 }
@@ -199,6 +201,7 @@ footer .hours {
                 <div class="details">
                     <p><strong>Date :</strong> {{ \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') }}</p>
                     <p><strong>Client :</strong> {{ $order->customer->name ?? '-' }}</p>
+                    <p><strong>Véhicule :</strong> {{ $order->vehicle ? ($order->vehicle->license_plate . ' (' . $order->vehicle->brand_name . ' ' . $order->vehicle->model_name . ')') : '-' }}</p>
                     <!-- <p><strong>Statut :</strong> {{ ucfirst($order->status) }}</p> -->
                 </div>
                 <p class="validite">Validité de l’offre : <strong>30 jours hors promotion</strong></p>

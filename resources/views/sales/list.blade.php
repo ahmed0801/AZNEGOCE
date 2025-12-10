@@ -541,7 +541,12 @@
                             </div>
 
                             <div id="lines-{{ $order->id }}" class="card-body d-none bg-light">
-                                <h6 class="fw-bold mb-3">🧾 Lignes de la commande</h6>
+
+                            <h6 class="fw-bold mb-3"><i class="fa fa-solid fa-car"></i> : {{ $order->vehicle ? ($order->vehicle->license_plate . ' (' . $order->vehicle->brand_name . ' ' . $order->vehicle->model_name . ')') : '-' }}                     @if($order->notes )<p> Note : {{ $order->notes ?? '-' }}</p> @endif
+ </h6>
+
+
+                                <!-- <h6 class="fw-bold mb-3">🧾 Lignes de la commande</h6> -->
                                 <table class="table table-sm table-bordered align-middle">
                                     <thead class="table-light text-center">
                                         <tr>
