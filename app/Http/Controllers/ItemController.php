@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\ArticleExport;
 use App\Models\Arrivage;
 use App\Models\Brand;
+use App\Models\DiscountGroup;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\Store;
@@ -73,6 +74,7 @@ if ($request->has('is_active') && $request->is_active !== null && $request->is_a
         'units' => Unit::all(),
         'stores' => Store::all(),
         'tvaGroups' => TvaGroup::all(),
+        'discountGroups' => DiscountGroup::orderBy('name')->get(), // ← À ajouter
         'search' => $request->search,
         'brand_id' => $request->brand_id,
         'category_id' => $request->category_id,
@@ -143,6 +145,7 @@ public function store(Request $request)
         'store_id'       => 'nullable|exists:stores,id',
         'codefournisseur'=> 'nullable|exists:suppliers,code',
         'location'       => 'nullable|string|max:255',
+        'discount_group_id' => 'nullable|exists:discount_groups,id', // ← Nouveau champ
     ]);
 
     // 2️⃣ Gestion du code pour qu’il soit unique
@@ -174,6 +177,7 @@ public function store(Request $request)
         'codefournisseur' => $validated['codefournisseur'] ?? null,
         'location'        => $validated['location'] ?? null,
         'is_active'       => true,
+        'discount_group_id' => $validated['discount_group_id'] ?? 1, // ← Par défaut groupe ID 1
     ]);
 
     // 4️⃣ Redirection avec message précisant le code final
@@ -216,6 +220,7 @@ public function update(Request $request, $id)
         'codefournisseur' => 'nullable|exists:suppliers,code',
 'location' => 'nullable|string|max:255',
 'is_active' => 'required|boolean',
+'discount_group_id' => 'nullable|exists:discount_groups,id', // ← Nouveau champ
 
     ]);
 

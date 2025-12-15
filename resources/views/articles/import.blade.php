@@ -378,7 +378,7 @@
                     <div class="card-body">
                         <h3 class="mb-4">
                             <i class="fas fa-file-excel text-success me-2"></i>
-                            Importer des articles depuis Excel 
+                            Importer ou Mettre à jour des articles depuis Excel 
 
                                       <a href="/articles" class="btn btn-outline-primary btn-round ms-2">
     Aller a la page Articles ⇒

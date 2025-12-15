@@ -18,54 +18,56 @@ class ArticleImportController extends Controller
     }
 
     public function downloadTemplate()
-    {
-        $fileName = 'articles_template.xlsx';
-        $filePath = storage_path('app/' . $fileName);
+{
+    $fileName = 'articles_template.xlsx';
+    $filePath = storage_path('app/' . $fileName);
 
-        if (file_exists($filePath)) unlink($filePath);
+    if (file_exists($filePath)) unlink($filePath);
 
-        $columns = [
-            'code','name','description','category','brand','unit','barcode',
-            'cost_price','sale_price','tva_group','stock_min','stock_max','store',
-            'location','is_active','supplier','Poids','Hauteur','Longueur','Largeur',
-            'Ref_TecDoc','Code_pays','Code_douane'
-        ];
+    // ← Ajout de 'discount_group' à la fin
+    $columns = [
+        'code','name','description','category','brand','unit','barcode',
+        'cost_price','sale_price','tva_group','stock_min','stock_max','store',
+        'location','is_active','supplier','Poids','Hauteur','Longueur','Largeur',
+        'Ref_TecDoc','Code_pays','Code_douane','discount_group'
+    ];
 
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->fromArray($columns, NULL, 'A1');
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->fromArray($columns, NULL, 'A1');
 
-        // Exemple complet pour guider l'utilisateur
-        $example = [
-            '57044',
-            'SUPPORT MOTEUR LA PIECE',
-            '',
-            'LIAISON AU SOL',
-            'MULTIMARQUES',
-            'PIECE',
-            '8435108604300',
-            '141.35',
-            '141.35',
-            'ASSUJ (20.00%)',
-            '2',
-            '0',
-            'MAGASIN CENTRALE',
-            'Emplacement',
-            '1',
-            'Exa - EXADIS',
-            '', '', '', '', '', '', ''
-        ];
+    // Exemple mis à jour
+    $example = [
+        '57044',
+        'SUPPORT MOTEUR LA PIECE',
+        '',
+        'LIAISON AU SOL',
+        'MULTIMARQUES',
+        'PIECE',
+        '8435108604300',
+        '141.35',
+        '141.35',
+        'ASSUJ (20.00%)',
+        '2',
+        '0',
+        'MAGASIN CENTRALE',
+        'Emplacement',
+        '1',
+        'Exa - EXADIS',
+        '', '', '', '', '', '', '',
+        'R0' // ← Exemple de groupe de remise
+    ];
 
-        $sheet->fromArray($example, NULL, 'A2');
+    $sheet->fromArray($example, NULL, 'A2');
 
-        $sheet->getStyle('A1:W1')->getFont()->setBold(true);
-        foreach (range('A', 'W') as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
+    $sheet->getStyle('A1:X1')->getFont()->setBold(true); // ← X car +1 colonne
+    foreach (range('A', 'X') as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
 
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($filePath);
+    $writer = new Xlsx($spreadsheet);
+    $writer->save($filePath);
 
-        return response()->download($filePath)->deleteFileAfterSend(false);
-    }
+    return response()->download($filePath)->deleteFileAfterSend(false);
+}
 
     public function import(Request $request)
     {
@@ -96,22 +98,23 @@ class ArticleImportController extends Controller
         $errors = [];
 
         for ($i=1; $i<count($rows); $i++) {
-            $row = array_combine($headers, $rows[$i]);
+        $row = array_combine($headers, $rows[$i]);
 
-            $isEmpty = true;
-            foreach ($row as $v) { if(!empty($v)) { $isEmpty=false; break; } }
-            if($isEmpty) continue;
+        $isEmpty = true;
+        foreach ($row as $v) { if(trim($v) !== '') { $isEmpty=false; break; } }
+        if($isEmpty) continue;
 
-            $existing = Item::where('code', $row['code'] ?? '')->first();
-            $status = $existing ? '⚠️ Déjà existant' : '✅ Nouveau';
+        $existing = Item::where('code', $row['code'] ?? '')->first();
+        $status = $existing ? '⚠️ Mise à jour' : '✅ Nouveau';
 
-            if(empty($row['code']) || empty($row['name'])) {
-                $errors[] = "Ligne ".($i+1)." : Code ou Nom manquant";
-                $status = '❌ Erreur';
-            }
-
-            $dataPreview[] = array_merge(['row_number'=>$i+1,'status'=>$status], $row);
+        if(empty(trim($row['code'])) || empty(trim($row['name']))) {
+            $errors[] = "Ligne ".($i+1)." : Code ou Nom manquant";
+            $status = '❌ Erreur';
         }
+
+        // ← Ajout du groupe dans l'aperçu
+        $dataPreview[] = array_merge(['row_number'=>$i+1,'status'=>$status], $row);
+    }
 
         return response()->json(['preview'=>$dataPreview,'errors'=>$errors]);
     }

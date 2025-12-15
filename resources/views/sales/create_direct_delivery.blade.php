@@ -812,7 +812,7 @@
                                 <div class="mb-3" id="customer_details" style="display: none;">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <p><strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span> 	&#8594; <strong>TVA:</strong> <span id="customer_tva"></span>%</p>
+                                            <p><strong>Client:</strong> <span id="customer_code"></span> - <span id="customer_name"></span> </span> / <strong>Type:</strong> <span id="customer_type"></span> 	&#8594; <strong>TVA:</strong> <span id="customer_tva"></span>%</p>
                                             <!-- <p><strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p> -->
                                             <p><strong>Email:</strong> <span id="customer_email"></span> &#8594; <strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span> </p>
                                             <!-- <p><strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span></p> -->
@@ -1182,6 +1182,7 @@ function formatFrench(number, decimals = 2) {
                                     address_delivery: item.address_delivery,
                                     city: item.city,
                                     country: item.country,
+                                    type: item.type,
                                     blocked: item.blocked,
                                     disabled: item.disabled
                                 };
@@ -1312,6 +1313,7 @@ let htText  = $(this).find('.total_ht').text().replace(/[^\d,\.-]/g, '').replace
                     $('#customer_address_delivery').text(selectedData.address_delivery || 'N/A');
                     $('#customer_city').text(selectedData.city || 'N/A');
                     $('#customer_country').text(selectedData.country || 'N/A');
+                    $('#customer_type').text(selectedData.type || 'N/A');
                     $('#customer_details').show();
                     $('#tva_rate').val(tvaRate);
 
@@ -1432,6 +1434,10 @@ $vehicleSelect.prop('disabled', false).removeClass('vehicle-empty');
                                              data-cost-price="${item.cost_price}"
                                              data-stock="${item.stock_quantity || 0}"
                                              data-location="${item.location || ''}"
+                                             data-discount-rate="${item.discount_rate || 20}"
+     data-discount-rate-jobber="${item.discount_rate_jobber || 0}"
+     data-discount-rate-professionnel="${item.discount_rate_professionnel || 0}"
+     
                                              data-is-active="${item.is_active}"
                                              data-supplier-id="${item.supplier_id || ''}">
                                             <span class="badge rounded-pill text-bg-light"><b> ${item.code}</b>
@@ -1566,6 +1572,10 @@ function initSupplierSelect($select, supplierId = null) {
         return;
     }
 
+
+    let selectedData = $('#customer_id').select2('data')[0];
+    let customerType = selectedData?.type?.toLowerCase() || ''; // "professionnel", "jobber", etc.
+
     let tvaRate = parseFloat($('#customer_id').select2('data')[0]?.tva || 0);
     if (tvaRate === 0 && $('#customer_id').select2('data')[0]?.tva == null) {
         Swal.fire('Erreur', 'Taux TVA non défini pour ce client.', 'error');
@@ -1580,6 +1590,24 @@ function initSupplierSelect($select, supplierId = null) {
     let location = $(this).data('location') || '-';
     let isActive = $(this).data('is-active') ? 1 : 0;
     
+
+    // 🔹 RÉCUPÉRATION DES TAUX DE REMISE DE L'ARTICLE
+    let rateGeneral = parseFloat($(this).data('discount-rate')) || 0;
+    let rateJobber = parseFloat($(this).data('discount-rate-jobber')) || 0;
+    let ratePro = parseFloat($(this).data('discount-rate-professionnel')) || 0;
+
+    // 🔹 CHOIX DU BON TAUX SELON LE TYPE CLIENT
+    let appliedDiscount = rateGeneral; // par défaut
+    if (customerType.includes('professionnel')) {
+        appliedDiscount = ratePro;
+    } else if (customerType.includes('jobber')) {
+        appliedDiscount = rateJobber;
+    }
+
+
+
+
+
 
     // DÉFINIR LES VARIABLES AVANT LE TEMPLATE
     let unitPriceHt = price.toFixed(2);
@@ -1660,7 +1688,14 @@ function initSupplierSelect($select, supplierId = null) {
                 <input type="number" inputmode="decimal" name="lines[${lineCount}][unit_price_ttc]"
                        class="form-control unit_price_ttc" value="${unitPriceTtc}" step="0.01">
             </td>
-            <td><input type="number" name="lines[${lineCount}][remise]" class="form-control remise" value="0" min="0" max="100" step="0.01"></td>
+
+<td>
+                <input type="number" name="lines[${lineCount}][remise]" 
+                       class="form-control remise" 
+                       value="${appliedDiscount.toFixed(2)}" 
+                       min="0" max="100" step="0.01">
+            </td>
+            
             <td class="text-right total_ht">0,00</td>
             <td class="text-right total_ttc">0,00</td>
             <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"> <i class="fas fa-trash-alt"></i> </button></td>
@@ -1671,14 +1706,15 @@ function initSupplierSelect($select, supplierId = null) {
     let supplierId = $(this).data('supplier-id') || ''; // si tu as supplier_id dans la recherche AJAX
 
     $('#lines_body').append(row);
-    // FORCE LE CALCUL IMMÉDIAT DE LA MARGE DÈS L'AJOUT
-let $newRow = $('#lines_body tr:last');
-let $supplierSelect = $newRow.find('.supplier-select');
-initSupplierSelect($supplierSelect, supplierId); // supplierId vient de data-supplier-id ou null
-$newRow.find('.purchase-discount').val('0');
-$newRow.find('.remise').val('0');
-updatePurchaseMargin($newRow);           // ← Maintenant ça marche !
-updateLineTotals($newRow, parseFloat($('#tva_rate').val()) || 0);
+    
+// Initialisation fournisseur
+    let $newRow = $('#lines_body tr:last');
+    let $supplierSelect = $newRow.find('.supplier-select');
+    initSupplierSelect($supplierSelect, supplierId);
+
+    // Calculs immédiats
+    updatePurchaseMargin($newRow);
+    updateLineTotals($newRow, tvaRate);
 
     // Gestion copie code
     $(document).on('click', '.copy-line-code', function (e) {

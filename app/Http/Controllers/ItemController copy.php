@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ArticleExport;
 use App\Models\Arrivage;
 use App\Models\Brand;
 use App\Models\Item;
@@ -12,7 +13,7 @@ use App\Models\Unit;
 use App\Services\BusinessCentralService;
 use Illuminate\Http\Request;
 use Composite\TecDoc\Facades\TecDoc;
-
+use Maatwebsite\Excel\Facades\Excel;
 
 class ItemController extends Controller
 {
@@ -30,13 +31,14 @@ class ItemController extends Controller
 
 public function index(Request $request)
 {
-$query = Item::with(['category', 'brand', 'tvaGroup', 'store', 'supplier']);
+$query = Item::with(['category', 'brand', 'tvaGroup', 'store', 'supplier','stocks']);
 
     // Recherche globale
     if ($request->filled('search')) {
         $query->where(function ($q) use ($request) {
-            $q->where('name', 'like', "%{$request->search}%")
-              ->orWhere('code', 'like', "%{$request->search}%");
+            $q->where('name', 'like', "{$request->search}%")
+              ->orWhere('code','like',$request->search);
+
         });
     }
 
@@ -62,7 +64,7 @@ if ($request->has('is_active') && $request->is_active !== null && $request->is_a
 
 
 
-    $items = $query->orderBy('name')->paginate(150)->withQueryString();
+    $items = $query->orderBy('name')->paginate(50)->withQueryString();
 
     return view('articles', [
         'items' => $items,
@@ -79,7 +81,10 @@ if ($request->has('is_active') && $request->is_active !== null && $request->is_a
 }
 
 
-
+public function export(Request $request)
+{
+    return Excel::download(new ArticleExport($request), 'articles.xlsx');
+}
 
 
 
@@ -120,9 +125,9 @@ public function indexold(Request $request)
 
 public function store(Request $request)
 {
-    // 1. Validation des champs
+    // 1️⃣ Validation des champs (sans la contrainte "unique")
     $validated = $request->validate([
-        'code'           => 'required|string|max:255|unique:items,code',
+        'code'           => 'required|string|max:255',
         'name'           => 'required|string|max:255',
         'description'    => 'nullable|string',
         'category_id'    => 'nullable|exists:item_categories,id',
@@ -135,36 +140,49 @@ public function store(Request $request)
         'stock_min'      => 'nullable|integer|min:0',
         'stock_max'      => 'nullable|integer|min:0',
         'is_active'      => 'nullable|boolean',
-        'store_id' => 'nullable|exists:stores,id',
-        'codefournisseur' => 'nullable|exists:suppliers,code',
-'location' => 'nullable|string|max:255',
-
+        'store_id'       => 'nullable|exists:stores,id',
+        'codefournisseur'=> 'nullable|exists:suppliers,code',
+        'location'       => 'nullable|string|max:255',
+        
     ]);
 
-    // 2. Création de l’article
-    $item = Item::create([
-        'code'           => $validated['code'],
-        'name'           => $validated['name'],
-        'description'    => $validated['description'] ?? null,
-        'category_id'    => $validated['category_id'] ?? null,
-        'brand_id'       => $validated['brand_id'] ?? null,
-        'unit_id'        => $validated['unit_id'] ?? null,
-        'tva_group_id'   => $validated['tva_group_id'] ?? null,
-        'barcode'        => $validated['barcode'] ?? null,
-        'cost_price'     => $validated['cost_price'] ?? 0.00,
-        'sale_price'     => $validated['sale_price'] ?? 0.00,
-        'stock_min'      => $validated['stock_min'] ?? 0,
-        'stock_max'      => $validated['stock_max'] ?? 0,
-        'store_id' => $validated['store_id'] ?? null,
+    // 2️⃣ Gestion du code pour qu’il soit unique
+    $code = $validated['code'];
+    $originalCode = $code;
+    $maxTries = 20; // pour éviter les boucles infinies
+    $tries = 0;
+
+    while (\App\Models\Item::where('code', $code)->exists() && $tries < $maxTries) {
+        $code .= '.';
+        $tries++;
+    }
+
+    // 3️⃣ Création de l’article avec le code corrigé
+    $item = \App\Models\Item::create([
+        'code'            => $code,
+        'name'            => $validated['name'],
+        'description'     => $validated['description'] ?? null,
+        'category_id'     => $validated['category_id'] ?? null,
+        'brand_id'        => $validated['brand_id'] ?? null,
+        'unit_id'         => $validated['unit_id'] ?? null,
+        'tva_group_id'    => $validated['tva_group_id'] ?? null,
+        'barcode'         => $validated['barcode'] ?? null,
+        'cost_price'      => $validated['cost_price'] ?? 0.00,
+        'sale_price'      => $validated['sale_price'] ?? 0.00,
+        'stock_min'       => $validated['stock_min'] ?? 0,
+        'stock_max'       => $validated['stock_max'] ?? 0,
+        'store_id'        => $validated['store_id'] ?? null,
         'codefournisseur' => $validated['codefournisseur'] ?? null,
-'location' => $validated['location'] ?? null,
-
-        'is_active'      => true,
+        'location'        => $validated['location'] ?? null,
+        'is_active'       => true,
     ]);
 
-    // 3. Redirection ou réponse AJAX
-    return redirect()->back()->with('success', 'Article créé avec succès.');
+    // 4️⃣ Redirection avec message précisant le code final
+    return redirect()
+        ->back()
+        ->with('success', "Article créé avec succès (code final : {$code}).");
 }
+
 
 
 
@@ -211,6 +229,25 @@ public function update(Request $request, $id)
 
 
 
+public function search(Request $request)
+{
+    $search = $request->input('term');
+
+    $items = Item::query()
+        ->where('code', 'like', "%{$search}%")
+        ->orWhere('name', 'like', "%{$search}%")
+        ->limit(100)
+        ->get();
+
+    return response()->json(
+        $items->map(fn($item) => [
+            'id' => $item->code,
+            'text' => "{$item->code} - {$item->name}",
+            'price' => $item->cost_price,
+            'sale_price' => $item->sale_price
+        ])
+    );
+}
 
 
 
@@ -218,15 +255,7 @@ public function update(Request $request, $id)
 
 
 
-
-
-
-
-
-
-
-
-    public function search(Request $request)
+    public function searchwithtecdoc(Request $request)
     {
         // Initialisation services et données
         $businessCentralService = new BusinessCentralService();

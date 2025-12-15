@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class DiscountGroup extends Model
 {
-    protected $fillable = ['name', 'discount_rate'];
+    protected $fillable = ['name', 'discount_rate','discount_rate_jobber',
+        'discount_rate_professionnel'];
 
     public function customers()
     {

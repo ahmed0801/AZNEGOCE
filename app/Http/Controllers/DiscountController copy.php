@@ -19,15 +19,11 @@ public function store(Request $request)
     $request->validate([
         'name' => 'required|string|max:255|unique:discount_groups,name',
         'rate'    => 'required',
-        'rate_jobber' => 'required|numeric|min:0|max:100',
-            'rate_professionnel' => 'required|numeric|min:0|max:100',
     ]);
 
     DiscountGroup::create([ 
         'name' => $request->name,
 'discount_rate'    => $request->rate,
-'discount_rate_jobber'  => $request->rate_jobber,
-            'discount_rate_professionnel' => $request->rate_professionnel,
 ]);
 
     return back()->with('success', 'Groupe Remise créée avec succès.');
@@ -36,17 +32,12 @@ public function store(Request $request)
 public function update(Request $request, $id)
 {
     $request->validate([
-        'name' => 'required|string|max:255|unique:discount_groups,name,' . $id,
-        'rate' => 'required|numeric|min:0|max:100',
-            'rate_jobber' => 'required|numeric|min:0|max:100',
-            'rate_professionnel' => 'required|numeric|min:0|max:100',
+        'name' => 'required|string|max:255|unique:discount_groups,name,' . $id
     ]);
 
     $category = DiscountGroup::findOrFail($id);
     $category->update([ 'name' => $request->name,
 'discount_rate'    => $request->rate,
-'discount_rate_jobber'  => $request->rate_jobber,
-            'discount_rate_professionnel' => $request->rate_professionnel,
  ]);
 
     return back()->with('success', 'Groupe Remise mise à jour.');

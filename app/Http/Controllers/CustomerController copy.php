@@ -56,7 +56,8 @@ class CustomerController extends Controller
 
         $tvaGroups = TvaGroup::all();
         $discountGroups = DiscountGroup::all();
-        $paymentModes = PaymentMode::all();
+        $paymentModes = PaymentMode::where('type', 'encaissement')->get();
+
         $paymentTerms = PaymentTerm::all();
 
         // Villes uniques pour le filtre
@@ -482,6 +483,7 @@ public function getAllAccountingEntriesHT()
         ->orWhere('code', 'LIKE', "%{$query}%")
         ->orWhere('email', 'LIKE', "%{$query}%")
         ->take(50)
+        ->latest()
         ->get()
         ->map(function ($customer) {
             return [
@@ -554,7 +556,8 @@ public function getAllAccountingEntriesHT()
 
         $tvaGroups = TvaGroup::all();
         $discountGroups = DiscountGroup::all();
-        $paymentModes = PaymentMode::all();
+        $paymentModes = PaymentMode::where('type', 'encaissement')->get();
+
         $paymentTerms = PaymentTerm::all();
 
         // Villes uniques pour le filtre
@@ -627,10 +630,13 @@ public function quickStoreVehicle(Request $request, $customer)
         'linkage_target_id' => $request->linkage_target_id,
     ]);
 
-    return response()->json([
-        'success' => true,
-        'vehicle' => $vehicle
-    ]);
+return response()->json([
+    'success' => true,
+    'vehicle' => [
+        'id'   => $vehicle->id,
+        'text' => $vehicle->license_plate . ' (' . $vehicle->brand_name . ' ' . $vehicle->model_name . ' - ' . ($vehicle->engine_description ?: 'Motorisation inconnue') . ')',
+    ]
+]);
 }
 
 
@@ -666,13 +672,15 @@ public function storeFromPlate(Request $request, $customerId)
         ]
     );
 
-    return response()->json([
-        'success' => true,
-        'vehicle' => [
-            'id'   => $vehicle->id,
-            'text' => $vehicle->license_plate . ' (' . $vehicle->brand_name . ' ' . $vehicle->model_name . ')'
-        ]
-    ]);
+// Dans storeFromPlate()
+return response()->json([
+    'success' => true,
+    'vehicle' => [
+        'id'   => $vehicle->id,
+        'text' => $vehicle->license_plate . ' (' . $vehicle->brand_name . ' ' . ($vehicle->model_name ?: 'Modèle inconnu') . ' - ' . ($vehicle->engine_description ?: 'Motorisation inconnue') . ')',
+    ]
+]);
+
 }
 
 

@@ -309,6 +309,7 @@
                     </a>
                     <div class="collapse" id="outils">
                         <ul class="nav nav-collapse">
+                            <li><a href="/analytics"><span class="sub-item">Analytics</span></a></li>
                             <li><a href="/tecdoc"><span class="sub-item">TecDoc</span></a></li>
                             <li><a href="/voice"><span class="sub-item">NEGOBOT</span></a></li>
                         </ul>
@@ -611,6 +612,9 @@
           </button>
 
 
+
+
+
           <!-- Bouton Familles Articles -->
         <a href="{{ url('/categories') }}" class="btn btn-outline-primary btn-round ms-2">
             Familles Articles
@@ -622,7 +626,13 @@
             Marques Articles
             <i class="fas fa-tags ms-2"></i>
         </a>
-        
+
+
+                  <a href="{{ route('articles.import') }}" class="btn btn-outline-danger btn-round ms-2">
+    <i class="fas fa-file-excel me-2"></i> Importer d'Excel
+</a>
+
+
 </h4>
 
 
@@ -657,8 +667,7 @@
                         <div class="mb-3 col-md-6">
                             <label for="category_id" class="form-label">Famille</label>
                             <select class="form-control" id="category_id" name="category_id">
-                                <option value="">-- Choisir --</option>
-                                @foreach($categories as $category)
+                                                    @foreach($categories as $category)
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endforeach
                             </select>
@@ -668,7 +677,7 @@
                         <div class="mb-3 col-md-6">
                             <label for="brand_id" class="form-label">Marque</label>
                             <select class="form-control" id="brand_id" name="brand_id">
-                                <option value="">-- Choisir --</option>
+                                
                                 @foreach($brands as $brand)
                                     <option value="{{ $brand->id }}">{{ $brand->name }}</option>
                                 @endforeach
@@ -679,7 +688,7 @@
                         <div class="mb-3 col-md-6">
                             <label for="unit_id" class="form-label">Unité</label>
                             <select class="form-control" id="unit_id" name="unit_id">
-                                <option value="">-- Choisir --</option>
+                               
                                 @foreach($units as $unit)
                                     <option value="{{ $unit->id }}">{{ $unit->label ?? $unit->code }}</option>
                                 @endforeach
@@ -690,7 +699,7 @@
                         <div class="mb-3 col-md-6">
                             <label for="tva_group_id" class="form-label">TVA</label>
                             <select class="form-control" id="tva_group_id" name="tva_group_id">
-                                <option value="">-- Choisir --</option>
+                                
                                 @foreach($tvaGroups as $tva)
                                     <option value="{{ $tva->id }}">{{ $tva->name }} ({{ $tva->rate }}%)</option>
                                 @endforeach
@@ -749,7 +758,7 @@
 <div class="mb-3 col-md-6">
     <label for="store_id" class="form-label">Magasin</label>
     <select name="store_id" class="form-control">
-        <option value="">-- Choisir --</option>
+        
         @foreach($stores as $store)
             <option value="{{ $store->id }}">{{ $store->name }}</option>
         @endforeach

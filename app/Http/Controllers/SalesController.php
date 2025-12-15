@@ -1248,6 +1248,12 @@ public function validateOrder($id)
                 'cost_price' => $item->cost_price,
                 'sale_price' => $item->sale_price,
 
+
+                'discount_rate' => $item->discountGroup->discount_rate ?? 0,
+            'discount_rate_jobber' => $item->discountGroup->discount_rate_jobber ?? 0,
+            'discount_rate_professionnel' => $item->discountGroup->discount_rate_professionnel ?? 0,
+
+
                  // 🔹 Nouveaux champs importés depuis GOLDA
             'Poids' => $item->Poids,
             'Hauteur' => $item->Hauteur,

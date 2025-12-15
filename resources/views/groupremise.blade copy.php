@@ -614,10 +614,10 @@
 </button>
 
 <!-- Modal -->
-<!-- Modal Création -->
 <div class="modal fade" id="createItemModal" tabindex="-1" aria-labelledby="createItemModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
+
             <div class="modal-header">
                 <h5 class="modal-title" id="createItemModalLabel">Créer un Groupe Remise</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
@@ -628,31 +628,26 @@
                     @csrf
 
                     <div class="row">
-                        <div class="mb-3 col-md-6">
-                            <label for="name" class="form-label">Nom du groupe</label>
+                        <!-- Code -->
+                        <div class="mb-3 col-md-4">
+                            <label for="name" class="form-label">Nom</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
 
-                        <div class="mb-3 col-md-6">
-                            <label for="rate" class="form-label">Remise générale (%)</label>
-                            <input type="number" step="0.01" min="0" max="100" class="form-control" name="rate" required>
+                        <!-- Nom -->
+                        <div class="mb-3 col-md-8">
+                            <label for="name" class="form-label">Pourcent.%</label>
+                            <input type="number" class="form-control" id="description" name="rate" required>
                         </div>
 
-                        <div class="mb-3 col-md-6">
-                            <label for="rate_jobber" class="form-label">Remise Jobber (%)</label>
-                            <input type="number" step="0.01" min="0" max="100" class="form-control" name="rate_jobber" value="0" required>
-                        </div>
-
-                        <div class="mb-3 col-md-6">
-                            <label for="rate_professionnel" class="form-label">Remise Professionnel (%)</label>
-                            <input type="number" step="0.01" min="0" max="100" class="form-control" name="rate_professionnel" value="0" required>
-                        </div>
+                        
                     </div>
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                         <button type="submit" class="btn btn-success">Créer</button>
                     </div>
+
                 </form>
             </div>
         </div>
@@ -713,9 +708,7 @@
             <thead class="table-dark">
                 <tr>
                     <th>Nom</th>
-                    <th>Remise générale (%)</th>
-        <th>Remise Jobber (%)</th>
-        <th>Remise Professionnel (%)</th>
+                    <th>Pourcentage %</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -724,8 +717,6 @@
                     <tr>
                         <td>{{ $groupremise->name }}</td>
                         <td>{{ $groupremise->discount_rate }}</td>
-                        <td>{{ $groupremise->discount_rate_jobber ?? 0 }}</td>
-            <td>{{ $groupremise->discount_rate_professionnel ?? 0 }}</td>
                         <td>
                             <!-- Modifier -->
 <!-- Modifier -->
@@ -751,10 +742,10 @@
 
 
                     <!-- Modal Modifier Article -->
-<!-- Modal Modifier -->
 <div class="modal fade" id="editItemModal{{ $groupremise->id }}" tabindex="-1" aria-labelledby="editItemModalLabel{{ $groupremise->id }}" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
+
             <div class="modal-header">
                 <h5 class="modal-title">Modifier le Groupe Remise : {{ $groupremise->name }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
@@ -766,25 +757,18 @@
                     @method('PUT')
 
                     <div class="row">
-                        <div class="mb-3 col-md-6">
-                            <label class="form-label">Nom du groupe</label>
+                        <!-- Exemple champ désignation -->
+                        <div class="mb-3 col-md-8">
+                            <label class="form-label">Nom</label>
                             <input type="text" name="name" class="form-control" value="{{ $groupremise->name }}" required>
                         </div>
 
-                        <div class="mb-3 col-md-6">
-                            <label class="form-label">Remise générale (%)</label>
-                            <input type="number" step="0.01" min="0" max="100" name="rate" class="form-control" value="{{ $groupremise->discount_rate }}" required>
+                        <!-- Code -->
+                        <div class="mb-3 col-md-4">
+                            <label class="form-label">Pourcent.%</label>
+                            <input type="number" name="rate" class="form-control" value="{{ $groupremise->discount_rate }}" required>
                         </div>
-
-                        <div class="mb-3 col-md-6">
-                            <label class="form-label">Remise Jobber (%)</label>
-                            <input type="number" step="0.01" min="0" max="100" name="rate_jobber" class="form-control" value="{{ $groupremise->discount_rate_jobber ?? 0 }}" required>
-                        </div>
-
-                        <div class="mb-3 col-md-6">
-                            <label class="form-label">Remise Professionnel (%)</label>
-                            <input type="number" step="0.01" min="0" max="100" name="rate_professionnel" class="form-control" value="{{ $groupremise->discount_rate_professionnel ?? 0 }}" required>
-                        </div>
+                       
                     </div>
 
                     <div class="modal-footer">

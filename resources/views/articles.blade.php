@@ -617,15 +617,19 @@
 
           <!-- Bouton Familles Articles -->
         <a href="{{ url('/categories') }}" class="btn btn-outline-primary btn-round ms-2">
-            Familles Articles
+            Familles
             <i class="fas fa-layer-group ms-2"></i>
         </a>
 
         <!-- Bouton Marques Articles -->
         <a href="{{ url('/brands') }}" class="btn btn-outline-info btn-round ms-2">
-            Marques Articles
+            Marques
             <i class="fas fa-tags ms-2"></i>
         </a>
+
+         <a href="/groupremises" class="btn btn-outline-secondary btn-round ms-2">
+    <i class="fas fa-percent me-2"></i> Groupes Remises
+</a>
 
 
                   <a href="{{ route('articles.import') }}" class="btn btn-outline-danger btn-round ms-2">
@@ -705,6 +709,21 @@
                                 @endforeach
                             </select>
                         </div>
+
+                        <!-- Groupe de remise -->
+<div class="mb-3 col-md-6">
+    <label for="discount_group_id" class="form-label">Groupe de remise</label>
+    <select class="form-control" id="discount_group_id" name="discount_group_id">
+        <option value="">-- Aucun (utilise standard) --</option>
+        @foreach($discountGroups as $group)
+            <option value="{{ $group->id }}" {{ old('discount_group_id') == $group->id ? 'selected' : '' }}>
+                {{ $group->name }}
+                (G: {{ $group->discount_rate }}% | J: {{ $group->discount_rate_jobber }}% | P: {{ $group->discount_rate_professionnel }}%)
+            </option>
+        @endforeach
+    </select>
+</div>
+
 
                         <!-- Prix d'achat -->
                         <div class="mb-3 col-md-3">
@@ -915,6 +934,7 @@
                     <th>Désignation</th>
                     <th>Marque</th>
                     <th>Famille</th>
+                    <th>Groupe Rem%</th>
                     <th>Prix A.HT</th>
                     <th>Prix V.HT</th>
                      <th>Fournisseur</th>
@@ -937,6 +957,16 @@
                         <td>{{ $item->name }}</td>
                         <td>{{ $item->brand->name ?? '-' }}</td>
                         <td>{{ $item->category->name ?? '-' }}</td>
+                        
+                        <td>
+    {{ $item->discountGroup->name ?? 'Standard' }}<br>
+    <small class="text-muted">
+        Général: {{ $item->discountGroup->discount_rate ?? 0 }}%
+        | Jobbeur: {{ $item->discountGroup->discount_rate_jobber ?? 0 }}%
+        | Pro: {{ $item->discountGroup->discount_rate_professionnel ?? 0 }}%
+    </small>
+</td>
+
                         <td>{{ number_format($item->cost_price, 2, ',', ' ') }} €</td>
 @php
     $marge = $item->sale_price - $item->cost_price;
@@ -1233,6 +1263,21 @@
                                 @endforeach
                             </select>
                         </div>
+
+                        <!-- Groupe de remise -->
+<div class="mb-3 col-md-6">
+    <label class="form-label">Groupe de remise</label>
+    <select name="discount_group_id" class="form-select" disabled>
+        <option value="">-- Aucun --</option>
+        @foreach($discountGroups as $group)
+            <option value="{{ $group->id }}" {{ $item->discount_group_id == $group->id ? 'selected' : '' }}>
+                {{ $group->name }}
+                (G: {{ $group->discount_rate }}% | J: {{ $group->discount_rate_jobber }}% | P: {{ $group->discount_rate_professionnel }}%)
+            </option>
+        @endforeach
+    </select>
+</div>
+
 
                         <div class="mb-3 col-md-3">
                             <label class="form-label">Prix Achat</label>

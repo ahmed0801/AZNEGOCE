@@ -713,11 +713,25 @@
                                 @csrf
                                 <div class="row mb-3">
                                     <div class="col-md-4 col-12 mb-2">
+
+
+<!-- BOUTON DANS LA PAGE COMMANDE -->
+<button type="button" 
+        id="openCreateCustomerModal" 
+        class="btn btn-outline-success btn-round ms-2">
+    Nouveau Client <i class="fas fa-plus-circle ms-1"></i>
+</button>
+
 <a href="/newcustomer"
    onclick="window.open(this.href, 'popupWindow', 'width=1200,height=700,scrollbars=yes'); return false;"
-   class="btn btn-outline-success btn-round ms-2">
-  Créer ou Modifier des Clients <i class="fas fa-plus-circle ms-1"></i>
+   class="btn btn-outline-primary btn-round ms-2">
+    Liste des Clients ⟰ 
 </a>
+
+
+
+
+
 <hr>
 
                                                                                     
@@ -798,7 +812,7 @@
                                 <div class="mb-3" id="customer_details" style="display: none;">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <p><strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span> 	&#8594; <strong>TVA:</strong> <span id="customer_tva"></span>%</p>
+                                            <p><strong>Client:</strong> <span id="customer_code"></span> - <span id="customer_name"></span> </span> / <strong>Type:</strong> <span id="customer_type"></span> 	&#8594; <strong>TVA:</strong> <span id="customer_tva"></span>%</p>
                                             <!-- <p><strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p> -->
                                             <p><strong>Email:</strong> <span id="customer_email"></span> &#8594; <strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span> </p>
                                             <!-- <p><strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span></p> -->
@@ -861,6 +875,12 @@
         <button type="button" id="add_divers_item" class="btn btn-outline-primary btn-sm">
             + Créer un article manuellement
         </button>
+
+
+        <button type="button" id="add_divers_item" data-type="consigne" class="btn btn-outline-dark btn-sm">
+            + Consigne
+        </button>
+
 
         <!-- NOUVEAU : Groupe de boutons fournisseurs -->
         <span class="text-muted small">|</span>
@@ -1162,6 +1182,7 @@ function formatFrench(number, decimals = 2) {
                                     address_delivery: item.address_delivery,
                                     city: item.city,
                                     country: item.country,
+                                    type: item.type,
                                     blocked: item.blocked,
                                     disabled: item.disabled
                                 };
@@ -1292,6 +1313,7 @@ let htText  = $(this).find('.total_ht').text().replace(/[^\d,\.-]/g, '').replace
                     $('#customer_address_delivery').text(selectedData.address_delivery || 'N/A');
                     $('#customer_city').text(selectedData.city || 'N/A');
                     $('#customer_country').text(selectedData.country || 'N/A');
+                    $('#customer_type').text(selectedData.type || 'N/A');
                     $('#customer_details').show();
                     $('#tva_rate').val(tvaRate);
 
@@ -2179,25 +2201,38 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
         let i = lineCount;  // ← INDEX UNIQUE
         lineCount++;        // ← INCRÉMENTÉ ICI
 
+
+        const isConsigne = $(this).data('type') === 'consigne';
+
         let rowHtml = `
             <tr class="divers-line" data-line-id="divers_${i}">
                 <td>
-                    <input type="text" name="lines[${i}][article_code]" class="form-control form-control-sm" placeholder="Réf (ex: DIV001)" required>
-                    <input type="hidden" name="lines[${i}][is_new_item]" value="1">
+<input type="text" 
+                       name="lines[${i}][article_code]" 
+                       class="form-control form-control-sm bg-light" 
+                       value="${isConsigne ? 'CONSIGNE' : ''}" 
+                       placeholder="Réf (ex: DIV001)" 
+                       ${isConsigne ? 'readonly' : 'required'}>
+                                           <input type="hidden" name="lines[${i}][is_new_item]" value="1">
                 </td>
-                <td>
-                    <input type="text" name="lines[${i}][item_name]" class="form-control form-control-sm" placeholder="Désignation" required>
-                </td>
+<td>
+                <input type="text" 
+                       name="lines[${i}][item_name]" 
+                       class="form-control form-control-sm bg-light" 
+                       value="${isConsigne ? 'CONSIGNE' : ''}" 
+                       placeholder="Désignation" 
+                       ${isConsigne ? 'readonly' : 'required'}>
+            </td>
 
 
 
 <td class="p-1">
-    <div class="purchase-price-block">
+    <div class="purchase-price-block ${isConsigne? 'd-none': ''}">
         <!-- Prix d'achat HT saisissable -->
 <div class="d-flex gap-1 align-items-center mb-1">
     <div class="input-group input-group-sm flex-fill">
         <span class="input-group-text">€</span>
-        <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
+        <input   type="${isConsigne ? 'hidden' : 'number'}"     step="0.01" class="form-control form-control-sm text-end cost-price-input"
                value="0.00" placeholder="Prix achat HT">
     </div>
     <select class="form-select form-select-sm supplier-select" style="width: 140px;" name="lines[${i}][supplier_id]">
@@ -2207,16 +2242,16 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
         <!-- Remise achat + Prix net -->
         <div class="d-flex gap-1 align-items-center justify-content-between">
             <div class="input-group input-group-sm" style="width: 105px;">
-                <input type="number" min="0" max="100" step="0.1"
+                <input type="${isConsigne ? 'hidden' : 'number'}"  min="0" max="100" step="0.1"
                        class="form-control form-control-sm text-end purchase-discount"
                        value="0" placeholder="Rem%">
                 <span class="input-group-text">%</span>
             </div>
-            <span class="text-muted small">→</span>
-            <span class="fw-bold text-success net-price">0,00 €</span>
+            <span class="text-muted small ${isConsigne? 'd-none': ''}">→</span>
+            <span class="fw-bold text-success net-price ${isConsigne? 'd-none': ''}">0,00 €</span>
         </div>
         <!-- Marge estimée -->
-        <small class="text-muted d-block text-end mt-1">
+        <small class="text-muted d-block text-end mt-1 ${isConsigne? 'd-none': ''}">
             Marge : <span class="margin-display text-primary fw-bold">0%</span>
             (<span class="margin-euro text-primary">0,00 €</span>)
         </small>
@@ -2595,6 +2630,41 @@ $form.on('submit', function (e) {
 });
 });
 </script>
+
+
+
+
+
+
+
+
+
+<script>
+// Ouvre automatiquement le modal de création client dans la popup /newcustomer
+$(document).on('click', '#openCreateCustomerModal', function () {
+    const popup = window.open('/newcustomer', 'createCustomerPopup', 'width=1200,height=700,scrollbars=yes,resizable=yes');
+    
+    const checkPopup = setInterval(() => {
+        try {
+            if (popup.document && popup.document.body && popup.document.querySelector('#createItemModal')) {
+                clearInterval(checkPopup);
+                
+                const modalElement = popup.document.querySelector('#createItemModal');
+                const modal = new popup.bootstrap.Modal(modalElement);
+                modal.show();
+                
+                setTimeout(() => {
+                    const nameInput = popup.document.querySelector('input[name="name"]');
+                    if (nameInput) nameInput.focus();
+                }, 500);
+            }
+        } catch (e) {
+            // Popup bloquée ou non chargée
+        }
+    }, 100);
+});
+</script>
+
 
 
 

@@ -500,6 +500,7 @@ public function getAllAccountingEntriesHT()
                 'address_delivery' => $customer->address_delivery ?? '',
                 'city' => $customer->city ?? '',
                 'country' => $customer->country ?? '',
+                'type' => $customer->type,
                 'blocked' => $customer->blocked,
                 'disabled' => $customer->blocked // Add disabled flag for Select2
             ];
