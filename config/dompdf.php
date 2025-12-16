@@ -11,8 +11,8 @@ return [
     'options' => [
 
         // === CHEMINS ===
-        "font_dir"   => sys_get_temp_dir(),
-"font_cache" => sys_get_temp_dir(),
+        "font_dir" => storage_path('fonts'),
+        "font_cache" => storage_path('fonts'),
         "temp_dir" => sys_get_temp_dir(),
         "chroot" => realpath(base_path()),
 
@@ -24,7 +24,7 @@ return [
         "enable_html5_parser" => true,
 
         // === POLICE PAR DÉFAUT (obligatoire pour €, accents, arabe, etc.) ===
-        "default_font" => "dejavusans",
+        "default_font" => "DejaVu Sans",
 
         // === RÉSOLUTION & QUALITÉ (96 au lieu de 150 → -60% mémoire) ===
         "dpi" => 96,
@@ -47,18 +47,5 @@ return [
 
         // === BACKEND (CPDF est le plus stable et rapide) ===
         "pdf_backend" => "CPDF",
-
-         'default_font' => 'dejavusans',
-    'pdf_backend' => 'CPDF',
-    'enable_font_subsetting' => true,
-    'enable_html5_parser' => true,
-    'font_cache' => sys_get_temp_dir(),
-    'font_dir' => sys_get_temp_dir(),
-    'temp_dir' => sys_get_temp_dir(),
-
-    // ⚠️ Crucial pour éviter le crash iconv
-    'unicode_warning' => false,
-
-    
     ],
 ];
