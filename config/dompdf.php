@@ -24,7 +24,7 @@ return [
         "enable_html5_parser" => true,
 
         // === POLICE PAR DÉFAUT (obligatoire pour €, accents, arabe, etc.) ===
-        "default_font" => "DejaVu Sans",
+        "default_font" => "dejavusans",
 
         // === RÉSOLUTION & QUALITÉ (96 au lieu de 150 → -60% mémoire) ===
         "dpi" => 96,
