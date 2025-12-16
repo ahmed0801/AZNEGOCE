@@ -47,5 +47,18 @@ return [
 
         // === BACKEND (CPDF est le plus stable et rapide) ===
         "pdf_backend" => "CPDF",
+
+         'default_font' => 'dejavusans',
+    'pdf_backend' => 'CPDF',
+    'enable_font_subsetting' => true,
+    'enable_html5_parser' => true,
+    'font_cache' => sys_get_temp_dir(),
+    'font_dir' => sys_get_temp_dir(),
+    'temp_dir' => sys_get_temp_dir(),
+
+    // ⚠️ Crucial pour éviter le crash iconv
+    'unicode_warning' => false,
+
+    
     ],
 ];
