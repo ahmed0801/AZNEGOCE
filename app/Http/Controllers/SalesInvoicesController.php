@@ -591,17 +591,13 @@ public function printSingleInvoice($id)
         $generator->getBarcode($invoice->numdoc, $generator::TYPE_CODE_128)
     );
 
-    // === NETTOYAGE COMPLET AVANT RENDU ===
-    $invoice = $this->cleanUtf8Recursive($invoice);
-    $company = $this->cleanUtf8Recursive($company);
-
-    // Rendu de la vue en string HTML
+    // Rendu de la vue en string HTML (avant nettoyage)
     $html = view('pdf.invoice', compact('invoice', 'company', 'barcode'))->render();
 
-    // Nettoyage FINAL du HTML complet (capture les caractères ajoutés par Blade)
+    // Nettoyage UTF-8 complet du HTML rendu (supprime tous les caractères invalides)
     $html = mb_convert_encoding($html, 'UTF-8', 'UTF-8');
 
-    // Chargement du HTML nettoyé
+    // Chargement du HTML propre dans DomPDF
     $pdf = Pdf::loadHTML($html);
 
     return $pdf->stream("facture_{$invoice->numdoc}.pdf");
