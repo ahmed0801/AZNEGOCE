@@ -11,8 +11,8 @@ return [
     'options' => [
 
         // === CHEMINS ===
-        "font_dir" => storage_path('fonts'),
-        "font_cache" => storage_path('fonts'),
+"font_dir"   => sys_get_temp_dir(),
+"font_cache" => sys_get_temp_dir(),
         "temp_dir" => sys_get_temp_dir(),
         "chroot" => realpath(base_path()),
 
