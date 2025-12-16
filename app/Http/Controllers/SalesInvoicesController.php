@@ -548,6 +548,30 @@ public function editInvoice($id)
         });
     }
 
+    // Fonction pour nettoyer toutes les chaînes UTF-8 invalides
+private function cleanUtf8Recursive($data)
+{
+    if (is_string($data)) {
+        // Supprime les caractères UTF-8 invalides ou incomplets
+        return mb_convert_encoding($data, 'UTF-8', 'UTF-8');
+        // Alternative plus agressive si besoin : return iconv('UTF-8', 'UTF-8//IGNORE', $data);
+    }
+
+    if (is_array($data) || $data instanceof \Traversable) {
+        foreach ($data as $key => $value) {
+            $data[$key] = $this->cleanUtf8Recursive($value);
+        }
+    } elseif (is_object($data)) {
+        foreach (get_object_vars($data) as $key => $value) {
+            $data->$key = $this->cleanUtf8Recursive($value);
+        }
+    }
+
+    return $data;
+}
+
+
+
     public function printSingleInvoice($id)
     {
         $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
@@ -562,6 +586,11 @@ public function editInvoice($id)
             'iban' => 'TN59 1234 5678 9012 3456 7890',
             'logo_path' => 'assets/img/test_logo.png',
         ]);
+
+        // === NETTOYAGE UTF-8 IMMÉDIAT ===
+    $invoice = $this->cleanUtf8Recursive($invoice);
+    $company = $this->cleanUtf8Recursive($company);
+    // hello
 
         $generator = new BarcodeGeneratorPNG();
         $barcode = 'data:image/png;base64,' . base64_encode(
