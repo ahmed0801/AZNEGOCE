@@ -548,60 +548,30 @@ public function editInvoice($id)
         });
     }
 
-    // Fonction pour nettoyer toutes les chaînes UTF-8 invalides
-private function cleanUtf8Recursive($data)
-{
-    if (is_string($data)) {
-        // Supprime les caractères UTF-8 invalides ou incomplets
-        return mb_convert_encoding($data, 'UTF-8', 'UTF-8');
-        // Alternative plus agressive si besoin : return iconv('UTF-8', 'UTF-8//IGNORE', $data);
+    public function printSingleInvoice($id)
+    {
+        $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
+        $company = CompanyInformation::first() ?? new CompanyInformation([
+            'name' => 'Test Company S.A.R.L',
+            'address' => '123 Rue Fictive, Tunis 1000',
+            'phone' => '+216 12 345 678',
+            'email' => 'contact@testcompany.com',
+            'matricule_fiscal' => '1234567ABC000',
+            'swift' => 'TESTTNTT',
+            'rib' => '123456789012',
+            'iban' => 'TN59 1234 5678 9012 3456 7890',
+            'logo_path' => 'assets/img/test_logo.png',
+        ]);
+
+        $generator = new BarcodeGeneratorPNG();
+        $barcode = 'data:image/png;base64,' . base64_encode(
+            $generator->getBarcode($invoice->numdoc, $generator::TYPE_CODE_128)
+        );
+
+        $pdf = Pdf::loadView('pdf.invoice', compact('invoice', 'company', 'barcode'));
+        return $pdf->stream("facture_{$invoice->numdoc}.pdf");
     }
 
-    if (is_array($data) || $data instanceof \Traversable) {
-        foreach ($data as $key => $value) {
-            $data[$key] = $this->cleanUtf8Recursive($value);
-        }
-    } elseif (is_object($data)) {
-        foreach (get_object_vars($data) as $key => $value) {
-            $data->$key = $this->cleanUtf8Recursive($value);
-        }
-    }
-
-    return $data;
-}
-
-
-public function printSingleInvoice($id)
-{
-    $invoice = Invoice::with(['customer', 'lines.item', 'deliveryNotes', 'salesReturns','vehicle'])->findOrFail($id);
-    $company = CompanyInformation::first() ?? new CompanyInformation([
-        'name' => 'Test Company S.A.R.L',
-        'address' => '123 Rue Fictive, Tunis 1000',
-        'phone' => '+216 12 345 678',
-        'email' => 'contact@testcompany.com',
-        'matricule_fiscal' => '1234567ABC000',
-        'swift' => 'TESTTNTT',
-        'rib' => '123456789012',
-        'iban' => 'TN59 1234 5678 9012 3456 7890',
-        'logo_path' => 'assets/img/test_logo.png',
-    ]);
-
-    $generator = new BarcodeGeneratorPNG();
-    $barcode = 'data:image/png;base64,' . base64_encode(
-        $generator->getBarcode($invoice->numdoc, $generator::TYPE_CODE_128)
-    );
-
-    // Rendu de la vue en string HTML (avant nettoyage)
-    $html = view('pdf.invoice', compact('invoice', 'company', 'barcode'))->render();
-
-    // Nettoyage UTF-8 complet du HTML rendu (supprime tous les caractères invalides)
-    $html = mb_convert_encoding($html, 'UTF-8', 'UTF-8');
-
-    // Chargement du HTML propre dans DomPDF
-    $pdf = Pdf::loadHTML($html);
-
-    return $pdf->stream("facture_{$invoice->numdoc}.pdf");
-}
 
 
 
