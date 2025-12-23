@@ -18,6 +18,10 @@ class SalesOrderLine extends Model
         'remise',
         'total_ligne_ht',
         'total_ligne_ttc', // Add this
+        // Nouveaux
+        'supplier_id',
+        'unit_coast',
+        'discount_coast',
     ];
 
     public function salesOrder()
@@ -28,5 +32,10 @@ class SalesOrderLine extends Model
     public function item()
     {
         return $this->belongsTo(Item::class, 'article_code', 'code');
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
     }
 }

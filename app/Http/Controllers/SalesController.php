@@ -319,6 +319,10 @@ protected function createDeliveryNoteFromOrder(SalesOrder $order, Request $reque
                 'remise' => $line->remise ?? 0,
                 'total_ligne_ht' => $total_ligne_ht,
                 'total_ligne_ttc' => $total_ligne_ttc,
+                // === COPIE DES 3 CHAMPS DEPUIS LA COMMANDE ===
+    'supplier_id' => $line->supplier_id,
+    'unit_coast' => $line->unit_coast,
+    'discount_coast' => $line->discount_coast,
             ]);
 
             $totalDelivered += $line->ordered_quantity;
@@ -601,6 +605,10 @@ foreach ($request->lines as $index => $line) {
         'remise' => $remise,
         'total_ligne_ht' => $ligne_total,
         'total_ligne_ttc' => $total_ligne_ttc,
+        // === LES 3 CHAMPS ===
+    'supplier_id' => $line['supplier_id'] ?? null,
+    'unit_coast' => $line['unit_coast'] ?? $item->cost_price ?? 0,
+    'discount_coast' => $line['discount_coast'] ?? 0,
     ]);
 }
 
@@ -768,6 +776,10 @@ if ($isNewItem) {
                         'remise' => $remise,
                         'total_ligne_ht' => $total_ligne_ht,
                         'total_ligne_ttc' => $total_ligne_ttc,
+                        // === ENREGISTREMENT DES 3 NOUVEAUX CHAMPS ===
+    'supplier_id' => $line['supplier_id'] ?? null,
+    'unit_coast' => $line['unit_coast'] ?? $item->cost_price ?? 0,
+    'discount_coast' => $line['discount_coast'] ?? 0,
                     ]);
 
                     // === MISE À JOUR DES TOTAUX ===
@@ -892,14 +904,47 @@ if ($isNewItem) {
     /**
      * Edit a sales order.
      */
-    public function edit($id)
-    {
-        $order = SalesOrder::with('lines', 'customer')->findOrFail($id);
-        // dd($order);
-        $customers = Customer::with('tvaGroup')->get();
-        $tvaRates = $customers->mapWithKeys(fn($c) => [$c->id => $c->tvaGroup->rate ?? 0])->toJson();
-        return view('sales.edit', compact('order', 'customers', 'tvaRates'));
-    }
+    /**
+ * Edit a sales order (devis / bon de livraison).
+ */
+public function edit($id)
+{
+    $order = SalesOrder::with('lines', 'customer')->findOrFail($id);
+
+    // Liste des clients (avec leur groupe TVA)
+    $customers = Customer::with('tvaGroup')->get();
+
+    // Pour le JS côté front (tvaRates par client) – même si peu utilisé en edit, on le garde pour cohérence
+    $tvaRates = $customers->mapWithKeys(fn($c) => [$c->id => $c->tvaGroup->rate ?? 0])->toJson();
+
+    // === NOUVEAU : Fournisseurs pour le Select2 dans les lignes (prix achat + fournisseur) ===
+    $suppliers = Supplier::where('has_b2b', true) // ou 'has_b2b' selon ton besoin
+                        ->orderBy('name')
+                        ->get(['id', 'name', 'code']);
+
+    $suppliersForSelect2 = $suppliers->map(function ($s) {
+        return [
+            'id'   => $s->id,
+            'text' => $s->name . ($s->code ? ' (' . $s->code . ')' : ''),
+        ];
+    })->toArray();
+
+    // === NOUVEAU : Marques TECDOC pour le modal d'ajout rapide véhicule ===
+    // Si tu as déjà une méthode privée ou un service pour ça, utilise-la
+    // Sinon, voici un exemple simple (à adapter selon ton implémentation TecDoc)
+    $brands = $this->getTecdocBrands();
+
+    // Alternative si tu as une méthode dédiée (recommandé)
+    // $brands = $this->getTecdocBrands();
+
+    return view('sales.edit', compact(
+        'order',
+        'customers',
+        'tvaRates',
+        'suppliersForSelect2',
+        'brands' // ← indispensable pour le modal "Nouveau (TECDOC)"
+    ));
+}
 
     /**
      * Update a sales order.
@@ -915,11 +960,11 @@ if ($isNewItem) {
 public function update(Request $request, $numdoc)
 {
     $request->validate([
-        'customer_id' => 'required|exists:customers,id',
+'customer_id' => 'required|exists:customers,id',
+        'vehicle_id' => 'nullable|exists:vehicles,id',
         'order_date' => 'required|date',
         'lines' => 'required|array',
-        'lines.*.article_code' => 'required|exists:items,code',
-        'lines.*.ordered_quantity' => 'required|numeric|min:0',
+        'lines.*.ordered_quantity' => 'required|numeric|min:0.01',
         'lines.*.unit_price_ht' => 'required|numeric|min:0',
         'lines.*.remise' => 'nullable|numeric|min:0|max:100',
     ]);
@@ -934,15 +979,68 @@ public function update(Request $request, $numdoc)
              'numclient' => $customer->code,
             'order_date' => $request->order_date,
             'notes' => $request->notes,
+            'vehicle_id' => $request->vehicle_id,
+            
         ]);
 
+        // Suppression des anciennes lignes
         $order->lines()->delete();
+
         $total = 0;
-        foreach ($request->lines as $line) {
-            $item = Item::where('code', $line['article_code'])->first();
-            if (!$item) {
-                throw new \Exception("Article {$line['article_code']} introuvable.");
+
+        foreach ($request->lines as $index => $line) {
+            // === CORRECTIF VIRGULES → POINTS (comme dans store) ===
+            $line['unit_price_ht']    = (float) str_replace(',', '.', $line['unit_price_ht'] ?? 0);
+            $line['ordered_quantity'] = (float) str_replace(',', '.', $line['ordered_quantity'] ?? 0);
+            $line['remise']           = (float) str_replace(',', '.', $line['remise'] ?? 0);
+
+            $articleCode = $line['article_code'] ?? null;
+            $isNewItem = !empty($line['is_new_item']);
+            $item = null;
+
+            // === GESTION ARTICLE DIVERS (is_new_item) ===
+            if ($isNewItem) {
+                // Validation spécifique pour les nouveaux articles divers
+                $request->validate([
+                    "lines.$index.item_name" => 'required|string|max:255',
+                    "lines.$index.unit_price_ht" => 'required|numeric|min:0',
+                ]);
+
+                $code = trim($articleCode ?? 'DIVERS');
+
+                $item = Item::where('code', $code)->first();
+
+                if ($item) {
+                    $item->update([
+                        'name' => $line['item_name'],
+                        'sale_price' => $line['unit_price_ht'],
+                        'cost_price' => $line['unit_price_ht'], // ou un autre logique si besoin
+                        'location' => 'Divers',
+                        'is_active' => 1,
+                        'store_id' => $order->store_id ?? 1,
+                    ]);
+                } else {
+                    $item = Item::create([
+                        'code' => $code,
+                        'name' => $line['item_name'],
+                        'sale_price' => $line['unit_price_ht'],
+                        'cost_price' => $line['unit_price_ht'],
+                        'is_active' => 1,
+                        'store_id' => $order->store_id ?? 1,
+                        'location' => 'Divers',
+                    ]);
+                }
+
+                // On force le code correct pour la suite
+                $line['article_code'] = $item->code;
+            } else {
+                // Article existant normal
+                $item = Item::where('code', $articleCode)->first();
+                if (!$item) {
+                    throw new \Exception("Article {$articleCode} introuvable.");
+                }
             }
+
             if ($request->input('action') === 'validate' && $item->getStockQuantityAttribute() < $line['ordered_quantity']) {
                 // throw new \Exception("Stock insuffisant pour l'article {$line['article_code']}.");
             }
@@ -961,6 +1059,10 @@ public function update(Request $request, $numdoc)
                 'remise' => $line['remise'] ?? 0,
                 'total_ligne_ht' => $ligne_total,
                 'total_ligne_ttc' => $total_ligne_ttc,
+                                        // === ENREGISTREMENT DES 3 NOUVEAUX CHAMPS ===
+    'supplier_id' => $line['supplier_id'] ?? null,
+    'unit_coast' => $line['unit_coast'] ?? $item->cost_price ?? 0,
+    'discount_coast' => $line['discount_coast'] ?? 0,
             ]);
         }
 
@@ -991,6 +1093,7 @@ public function update(Request $request, $numdoc)
 
                 $deliveryNote = DeliveryNote::create([
                     'sales_order_id' => $order->id,
+                    'vehicle_id' => $request->vehicle_id,
                     'delivery_date' => now(),
                     'status' => 'en_cours',
                     'total_delivered' => 0,
@@ -1021,6 +1124,10 @@ public function update(Request $request, $numdoc)
                     'remise' => $line->remise ?? 0,
                     'total_ligne_ht' => $total_ligne_ht,
                     'total_ligne_ttc' => $total_ligne_ttc,
+                                            // === ENREGISTREMENT DES 3 NOUVEAUX CHAMPS ===
+    'supplier_id' => $line['supplier_id'] ?? null,
+    'unit_coast' => $line['unit_coast'] ?? $item->cost_price ?? 0,
+    'discount_coast' => $line['discount_coast'] ?? 0,
                 ]);
 
                 $totalDelivered += $line->ordered_quantity;
@@ -1075,7 +1182,7 @@ public function validateOrder($id)
     return DB::transaction(function () use ($id) {
         $order = SalesOrder::with('lines')->findOrFail($id);
         if ($order->status !== 'brouillon') {
-            throw new \Exception('Cette commande est déjà validée.');
+            // throw new \Exception('Cette commande est déjà validée.');
         }
 
         foreach ($order->lines as $line) {
@@ -1098,6 +1205,7 @@ public function validateOrder($id)
         $deliveryNote = DeliveryNote::create([
             'sales_order_id' => $order->id,
             'numclient' => $order->numclient,
+            'vehicle_id' => $order->vehicle_id,
             'delivery_date' => now(),
             'status' => 'en_cours',
             'total_delivered' => 0,
@@ -1123,6 +1231,10 @@ public function validateOrder($id)
                 'remise' => $line->remise ?? 0,
                 'total_ligne_ht' => $total_ligne_ht,
                 'total_ligne_ttc' => $total_ligne_ttc,
+                                        // === ENREGISTREMENT DES 3 NOUVEAUX CHAMPS ===
+    'supplier_id' => $line['supplier_id'] ?? null,
+    'unit_coast' => $line['unit_coast'] ?? $item->cost_price ?? 0,
+    'discount_coast' => $line['discount_coast'] ?? 0,
             ]);
 
             $totalDelivered += $line->ordered_quantity;
@@ -1537,6 +1649,10 @@ public function exportSingle($id)
                         'remise' => $remise,
                         'total_ligne_ht' => $ligne_total,
                         'total_ligne_ttc' => $total_ligne_ttc,
+                        // === LES 3 CHAMPS ===
+    'supplier_id' => $line['supplier_id'] ?? null,
+    'unit_coast' => $line['unit_coast'] ?? $item->cost_price ?? 0,
+    'discount_coast' => $line['discount_coast'] ?? 0,
                     ]);
                 }
 

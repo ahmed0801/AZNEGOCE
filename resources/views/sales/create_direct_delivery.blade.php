@@ -1633,34 +1633,28 @@ function initSupplierSelect($select, supplierId = null) {
            
            <td class="p-1">
     <div class="purchase-price-block">
-        <!-- Prix d'achat HT (affiché) -->
-<!-- Prix d'achat HT + Fournisseur -->
-<div class="d-flex gap-1 align-items-center mb-1">
-    <div class="input-group input-group-sm flex-fill">
-        <span class="input-group-text">€</span>
-        <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
-               value="${costPrice.toFixed(2)}" data-original-cost="${costPrice.toFixed(2)}">
-    </div>
-    <select class="form-select form-select-sm supplier-select" style="width: 140px;" name="lines[${lineCount}][supplier_id]">
-        <option value="">Fournisseur</option>
-    </select>
-</div>
-
-        <!-- Remise achat + Prix net -->
+        <div class="d-flex gap-1 align-items-center mb-1">
+            <div class="input-group input-group-sm flex-fill">
+                <span class="input-group-text">€</span>
+                <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
+                       value="${costPrice.toFixed(2)}" name="lines[${lineCount}][unit_coast]" placeholder="Prix achat HT">
+            </div>
+            <select class="form-select form-select-sm supplier-select" name="lines[${lineCount}][supplier_id]">
+                <option value="">Fournisseur</option>
+            </select>
+        </div>
         <div class="d-flex gap-1 align-items-center justify-content-between">
             <div class="input-group input-group-sm" style="width: 105px;">
                 <input type="number" min="0" max="100" step="0.1"
                        class="form-control form-control-sm text-end purchase-discount"
-                       value="0" placeholder="Rem%">
+                       value="0" name="lines[${lineCount}][discount_coast]" placeholder="Rem%">
                 <span class="input-group-text">%</span>
             </div>
             <span class="text-muted small">→</span>
             <span class="fw-bold text-success net-price">0,00 €</span>
         </div>
-
-        <!-- Marge estimée -->
         <small class="text-muted d-block text-end mt-1">
-            Marge : <span class="margin-display text-primary fw-bold">0%</span>
+            Marge nette : <span class="margin-display text-primary fw-bold">0%</span>
             (<span class="margin-euro text-primary">0,00 €</span>)
         </small>
     </div>
@@ -1767,6 +1761,13 @@ let negativeMarginTimeout = null;
 let negativeMarginToastShown = null;
 
 function updatePurchaseMargin(row) {
+// Si c'est une consigne → on ne calcule rien
+    if (row.data('is-consigne') == '1') {
+        row.find('.net-price').text('—');
+        row.find('.margin-display').text('—');
+        row.find('.margin-euro').text('—');
+        return;
+    }
     let costPrice = parseFloat(row.find('.cost-price-input').val().replace(',', '.')) || 0;
     let purchaseDiscount = parseFloat(row.find('.purchase-discount').val().replace(',', '.')) || 0;
     let saleDiscount = parseFloat(row.find('.remise').val().replace(',', '.')) || 0;
@@ -2239,76 +2240,69 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
         const isConsigne = $(this).data('type') === 'consigne';
 
         let rowHtml = `
-            <tr class="divers-line" data-line-id="divers_${i}">
-                <td>
-<input type="text" 
-                       name="lines[${i}][article_code]" 
-                       class="form-control form-control-sm bg-light" 
-                       value="${isConsigne ? 'CONSIGNE' : ''}" 
-                       placeholder="Réf (ex: DIV001)" 
-                       ${isConsigne ? 'readonly' : 'required'}>
-                                           <input type="hidden" name="lines[${i}][is_new_item]" value="1">
-                </td>
-<td>
-                <input type="text" 
-                       name="lines[${i}][item_name]" 
-                       class="form-control form-control-sm bg-light" 
-                       value="${isConsigne ? 'CONSIGNE' : ''}" 
-                       placeholder="Désignation" 
-                       ${isConsigne ? 'readonly' : 'required'}>
-            </td>
-
-
-
-<td class="p-1">
-    <div class="purchase-price-block ${isConsigne? 'd-none': ''}">
-        <!-- Prix d'achat HT saisissable -->
-<div class="d-flex gap-1 align-items-center mb-1">
-    <div class="input-group input-group-sm flex-fill">
-        <span class="input-group-text">€</span>
-        <input   type="${isConsigne ? 'hidden' : 'number'}"     step="0.01" class="form-control form-control-sm text-end cost-price-input"
-               value="0.00" placeholder="Prix achat HT">
-    </div>
-    <select class="form-select form-select-sm supplier-select" style="width: 140px;" name="lines[${i}][supplier_id]">
-        <option value="">Fournisseur</option>
-    </select>
-</div>
-        <!-- Remise achat + Prix net -->
-        <div class="d-flex gap-1 align-items-center justify-content-between">
-            <div class="input-group input-group-sm" style="width: 105px;">
-                <input type="${isConsigne ? 'hidden' : 'number'}"  min="0" max="100" step="0.1"
-                       class="form-control form-control-sm text-end purchase-discount"
-                       value="0" placeholder="Rem%">
-                <span class="input-group-text">%</span>
+    <tr class="divers-line" data-line-id="divers_${i}" data-is-consigne="${isConsigne ? '1' : '0'}">
+        <td>
+            <input type="text"
+                   name="lines[${i}][article_code]"
+                   class="form-control form-control-sm bg-light"
+                   value="${isConsigne ? 'CONSIGNE' : ''}"
+                   placeholder="Réf (ex: DIV001)"
+                   ${isConsigne ? 'readonly' : 'required'}>
+            <input type="hidden" name="lines[${i}][is_new_item]" value="1">
+        </td>
+        <td>
+            <input type="text"
+                   name="lines[${i}][item_name]"
+                   class="form-control form-control-sm bg-light"
+                   value="${isConsigne ? 'CONSIGNE' : ''}"
+                   placeholder="Désignation"
+                   ${isConsigne ? 'readonly' : 'required'}>
+        </td>
+        <td class="p-1">
+            <div class="purchase-price-block ${isConsigne ? 'd-none' : ''}">
+                <div class="d-flex gap-1 align-items-center mb-1">
+                    <div class="input-group input-group-sm flex-fill">
+                        <span class="input-group-text">€</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
+                               value="0.00" name="lines[${i}][unit_coast]" placeholder="Prix achat HT">
+                    </div>
+                    <select class="form-select form-select-sm supplier-select" name="lines[${i}][supplier_id]" ${isConsigne ? 'disabled' : ''}>
+                        <option value="">Fournisseur</option>
+                    </select>
+                </div>
+                <div class="d-flex gap-1 align-items-center justify-content-between">
+                    <div class="input-group input-group-sm" style="width: 105px;">
+                        <input type="number" min="0" max="100" step="0.1"
+                               class="form-control form-control-sm text-end purchase-discount"
+                               value="0" name="lines[${i}][discount_coast]" placeholder="Rem%">
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <span class="text-muted small">→</span>
+                    <span class="fw-bold text-success net-price">0,00 €</span>
+                </div>
+                <small class="text-muted d-block text-end mt-1">
+                    Marge nette : <span class="margin-display text-primary fw-bold">0%</span>
+                    (<span class="margin-euro text-primary">0,00 €</span>)
+                </small>
             </div>
-            <span class="text-muted small ${isConsigne? 'd-none': ''}">→</span>
-            <span class="fw-bold text-success net-price ${isConsigne? 'd-none': ''}">0,00 €</span>
-        </div>
-        <!-- Marge estimée -->
-        <small class="text-muted d-block text-end mt-1 ${isConsigne? 'd-none': ''}">
-            Marge : <span class="margin-display text-primary fw-bold">0%</span>
-            (<span class="margin-euro text-primary">0,00 €</span>)
-        </small>
-    </div>
-</td>                <td><span class="text-muted">-</span></td>
-
-
-
-                <td><input type="number" name="lines[${i}][ordered_quantity]" class="form-control quantity" value="1" min="1" required></td>
-<td>
-    <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ht]"
-           class="form-control unit_price_ht" value="0.00" placeholder="0,00">
-</td>
-<td>
-    <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ttc]"
-           class="form-control unit_price_ttc" value="0.00" placeholder="0,00">
-</td>
-                <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
-                <td class="text-right total_ht">0,00</td>
-                <td class="text-right total_ttc">0,00</td>
-                <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"><i class="fas fa-trash-alt"></i></button></td>
-            </tr>
-        `;
+            ${isConsigne ? '<div class="text-center text-muted small">Consigne — Pas de marge</div>' : ''}
+        </td>
+        <td><span class="text-muted">-</span></td>
+        <td><input type="number" name="lines[${i}][ordered_quantity]" class="form-control quantity" value="1" min="1" required></td>
+        <td>
+            <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ht]"
+                   class="form-control unit_price_ht" value="0.00" placeholder="0,00">
+        </td>
+        <td>
+            <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ttc]"
+                   class="form-control unit_price_ttc" value="0.00" placeholder="0,00">
+        </td>
+        <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
+        <td class="text-right total_ht">0,00</td>
+        <td class="text-right total_ttc">0,00</td>
+        <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"><i class="fas fa-trash-alt"></i></button></td>
+    </tr>
+`;
 
         $('#lines_body').append(rowHtml);
         let $newRow = $('#lines_body tr:last');

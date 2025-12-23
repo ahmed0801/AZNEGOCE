@@ -319,6 +319,10 @@ protected function createDeliveryNoteFromOrder(SalesOrder $order, Request $reque
                 'remise' => $line->remise ?? 0,
                 'total_ligne_ht' => $total_ligne_ht,
                 'total_ligne_ttc' => $total_ligne_ttc,
+                // === COPIE DES 3 CHAMPS DEPUIS LA COMMANDE ===
+    'supplier_id' => $line->supplier_id,
+    'unit_coast' => $line->unit_coast,
+    'discount_coast' => $line->discount_coast,
             ]);
 
             $totalDelivered += $line->ordered_quantity;
@@ -601,6 +605,10 @@ foreach ($request->lines as $index => $line) {
         'remise' => $remise,
         'total_ligne_ht' => $ligne_total,
         'total_ligne_ttc' => $total_ligne_ttc,
+        // === LES 3 CHAMPS ===
+    'supplier_id' => $line['supplier_id'] ?? null,
+    'unit_coast' => $line['unit_coast'] ?? $item->cost_price ?? 0,
+    'discount_coast' => $line['discount_coast'] ?? 0,
     ]);
 }
 
@@ -768,6 +776,10 @@ if ($isNewItem) {
                         'remise' => $remise,
                         'total_ligne_ht' => $total_ligne_ht,
                         'total_ligne_ttc' => $total_ligne_ttc,
+                        // === ENREGISTREMENT DES 3 NOUVEAUX CHAMPS ===
+    'supplier_id' => $line['supplier_id'] ?? null,
+    'unit_coast' => $line['unit_coast'] ?? $item->cost_price ?? 0,
+    'discount_coast' => $line['discount_coast'] ?? 0,
                     ]);
 
                     // === MISE À JOUR DES TOTAUX ===
@@ -961,6 +973,10 @@ public function update(Request $request, $numdoc)
                 'remise' => $line['remise'] ?? 0,
                 'total_ligne_ht' => $ligne_total,
                 'total_ligne_ttc' => $total_ligne_ttc,
+                                        // === ENREGISTREMENT DES 3 NOUVEAUX CHAMPS ===
+    'supplier_id' => $line['supplier_id'] ?? null,
+    'unit_coast' => $line['unit_coast'] ?? $item->cost_price ?? 0,
+    'discount_coast' => $line['discount_coast'] ?? 0,
             ]);
         }
 
@@ -1021,6 +1037,10 @@ public function update(Request $request, $numdoc)
                     'remise' => $line->remise ?? 0,
                     'total_ligne_ht' => $total_ligne_ht,
                     'total_ligne_ttc' => $total_ligne_ttc,
+                                            // === ENREGISTREMENT DES 3 NOUVEAUX CHAMPS ===
+    'supplier_id' => $line['supplier_id'] ?? null,
+    'unit_coast' => $line['unit_coast'] ?? $item->cost_price ?? 0,
+    'discount_coast' => $line['discount_coast'] ?? 0,
                 ]);
 
                 $totalDelivered += $line->ordered_quantity;
@@ -1123,6 +1143,10 @@ public function validateOrder($id)
                 'remise' => $line->remise ?? 0,
                 'total_ligne_ht' => $total_ligne_ht,
                 'total_ligne_ttc' => $total_ligne_ttc,
+                                        // === ENREGISTREMENT DES 3 NOUVEAUX CHAMPS ===
+    'supplier_id' => $line['supplier_id'] ?? null,
+    'unit_coast' => $line['unit_coast'] ?? $item->cost_price ?? 0,
+    'discount_coast' => $line['discount_coast'] ?? 0,
             ]);
 
             $totalDelivered += $line->ordered_quantity;
@@ -1219,8 +1243,7 @@ public function validateOrder($id)
         if ($request->filled('query')) {
             $searchTerm = $request->query('query');
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('code','like',$searchTerm)
-                ->orWhere('code', 'like', $searchTerm . '%')   // match "1234."
+                $q->Where('code', 'like', $searchTerm . '%')   // match "1234."
                   ->orWhere('name', 'like',$searchTerm . '%');
 
             });
@@ -1248,6 +1271,12 @@ public function validateOrder($id)
                 'stock_quantity' => $item->getStockQuantityAttribute(),
                 'cost_price' => $item->cost_price,
                 'sale_price' => $item->sale_price,
+
+
+                'discount_rate' => $item->discountGroup->discount_rate ?? 0,
+            'discount_rate_jobber' => $item->discountGroup->discount_rate_jobber ?? 0,
+            'discount_rate_professionnel' => $item->discountGroup->discount_rate_professionnel ?? 0,
+
 
                  // 🔹 Nouveaux champs importés depuis GOLDA
             'Poids' => $item->Poids,
@@ -1532,6 +1561,10 @@ public function exportSingle($id)
                         'remise' => $remise,
                         'total_ligne_ht' => $ligne_total,
                         'total_ligne_ttc' => $total_ligne_ttc,
+                        // === LES 3 CHAMPS ===
+    'supplier_id' => $line['supplier_id'] ?? null,
+    'unit_coast' => $line['unit_coast'] ?? $item->cost_price ?? 0,
+    'discount_coast' => $line['discount_coast'] ?? 0,
                     ]);
                 }
 

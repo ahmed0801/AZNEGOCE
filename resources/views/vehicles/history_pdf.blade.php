@@ -38,13 +38,13 @@
 <header>
     <img src="{{ public_path($company->logo_path) }}" alt="Logo" class="logo">
     <h1>{{ $company->name }}</h1>
-    <h4>Historique des Réparations : {{ $vehicle->license_plate }}</h4>
+    <h4>Historique Véhicule : {{ $vehicle->license_plate }}</h4>
 </header>
 
 <main>
     <div class="intro-text">
         Ce document récapitule l’ensemble des pièces détachées fournies pour le véhicule indiqué ci-dessus. 
-        Il constitue un justificatif d'achat et peut être utilisé pour le suivi des réparations.
+        Il constitue un justificatif d'achat et peut être utilisé pour le suivi.
     </div>
 
     @foreach($deliveryNotes as $bl)

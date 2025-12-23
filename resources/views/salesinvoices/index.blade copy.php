@@ -48,6 +48,18 @@
         .btn-primary:hover { background-color: #0056b3; box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); }
         .form-select-sm { width: auto; display: inline-block; }
         .badge { font-size: 0.85rem; }
+
+
+
+
+
+        .filter-box {
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    padding: 6px 8px !important;
+    background: #f2f1f1ff;
+}
+
     </style>
 </head>
 <body>
@@ -402,9 +414,27 @@
                             </div> -->
 
 
-                            <a href="{{ route('salesinvoices.create_grouped') }}" class="btn btn-outline-success btn-round ms-2">
-                            Nouvelle Facture Groupée <i class="fas fa-plus-circle ms-2"></i>
-                        </a>
+                            <a href="{{ route('salesinvoices.create_grouped') }}"
+   class="btn btn-outline-success btn-round ms-2">
+
+
+    <!-- Icône d’information -->
+<span 
+    style="cursor: pointer;"
+    data-bs-toggle="popover"
+    data-bs-trigger="hover focus"
+    data-bs-placement="left"
+    title="À quoi sert cette fonction ?"
+    data-bs-content="Ce bouton permet de collecter tous les BL et retours non facturés d’un client afin de générer une seule facture groupée. Très utile pour les factures de fin de mois des garages, professionnels ou clients réguliers.">
+
+    Nouvelle Facture Groupée <i class="fas fa-plus-circle ms-2"></i>
+
+</span>
+
+
+</a>
+
+
 
                             <a href="{{ route('sales.delivery.create') }}" class="btn btn-outline-success btn-round ms-2">
                             Nouvelle Commande <i class="fas fa-plus-circle ms-2"></i>
@@ -418,65 +448,69 @@
 
                         </h4>
 
-                        <div class="alert alert-primary" role="alert">
+                        <!-- <div class="alert alert-primary" role="alert">
   La création des factures Directes se fait à partir d’un <a href="/delivery_notes/list" class="alert-link">Bon de Livraison</a> non facturé.
+</div> -->
+
+
+
+                        <div class="filter-box mb-2 p-2">
+    <form method="GET" action="{{ route('salesinvoices.index') }}" class="d-flex flex-wrap align-items-end gap-2">
+
+        <select name="customer_id" class="form-select form-select-sm select2" style="width: 140px;">
+            <option value="">Client (Tous)</option>
+            @foreach($customers as $customer)
+                <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
+                    {{ $customer->name }}
+                </option>
+            @endforeach
+        </select>
+
+        <input type="text" name="numdoc" class="form-control form-control-sm" style="width: 95px;"
+               placeholder="N° facture" value="{{ request('numdoc') }}">
+
+        <select name="vendeur" class="form-select form-select-sm" style="width: 120px;">
+            <option value="">Vendeur (Tous)</option>
+            @foreach($vendeurs as $v)
+                <option value="{{ $v }}" {{ request('vendeur') == $v ? 'selected' : '' }}>
+                    {{ $v }}
+                </option>
+            @endforeach
+        </select>
+
+        <select name="status" class="form-select form-select-sm" style="width: 80px;">
+            <option value="">Statut (Tous)</option>
+            <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
+            <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
+        </select>
+
+        <select name="paid" class="form-select form-select-sm" style="width: 85px;">
+            <option value="">Payé (Tous)</option>
+            <option value="1" {{ request('paid') == '1' ? 'selected' : '' }}>Payé</option>
+            <option value="0" {{ request('paid') == '0' ? 'selected' : '' }}>Non payé</option>
+        </select>
+
+        <input type="date" name="date_from" class="form-control form-control-sm" style="width: 97px;" value="{{ request('date_from') }}">
+        <span class="mx-0">à</span>
+        <input type="date" name="date_to" class="form-control form-control-sm" style="width: 97px;" value="{{ request('date_to') }}">
+
+        <button id="btnFilter" type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
+            <i class="fas fa-filter me-1"></i> Filtrer (F8)
+        </button>
+
+        <a id="btnReset" href="{{ route('salesinvoices.index') }}" class="btn btn-outline-secondary btn-sm px-3">
+            <i class="fas fa-undo me-1"></i> Réinitialiser (F9)
+        </a>
+
+        <button type="submit" name="action" value="export" 
+                formaction="{{ route('salesinvoices.export') }}"
+                class="btn btn-outline-success btn-sm px-3">
+            <i class="fas fa-file-excel me-1"></i> EXCEL
+        </button>
+
+    </form>
 </div>
 
-
-
-                        <form method="GET" action="{{ route('salesinvoices.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3" >
-                            <select name="customer_id" class="form-select form-select-sm select2" style="width: 150px;">
-                                <option value="">Client (Tous)</option>
-                                @foreach($customers as $customer)
-                                    <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
-                                        {{ $customer->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-
-                            <!-- num facture -->
-                            <input type="text" 
-       name="numdoc" 
-       class="form-control form-control-sm" 
-       style="width: 95px;" 
-       placeholder="N° facture" 
-       value="{{ request('numdoc') }}">
-
-
-       <select name="vendeur" class="form-select form-select-sm" style="width: 122px;">
-    <option value="">Vendeur (Tous)</option>
-    @foreach($vendeurs as $v)
-        <option value="{{ $v }}" {{ request('vendeur') == $v ? 'selected' : '' }}>
-            {{ $v }}
-        </option>
-    @endforeach
-</select>
-
-
-
-                            <select name="status" class="form-select form-select-sm" style="width: 85px;">
-                                <option value="">Statut (Tous)</option>
-                                <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
-                                <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
-                            </select>
-                            <select name="paid" class="form-select form-select-sm" style="width: 103px;">
-                                <option value="">Payé (Tous)</option>
-                                <option value="1" {{ request('paid') == '1' ? 'selected' : '' }}>Payé</option>
-                                <option value="0" {{ request('paid') == '0' ? 'selected' : '' }}>Non payé</option>
-                            </select>
-                            <input type="date" name="date_from" class="form-control form-control-sm" style="width: 97px;" placeholder="Date début" value="{{ request('date_from') }}">
-                            <span class="mx-1">à</span>
-                            <input type="date" name="date_to" class="form-control form-control-sm" style="width: 97px;" placeholder="Date fin" value="{{ request('date_to') }}">
-                            <button id="btnFilter"  type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                                <i class="fas fa-filter me-1"></i> Filtrer(F8)
-                            </button>
-                            <button type="submit" name="action" value="export" formaction="{{ route('salesinvoices.export') }}" class="btn btn-outline-success btn-sm px-3">
-                                <i class="fas fa-file-excel me-1"></i> EXCEL
-                            </button>
-                            <a id="btnReset" href="{{ route('salesinvoices.index') }}" class="btn btn-outline-secondary btn-sm px-3">
-                                <i class="fas fa-undo me-1"></i> Réinitialiser(F9)
-                            </a>
-                        </form>
 
                                                                 <!-- Pagination avec conservation des filtres -->
 <div class="d-flex justify-content-center mt-3">
@@ -497,7 +531,7 @@
                                              </strong> –
                                             &#x1F482;{{ $invoice->customer->name ?? 'N/A' }}
                                             <span class="text-muted small">({{ $invoice->numclient ?? 'N/A' }})</span>
-                                            <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</span>
+                                            <span class="text-muted small">- 📆 <b>{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</b></span>
                                         
                                         </h6>
                                         @if($invoice->status === 'brouillon')
@@ -525,7 +559,7 @@
 
     @endif
                                                 @endif
-                                                 <span class="text-muted small"> Créée le {{ $invoice->created_at }}</span>
+                                                 <span class="text-muted small"> Créée le <b> {{ $invoice->created_at->format('Y-m-d H:i') }} </b></span>
 
 
                                                                                         @if($invoice->due_date != $invoice->invoice_date)
