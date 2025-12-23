@@ -456,7 +456,7 @@
                                 <div class="text-end">
                                     <button type="submit" name="action" value="save" class="btn btn-warning px-3">Enregistrer Devis</button>
                                     <button type="submit" name="action" value="validate" class="btn btn-primary px-3 ms-2">Valider BL</button>
-                                    <button type="submit" name="action" value="validate_and_invoice" class="btn btn-success px-3 ms-2">Valider et Facturer</button>
+                                    <!-- <button type="submit" name="action" value="validate_and_invoice" class="btn btn-success px-3 ms-2">Valider et Facturer</button> -->
                                 </div>
                             </form>
                         </div>
