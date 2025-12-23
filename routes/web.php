@@ -281,7 +281,7 @@ Route::get('/purchase-invoices/create', [PurchaseInvoiceController::class, 'crea
 Route::get('/invoices/export', [PurchaseController::class, 'exportinvoices'])->name('invoices.export');
 Route::get('/purchases/search', [PurchaseController::class, 'search'])->name('purchases.search');
 
-Route::get('/settings', function () {
+Route::get('/setting', function () {
             return view('parametres');
     });
 
