@@ -870,11 +870,11 @@
             </nav>
             <div class="copyright">
             © AZ NEGOCE. All Rights Reserved.
-              <!-- <a href="http://www.themekita.com">By Ahmed Arfaoui</a> -->
+              <!-- <a href="http://www.themekita.com">By AZ NEGOCE</a> -->
             </div>
             <div>
                by
-              <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.
+              <a target="_blank" href="https://themewagon.com/">AZ NEGOCE</a>.
             </div>
           </div>
         </footer>

@@ -645,7 +645,7 @@ $total += $totalpararticleFloat - ($totalpararticleFloat * $details['remise'] / 
             </div>
             <div>
               by
-              <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.
+              <a target="_blank" href="https://themewagon.com/">AZ NEGOCE</a>.
             </div>
           </div>
         </footer>

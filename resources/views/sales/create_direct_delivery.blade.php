@@ -961,8 +961,8 @@
                                     <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de livraison, etc."></textarea>
                                 </div>
                                 <div class="text-end">
-                                    <button type="button" id="generatePurchaseBtn" class="btn btn-danger px-3 ms-2">🛒 Générer Commande Achat</button>
-                                    <button type="submit" name="action" value="validate" class="btn btn-primary px-3 ms-2">✔️ Valider BL</button>
+                                    <!-- <button type="button" id="generatePurchaseBtn" class="btn btn-danger px-3 ms-2">🛒 Générer Commande Achat</button> -->
+                                    <button type="submit" name="action" value="validate" class="btn btn-primary px-3 ms-2">✔️ Valider BL (Clients En Compte)</button>
                                     <button type="submit" name="action" value="validate_and_invoice" class="btn btn-success px-3 ms-2">📄 Valider et Facturer</button>
                                     <button type="submit" name="action" value="save_draft" class="btn btn-warning px-3 ms-2">📝 Enregistrer Devis</button>
                                 </div>
@@ -1098,7 +1098,7 @@
                         © AZ NEGOCE. All Rights Reserved.
                     </div>
                     <div>
-                        by <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.
+                        by <a target="_blank" href="https://themewagon.com/">AZ NEGOCE</a>.
                     </div>
                 </div>
             </footer>

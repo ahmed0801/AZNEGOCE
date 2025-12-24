@@ -710,7 +710,7 @@
                         © AZ NEGOCE. All Rights Reserved.
                     </div>
                     <div>
-                        by <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.
+                        by <a target="_blank" href="https://themewagon.com/">AZ NEGOCE</a>.
                     </div>
                 </div>
             </footer>
