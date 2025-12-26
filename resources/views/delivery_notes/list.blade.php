@@ -513,6 +513,20 @@
                                         PDF <i class="fas fa-print"></i>
                                     </a>
 
+                                    @if($deliveryNote->status === 'en_cours' && $deliveryNote->status_livraison === 'non_livré')
+    <form action="{{ route('delivery_notes.validate', $deliveryNote->id) }}"
+          method="POST"
+          class="d-inline"
+          onsubmit="return confirm('Valider cette expédition ?')">
+        @csrf
+        <button type="submit" class="btn btn-xs btn-outline-success">
+            ✅ Valider l'exp.
+        </button>
+    </form>
+@endif
+
+
+
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
                                             <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>

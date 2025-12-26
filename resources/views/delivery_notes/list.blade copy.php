@@ -61,68 +61,153 @@
 </head>
 <body>
     <div class="wrapper">
-     <!-- Sidebar -->
-        <div class="sidebar" data-background-color="dark">
-            <div class="sidebar-logo">
-                <div class="logo-header" data-background-color="dark">
-                    <a href="/" class="logo">
-                        <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
-                    </a>
-                    <div class="nav-toggle">
-                        <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
-                        <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
-                    </div>
-                    <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
-                </div>
-            </div>
-            <div class="sidebar-wrapper scrollbar scrollbar-inner">
-                <div class="sidebar-content">
-                    <ul class="nav nav-secondary">
-                        <li class="nav-item">
-                            <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
-                        </li>
-                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-shopping-cart"></i></span><h4 class="text-section">Ventes</h4></li>
-                        <li class="nav-item"><a href="/sales/create"><i class="fas fa-shopping-cart"></i><p>Nouvelle Commande</p></a></li>
-                        <li class="nav-item"><a href="/sales"><i class="fas fa-file-alt"></i><p>Commandes Vente</p></a></li>
-                        <li class="nav-item"><a href="/listbrouillon"><i class="fas fa-reply-all"></i><p>Devis</p></a></li>
-                        <li class="nav-item active"><a href="/delivery_notes/list"><i class="fas fa-file-invoice-dollar"></i><p>Bons De Livraison</p></a></li>
-                        <li class="nav-item"><a href="/delivery_notes/returns/list"><i class="fas fa-undo-alt"></i><p>Retours Vente</p></a></li>
-                        <li class="nav-item"><a href="/salesinvoices"><i class="fas fa-money-bill-wave"></i><p>Factures Vente</p></a></li>
-                        <li class="nav-item"><a href="/avoirs"><i class="fas fa-reply-all"></i><p>Avoirs Vente</p></a></li>
-                        <li class="nav-item"><a href="/reglement-client"><i class="fas fa-credit-card"></i><p>Règlement Client</p></a></li>
-                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-box"></i></span><h4 class="text-section">Achats</h4></li>
-                        <li class="nav-item"><a href="/purchases/list"><i class="fas fa-file-alt"></i><p>Commandes Achat</p></a></li>
-                        <li class="nav-item"><a href="/purchaseprojects/list"><i class="fas fa-file-alt"></i><p>Projets de Commande</p></a></li>
-                        <li class="nav-item"><a href="/returns"><i class="fas fa-undo-alt"></i><p>Retours Achat</p></a></li>
-                        <li class="nav-item"><a href="/invoices"><i class="fas fa-file-invoice"></i><p>Factures Achat</p></a></li>
-                        <li class="nav-item"><a href="/notes"><i class="fas fa-sticky-note"></i><p>Avoirs Achat</p></a></li>
-                        <li class="nav-item"><a href="/reglement-fournisseur"><i class="fas fa-credit-card"></i><p>Règlement Fournisseur</p></a></li>
-                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-warehouse"></i></span><h4 class="text-section">Stock</h4></li>
-                        <li class="nav-item"><a href="/receptions"><i class="fas fa-truck-loading"></i><p>Réceptions</p></a></li>
-                        <li class="nav-item"><a href="/articles"><i class="fas fa-cubes"></i><p>Articles</p></a></li>
-                                                <li class="nav-item"><a href="/planification-tournee"><i class="fas fa-truck"></i><p>Suivi Livraisons</p></a></li>
-
-                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fa fa-users"></i></span><h4 class="text-section">Référentiel</h4></li>
-                        <li class="nav-item"><a href="/customers"><i class="fa fa-user"></i><p>Clients</p></a></li>
-                        <li class="nav-item"><a href="/suppliers"><i class="fa fa-user-tie"></i><p>Fournisseurs</p></a></li>
-                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-cogs"></i></span><h4 class="text-section">Paramètres</h4></li>
-                        <li class="nav-item"><a href="/setting"><i class="fas fa-sliders-h"></i><p>Paramètres</p></a></li>
-                        <li class="nav-item"><a href="/tecdoc"><i class="fas fa-database"></i><p>TecDoc</p></a></li>
-                        <li class="nav-section"><span class="sidebar-mini-icon"><i class="fas fa-robot"></i></span><h4 class="text-section">Autres</h4></li>
-                        <li class="nav-item"><a href="/voice"><i class="fas fa-robot"></i><p>NEGOBOT</p></a></li>
-                        <li class="nav-item">
-                            <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
-                            </a>
-                            <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
-                                @csrf
-                            </form>
-                        </li>
-                    </ul>
-                </div>
+    <!-- Sidebar -->
+<div class="sidebar" data-background-color="dark">
+    <div class="sidebar-logo">
+        <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
+            </a>
+            <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
             </div>
         </div>
-        <!-- End Sidebar -->
+    </div>
+
+    <div class="sidebar-wrapper scrollbar scrollbar-inner">
+        <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
+                </li>
+
+                <!-- Ventes -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#ventes" aria-expanded="false">
+                        <i class="fas fa-shopping-cart"></i><p>Ventes</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="ventes">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
+                            <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
+                            <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="/salesnotes/list"><span class="sub-item">Avoirs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Achats -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#achats" aria-expanded="false">
+                        <i class="fas fa-shopping-bag"></i><p>Achats</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="achats">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Comptabilité -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#compta" aria-expanded="false">
+                        <i class="fas fa-balance-scale"></i><p>Comptabilité</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="compta">
+                        <ul class="nav nav-collapse">
+                            <li><a href="{{ route('generalaccounts.index') }}"><span class="sub-item">Plan Comptable</span></a></li>
+                            <li><a href="{{ route('payments.index') }}"><span class="sub-item">Règlements</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Stock -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#stock" aria-expanded="false">
+                        <i class="fas fa-warehouse"></i><p>Stock</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="stock">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/receptions"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="/articles"><span class="sub-item">Articles</span></a></li>
+                            <li><a href="/planification-tournee"><span class="sub-item">Suivi Livraisons</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Référentiel -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#referentiel" aria-expanded="false">
+                        <i class="fas fa-users"></i><p>Référentiel</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="referentiel">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/customers"><span class="sub-item">Clients</span></a></li>
+                            <li><a href="/suppliers"><span class="sub-item">Fournisseurs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Paramètres -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#parametres" aria-expanded="false">
+                        <i class="fas fa-cogs"></i><p>Paramètres</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="parametres">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/setting"><span class="sub-item">Configuration</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Outils -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#outils" aria-expanded="false">
+                        <i class="fab fa-skyatlas"></i><p>Outils</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="outils">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/analytics"><span class="sub-item">Analytics</span></a></li>
+                            <li><a href="/tecdoc"><span class="sub-item">TecDoc</span></a></li>
+                            <li><a href="/voice"><span class="sub-item">NEGOBOT</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Assistance -->
+<li class="nav-item">
+    <a href="/contact">
+        <i class="fas fa-headset"></i>
+        <p>Assistance</p>
+    </a>
+</li>
+
+
+                <!-- Déconnexion -->
+                <li class="nav-item">
+                    <a href="{{ route('logout.admin') }}" class="nav-link"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
+                    </a>
+                    <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Sidebar -->
 
 
         <div class="main-panel">
@@ -142,6 +227,131 @@
                 <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
                     <div class="container-fluid">
                         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+
+
+                              <!-- test quick action  -->
+<li class="nav-item topbar-icon dropdown hidden-caret">
+                  <a
+                    class="nav-link"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <i class="fas fa-layer-group"></i>
+                  </a>
+                  <div class="dropdown-menu quick-actions animated fadeIn">
+                    <div class="quick-actions-header">
+                      <span class="title mb-1">Actions Rapides</span>
+                      <!-- <span class="subtitle op-7">Liens Utiles</span> -->
+                    </div>
+                    <div class="quick-actions-scroll scrollbar-outer">
+                      <div class="quick-actions-items">
+                        <div class="row m-0">
+
+                                                  <a class="col-6 col-md-4 p-0" href="/articles">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-success rounded-circle"
+                              >
+                                <i class="fas fa-sitemap"></i>
+                              </div>
+                              <span class="text">Articles</span>
+                            </div>
+                          </a>
+
+                                                                            <a class="col-6 col-md-4 p-0" href="/customers">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-primary rounded-circle"
+                              >
+                                <i class="fas fa-users"></i>
+                              </div>
+                              <span class="text">Clients</span>
+                            </div>
+                          </a>
+
+
+                                                                                                      <a class="col-6 col-md-4 p-0" href="/suppliers">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-secondary rounded-circle"
+                              >
+                                <i class="fas fa-user-tag"></i>
+                              </div>
+                              <span class="text">Fournisseurs</span>
+                            </div>
+                          </a>
+
+
+
+                          <a class="col-6 col-md-4 p-0" href="/delivery_notes/list">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-danger rounded-circle">
+                                <i class="fa fa-cart-plus"></i>
+                              </div>
+                              <span class="text">Commandes Ventes</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/salesinvoices">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-warning rounded-circle"
+                              >
+                                <i class="fas fa-file-invoice-dollar"></i>
+                              </div>
+                              <span class="text">Factures Ventes</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/generalaccounts">
+                            <div class="quick-actions-item">
+                              <div class="avatar-item bg-info rounded-circle">
+                                <i class="fas fa-money-check-alt"></i>
+                              </div>
+                              <span class="text">Plan Comptable</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/purchases/list">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-success rounded-circle"
+                              >
+                                <i class="fa fa-cart-plus"></i>
+                              </div>
+                              <span class="text">Commandes Achats</span>
+                            </div>
+                          </a>
+                          <a class="col-6 col-md-4 p-0" href="/invoices">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-primary rounded-circle"
+                              >
+                                <i class="fas fa-file-invoice-dollar"></i>
+                              </div>
+                              <span class="text">Factures Achats</span>
+                            </div>
+                          </a>
+
+                          <a class="col-6 col-md-4 p-0" href="/paymentlist">
+                            <div class="quick-actions-item">
+                              <div
+                                class="avatar-item bg-secondary rounded-circle"
+                              >
+                                <i class="fas fa-credit-card"></i>
+                              </div>
+                              <span class="text">Paiements</span>
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                        <!-- fin test quick action  -->
+
+
                             <li class="nav-item topbar-user dropdown hidden-caret">
                                 <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
                                     <div class="avatar-sm">
@@ -190,10 +400,29 @@
                     @endif
 
                     <h4>📋 Liste des bons de livraison :
-                        <a href="{{ route('sales.delivery.create') }}" class="btn btn-sm btn-success">
-                            Nouveau BL <i class="fas fa-plus-circle ms-2"></i>
+                        <a href="{{ route('sales.delivery.create') }}" class="btn btn-outline-success btn-round ms-2">
+                            Nouvelle Commande <i class="fas fa-plus-circle ms-2"></i>
                         </a>
-                        <a href="{{ route('salesinvoices.create_grouped') }}" class="btn btn-sm btn-success">Facture groupée <i class="fas fa-file-invoice ms-2"></i></a>
+                        
+<a href="{{ route('salesinvoices.create_grouped') }}"
+   class="btn btn-outline-success btn-round ms-2">
+
+
+    <!-- Icône d’information -->
+<span 
+    style="cursor: pointer;"
+    data-bs-toggle="popover"
+    data-bs-trigger="hover focus"
+    data-bs-placement="right"
+    title="À quoi sert cette fonction ?"
+    data-bs-content="Ce bouton permet de collecter tous les BL et retours non facturés d’un client afin de générer une seule facture groupée. Très utile pour les factures de fin de mois des garages, professionnels ou clients réguliers.">
+
+    Nouvelle Facture Groupée <i class="fas fa-plus-circle ms-2"></i>
+
+</span>
+
+
+</a>
                     </h4>
 
                     <form method="GET" action="{{ route('delivery_notes.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
@@ -209,7 +438,9 @@
                         <select name="status" class="form-select form-select-sm" style="width: 170px;">
                             <option value="">Statut BL (Tous)</option>
                             <option value="en_cours" {{ request('status') == 'en_cours' ? 'selected' : '' }}>En cours</option>
-                            <option value="livré" {{ request('status') == 'livré' ? 'selected' : '' }}>Livré</option>
+                            <option value="expédié" {{ request('status') == 'expédié' ? 'selected' : '' }}>Expédié</option>
+                            <option value="annulé" {{ request('status') == 'annulé' ? 'selected' : '' }}>Annulé</option>
+
                         </select>
 
                         <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début" value="{{ request('date_from') }}">
@@ -224,6 +455,13 @@
                             <i class="fas fa-undo me-1"></i> Réinitialiser
                         </a>
                     </form>
+
+
+                                                                                                    <!-- Pagination avec conservation des filtres -->
+<div class="d-flex justify-content-center mt-3">
+    {{ $deliveryNotes->appends(request()->query())->links() }}
+</div>
+
 
                     @foreach ($deliveryNotes as $deliveryNote)
                         <div class="card mb-4 shadow-sm border-0">
@@ -244,6 +482,11 @@
 
                                                                       <span class="badge bg-info">@if($deliveryNote->salesOrder) CMD: {{ $deliveryNote->salesOrder->numdoc ?? '-' }} 
                                                                          @endif</span>
+
+     <span class="badge rounded-pill text-bg-light"><i class="fas fa-user-tie"></i> Vendeur :  {{ $deliveryNote->vendeur}}</span>
+
+
+
 
                                                                                               <span class="text-muted small">
                                      @if($deliveryNote->invoiced)
@@ -322,7 +565,7 @@
                                                    onclick="setCommentForm('{{ route('delivery_notes.shipping_note', $deliveryNote->id) }}', {{ $deliveryNote->id }})">
                                                     <i class="fas fa-truck"></i> Bordereau d'envoi
                                                 </a>
-                                            @endif
+                                           
                                             
 
                                 @if($deliveryNote->salesReturns()->exists())
@@ -333,6 +576,8 @@
                                     @endforeach
                                 @endif
 
+                                 @endif
+                                 
                                 @if(!$deliveryNote->invoiced)
                                                     <a class="dropdown-item" href="{{ route('salesinvoices.create_direct', $deliveryNote->id) }}">
                                                         <i class="fas fa-file-invoice"></i> Créer facture directe
@@ -349,7 +594,12 @@
                             </div>
 
                             <div id="lines-{{ $deliveryNote->id }}" class="card-body d-none bg-light">
-                                <h6 class="fw-bold mb-3">🧾 Lignes du bon de livraison</h6>
+                             <h6 class="fw-bold mb-3"><i class="fa fa-solid fa-car"></i> : {{ $deliveryNote->vehicle ? ($deliveryNote->vehicle->license_plate . ' (' . $deliveryNote->vehicle->brand_name . ' ' . $deliveryNote->vehicle->model_name . ')') : '-' }}</h6>
+
+                                @if($deliveryNote->notes)
+                                <h6 class="fw-bold mb-3">🧾 Note : {{$deliveryNote->notes}}</h6>
+                                @endif
+                                <!-- <h6 class="fw-bold mb-3">🧾 Lignes du bon de livraison</h6> -->
                                 <table class="table table-sm table-bordered align-middle">
                                     <thead class="table-light text-center">
                                         <tr>
@@ -385,6 +635,13 @@
                         </div>
                     @endforeach
                 </div>
+
+                                                                                <!-- Pagination avec conservation des filtres -->
+<div class="d-flex justify-content-center mt-3">
+    {{ $deliveryNotes->appends(request()->query())->links() }}
+</div>
+
+
             </div>
 
 
@@ -421,7 +678,7 @@
             <footer class="footer">
                 <div class="container-fluid d-flex justify-content-between">
                     <div class="copyright">© AZ NEGOCE. All Rights Reserved.</div>
-                    <div>by <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.</div>
+                    <div>by <a target="_blank" href="https://themewagon.com/">AZ NEGOCE</a>.</div>
                 </div>
             </footer>
         </div>
