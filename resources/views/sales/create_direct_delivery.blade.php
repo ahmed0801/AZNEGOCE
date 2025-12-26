@@ -872,12 +872,12 @@
                                 <div class="mb-3">
                                     <h6 class="font-weight-bold mb-2 d-flex align-items-center flex-wrap gap-2">
         <!-- Bouton création manuelle -->
-        <button type="button" id="add_divers_item" class="btn btn-outline-primary btn-sm">
+        <button type="button" id="add_divers_item" class="btn btn-primary btn-sm">
             + Créer un article
         </button>
 
 
-        <button type="button" id="add_divers_item" data-type="consigne" class="btn btn-outline-dark btn-sm">
+        <button type="button" id="add_divers_item" data-type="consigne" class="btn btn-dark btn-sm">
             + Consigne
         </button>
 
