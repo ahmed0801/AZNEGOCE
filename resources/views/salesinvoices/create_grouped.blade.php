@@ -456,7 +456,7 @@
                     @endif
                     <div class="card shadow-sm">
                         <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">Créer une Facture Vente Groupée</h5>
+                            <h5 class="mb-0">Créer une Facture Vente Groupée *(Clients En Comptes / Fin Du Mois)</h5>
                         </div>
                         <div class="card-body">
                             <form method="POST" action="{{ route('salesinvoices.store_grouped') }}">
@@ -507,7 +507,7 @@ Si non renseignées, tous les documents non facturés seront sélectionnés.
 
                                 <div class="mb-3">
     <div class="d-flex justify-content-between align-items-center mb-1">
-        <label class="form-label mb-0">Bons de Livraison et Retours</label>
+        <label class="form-label mb-0">Bons de Livraison et Retours (Non Facturées)</label>
         <button type="button" id="selectAllDocuments" class="btn btn-sm btn-outline-primary">
             ✅ Sélectionner tout
         </button>
