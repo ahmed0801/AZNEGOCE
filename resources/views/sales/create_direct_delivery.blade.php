@@ -398,7 +398,8 @@
                     <div class="collapse" id="ventes">
                         <ul class="nav nav-collapse">
                             <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
-                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/devislist"><span class="sub-item">Devis</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Commandes Ventes</span></a></li>
                             <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
                             <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
                             <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
@@ -716,18 +717,23 @@
 
 
 <!-- BOUTON DANS LA PAGE COMMANDE -->
-<button type="button" 
-        id="openCreateCustomerModal" 
-        class="btn btn-outline-success btn-round ms-2">
-    Nouveau Client <i class="fas fa-plus-circle ms-1"></i>
-</button>
+<div class="btn-group btn-group-sm ms-2 shadow-sm" role="group">
 
-<a href="/newcustomer"
-   onclick="window.open(this.href, 'popupWindow', 'width=1200,height=700,scrollbars=yes'); return false;"
-   class="btn btn-outline-primary btn-round ms-2">
-    Liste des Clients ⟰ 
-</a>
+    <button type="button"
+            id="openCreateCustomerModal"
+            class="btn btn-success btn-round">
+        <i class="fas fa-user-plus me-1"></i>
+        Nouveau Client
+    </button>
 
+    <a href="/newcustomer"
+       onclick="window.open(this.href, 'popupWindow', 'width=1200,height=700,scrollbars=yes'); return false;"
+       class="btn btn-outline-primary btn-round">
+        <i class="fas fa-users me-1"></i>
+        Liste des Clients
+    </a>
+
+</div>
 
 
 
@@ -953,7 +959,7 @@
                                     <!-- <a href="/articles" target="_blank" type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Aller a la Page Articles</a> -->
                                     <a href="/articles" 
                                     onclick="window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); return false;"
-                                     type="button" class="btn btn-outline-success btn-round ms-2">⟰ Liste des Articles</a>
+                                     type="button" class="btn btn-outline-success btn-sm btn-round ms-2">⟰ Liste des Articles</a>
 
                                 </div>
                                 <div class="mb-3">
@@ -963,7 +969,7 @@
                                 <div class="text-end">
                                     <!-- <button type="button" id="generatePurchaseBtn" class="btn btn-danger px-3 ms-2">🛒 Générer Commande Achat</button> -->
                                     <button type="submit" name="action" value="validate" class="btn btn-primary px-3 ms-2">✔️ Valider BL (Clients En Compte)</button>
-                                                                        <button type="submit" name="action" value="save_draft" class="btn btn-secondary px-3 ms-2">📝 Editer Commande Vente</button>
+                                                                        <button type="submit" name="action" value="save_commande" class="btn btn-danger px-3 ms-2">📝 Editer Commande Vente</button>
                                     <button type="submit" name="action" value="save_draft" class="btn btn-warning px-3 ms-2">📝 Editer Devis</button>
                                                                                                              <button type="submit" name="action" value="validate_and_invoice" class="btn btn-success px-3 ms-2">📄 Valider et Facturer</button>
 
@@ -1681,17 +1687,20 @@ function initSupplierSelect($select, supplierId = null) {
                        class="form-control unit_price_ht" value="${unitPriceHt}" step="0.01">
             </td>
 
+           
+
             <td>
+                <input type="number" inputmode="decimal" name="lines[${lineCount}][unit_price_ttc]"
+                       class="form-control unit_price_ttc" value="${unitPriceTtc}" step="0.01">
+            </td>
+
+             <td>
                 <input type="number" name="lines[${lineCount}][remise]" 
                        class="form-control remise" 
                        value="${appliedDiscount.toFixed(2)}" 
                        min="0" max="100" step="0.01">
             </td>
 
-            <td>
-                <input type="number" inputmode="decimal" name="lines[${lineCount}][unit_price_ttc]"
-                       class="form-control unit_price_ttc" value="${unitPriceTtc}" step="0.01">
-            </td>
 
             
             <td class="text-right total_ht">0,00</td>
@@ -2036,16 +2045,8 @@ row.find('.total_ttc').text(formatFrench(round(totalTtc, 2)));
 
 
     
-                const actionValue = $(this).find('button[type="submit"]:focus').val();
-                if (actionValue === 'validate_and_invoice') {
-                    e.preventDefault();
-                    $(this).attr('action', '{{ route("sales.delivery.store_and_invoice") }}');
-                    this.submit();
-                } else if (actionValue === 'save_draft') {
-                    e.preventDefault();
-                    $(this).attr('action', '{{ route("devis.store") }}');
-                    this.submit();
-                }
+                
+
             });
 
             document.getElementById('salesForm').addEventListener('submit', function (e) {
@@ -2059,12 +2060,25 @@ row.find('.total_ttc').text(formatFrench(round(totalTtc, 2)));
                 } else if (actionValue === 'save_draft') {
                     confirmMessage = 'Vous êtes sûr d\'enregistrer ce devis ?';
                 }
+
+                 else if (actionValue === 'save_commande') {
+                    confirmMessage = 'Vous êtes sûr d\'enregistrer cette commande vente ?';
+                }
+
                 if (confirmMessage && confirm(confirmMessage)) {
                     if (actionValue === 'validate_and_invoice') {
                         this.action = '{{ route("sales.delivery.store_and_invoice") }}';
                     } else if (actionValue === 'save_draft') {
                         this.action = '{{ route("devis.store") }}';
                     }
+
+                     else if (actionValue === 'save_commande') {
+                        this.action = '{{ route("commande.store") }}';
+                    }
+                     else if (actionValue === 'validate') {
+                        this.action = '{{ route("sales.delivery.store") }}';
+                    }
+
                     this.submit();
                 }
             });
@@ -2297,12 +2311,15 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
             <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ht]"
                    class="form-control unit_price_ht" value="0.00" placeholder="0,00">
         </td>
-                <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
 
         <td>
             <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ttc]"
                    class="form-control unit_price_ttc" value="0.00" placeholder="0,00">
         </td>
+
+                        <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
+
+
         <td class="text-right total_ht">0,00</td>
         <td class="text-right total_ttc">0,00</td>
         <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"><i class="fas fa-trash-alt"></i></button></td>

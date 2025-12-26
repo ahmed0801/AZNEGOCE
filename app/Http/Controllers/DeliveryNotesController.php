@@ -14,6 +14,7 @@ use App\Models\SalesReturnLine;
 use App\Models\Souche;
 use App\Models\Stock;
 use App\Models\StockMovement;
+use App\Models\User;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -44,10 +45,22 @@ $query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item','vehicle'])
             $query->whereDate('delivery_notes.delivery_date', '<=', $request->date_to);
         }
 
+                     // ✅ NOUVEAU : filtre vendeur
+    if ($request->filled('vendeur')) {
+        $query->where('vendeur', $request->vendeur);
+    }
+
+
         $deliveryNotes = $query->paginate(50); // Pagination au lieu de get()
         $customers = Customer::orderBy('name')->get();
+                                // On récupère aussi la liste des vendeurs uniques pour le select
+    $vendeurs = User::where('role', 'vendeur')
+        ->orderBy('name')
+        ->pluck('name')
+        ->unique();
+        
 
-        return view('delivery_notes.list', compact('deliveryNotes', 'customers'));
+        return view('delivery_notes.list', compact('deliveryNotes', 'customers','vendeurs'));
     }
 
  public function exportSingle($id)

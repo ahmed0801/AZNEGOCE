@@ -152,7 +152,8 @@
                     <div class="collapse" id="ventes">
                         <ul class="nav nav-collapse">
                             <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
-                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/devislist"><span class="sub-item">Devis</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Commandes Ventes</span></a></li>
                             <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
                             <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
                             <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>

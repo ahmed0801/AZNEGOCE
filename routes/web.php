@@ -303,6 +303,8 @@ Route::post('/stock/movement', [StockMovementController::class, 'store'])->name(
 
 // Sales Orders
     Route::get('/sales', [SalesController::class, 'list'])->name('sales.list');
+        Route::get('/devislist', [SalesController::class, 'devislist'])->name('sales.devislist');
+
     Route::get('/sales/create', [SalesController::class, 'index'])->name('sales.create');
     Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
     Route::get('/sales/{id}/edit', [SalesController::class, 'edit'])->name('sales.edit');
@@ -320,6 +322,7 @@ Route::get('/sales/printsansref/{id}', [SalesController::class, 'printSinglesans
 
 
         Route::post('/salesdevis', [SalesController::class, 'storedevis'])->name('devis.store');
+        Route::post('/salescommande', [SalesController::class, 'storecommande'])->name('commande.store');
 
 
 

@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>AZ ERP - Liste des Bons de Livraison</title>
+    <title>AZ ERP - Liste des Commandes Vente</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
     
@@ -72,6 +72,18 @@
 
 
 
+
+
+.filter-box {
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    padding: 6px 8px !important;
+    background: #f2f1f1ff;
+}
+
+
+
+
     </style>
 </head>
 <body>
@@ -107,7 +119,8 @@
                     <div class="collapse" id="ventes">
                         <ul class="nav nav-collapse">
                             <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
-                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/devislist"><span class="sub-item">Devis</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Commandes Ventes</span></a></li>
                             <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
                             <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
                             <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
@@ -414,7 +427,7 @@
                         <div class="alert alert-danger">{{ session('error') }}</div>
                     @endif
 
-                    <h4>📋 Liste des commandes de vente & Devis :
+                    <h4>📋 Liste des commandes vente :
 
                         <!-- <a href="{{ route('sales.create') }}" class="btn btn-sm btn-success">
                             Nouvelle <i class="fas fa-plus-circle ms-2"></i>
@@ -427,41 +440,91 @@
 
                     </h4>
 
-                    <form method="GET" action="{{ route('sales.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-                        <select name="customer_id" class="form-select form-select-sm select2" style="width: 150px;">
-                            <option value="">Client (Tous)</option>
-                            @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
-                                    {{ $customer->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                         <div class="filter-box mb-2 p-2">
+    <form method="GET"
+          action="{{ route('sales.list') }}"
+          class="d-flex flex-wrap align-items-end gap-2">
 
-                        <select name="status" class="form-select form-select-sm" style="width: 130px;">
-                            <option value="">Type/Statut</option>
-                            <option value="Devis" {{ request('status') == 'Devis' ? 'selected' : '' }}>Devis</option>
-                            <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
-                            <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
-                        </select>
+        {{-- Client --}}
+        <select name="customer_id"
+                class="form-select form-select-sm select2"
+                style="width: 140px;">
+            <option value="">Client (Tous)</option>
+            @foreach($customers as $customer)
+                <option value="{{ $customer->id }}"
+                    {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
+                    {{ $customer->name }}
+                </option>
+            @endforeach
+        </select>
 
-                        <select name="delivery_status" class="form-select form-select-sm" style="width: 140px;">
-                            <option value="">Statut BL (Tous)</option>
-                            <option value="en_cours" {{ request('delivery_status') == 'en_cours' ? 'selected' : '' }}>En cours</option>
-                            <option value="livré" {{ request('delivery_status') == 'livré' ? 'selected' : '' }}>Livré</option>
-                        </select>
+        {{-- Vendeur --}}
+        <select name="vendeur"
+                class="form-select form-select-sm"
+                style="width: 120px;">
+            <option value="">Vendeur (Tous)</option>
+            @foreach($vendeurs as $vendeur)
+                <option value="{{ $vendeur }}"
+                    {{ request('vendeur') == $vendeur ? 'selected' : '' }}>
+                    {{ $vendeur }}
+                </option>
+            @endforeach
+        </select>
 
-                        <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début" value="{{ request('date_from') }}">
-                        <span>à</span>
-                        <input type="date" name="date_to" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin" value="{{ request('date_to') }}">
+        {{-- Statut devis --}}
+        <select name="status"
+                class="form-select form-select-sm"
+                style="width: 90px;">
+            <option value="">Statut</option>
+            <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>
+                Brouillon
+            </option>
+            <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>
+                Validée
+            </option>
+        </select>
 
-                        <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                            <i class="fas fa-filter me-1"></i> Filtrer
-                        </button>
+        {{-- Statut BL --}}
+        <select name="delivery_status"
+                class="form-select form-select-sm"
+                style="width: 100px;">
+            <option value="">BL (Tous)</option>
+            <option value="en_cours" {{ request('delivery_status') == 'en_cours' ? 'selected' : '' }}>
+                En cours
+            </option>
+            <option value="livré" {{ request('delivery_status') == 'livré' ? 'selected' : '' }}>
+                Livré
+            </option>
+        </select>
 
-                        <a href="{{ route('sales.list') }}" class="btn btn-outline-secondary btn-sm px-3">
-                            <i class="fas fa-undo me-1"></i> Réinitialiser
-                        </a>
-                    </form>
+        {{-- Dates --}}
+        <input type="date"
+               name="date_from"
+               class="form-control form-control-sm"
+               style="width: 97px;"
+               value="{{ request('date_from') }}">
+
+        <span class="mx-0">à</span>
+
+        <input type="date"
+               name="date_to"
+               class="form-control form-control-sm"
+               style="width: 97px;"
+               value="{{ request('date_to') }}">
+
+        {{-- Boutons --}}
+        <button type="submit"
+                class="btn btn-outline-primary btn-sm px-3">
+            <i class="fas fa-filter me-1"></i> Filtrer
+        </button>
+
+        <a href="{{ route('sales.devislist') }}"
+           class="btn btn-outline-secondary btn-sm px-3">
+            <i class="fas fa-undo me-1"></i> Réinitialiser
+        </a>
+
+    </form>
+</div>   
 
                     @foreach ($sales as $order)
                         <div class="card mb-4 shadow-sm border-0">
@@ -478,6 +541,9 @@
                                         <span class="badge bg-dark">{{ ucfirst($order->status) }}</span>
                                     @elseif($order->status === 'validée')
                                         <span class="badge bg-success">{{ ucfirst($order->status) }}</span>
+                                         @elseif($order->status === 'en_cours')
+                                        <span class="badge bg-warning">{{ ucfirst($order->status) }}</span>
+
                                     @endif
                                     @if($order->deliveryNote)
                                         <span class="badge bg-info">Expédition {{ ucfirst($order->deliveryNote->status) }}</span>
@@ -627,4 +693,4 @@
     </script>
 </body>
 </html>
-```
+

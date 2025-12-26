@@ -24,6 +24,7 @@ use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\Supplier;
 use App\Models\TvaGroup;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +41,9 @@ class SalesController extends Controller
      */
     public function list(Request $request)
     {
-        $query = SalesOrder::with(['customer', 'lines.item', 'deliveryNote'])->orderBy('updated_at', 'desc');
+        $query = SalesOrder::with(['customer', 'lines.item', 'deliveryNote'])
+                        ->where('numdoc', 'like', 'C%') // ✅ uniquement les devis
+                        ->orderBy('updated_at', 'desc');
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -58,17 +61,87 @@ class SalesController extends Controller
             $query->whereDate('order_date', '<=', $request->date_to);
         }
 
+                 // ✅ NOUVEAU : filtre vendeur
+    if ($request->filled('vendeur')) {
+        $query->where('vendeur', $request->vendeur);
+    }
+    
+
         if ($request->filled('delivery_status')) {
             $query->whereHas('deliveryNote', function ($q) use ($request) {
                 $q->where('status', $request->delivery_status);
             });
         }
 
+
+                        // On récupère aussi la liste des vendeurs uniques pour le select
+    $vendeurs = User::where('role', 'vendeur')
+        ->orderBy('name')
+        ->pluck('name')
+        ->unique();
+
         $sales = $query->get();
         $customers = Customer::orderBy('name')->get();
 
-        return view('sales.list', compact('sales', 'customers'));
+
+        $sales = $query->get();
+        $customers = Customer::orderBy('name')->get();
+
+        return view('sales.list', compact('sales', 'customers','vendeurs'));
     }
+
+
+
+
+
+
+    public function devislist(Request $request)
+    {
+        $query = SalesOrder::with(['customer', 'lines.item', 'deliveryNote'])
+                ->where('numdoc', 'like', 'D%') // ✅ uniquement les devis
+                ->orderBy('updated_at', 'desc');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('customer_id')) {
+            $query->where('customer_id', $request->customer_id);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('order_date', '>=', $request->date_from);
+        }
+
+         // ✅ NOUVEAU : filtre vendeur
+    if ($request->filled('vendeur')) {
+        $query->where('vendeur', $request->vendeur);
+    }
+
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('order_date', '<=', $request->date_to);
+        }
+
+        if ($request->filled('delivery_status')) {
+            $query->whereHas('deliveryNote', function ($q) use ($request) {
+                $q->where('status', $request->delivery_status);
+            });
+        }
+
+                // On récupère aussi la liste des vendeurs uniques pour le select
+    $vendeurs = User::where('role', 'vendeur')
+        ->orderBy('name')
+        ->pluck('name')
+        ->unique();
+
+        $sales = $query->get();
+        $customers = Customer::orderBy('name')->get();
+
+        return view('sales.devislist', compact('sales', 'customers','vendeurs'));
+    }
+
+
 
     /**
      * Show the form to create a new sales order.
@@ -1679,6 +1752,177 @@ public function exportSingle($id)
         throw new \Exception('Impossible de générer un numéro de document unique après plusieurs tentatives.');
     });
 }
+
+
+
+
+
+
+
+
+
+
+
+  public function storecommande(Request $request)
+{
+    // Validation globale sans exists sur items.code
+    $request->validate([
+        'customer_id' => 'required|exists:customers,id',
+        'order_date' => 'required|date',
+        'vehicle_id' => 'nullable|exists:vehicles,id',
+        'lines' => 'required|array',
+        'lines.*.ordered_quantity' => 'required|numeric|min:0.01',
+        'lines.*.unit_price_ht' => 'required|numeric|min:0',
+        'lines.*.remise' => 'nullable|numeric|min:0|max:100',
+    ]);
+
+    return DB::transaction(function () use ($request) {
+        $customer = Customer::with('tvaGroup')->findOrFail($request->customer_id);
+        $tvaRate = $customer->tvaGroup->rate ?? 0;
+        $status = $request->input('action') === 'validate' ? 'validée' : 'brouillon';
+
+        $maxRetries = 3;
+        $retryCount = 0;
+
+        while ($retryCount < $maxRetries) {
+            $souche = Souche::where('type', 'commande_vente')->lockForUpdate()->first();
+            if (!$souche) {
+                \Log::error('Souche Commande Vente manquante');
+                throw new \Exception('Souche Commande Vente manquante');
+            }
+
+            $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
+            $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
+
+            \Log::info('Generating numdoc', ['numdoc' => $numdoc, 'last_number' => $souche->last_number, 'retry' => $retryCount]);
+
+            if (!SalesOrder::where('numdoc', $numdoc)->exists()) {
+                $order = SalesOrder::create([
+                    'customer_id' => $request->customer_id,
+                    'order_date' => $request->order_date,
+                    'numclient' => $customer->code,
+                    'vehicle_id' => $request->vehicle_id,
+                    'status' => $status,
+                    'total_ht' => 0,
+                    'total_ttc' => 0,
+                    'notes' => $request->notes,
+                    'numdoc' => $numdoc,
+                    'tva_rate' => $tvaRate,
+                    'store_id' => $request->store_id ?? 1,
+                ]);
+
+                $total = 0;
+
+                foreach ($request->lines as $index => $line) {
+
+
+
+
+                    // ajoute ca correctif total
+                    $line['unit_price_ht']    = (float) str_replace(',', '.', $line['unit_price_ht'] ?? 0);
+    $line['ordered_quantity'] = (float) str_replace(',', '.', $line['ordered_quantity'] ?? 0);
+    $line['remise']           = (float) str_replace(',', '.', $line['remise'] ?? 0);
+
+// fin correctif total
+
+
+
+                    $articleCode = $line['article_code'] ?? null;
+                    $isNewItem = !empty($line['is_new_item']);
+                    $item = null;
+
+                    // === GESTION ARTICLE DIVERS (is_new_item) ===
+                  if ($isNewItem) {
+    $request->validate([
+        "lines.$index.item_name" => 'required|string|max:255',
+        "lines.$index.unit_price_ht" => 'required|numeric|min:0',
+    ]);
+
+    $code = trim($line['article_code'] ?? 'DIVERS');
+
+    $item = Item::where('code', $code)->first();
+
+    if ($item) {
+        $item->update([
+            'name' => $line['item_name'],
+            'sale_price' => $line['unit_price_ht'],
+            'cost_price' => $line['unit_price_ht'],
+            'location' => 'Divers',
+            'is_active' => 1,
+        ]);
+    } else {
+        $item = Item::create([
+            'code' => $code,
+            'name' => $line['item_name'],
+            'sale_price' => $line['unit_price_ht'],
+            'cost_price' => $line['unit_price_ht'],
+            'is_active' => 1,
+            'store_id' => $request->store_id ?? 1,
+            'location' => 'Divers',
+        ]);
+    }
+
+    $line['article_code'] = $item->code;
+} else {
+    $item = Item::where('code', $articleCode)->first();
+    if (!$item) {
+        throw new \Exception("Article {$articleCode} introuvable.");
+    }
+}
+
+                    // Vérification stock si validée
+                    if ($status === 'validée' && $item->getStockQuantityAttribute() < $line['ordered_quantity']) {
+                        throw new \Exception("Stock insuffisant pour l'article {$item->code}.");
+                    }
+
+                    $remise = $line['remise'] ?? 0;
+                    $ligne_total = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - $remise / 100);
+                    $unit_price_ttc = $line['unit_price_ht'] * (1 - $remise / 100) * (1 + $tvaRate / 100);
+                    $total_ligne_ttc = $ligne_total * (1 + $tvaRate / 100);
+                    $total += $ligne_total;
+
+                    SalesOrderLine::create([
+                        'sales_order_id' => $order->id,
+                        'article_code' => $item->code,
+                        'ordered_quantity' => $line['ordered_quantity'],
+                        'unit_price_ht' => $line['unit_price_ht'],
+                        'unit_price_ttc' => $unit_price_ttc,
+                        'remise' => $remise,
+                        'total_ligne_ht' => $ligne_total,
+                        'total_ligne_ttc' => $total_ligne_ttc,
+                        // === LES 3 CHAMPS ===
+    'supplier_id' => $line['supplier_id'] ?? null,
+    'unit_coast' => $line['unit_coast'] ?? $item->cost_price ?? 0,
+    'discount_coast' => $line['discount_coast'] ?? 0,
+                    ]);
+                }
+
+                $order->update([
+                    'total_ht' => $total,
+                    'total_ttc' => $total * (1 + $tvaRate / 100),
+                ]);
+
+                $souche->last_number += 1;
+                $souche->save();
+                \Log::info('Souche updated', ['numdoc' => $numdoc, 'new_last_number' => $souche->last_number]);
+
+                return redirect()->route('sales.list')
+                    ->with('success', 'Devis ' . ($status === 'validée' ? 'validé et créé' : 'créé en brouillon'));
+            }
+
+            $souche->last_number += 1;
+            $souche->save();
+            $retryCount++;
+            \Log::warning('Duplicate numdoc detected, retrying', ['numdoc' => $numdoc, 'retry' => $retryCount]);
+        }
+
+        \Log::error('Failed to find unique numdoc after retries', ['last_numdoc' => $numdoc, 'retries' => $maxRetries]);
+        throw new \Exception('Impossible de générer un numéro de document unique après plusieurs tentatives.');
+    });
+}
+
+
+
 
 
 
