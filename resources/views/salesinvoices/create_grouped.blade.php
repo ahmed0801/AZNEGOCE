@@ -507,8 +507,8 @@ Si non renseignées, tous les documents non facturés seront sélectionnés.
 
                                 <div class="mb-3">
     <div class="d-flex justify-content-between align-items-center mb-1">
-        <label class="form-label mb-0">Bons de Livraison et Retours (Non Facturées)</label>
-        <button type="button" id="selectAllDocuments" class="btn btn-sm btn-outline-primary">
+        <label class="form-label mb-0">Bons de Livraison et Retours (Validées & Non Facturées)</label>
+        <button type="button" id="selectAllDocuments" class="btn btn-md btn-outline-primary">
             ✅ Sélectionner tout
         </button>
 
