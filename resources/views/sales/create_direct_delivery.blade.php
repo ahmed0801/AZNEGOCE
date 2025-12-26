@@ -873,7 +873,7 @@
                                     <h6 class="font-weight-bold mb-2 d-flex align-items-center flex-wrap gap-2">
         <!-- Bouton création manuelle -->
         <button type="button" id="add_divers_item" class="btn btn-outline-primary btn-sm">
-            + Créer un article manuellement
+            + Créer un article
         </button>
 
 
@@ -964,7 +964,7 @@
                                     <!-- <button type="button" id="generatePurchaseBtn" class="btn btn-danger px-3 ms-2">🛒 Générer Commande Achat</button> -->
                                     <button type="submit" name="action" value="validate" class="btn btn-primary px-3 ms-2">✔️ Valider BL (Clients En Compte)</button>
                                     <button type="submit" name="action" value="validate_and_invoice" class="btn btn-success px-3 ms-2">📄 Valider et Facturer</button>
-                                    <button type="submit" name="action" value="save_draft" class="btn btn-warning px-3 ms-2">📝 Enregistrer Devis</button>
+                                    <button type="submit" name="action" value="save_draft" class="btn btn-warning px-3 ms-2">📝 Editer Devis</button>
                                 </div>
                             </form>
                         </div>
@@ -1678,17 +1678,19 @@ function initSupplierSelect($select, supplierId = null) {
                 <input type="number" inputmode="decimal" name="lines[${lineCount}][unit_price_ht]"
                        class="form-control unit_price_ht" value="${unitPriceHt}" step="0.01">
             </td>
-            <td>
-                <input type="number" inputmode="decimal" name="lines[${lineCount}][unit_price_ttc]"
-                       class="form-control unit_price_ttc" value="${unitPriceTtc}" step="0.01">
-            </td>
 
-<td>
+            <td>
                 <input type="number" name="lines[${lineCount}][remise]" 
                        class="form-control remise" 
                        value="${appliedDiscount.toFixed(2)}" 
                        min="0" max="100" step="0.01">
             </td>
+
+            <td>
+                <input type="number" inputmode="decimal" name="lines[${lineCount}][unit_price_ttc]"
+                       class="form-control unit_price_ttc" value="${unitPriceTtc}" step="0.01">
+            </td>
+
             
             <td class="text-right total_ht">0,00</td>
             <td class="text-right total_ttc">0,00</td>
@@ -2293,11 +2295,12 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
             <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ht]"
                    class="form-control unit_price_ht" value="0.00" placeholder="0,00">
         </td>
+                <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
+
         <td>
             <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ttc]"
                    class="form-control unit_price_ttc" value="0.00" placeholder="0,00">
         </td>
-        <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
         <td class="text-right total_ht">0,00</td>
         <td class="text-right total_ttc">0,00</td>
         <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"><i class="fas fa-trash-alt"></i></button></td>
