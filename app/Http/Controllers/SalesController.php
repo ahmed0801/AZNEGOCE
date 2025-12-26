@@ -65,7 +65,7 @@ class SalesController extends Controller
     if ($request->filled('vendeur')) {
         $query->where('vendeur', $request->vendeur);
     }
-    
+
 
         if ($request->filled('delivery_status')) {
             $query->whereHas('deliveryNote', function ($q) use ($request) {
@@ -1738,7 +1738,7 @@ public function exportSingle($id)
                 $souche->save();
                 \Log::info('Souche updated', ['numdoc' => $numdoc, 'new_last_number' => $souche->last_number]);
 
-                return redirect()->route('sales.list')
+                return redirect()->route('sales.devislist')
                     ->with('success', 'Devis ' . ($status === 'validée' ? 'validé et créé' : 'créé en brouillon'));
             }
 
@@ -1907,7 +1907,7 @@ public function exportSingle($id)
                 \Log::info('Souche updated', ['numdoc' => $numdoc, 'new_last_number' => $souche->last_number]);
 
                 return redirect()->route('sales.list')
-                    ->with('success', 'Devis ' . ($status === 'validée' ? 'validé et créé' : 'créé en brouillon'));
+                    ->with('success', 'Commande ' . ($status === 'validée' ? 'validé et créé' : 'créé en brouillon'));
             }
 
             $souche->last_number += 1;
