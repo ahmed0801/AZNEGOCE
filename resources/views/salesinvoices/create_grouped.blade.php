@@ -481,10 +481,48 @@
                                         <input type="date" name="invoice_date" id="invoice_date" class="form-control" value="{{ now()->format('Y-m-d') }}" required>
                                     </div>
                                 </div>
+
+
+                                <div class="row mb-3">
+    <div class="col-md-3">
+        <label class="form-label">Date début</label>
+        <input type="date" id="date_from" class="form-control">
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Date fin</label>
+        <input type="date" id="date_to" class="form-control">
+    </div>
+
+    <div class="col-md-6 d-flex align-items-end">
+        <small class="text-muted">
+📌 Les dates sont facultatives.  
+Si non renseignées, tous les documents non facturés seront sélectionnés.
+</small>
+
+    </div>
+</div>
+
+
+
                                 <div class="mb-3">
-                                    <label class="form-label">Bons de Livraison et Retours</label>
-                                    <select name="documents[]" id="documents" class="form-control select2-documents" multiple required></select>
-                                </div>
+    <div class="d-flex justify-content-between align-items-center mb-1">
+        <label class="form-label mb-0">Bons de Livraison et Retours</label>
+        <button type="button" id="selectAllDocuments" class="btn btn-sm btn-outline-primary">
+            ✅ Sélectionner tout
+        </button>
+
+        <button type="button" id="resetFilters" class="btn btn-sm btn-outline-secondary ms-2">
+    🔄 Réinitialiser tout
+</button>
+
+
+    </div>
+
+    <select name="documents[]" id="documents" class="form-control select2-documents" multiple required></select>
+</div>
+
+
                                 <h6 class="mt-4 mb-2">Lignes Sélectionnées</h6>
                                 <table class="table table-bordered" id="lines-table">
                                     <thead class="table-light">
@@ -559,6 +597,22 @@
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
     <script>
         let lineIndex = 0;
+
+        function isDateInRange(date, from, to) {
+    const d = new Date(date);
+    if (from) {
+        const f = new Date(from);
+        if (d < f) return false;
+    }
+    if (to) {
+        const t = new Date(to);
+        t.setHours(23, 59, 59, 999);
+        if (d > t) return false;
+    }
+    return true;
+}
+
+
         $(document).ready(function () {
             $('.select2').select2({ width: '100%' });
             $('.select2-documents').select2({
@@ -566,25 +620,37 @@
                     url: "{{ route('sales.orders.search') }}",
                     dataType: 'json',
                     delay: 250,
-                    data: function (params) {
-                        const customer = $('#customer_id').find(':selected');
-                        return {
-                            term: params.term || '',
-                            customer_id: customer.val() || '',
-                            customer_code: customer.data('code') || ''
-                        };
-                    },
-                    processResults: function (data) {
-                        return {
-                            results: data.map(item => ({
-                                id: `${item.type}_${item.id}`,
-                                text: `${item.type === 'delivery' ? 'BL' : 'Ret'} #${item.numdoc} - ${item.customer_name} (${new Date(item.order_date).toLocaleDateString()})`,
-                                type: item.type,
-                                lines: item.lines,
-                                tva_rate: item.tva_rate
-                            }))
-                        };
-                    },
+ data: function (params) {
+    const customer = $('#customer_id').find(':selected');
+
+    return {
+        term: params.term || '',
+        customer_id: customer.val() || '',
+        customer_code: customer.data('code') || '',
+        date_from: $('#date_from').val() || null,
+        date_to: $('#date_to').val() || null
+    };
+},
+
+                   processResults: function (data) {
+    const from = $('#date_from').val();
+    const to = $('#date_to').val();
+
+    const filtered = data.filter(item =>
+        isDateInRange(item.order_date, from, to)
+    );
+
+    return {
+        results: filtered.map(item => ({
+            id: `${item.type}_${item.id}`,
+            text: `${item.type === 'delivery' ? 'BL' : 'Ret'} #${item.numdoc} - ${item.customer_name} (${new Date(item.order_date).toLocaleDateString()})`,
+            type: item.type,
+            lines: item.lines,
+            tva_rate: item.tva_rate
+        }))
+    };
+}
+,
                     cache: true
                 },
                 placeholder: 'Sélect. Documents',
@@ -664,6 +730,109 @@
             });
             $('#lines').on('input', '.qty, .pu, .remise', recalculate);
             $('#customer_id').trigger('change');
+
+
+           
+            
+           $('#selectAllDocuments').on('click', function () {
+    const customer = $('#customer_id').find(':selected');
+
+    if (!customer.val()) {
+        alert('Veuillez d’abord sélectionner un client.');
+        return;
+    }
+
+    const dateFrom = $('#date_from').val();
+    const dateTo = $('#date_to').val();
+
+    $.ajax({
+        url: "{{ route('sales.orders.search') }}",
+        dataType: 'json',
+        data: {
+            term: '',
+            customer_id: customer.val(),
+            customer_code: customer.data('code') || '',
+            date_from: dateFrom || null,
+            date_to: dateTo || null
+        },
+        success: function (data) {
+            const select = $('.select2-documents');
+            select.empty();
+
+            if (!data || data.length === 0) {
+                alert('Aucun document disponible.');
+                return;
+            }
+
+            const from = $('#date_from').val();
+const to = $('#date_to').val();
+
+const filteredData = data.filter(item =>
+    isDateInRange(item.order_date, from, to)
+);
+
+if (filteredData.length === 0) {
+    alert('Aucun document disponible pour cet intervalle.');
+    return;
+}
+
+
+
+            filteredData.forEach(item => {
+                const option = new Option(
+                    `${item.type === 'delivery' ? 'BL' : 'Ret'} #${item.numdoc} - ${item.customer_name} (${new Date(item.order_date).toLocaleDateString()})`,
+                    `${item.type}_${item.id}`,
+                    true,
+                    true
+                );
+
+                // IMPORTANT pour Select2
+                $(option).data('data', {
+                    id: `${item.type}_${item.id}`,
+                    text: option.text,
+                    type: item.type,
+                    lines: item.lines,
+                    tva_rate: item.tva_rate
+                });
+
+                select.append(option);
+            });
+
+            select.trigger('change');
+        },
+        error: function () {
+            alert('Erreur lors du chargement des documents.');
+        }
+    });
+});
+
+
+
+
+
+
+$('#resetFilters').on('click', function () {
+    $('#date_from').val('');
+    $('#date_to').val('');
+
+    $('.select2-documents').val(null).trigger('change');
+    $('#lines').empty();
+
+    $('#grandTotal').text('0.00');
+    $('#grandTotalTTC').text('0.00');
+    $('#tva_display').val(0);
+    $('#tva_rate').val(0);
+});
+
+
+
+
+
+
+
+
+
+
         });
     </script>
 </body>
