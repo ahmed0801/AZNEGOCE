@@ -1542,6 +1542,8 @@ public function exportSingle($id)
     $invoice = SalesInvoice::with([
         'customer', 
         'lines.item',
+        'deliveryNotes',                 // Pour afficher numdoc + date
+        'salesReturns',                  // Pour afficher numdoc + date des retours
         'payments' => function ($query) {
             $query->orderBy('payment_date', 'asc');
         },
