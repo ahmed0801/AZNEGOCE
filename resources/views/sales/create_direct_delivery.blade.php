@@ -811,8 +811,8 @@
 
 
                                     <div class="col-md-3 col-12 mb-2">
-                                        <label class="form-label">Date de commande</label>
-                                        <input type="date" name="order_date" id="order_date" value="{{ now()->format('Y-m-d') }}" class="form-control order_date" required>
+                                        <!-- <label class="form-label">Date du document</label> -->
+                                        <input type="hidden" name="order_date" id="order_date" value="{{ now()->format('Y-m-d') }}" class="form-control order_date" required>
                                     </div>
                                 </div>
                                 <div class="mb-3" id="customer_details" style="display: none;">
@@ -842,8 +842,8 @@
  <label class="form-label">Rechercher un article </label>
 <div class="input-group mb-3">
   <input type="text" id="search_item"  class="form-control" placeholder="Par réference ou description, minimum 4 caratéres">
+  &nbsp;
   <div class="input-group-append">
-
             <button type="button" id="add_divers_item" class="btn btn-primary btn-sm">
             + Créer un article
         </button>
