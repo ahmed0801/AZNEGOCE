@@ -299,6 +299,11 @@ td {
             </tr>
         </thead>
                               <tbody>
+
+
+
+
+
             @php
                 $groupedLines = $invoice->lines->groupBy(function ($line) {
                     if ($line->sales_return_id) {
@@ -321,6 +326,9 @@ td {
 
             @foreach($groupedLines as $header => $lines)
                 <!-- Entête discrète avec véhicule si présent -->
+
+                                                                    @if($invoice->type =="groupée")
+
                 <tr>
                     <td colspan="7" style="
                         background-color: {{ str_starts_with($header, 'Retour') ? '#fff5f5' : '#f0f8ff' }};
@@ -332,9 +340,13 @@ td {
                         border-left: 3px solid {{ str_starts_with($header, 'Retour') ? '#e57373' : '#2196f3' }};
                         border-bottom: 1px solid #ddd;
                     ">
-                        {{ $header }}
+                       {{ $header }}
+                      
                     </td>
                 </tr>
+ @endif
+
+
 
                 <!-- Lignes du groupe -->
                 @foreach($lines as $line)
