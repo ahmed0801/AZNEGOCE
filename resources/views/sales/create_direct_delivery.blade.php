@@ -839,12 +839,49 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Rechercher un article </label>
-                                    <input type="text" id="search_item" class="form-control" placeholder="Par réference ou description, minimum 4 caratéres">
-                                    
-                                    <u><small class="form-text text-muted">
-        Astuce: ajoutez un <strong>%</strong> avant ou après votre mot-clé pour élargir la recherche. Exemple: <code>%pièce</code> ou <code>vis%</code>
-    </small></u>
+ <label class="form-label">Rechercher un article </label>
+<div class="input-group mb-3">
+  <input type="text" id="search_item"  class="form-control" placeholder="Par réference ou description, minimum 4 caratéres">
+  <div class="input-group-append">
+
+            <button type="button" id="add_divers_item" class="btn btn-primary btn-sm">
+            + Créer un article
+        </button>
+
+        <button type="button" id="add_divers_item" data-type="consigne" class="btn btn-dark btn-sm">
+            + Consigne
+        </button>
+        
+
+        <!-- NOUVEAU : Groupe de boutons fournisseurs -->
+        <!-- <span class="text-muted small">|</span> -->
+
+        <div class="btn-group btn-group-sm" role="group">
+        
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle  btn-sm" data-bs-toggle="dropdown">
+                    Recherche externe 
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="https://destockpiecesauto.autodata.fr/databox.php#vehicule/immat" target="_blank">DataBox</a></li>
+                    <li><a class="dropdown-item" href="https://aznegoce.inoshop.net/search" target="_blank">AZ</a></li>
+                    <li><a class="dropdown-item" href="https://apcat.eu/" target="_blank">AP</a></li>
+                    <li><a class="dropdown-item" href="https://ottogo.inoshop.net/search" target="_blank">OttoGo</a></li>
+
+                    <li><a class="dropdown-item" href="https://ksdistribpro.fr/index.php" target="_blank">KS Distrib</a></li>
+                    <li><a class="dropdown-item" href="https://mymga.fr/" target="_blank">MyMGA</a></li>
+                    <li><a class="dropdown-item" href="https://formule1.acrgroup.fr/CCDISP.HTM" target="_blank">Formule 1</a></li>
+                    <li><a class="dropdown-item" href="https://www.idlp.fr/" target="_blank">IDLP</a></li>
+                    <li><a class="dropdown-item" href="https://shopgroupeidlp.fr:5083/CCDISP.HTM" target="_blank">Shop IDLP</a></li>
+                    <li><a class="dropdown-item" href="http://siteweb.cal92.fr/" target="_blank">CAL92</a></li>
+                </ul>
+            </div>
+        </div>
+
+
+
+  </div>
+</div>
 
 
                                     <div id="search_results" class="mt-2"></div>
@@ -876,54 +913,7 @@
 
 <!-- article divers -->
                                 <div class="mb-3">
-                                    <h6 class="font-weight-bold mb-2 d-flex align-items-center flex-wrap gap-2">
-        <!-- Bouton création manuelle -->
-        <button type="button" id="add_divers_item" class="btn btn-primary btn-sm">
-            + Créer un article
-        </button>
-
-
-        <button type="button" id="add_divers_item" data-type="consigne" class="btn btn-dark btn-sm">
-            + Consigne
-        </button>
-
-
-        <!-- NOUVEAU : Groupe de boutons fournisseurs -->
-        <span class="text-muted small">|</span>
-        <span class="text-muted small d-none d-md-inline">Recherche externe :</span>
-
-        <div class="btn-group btn-group-sm" role="group">
-            <a href="https://destockpiecesauto.autodata.fr/databox.php#vehicule/immat" target="_blank"
-               class="btn btn-outline-dark" title="Destock Pièces Auto">
-                 DataBox
-            </a>
-            <a href="https://aznegoce.inoshop.net/search" target="_blank"
-               class="btn btn-outline-success" title="AZ Negoce">
-                 AZ
-            </a>
-            <a href="https://apcat.eu/" target="_blank"
-               class="btn btn-outline-warning" title="APCAT">
-                 AP
-            </a>
-            <a href="https://ottogo.inoshop.net/search" target="_blank"
-               class="btn btn-outline-danger" title="OttoGo">
-                 OttoGo
-            </a>
-            <div class="btn-group btn-group-sm" role="group">
-                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                    Plus
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="https://ksdistribpro.fr/index.php" target="_blank">KS Distrib</a></li>
-                    <li><a class="dropdown-item" href="https://mymga.fr/" target="_blank">MyMGA</a></li>
-                    <li><a class="dropdown-item" href="https://formule1.acrgroup.fr/CCDISP.HTM" target="_blank">Formule 1</a></li>
-                    <li><a class="dropdown-item" href="https://www.idlp.fr/" target="_blank">IDLP</a></li>
-                    <li><a class="dropdown-item" href="https://shopgroupeidlp.fr:5083/CCDISP.HTM" target="_blank">Shop IDLP</a></li>
-                    <li><a class="dropdown-item" href="http://siteweb.cal92.fr/" target="_blank">CAL92</a></li>
-                </ul>
-            </div>
-        </div>
-    </h6>
+                                    
 
                                     <!-- AJOUTE LE BOUTON ICI -->
 
