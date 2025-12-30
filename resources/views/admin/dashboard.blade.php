@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>AZ NEGOCE - Dashboard</title>
+    <title>NEGOPARTS - Dashboard</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
 
@@ -737,7 +737,7 @@
             <footer class="footer">
                 <div class="container-fluid d-flex justify-content-between">
                     <div class="copyright">
-                        © AZ NEGOCE. All Rights Reserved.
+                        © DESTOCK PA. All Rights Reserved.
                     </div>
                     <div>
                         by <a target="_blank" href="https://themewagon.com/">AZ NEGOCE</a>.
