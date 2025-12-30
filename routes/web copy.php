@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\ArticleImportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AvoirController;
+use App\Http\Controllers\BotController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
@@ -20,6 +23,7 @@ use App\Http\Controllers\TecdocController;
 use App\Http\Controllers\DevisController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\GeneralAccountsController;
+use App\Http\Controllers\ImmatController;
 use App\Http\Controllers\PayementmodeController;
 use App\Http\Controllers\PayementtermController;
 use App\Http\Controllers\PaymentController;
@@ -36,10 +40,12 @@ use App\Http\Controllers\StockController;
 use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\SupportController;
 use App\Http\Controllers\TvaController;
 use App\Http\Controllers\TvaGroupController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\VoiceCommandController;
 use App\Models\Arrivage;
 use App\Models\Brand;
 use App\Models\Invoice;
@@ -79,72 +85,7 @@ Route::get('/items/search', [ItemController::class, 'search'])->name('items.sear
 Route::get('/dashboard', [AuthController::class, 'adminDashboard'])->name('dashboard');
 
 
-Route::get('/commande', [ItemController::class, 'commande'])->name('commande');
 
-Route::get('/commandetest', [ItemController::class, 'commandetest'])->name('commandetest');
-Route::post('/itemstest/search', [ItemController::class, 'searchtest'])->name('items.searchtest');
-
-
-Route::get('/commande/refresh-clients', function () {
-    session()->forget('clients');
-    return redirect('/commande');
-});
-
-Route::get('/actualiser', function () {
-    session()->forget('clients');
-    return redirect()->back();
-});
-
-
-
-Route::post('/client/selectionner', function (Request $request) {
-    $customerNo = $request->client;
-    $clients = session('clients', []);
-    $client = collect($clients)->where('CustomerNo', $customerNo)->first();
-
-    if ($client) {
-        session()->forget('selectedClient');
-        session()->put('selectedClient', $client);
-        session()->save();
-        
-
-        // Log pour vérifier la session
-        // \Log::info('Client sélectionné:', ['client' => $client]);
-        // \Log::info('Session après mise à jour:', ['selectedClient' => session('selectedClient')]);
-
-        return response()->json([
-            'success' => true,
-            'client' => $client,
-            'selectedClient' => session('selectedClient')
-        ]);
-    }
-
-    return response()->json(['success' => false]);
-})->name('client.selectionner');
-
-
-
-
-    Route::get('/contact', function () {
-        return view('contact');
-    });
-
-
-
-
-
-
-        Route::get('/articlesold', function () {
-            $categories = ItemCategory::all();
-$brands = Brand::all();
-$units = Unit::all();
-$stores = Store::all();
-$tvaGroups = TvaGroup::all();
-    $items = Item::with(['category', 'brand', 'tvaGroup'])->orderBy('name')->get();
-
-
-        return view('articles', compact('items','stores','categories', 'brands', 'units', 'tvaGroups'));
-    });
 
 Route::get('/articles', [ItemController::class, 'index'])->name('articles.index');
 
@@ -201,6 +142,9 @@ Route::put('/brand/{id}', [BrandController::class, 'update'])->name('brand.updat
 
 
 Route::get('/customers', [CustomerController::class, 'index'])->name('customer.index');
+// créer un client depuis la page vente
+Route::get('/newcustomer', [CustomerController::class, 'newforsale'])->name('customer.new');
+
 Route::post('/customer', [CustomerController::class, 'store'])->name('customer.store');
 Route::delete('/customer/{id}', [CustomerController::class, 'destroy'])->name('customer.destroy');
 Route::put('/customer/{id}', [CustomerController::class, 'update'])->name('customer.update');
@@ -359,6 +303,8 @@ Route::post('/stock/movement', [StockMovementController::class, 'store'])->name(
 
 // Sales Orders
     Route::get('/sales', [SalesController::class, 'list'])->name('sales.list');
+        Route::get('/devislist', [SalesController::class, 'devislist'])->name('sales.devislist');
+
     Route::get('/sales/create', [SalesController::class, 'index'])->name('sales.create');
     Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
     Route::get('/sales/{id}/edit', [SalesController::class, 'edit'])->name('sales.edit');
@@ -367,9 +313,16 @@ Route::post('/stock/movement', [StockMovementController::class, 'store'])->name(
 Route::get('/export/{id}', [SalesController::class, 'exportSingle'])->name('sales.export_single');
     Route::get('/sales/print/{id}', [SalesController::class, 'printSingle'])->name('sales.print_single');
 
+Route::get('/sales/printsansref/{id}', [SalesController::class, 'printSinglesansref'])->name('sales.print_singlesansref');
+
 
     Route::get('/items/stock-details', [SalesController::class, 'stockDetails'])->name('items.stock.details');
 
+
+
+
+        Route::post('/salesdevis', [SalesController::class, 'storedevis'])->name('devis.store');
+        Route::post('/salescommande', [SalesController::class, 'storecommande'])->name('commande.store');
 
 
 
@@ -411,6 +364,18 @@ Route::post('/purchase/{id}/ship', [PurchaseController::class, 'markAsShipped'])
     // Delivery Notes
     Route::get('/sales/delivery/create', [SalesController::class, 'createDirectDeliveryNote'])->name('sales.delivery.create');
     Route::post('/sales/delivery', [SalesController::class, 'storeDirectDeliveryNote'])->name('sales.delivery.store');
+
+
+
+// 1. Création RAPIDE depuis une simple immatriculation (API plaque ou fallback)
+// Route pour créer/retrouver un véhicule par plaque (depuis le BL)
+Route::get('/customers/{customer}/vehicles/from-plate', [CustomerController::class, 'storeFromPlate'])
+    ->name('customers.vehicles.from-plate');
+
+// 2. Création COMPLÈTE via TecDoc (le modal classique)
+Route::post('/customers/{customer}/vehicles/quick-store', [CustomerController::class, 'quickStoreVehicle'])
+    ->name('customers.vehicles.quick-store');
+
 
 
 // Sales Invoices
@@ -455,6 +420,18 @@ Route::delete('/transfers/{transfer}/cancel', [PaymentController::class, 'cancel
 Route::post('/payments/deposit', [PaymentController::class, 'deposit'])->name('payments.deposit');
 Route::post('/payments/withdraw', [PaymentController::class, 'withdraw'])->name('payments.withdraw');
 
+// annulation reglement 
+Route::post('/payments/{id}/cancel', [PaymentController::class, 'cancelPayment'])->name('payments.cancel');
+
+
+// mail messages
+Route::post('/salesinvoices/{id}/send-email', [SalesInvoicesController::class, 'sendEmail'])->name('salesinvoices.sendEmail');
+Route::post('/salesinvoices/{id}/send-order-ready', 
+    [SalesInvoicesController::class, 'sendOrderReadyEmail'])
+    ->name('salesinvoices.sendOrderReadyEmail');
+
+
+
 
  
 // General Accounts Routes
@@ -470,7 +447,8 @@ Route::get('/generalaccounts/{id}/transactions', [GeneralAccountsController::cla
 
 
 
-
+Route::get('/customers/export', [CustomerController::class, 'export'])->name('customers.export');
+Route::get('/suppliers/export', [SupplierController::class, 'export'])->name('suppliers.export');
 
 
 
@@ -480,6 +458,50 @@ Route::get('/invoices/{id}/download_supplier_invoice', [PurchaseController::clas
 Route::delete('/invoices/{id}/delete_supplier_invoice', [PurchaseController::class, 'deleteSupplierInvoice'])->name('invoices.delete_supplier_invoice');
 
 
+// ecriture client historique client
+Route::get('/customers/{customer}/accounting-entries', [CustomerController::class, 'getAccountingEntries'])->name('customer.accounting-entries');
+// ecriture toutes client historique client
+Route::get('/allcustomers/accounting-entries', [CustomerController::class, 'getAllAccountingEntries'])->name('allcustomer.accounting-entries');
+// ecriture toutes client historique client HT pour compte general vente marchandises
+Route::get('/allcustomers/accounting-entriesHT', [CustomerController::class, 'getAllAccountingEntriesHT'])->name('allcustomer.accounting-entriesHT');
+
+
+// ecriture client historique fournisseurs
+Route::get('/suppliers/{customer}/accounting-entries', [SupplierController::class, 'getAccountingEntries'])->name('supplier.accounting-entries');
+// ecriture toutes fournisseur historique client
+Route::get('/allcsuppliers/accounting-entries', [SupplierController::class, 'getAllAccountingEntries'])->name('allsupplier.accounting-entries');
+// ecriture toutes client historique client HT pour compte general vente marchandises
+Route::get('/allcsuppliers/accounting-entriesHT', [SupplierController::class, 'getAllAccountingEntriesHT'])->name('allsupplier.accounting-entriesHT');
+
+// ecriture compte tva collectée
+Route::get('/TVA/accounting-entries', [GeneralAccountsController::class, 'getAllAccountingEntriesTVA'])->name('TVA.accounting-entries');
+// ecriture compte tva déductible
+Route::get('/TVAD/accounting-entries', [GeneralAccountsController::class, 'getAllAccountingEntriesTVAD'])->name('TVAD.accounting-entries');
+// ecriture compte stock
+Route::get('/stock/accounting-entries', [GeneralAccountsController::class, 'getAllAccountingEntriesStock'])->name('stock.accounting-entries');
+Route::get('/stock/accounting-entries/export', [GeneralAccountsController::class, 'exportStockEntries'])
+    ->name('stock.accounting-entries.export');
+
+
+
+
+// recherche client 
+Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
+
+// validation comptable
+Route::post('/payments/{payment}/validate', [PaymentController::class, 'validatePayment'])
+    ->name('payments.validate');
+
+
+
+    // routes pour test new recherche immatr
+    Route::get('/vehicle/catalog', [ImmatController::class, 'index'])->name('vehicle.catalog.form');
+Route::post('/vehicle/catalog/fetch', [ImmatController::class, 'fetchByPlate'])->name('vehicle.catalog.fetch');
+Route::post('/tecdoc/search-by-plate', [VehicleController::class, 'searchByPlate'])->name('tecdoc.search.plate');
+
+//Routes pour Nego bot negobot
+Route::get('/voice-command', [VoiceCommandController::class, 'sendSentenceToModel'])->name('predict');
+Route::post('/chat-bot', [BotController::class, 'callBot'])->name('chat-bot');
 
 
 // Sales Notes (Avoirs)
@@ -554,7 +576,8 @@ Route::post('/sales/delivery/store-and-invoice', [SalesController::class, 'store
     Route::get('/sales/items/{itemId}/history', [SalesController::class, 'itemHistory'])->name('sales.items.history');
 
 
-
+Route::get('/analytics', [AnalyticsController::class, 'index'])
+    ->name('analytics');
 
 
 
@@ -596,7 +619,11 @@ Route::post('/sales/delivery/store-and-invoice', [SalesController::class, 'store
     Route::get('/get-article/{articleNumber}', [TecDocController::class,'getArticle']);
 
 
-    Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::get('/contact', [SupportController::class, 'index'])->name('contact');
+Route::post('/contact', [SupportController::class, 'send'])->name('contact.send');
+// Back-office (admin)
+Route::get('/tickets', [SupportController::class, 'list'])->name('tickets.list');
+Route::put('/tickets/{id}/status', [SupportController::class, 'updateStatus'])->name('tickets.updateStatus');
 
 
 
@@ -738,6 +765,27 @@ Route::get('/lastarrivage/{id}', [AdminController::class, 'showArrivage'])->name
     Route::delete('/users/{user}', [AuthController::class, 'destroy'])->name('users.destroy');
 
 
+
+
+
+
+
+
+
+        Route::get('/articles/import', [ArticleImportController::class, 'showForm'])->name('articles.import.form');
+    Route::get('/articles/import/template', [ArticleImportController::class, 'downloadTemplate'])->name('articles.import.template');
+    Route::post('/articles/import', [ArticleImportController::class, 'import'])->name('articles.import');
+Route::post('/articles/preview', [ArticleImportController::class, 'preview'])->name('articles.import.preview');
+
+
+
+
+
+
+
+
+
+    
     // Autres routes protégées...
 });
 

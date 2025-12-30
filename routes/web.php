@@ -77,7 +77,8 @@ Route::post('/login', [AuthController::class, 'loginFormAdmin'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Routes protégées par le middleware personnalisé
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'single.session'])->group(function () {
+
 
 
 Route::get('/items/search', [ItemController::class, 'search'])->name('items.search');

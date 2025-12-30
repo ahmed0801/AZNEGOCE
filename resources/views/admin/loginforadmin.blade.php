@@ -77,15 +77,32 @@
         <img src="{{ asset('assets/img/prodnegocix.png') }}" alt="PREMA GROS Logo" class="logo">
         <!-- <h2>Espace Commercial</h2> -->
         
-        @if($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+ @if($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+
+
+
+@if (Cookie::has('session_error'))
+    <div class="alert alert-danger">
+        {{ Cookie::get('session_error') }}
+    </div>
+    {{ Cookie::queue(Cookie::forget('session_error')) }}
+@endif
+
+
+
+
+
+
+
 
         <form action="{{ route('login.admin') }}" method="POST">
             @csrf
