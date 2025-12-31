@@ -58,11 +58,11 @@ public function index(Request $request)
             $query->where('discount_group_id', $request->discount_group_id);
         }
 
-        $suppliers = $query->orderBy('name')->paginate(10);
+        $suppliers = $query->orderBy('name')->paginate(50);
 
         $tvaGroups = TvaGroup::all();
         $discountGroups = DiscountGroup::all();
-        $paymentModes = PaymentMode::all();
+        $paymentModes = PaymentMode::where('type', 'décaissement')->get();
         $paymentTerms = PaymentTerm::all();
         
         // Villes uniques pour le filtre
