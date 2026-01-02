@@ -12,27 +12,34 @@ class SingleSession
     public function handle($request, Closure $next)
     {
         if (Auth::check()) {
-            $currentSessionId = session()->getId();
-            $userSessionId = Auth::user()->session_id;
+    $user = Auth::user();
 
-            if ($userSessionId && $userSessionId !== $currentSessionId) {
-                // Supprimer l'ancienne session
-                DB::table('sessions')->where('id', $userSessionId)->delete();
+    // ✅ EXCEPTION
+    if ($user->allow_multi_session) {
+        return $next($request);
+    }
 
-                // Mettre à jour la session actuelle
-                Auth::user()->session_id = $currentSessionId;
-                Auth::user()->save();
+    $currentSessionId = session()->getId();
+    $userSessionId = $user->session_id;
 
-                // ⚠️ Stocker le message AVANT le logout dans session temporaire
-                Session::flash('session_error', 'Votre compte a été ouvert sur un autre appareil. L’ancienne session a été fermée.');
+    if ($userSessionId && $userSessionId !== $currentSessionId) {
 
-                // Logout
-                Auth::logout();
+        DB::table('sessions')->where('id', $userSessionId)->delete();
 
-                // Rediriger vers login
-                return redirect()->route('login.form');
-            }
-        }
+        $user->session_id = $currentSessionId;
+        $user->save();
+
+        Session::flash(
+            'session_error',
+            'Votre compte a été ouvert sur un autre appareil.'
+        );
+
+        Auth::logout();
+
+        return redirect()->route('login.form');
+    }
+}
+
 
         return $next($request);
     }

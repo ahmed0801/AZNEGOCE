@@ -23,6 +23,8 @@ class User extends Authenticatable
         'password',
         'role',
         'codevendeur',
+            'allow_multi_session', // ✅ AJOUT
+
     ];
 
     /**

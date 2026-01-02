@@ -11,6 +11,12 @@ class EnforceSingleSession
     {
         $user = $event->user;
 
+        if ($user->allow_multi_session) {
+    return;
+}
+
+
+
         // Supprimer toutes les autres sessions
         DB::table('sessions')
             ->where('user_id', $user->id)

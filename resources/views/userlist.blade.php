@@ -685,6 +685,28 @@
                             </select>
                         </div>
                     </div>
+
+
+                    <div class="col-md-6 mb-3">
+    <div class="form-check mt-4">
+        <input
+            class="form-check-input"
+            type="checkbox"
+            id="allow_multi_session"
+            name="allow_multi_session"
+            value="1"
+        >
+        <label class="form-check-label fw-bold" for="allow_multi_session">
+            🔓 Autoriser plusieurs connexions
+        </label>
+        <small class="text-muted d-block">
+            (Ne déconnecte pas les autres appareils)
+        </small>
+    </div>
+</div>
+
+
+
                     <div class="mb-3">
                         <label class="form-label">Permissions</label>
                         <div class="row">
@@ -889,6 +911,8 @@ document.getElementById("searchItemInput").addEventListener("keyup", function() 
         document.getElementById('email').value = user.email;
         document.getElementById('password').value = '';
         document.getElementById('role').value = user.role;
+        document.getElementById('allow_multi_session').checked = user.allow_multi_session == 1;
+
 
         const perms = user.permissions.map(p => p.id);
         document.querySelectorAll('input[name="permissions[]"]').forEach(chk => {
