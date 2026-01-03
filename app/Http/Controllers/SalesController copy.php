@@ -1244,6 +1244,268 @@ public function update(Request $request, $numdoc)
     });
 }
 
+
+
+
+
+
+    public function storeDirectInvoice(Request $request, $deliveryNoteId)
+    {
+        $request->validate([
+            'invoice_date' => 'required|date',
+            'notes' => 'nullable|string|max:500',
+            'action' => 'required|in:save,validate',
+        ]);
+
+        return DB::transaction(function () use ($request, $deliveryNoteId) {
+            $deliveryNote = DeliveryNote::with(['lines.item', 'customer'])->findOrFail($deliveryNoteId);
+            if ($deliveryNote->invoiced) {
+                throw new \Exception('Ce bon de livraison est déjà facturé.');
+            }
+
+            $customer = $deliveryNote->customer;
+            $vehicle_id = $deliveryNote->vehicle_id;
+            $tvaRate = $deliveryNote->tva_rate ?? 0;
+            $dueDate = $customer->paymentTerm
+                ? Carbon::parse($request->invoice_date)->addDays($customer->paymentTerm->days)
+                : null;
+
+            $souche = Souche::where('type', 'facture_vente')->lockForUpdate()->first();
+            if (!$souche) {
+                throw new \Exception('Souche facture vente manquante.');
+            }
+
+            $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
+            $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
+
+            $invoice = Invoice::create([
+                'numdoc' => $numdoc,
+                'type' => 'direct',
+                'numclient' => $customer->code ?? null,
+                'customer_id' => $customer->id,
+                'vehicle_id' => $vehicle_id,
+                'invoice_date' => $request->invoice_date,
+                'due_date' => $dueDate,
+                'status' => $request->action === 'validate' ? 'validée' : 'brouillon',
+                'paid' => false,
+                'total_ht' => 0,
+                'total_ttc' => 0,
+                'tva_rate' => $tvaRate,
+                'notes' => $request->notes,
+            ]);
+
+            $totalHt = 0;
+            foreach ($deliveryNote->lines as $line) {
+                $totalLigneHt = $line->delivered_quantity * $line->unit_price_ht * (1 - ($line->remise ?? 0) / 100);
+                $totalLigneTtc = $totalLigneHt * (1 + $tvaRate / 100);
+
+                InvoiceLine::create([
+                    'invoice_id' => $invoice->id,
+                    'delivery_note_id' => $deliveryNote->id,
+                    'sales_return_id' => null,
+                    'article_code' => $line->article_code,
+                    'quantity' => $line->delivered_quantity,
+                    'unit_price_ht' => $line->unit_price_ht,
+                    'remise' => $line->remise ?? 0,
+                    'total_ligne_ht' => $totalLigneHt,
+                    'total_ligne_ttc' => $totalLigneTtc,
+                ]);
+
+                $totalHt += $totalLigneHt;
+            }
+
+            $invoice->update([
+                'total_ht' => $totalHt,
+                'total_ttc' => $totalHt * (1 + $tvaRate / 100),
+            ]);
+
+            if ($request->action === 'validate') {
+                $deliveryNote->update([
+                    'invoiced' => true,
+            'status' => 'expédié',  
+        ]);
+
+                                                 // Update customer balance solde client
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                    $customer->save();
+
+            }
+
+            $souche->last_number += 1;
+            $souche->save();
+
+            $invoice->deliveryNotes()->attach($deliveryNote->id);
+
+            return redirect()->route('salesinvoices.index')
+                ->with('success', $request->action === 'validate'
+                    ? 'Facture validée avec succès.'
+                    : 'Facture enregistrée comme brouillon.');
+        });
+    }
+
+    public function createGroupedInvoice()
+    {
+        $deliveryNotes = DeliveryNote::with(['customer', 'lines.item'])
+            ->where('invoiced', false)
+            ->whereIn('status', ['expédié', 'livré'])
+            ->orderBy('numdoc', 'DESC')
+            ->get();
+        $salesReturns = SalesReturn::with(['customer', 'lines.item'])
+            ->where('invoiced', false)
+            ->orderBy('numdoc', 'DESC')
+            ->get();
+        $customers = Customer::orderBy('name')->get();
+        return view('salesinvoices.create_grouped', compact('deliveryNotes', 'salesReturns', 'customers'));
+    }
+
+
+
+
+    public function storeGroupedInvoice(Request $request)
+    {
+        $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+            'invoice_date' => 'required|date',
+            'documents' => 'required|array',
+            'documents.*' => 'string',
+            'notes' => 'nullable|string|max:500',
+            'action' => 'required|in:save,validate',
+            'lines' => 'required|array',
+            'lines.*.quantity' => 'required|numeric',
+            'lines.*.unit_price_ht' => 'required|numeric|min:0',
+            'lines.*.remise' => 'nullable|numeric|min:0|max:100',
+            'lines.*.article_code' => 'required|exists:items,code',
+            'lines.*.delivery_note_id' => 'nullable',
+            'lines.*.sales_return_id' => 'nullable',
+        ]);
+
+        return DB::transaction(function () use ($request) {
+$customer = Customer::with(['tvaGroup', 'paymentTerm'])->findOrFail($request->customer_id);
+            $tvaRate = $request->tva_rate ?? ($customer->tvaGroup->rate ?? 0);
+            $dueDate = $customer->paymentTerm
+                ? Carbon::parse($request->invoice_date)->addDays($customer->paymentTerm->days)
+                : null;
+
+
+             
+                if (!$customer->paymentTerm) {
+                \Log::warning('No payment term for customer', ['customer_id' => $customer->id]);
+                throw new \Exception('Terme de paiement manquant pour le client.');
+            }
+
+
+                $paymentTermLabel = strtolower($customer->paymentTerm->label ?? '');
+
+$invoiceDate = Carbon::parse($request->invoice_date);
+$paymentTermLabel = strtolower($customer->paymentTerm->label); // pour éviter les majuscules
+
+    // calcul echeance"
+    $days = $customer->paymentTerm->days?? 0;
+    $dueDate = $invoiceDate->copy()->endOfMonth()->addDays($days);
+
+
+
+
+            
+
+            $souche = Souche::where('type', 'facture_vente')->lockForUpdate()->first();
+            if (!$souche) {
+                throw new \Exception('Souche facture vente manquante.');
+            }
+
+            $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
+            $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
+
+            $invoice = Invoice::create([
+                'numdoc' => $numdoc,
+                'type' => 'groupée',
+                'numclient' => $customer->code ?? null,
+                'customer_id' => $request->customer_id,
+                'invoice_date' => $request->invoice_date,
+                'due_date' => $dueDate,
+                'status' => $request->action === 'validate' ? 'validée' : 'brouillon',
+                'paid' => false,
+                'total_ht' => 0,
+                'total_ttc' => 0,
+                'tva_rate' => $tvaRate,
+                'notes' => $request->notes,
+            ]);
+
+            $totalHt = 0;
+            $pivotData = [];
+            $deliveryNoteIds = [];
+            $salesReturnIds = [];
+
+            foreach ($request->documents as $document) {
+                // dd($document);
+                [$type, $id] = explode('_', $document);
+                if ($type === 'delivery') {
+                    $deliveryNoteIds[] = $id;
+                    $pivotData[$id] = ['delivery_note_id' => $id];
+                } else {
+                    $salesReturnIds[] = $id;
+                    $pivotData[$id] = ['sales_return_id' => $id];
+                }
+            }
+
+            foreach ($request->lines as $index => $line) {
+                $totalLigneHt = $line['quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
+                $totalLigneTtc = $totalLigneHt * (1 + $tvaRate / 100);
+
+                InvoiceLine::create([
+                    'invoice_id' => $invoice->id,
+                    'delivery_note_id' => $line['delivery_note_id'] ?? null,
+                    'sales_return_id' => $line['sales_return_id'] ?? null,
+                    'article_code' => $line['article_code'],
+                    'quantity' => $line['quantity'],
+                    'unit_price_ht' => $line['unit_price_ht'],
+                    'remise' => $line['remise'] ?? 0,
+                    'total_ligne_ht' => $totalLigneHt,
+                    'total_ligne_ttc' => $totalLigneTtc,
+                ]);
+
+                $totalHt += $totalLigneHt;
+            }
+
+            $invoice->update([
+                'total_ht' => $totalHt,
+                'total_ttc' => $totalHt * (1 + $tvaRate / 100),
+            ]);
+
+            if ($request->action === 'validate') {
+                if (!empty($deliveryNoteIds)) {
+                    DeliveryNote::whereIn('id', $deliveryNoteIds)
+                        ->where('invoiced', false)
+                        ->where('numclient', $customer->code)
+                        ->update(['invoiced' => true]);
+                }
+                if (!empty($salesReturnIds)) {
+                    SalesReturn::whereIn('id', $salesReturnIds)
+                        ->where('invoiced', false)
+                        ->where('customer_id', $request->customer_id)
+                        ->update(['invoiced' => true]);
+                }
+
+                                                 // Update customer balance solde client
+                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                    $customer->save();
+
+            }
+
+            $souche->last_number += 1;
+            $souche->save();
+
+            $invoice->deliveryNotes()->sync($pivotData);
+
+            return redirect()->route('salesinvoices.index')
+                ->with('success', $request->action === 'validate'
+                    ? 'Facture groupée validée avec succès.'
+                    : 'Facture groupée enregistrée comme brouillon.');
+        });
+    }
+
     /**
      * Validate a sales order and create delivery note.
      */
@@ -1542,6 +1804,8 @@ public function exportSingle($id)
     $invoice = SalesInvoice::with([
         'customer', 
         'lines.item',
+        'deliveryNotes',                 // Pour afficher numdoc + date
+        'salesReturns',                  // Pour afficher numdoc + date des retours
         'payments' => function ($query) {
             $query->orderBy('payment_date', 'asc');
         },

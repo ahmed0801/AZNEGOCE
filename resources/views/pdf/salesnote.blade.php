@@ -91,10 +91,10 @@
                         <td>{{ $line->article_code ?? '-' }}</td>
                         <td>{{ $line->item->name ?? $line->description ?? '-' }}</td>
                         <td>{{ number_format($line->quantity, 0, ',', ' ') }}</td>
-                        <td>{{ number_format($line->unit_price_ht, 2, ',', ' ') }} TND</td>
+                        <td>{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
                         <td>{{ number_format($line->remise ?? 0, 2, ',', ' ') }}%</td>
-                        <td>{{ number_format($line->total_ligne_ht, 2, ',', ' ') }} TND</td>
-                        <td>{{ number_format($line->total_ligne_ttc, 2, ',', ' ') }} TND</td>
+                        <td>{{ number_format($line->total_ligne_ht, 2, ',', ' ') }} €</td>
+                        <td>{{ number_format($line->total_ligne_ttc, 2, ',', ' ') }} €</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -104,15 +104,15 @@
             <table>
                 <tr>
                     <td class="label">Total HT :</td>
-                    <td>{{ number_format($salesNote->total_ht, 2, ',', ' ') }} TND</td>
+                    <td>{{ number_format($salesNote->total_ht, 2, ',', ' ') }} €</td>
                 </tr>
                 <tr>
                     <td class="label">TVA ({{ number_format($salesNote->tva_rate, 2, ',', ' ') }}%) :</td>
-                    <td>{{ number_format($salesNote->total_ttc - $salesNote->total_ht, 2, ',', ' ') }} TND</td>
+                    <td>{{ number_format($salesNote->total_ttc - $salesNote->total_ht, 2, ',', ' ') }} €</td>
                 </tr>
                 <tr>
                     <td class="label">Total TTC :</td>
-                    <td>{{ number_format($salesNote->total_ttc, 2, ',', ' ') }} TND</td>
+                    <td>{{ number_format($salesNote->total_ttc, 2, ',', ' ') }} €</td>
                 </tr>
             </table>
         </div>

@@ -562,7 +562,7 @@
 <a type="button"
    class="btn btn-warning btn-sm blinking-btn"
    href="{{ route('sales.edit', $order->id) }}">
-   Valider Pour Facturer
+   Modifier ou Valider
 </a>
                                     @endif
 
