@@ -60,6 +60,26 @@
     background: #f2f1f1ff;
 }
 
+
+
+
+
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #007bff, #6610f2) !important;
+}
+
+.modal-content {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card.shadow-sm {
+    transition: transform 0.2s;
+}
+
+
+
     </style>
 </head>
 <body>
@@ -69,7 +89,7 @@
     <div class="sidebar-logo">
         <div class="logo-header" data-background-color="dark">
             <a href="/" class="logo">
-                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
+                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="70" />
             </a>
             <div class="nav-toggle">
                 <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
@@ -95,7 +115,8 @@
                     <div class="collapse" id="ventes">
                         <ul class="nav nav-collapse">
                             <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
-                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/devislist"><span class="sub-item">Devis</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Commandes Ventes</span></a></li>
                             <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
                             <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
                             <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
@@ -532,6 +553,10 @@
                                             &#x1F482;{{ $invoice->customer->name ?? 'N/A' }}
                                             <span class="text-muted small">({{ $invoice->numclient ?? 'N/A' }})</span>
                                             <span class="text-muted small">- 📆 <b>{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</b></span>
+                                                                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#smartViewModal{{ $invoice->id }}">
+    <i class="fas fa-brain me-1"></i> Smart View
+</button>
+
                                         
                                         </h6>
                                         @if($invoice->status === 'brouillon')
@@ -574,6 +599,8 @@
                                         <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $invoice->id }})">
                                             ➕ Détails
                                         </button>
+
+
                                         <a href="{{ route('salesinvoices.export_single', $invoice->id) }}" class="btn btn-xs btn-outline-success">
                                             EXCEL <i class="fas fa-file-excel"></i>
                                         </a>
@@ -653,6 +680,248 @@
                                         </div>
                                     </div>
                                 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Smart View Modal – Sans graphique + avec fournisseur -->
+<div class="modal fade" id="smartViewModal{{ $invoice->id }}" tabindex="-1" aria-labelledby="smartViewLabel{{ $invoice->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient-primary text-white">
+                <h5 class="modal-title" id="smartViewLabel{{ $invoice->id }}">
+                    <i class="fas fa-brain me-2"></i> Smart View – Facture {{ $invoice->numdoc }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+
+                @php
+                    $blLines = collect();
+                    if ($invoice->deliveryNotes()->exists()) {
+                        foreach ($invoice->deliveryNotes as $dn) {
+                            $blLines = $blLines->merge($dn->lines);
+                        }
+                    } else {
+                        $blLines = $invoice->lines;
+                    }
+
+                    $totalCostNet = 0;
+                    $totalSaleNet = 0;
+                    $hasPurchaseData = false;
+
+                    foreach ($blLines as $line) {
+                        $qty = $line->delivered_quantity ?? $line->quantity ?? 1;
+                        $salePriceHt = $line->unit_price_ht ?? 0;
+                        $remise = $line->remise ?? 0;
+
+                        $saleNet = $qty * $salePriceHt * (1 - $remise / 100);
+                        $totalSaleNet += $saleNet;
+
+                        if (isset($line->unit_coast) && $line->unit_coast > 0) {
+                            $costPrice = $line->unit_coast;
+                            $discountCoast = $line->discount_coast ?? 0;
+                            $costNet = $qty * $costPrice * (1 - $discountCoast / 100);
+                            $totalCostNet += $costNet;
+                            $hasPurchaseData = true;
+                        }
+                    }
+
+                    $netMargin = $totalSaleNet - $totalCostNet;
+                    $marginRate = $totalCostNet > 0 ? round(($netMargin / $totalCostNet) * 100, 1) : ($hasPurchaseData ? 0 : null);
+                    $colorClass = $marginRate >= 40 ? 'text-success' : ($marginRate >= 20 ? 'text-warning' : 'text-danger');
+                @endphp
+
+                <!-- Indicateurs clés en pleine largeur -->
+                <div class="row text-center mb-5">
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm bg-light h-100">
+                            <div class="card-body d-flex flex-column justify-content-center py-4">
+                                <i class="fas fa-receipt fa-3x text-primary mb-3"></i>
+                                <h6 class="fw-bold">CA TTC</h6>
+                                <h3 class="text-primary fw-bold">{{ number_format($invoice->total_ttc, 2, ',', ' ') }} €</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm bg-light h-100">
+                            <div class="card-body d-flex flex-column justify-content-center py-4">
+                                <i class="fas fa-shopping-cart fa-3x text-warning mb-3"></i>
+                                <h6 class="fw-bold">Coût d'achat net</h6>
+                                <h3 class="text-warning fw-bold">
+                                    @if($hasPurchaseData)
+                                        {{ number_format($totalCostNet, 2, ',', ' ') }} €
+                                    @else
+                                        <span class="text-muted">Non renseigné</span>
+                                    @endif
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm bg-light h-100">
+                            <div class="card-body d-flex flex-column justify-content-center py-4">
+                                <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                                <h6 class="fw-bold">Marge nette</h6>
+                                <h3 class="text-success fw-bold">
+                                    @if($hasPurchaseData)
+                                        {{ number_format($netMargin, 2, ',', ' ') }} €
+                                    @else
+                                        <span class="text-muted">Non calculable</span>
+                                    @endif
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm bg-light h-100">
+                            <div class="card-body d-flex flex-column justify-content-center py-4">
+                                <i class="fas fa-percentage fa-3x text-info mb-3"></i>
+                                <h6 class="fw-bold">Taux de marge nette</h6>
+                                <h3 class="fw-bold {{ $colorClass }}">
+                                    @if($hasPurchaseData)
+                                        {{ $marginRate }}%
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tableau détaillé avec fournisseur -->
+                <h6 class="fw-bold mb-3">
+                    <i class="fas fa-list-ol me-2"></i> Détail par ligne 
+                    ({{ $blLines->count() }} article{{ $blLines->count() > 1 ? 's' : '' }})
+                    @if($invoice->deliveryNotes()->exists())
+                        <small class="text-muted">– Données issues du{{ $invoice->deliveryNotes->count() > 1 ? 's' : '' }} BL lié{{ $invoice->deliveryNotes->count() > 1 ? 's' : '' }}</small>
+                    @endif
+                </h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th>Article</th>
+                                <th>Fournisseur</th>
+                                <th>Qté</th>
+                                <th>PU HT Vente</th>
+                                <th>Achat net unitaire</th>
+                                <th>Marge nette ligne</th>
+                                <th>Taux</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($blLines as $line)
+                                @php
+                                    $qty = $line->delivered_quantity ?? $line->quantity ?? 1;
+                                    $salePriceHt = $line->unit_price_ht ?? 0;
+                                    $remise = $line->remise ?? 0;
+                                    $saleNetLine = $qty * $salePriceHt * (1 - $remise / 100);
+
+                                    $hasCost = isset($line->unit_coast) && $line->unit_coast > 0;
+                                    $costPrice = $hasCost ? $line->unit_coast : 0;
+                                    $discountCoast = $hasCost ? ($line->discount_coast ?? 0) : 0;
+                                    $costNetUnit = $hasCost ? $costPrice * (1 - $discountCoast / 100) : null;
+                                    $costNetLine = $hasCost ? $qty * $costNetUnit : null;
+                                    $lineMargin = $hasCost ? $saleNetLine - $costNetLine : null;
+                                    $lineRate = $hasCost && $costNetLine > 0 ? round(($lineMargin / $costNetLine) * 100, 1) : null;
+                                    $rateColor = $lineRate >= 40 ? 'text-success' : ($lineRate >= 20 ? 'text-warning' : 'text-danger');
+
+                                    $supplierName = $line->supplier->name ?? ($hasCost ? 'Non précisé' : '—');
+                                @endphp
+                                <tr>
+                                    <td>
+                                        <small>
+                                            <strong>{{ $line->article_code ?? 'Divers' }}</strong><br>
+                                            {{ $line->item->name ?? ($line->description ?? 'Article divers') }}
+                                        </small>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-secondary">{{ $supplierName }}</span>
+                                    </td>
+                                    <td class="text-center">{{ $qty }}</td>
+                                    <td class="text-end"><small>{{ number_format($salePriceHt, 2, ',', ' ') }} €</small></td>
+                                    <td class="text-end">
+                                        @if($hasCost)
+                                            <small>{{ number_format($costNetUnit, 2, ',', ' ') }} €</small>
+                                        @else
+                                            <small class="text-muted">—</small>
+                                        @endif
+                                    </td>
+                                    <td class="text-end fw-bold {{ $lineMargin >= 0 ? 'text-success' : 'text-danger' }}">
+                                        @if($hasCost)
+                                            {{ number_format($lineMargin, 2, ',', ' ') }} €
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                    <td class="text-center fw-bold">
+                                        @if($hasCost)
+                                            <span class="{{ $rateColor }}">{{ $lineRate }}%</span>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Résumé final -->
+                <div class="alert alert-info text-center mt-5 p-4">
+                    <i class="fas fa-lightbulb fa-3x mb-3 text-warning"></i>
+                    <h4 class="mb-3">
+                        Bénéfice net estimé sur cette facture :
+                        <strong class="text-success fs-3">
+                            @if($hasPurchaseData)
+                                {{ number_format($netMargin, 2, ',', ' ') }} €
+                            @else
+                                Non calculable (prix d'achat manquants)
+                            @endif
+                        </strong>
+                    </h4>
+                    <p class="fs-5 mb-0">
+                        Taux moyen de marge nette :
+                        <strong class="{{ $colorClass }} fs-4">
+                            @if($hasPurchaseData)
+                                {{ $marginRate }}%
+                            @else
+                                —
+                            @endif
+                        </strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                
 
                                 <div id="lines-{{ $invoice->id }}" class="card-body d-none bg-light">
                                     <h6 class="fw-bold mb-3"><i class="fa fa-solid fa-car"></i> : {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}                     @if($invoice->notes )<p> Note : {{ $invoice->notes ?? '-' }}</p> @endif
@@ -880,7 +1149,7 @@ function addEmailField(id) {
             <footer class="footer">
                 <div class="container-fluid d-flex justify-content-between">
                     <div class="copyright">© AZ NEGOCE. All Rights Reserved.</div>
-                    <div>by <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.</div>
+                    <div>by <a target="_blank" href="https://themewagon.com/">AZ NEGOCE</a>.</div>
                 </div>
             </footer>
         </div>
