@@ -308,7 +308,7 @@
 
         <div class="mb-3 col-md-4">
             <label class="form-label">Ville</label>
-            <input type="text" name="city" class="form-control" value="Paris">
+            <input type="text" name="city" class="form-control" value="">
         </div>
 
         <div class="mb-3 col-md-2">
@@ -317,7 +317,7 @@
         </div>
 
         <div class="mb-3 col-md-6">
-            <label class="form-label">Adresse de livraison</label>
+            <label class="form-label">Code Postal</label>
             <input type="text" name="address_delivery" class="form-control">
         </div>
 
@@ -816,7 +816,7 @@
         </div>
 
         <div class="mb-3 col-md-6">
-            <label class="form-label">Adresse de livraison</label>
+            <label class="form-label">Code Postal</label>
             <input type="text" name="address_delivery" class="form-control" value="{{ $customer->address_delivery }}" disabled>
         </div>
 

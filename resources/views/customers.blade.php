@@ -667,7 +667,7 @@
         </div>
 
         <div class="mb-3 col-md-6">
-            <label class="form-label">Adresse de livraison</label>
+            <label class="form-label">Code Postal</label>
             <input type="text" name="address_delivery" class="form-control">
         </div>
 
@@ -1272,7 +1272,7 @@
         </div>
 
         <div class="mb-3 col-md-6">
-            <label class="form-label">Adresse de livraison</label>
+            <label class="form-label">Code Postal</label>
             <input type="text" name="address_delivery" class="form-control" value="{{ $customer->address_delivery }}" disabled>
         </div>
 
