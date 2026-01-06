@@ -959,7 +959,7 @@
                                 </div>
                                 <div class="text-end">
                                     <!-- <button type="button" id="generatePurchaseBtn" class="btn btn-danger px-3 ms-2">🛒 Générer Commande Achat</button> -->
-                                    <button type="submit" name="action" value="validate" class="btn btn-primary px-3 ms-2">✔️ Valider BL (Clients En Compte)</button>
+                                    <button type="submit" name="action" id="validateBlBtn" value="validate" class="btn btn-primary px-3 ms-2">✔️ Valider BL (Clients En Compte)</button>
                                                                         <button type="submit" name="action" value="save_commande" class="btn btn-danger px-3 ms-2">📝 Editer Commande Vente</button>
                                     <button type="submit" name="action" value="save_draft" class="btn btn-warning px-3 ms-2">📝 Editer Devis</button>
                                                                                                              <button type="submit" name="action" value="validate_and_invoice" class="btn btn-success px-3 ms-2">📄 Valider et Facturer</button>
@@ -1288,6 +1288,40 @@ let htText  = $(this).find('.total_ht').text().replace(/[^\d,\.-]/g, '').replace
             $('#customer_id').on('change', function () {
                 let customerId = $(this).val();
                 let selectedData = $(this).select2('data')[0];
+
+
+
+
+                // essai interdit bl
+                let customerType = selectedData?.type?.toLowerCase().trim() || '';
+                const $validateBtn = $('#validateBlBtn');
+                if (customerType === 'particulier') {
+        $validateBtn
+            .prop('disabled', true)
+            .removeClass('btn-primary')
+            .addClass('btn btn-primary px-3 ms-2')
+            .attr('title', 'Non autorisé pour les clients Particuliers');
+        
+        // Optionnel : ajouter un petit tooltip visuel
+        $validateBtn.html('✔️ Valider BL <span class="badge bg-light text-dark ms-1">Interdit pour les Particuliers</span>');
+    } else {
+        $validateBtn
+            .prop('disabled', false)
+            .removeClass('btn-secondary')
+            .addClass('btn-primary')
+            .removeAttr('title');
+        
+        $validateBtn.html('✔️ Valider BL (Clients En Compte)');
+    }
+
+
+
+
+
+
+
+
+
                 
                 const $balanceBtn = $('#balanceBtn');
                 const $balanceSpan = $('#customer_balance');

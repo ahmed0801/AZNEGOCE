@@ -306,7 +306,7 @@
 
                                     <div class="col-md-3 mb-3">
                                         <label class="form-label">Date de commande</label>
-                                        <input type="date" name="order_date" value="{{ \Carbon\Carbon::parse($order->order_date)->format('Y-m-d') }}" class="form-control" required>
+                                        <input type="date" name="order_date" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" class="form-control" required>
                                     </div>
                                 </div>
 

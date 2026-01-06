@@ -460,22 +460,10 @@
             @endforeach
         </select>
 
-        <!-- NOUVEAU : Recherche par numéro de devis -->
-<div class="me-2">
-    <input type="text"
-           name="numdoc"
-           class="form-control form-control-sm"
-           placeholder="N° Devis"
-           value="{{ request('numdoc') }}"
-           style="width: 100px;">
-</div>
-
-
-
         {{-- Vendeur --}}
         <select name="vendeur"
                 class="form-select form-select-sm"
-                style="width: 110px;">
+                style="width: 120px;">
             <option value="">Vendeur (Tous)</option>
             @foreach($vendeurs as $vendeur)
                 <option value="{{ $vendeur }}"
@@ -488,7 +476,7 @@
         {{-- Statut devis --}}
         <select name="status"
                 class="form-select form-select-sm"
-                style="width: 80px;">
+                style="width: 90px;">
             <option value="">Statut</option>
             <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>
                 Brouillon
@@ -501,7 +489,7 @@
         {{-- Statut BL --}}
         <select name="delivery_status"
                 class="form-select form-select-sm"
-                style="width: 80px;">
+                style="width: 100px;">
             <option value="">BL (Tous)</option>
             <option value="en_cours" {{ request('delivery_status') == 'en_cours' ? 'selected' : '' }}>
                 En cours
@@ -695,7 +683,7 @@
 
     <script>
         $(document).ready(function () {
-            $('.select2').select2({ width: '20%' });
+            $('.select2').select2({ width: '30%' });
         });
 
         function toggleLines(id) {

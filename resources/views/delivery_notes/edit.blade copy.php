@@ -553,7 +553,7 @@
                                     </div>
                                     <div class="col-md-6 mb-2">
                                         <label class="form-label">Date de livraison</label>
-                                        <input type="date" name="delivery_date" id="delivery_date" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" class="form-control" required>
+                                        <input type="date" name="delivery_date" id="delivery_date" value="{{ \Carbon\Carbon::parse($deliveryNote->delivery_date)->format('Y-m-d') }}" class="form-control" required>
                                     </div>
                                 </div>
                                 <div class="mb-3" id="customer_details">

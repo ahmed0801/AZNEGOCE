@@ -1282,7 +1282,7 @@
 
                         <div class="mb-3 col-md-3">
                             <label class="form-label">Prix Achat</label>
-                            <input type="number" name="cost_price" step="0.01" class="form-control" value="{{ $item->cost_price }}" readonly>
+                            <input type="number" name="cost_price" step="0.01" class="form-control" value="{{ $item->cost_price }}">
                         </div>
 
 

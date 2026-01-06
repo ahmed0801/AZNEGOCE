@@ -315,8 +315,8 @@
                                         <div class="col-md-6">
                                             <p><strong>Client:</strong> <span id="customer_name">{{ $order->customer->name ?? '' }}</span></p>
                                             <p><strong>TVA:</strong> <span id="customer_tva">{{ $order->tva_rate }}</span>%</p>
-                                            <p><strong>Email:</strong> <span id="customer_email">{{ $order->customer->email ?? '' }}</span></p>
-                                            <p><strong>Téléphones :</strong> <span id="customer_phone1">{{ $order->customer->phone1 ?? '' }}</span> / <span id="customer_phone2">{{ $order->customer->phone2 ?? '' }}</span></p>
+                                            <!-- <p><strong>Email:</strong> <span id="customer_email">{{ $order->customer->email ?? '' }}</span></p>
+                                            <p><strong>Téléphones :</strong> <span id="customer_phone1">{{ $order->customer->phone1 ?? '' }}</span> / <span id="customer_phone2">{{ $order->customer->phone2 ?? '' }}</span></p> -->
                                         </div>
                                         <div class="col-md-6">
                                             <p><strong>Adresse:</strong> <span id="customer_address">{{ $order->customer->address ?? '' }}</span></p>
@@ -455,9 +455,9 @@
                                 </div>
 
                                 <div class="text-end">
-                                    <button type="submit" name="action" value="save" class="btn btn-warning px-3">Enregistrer Devis</button>
-                                    <button type="submit" name="action" value="validate" class="btn btn-primary px-3 ms-2">Valider BL</button>
-                                    <!-- <button type="submit" name="action" value="validate_and_invoice" class="btn btn-success px-3 ms-2">Valider et Facturer</button> -->
+                                    <button type="submit" name="action" value="save" class="btn btn-warning px-3">Enregistrer</button>
+                                    <button type="submit" name="action" value="validate" class="btn btn-primary px-3 ms-2">Enregistrer et Valider BL</button>
+                                    <button type="submit" name="action" value="validate_and_invoice" class="btn btn-success px-3 ms-2">Enregistrer et Facturer</button>
                                 </div>
                             </form>
                         </div>

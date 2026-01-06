@@ -96,51 +96,54 @@ class SalesController extends Controller
 
 
 
-    public function devislist(Request $request)
-    {
-        $query = SalesOrder::with(['customer', 'lines.item', 'deliveryNote'])
-                ->where('numdoc', 'like', 'D%') // ✅ uniquement les devis
-                ->orderBy('updated_at', 'desc');
+   public function devislist(Request $request)
+{
+    $query = SalesOrder::with(['customer', 'lines.item', 'deliveryNote'])
+            ->where('numdoc', 'like', 'D%') // uniquement les devis
+            ->orderBy('updated_at', 'desc');
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
+    // Recherche par numéro de document (numdoc) avec LIKE
+    if ($request->filled('numdoc')) {
+        $query->where('numdoc', 'like', '%' . trim($request->numdoc) . '%');
+    }
 
-        if ($request->filled('customer_id')) {
-            $query->where('customer_id', $request->customer_id);
-        }
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
 
-        if ($request->filled('date_from')) {
-            $query->whereDate('order_date', '>=', $request->date_from);
-        }
+    if ($request->filled('customer_id')) {
+        $query->where('customer_id', $request->customer_id);
+    }
 
-         // ✅ NOUVEAU : filtre vendeur
     if ($request->filled('vendeur')) {
         $query->where('vendeur', $request->vendeur);
     }
 
+    if ($request->filled('date_from')) {
+        $query->whereDate('order_date', '>=', $request->date_from);
+    }
 
-        if ($request->filled('date_to')) {
-            $query->whereDate('order_date', '<=', $request->date_to);
-        }
+    if ($request->filled('date_to')) {
+        $query->whereDate('order_date', '<=', $request->date_to);
+    }
 
-        if ($request->filled('delivery_status')) {
-            $query->whereHas('deliveryNote', function ($q) use ($request) {
-                $q->where('status', $request->delivery_status);
-            });
-        }
+    if ($request->filled('delivery_status')) {
+        $query->whereHas('deliveryNote', function ($q) use ($request) {
+            $q->where('status', $request->delivery_status);
+        });
+    }
 
-                // On récupère aussi la liste des vendeurs uniques pour le select
+    // Récupération des données pour les filtres
     $vendeurs = User::where('role', 'vendeur')
         ->orderBy('name')
         ->pluck('name')
         ->unique();
 
-        $sales = $query->get();
-        $customers = Customer::orderBy('name')->get();
+    $sales = $query->get();
+    $customers = Customer::orderBy('name')->get();
 
-        return view('sales.devislist', compact('sales', 'customers','vendeurs'));
-    }
+    return view('sales.devislist', compact('sales', 'customers', 'vendeurs'));
+}
 
 
 
@@ -1487,7 +1490,8 @@ public function validateOrder($id)
     // la fonction qui search les articles dans nouvelle commande
     public function searchItems(Request $request)
     {
-        $query = Item::with(['brand', 'supplier', 'tvaGroup', 'stocks']);
+        $query = Item::with(['brand', 'supplier', 'tvaGroup', 'stocks'])
+         ->where('is_active', 1);
 
         if ($request->filled('query')) {
             $searchTerm = $request->query('query');
