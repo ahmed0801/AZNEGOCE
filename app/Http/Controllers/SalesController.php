@@ -2022,4 +2022,73 @@ public function exportSingle($id)
 
 
 
+
+
+public function convertDevisToCommande(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:validée,brouillon', // tu peux autoriser les deux ou forcer 'validée'
+    ]);
+
+    return DB::transaction(function () use ($request, $id) {
+        $order = SalesOrder::with('customer.tvaGroup')->findOrFail($id);
+
+        // Sécurité : on ne convertit que les devis (ou brouillon si tu veux)
+        if (!in_array($order->status, ['Devis', 'brouillon'])) {
+            throw new \Exception('Seuls les devis peuvent être convertis en commande vente.');
+        }
+
+        $newStatus = $request->status; // 'validée' ou 'brouillon'
+
+        $maxRetries = 5;
+        $retryCount = 0;
+
+        while ($retryCount < $maxRetries) {
+            // On prend la souche des commandes vente
+            $souche = Souche::where('type', 'commande_vente')->lockForUpdate()->first();
+
+            if (!$souche) {
+                throw new \Exception('Souche commande vente manquante dans la base.');
+            }
+
+            $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
+            $newNumdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
+
+            // Vérifier l'unicité du nouveau numéro
+            if (!SalesOrder::where('numdoc', $newNumdoc)->exists()) {
+                // Tout est bon → on met à jour le devis
+                $order->update([
+                    'numdoc'  => $newNumdoc,
+                    'status'  => $newStatus,
+                ]);
+
+                // Incrémenter la souche
+                $souche->increment('last_number');
+
+                \Log::info('Devis converti en commande', [
+                    'old_numdoc' => $order->getOriginal('numdoc'),
+                    'new_numdoc' => $newNumdoc,
+                    'order_id'   => $order->id,
+                ]);
+
+                return redirect()->route('sales.list')
+                    ->with('success', "Devis {$order->getOriginal('numdoc')} converti en commande vente n° {$newNumdoc}");
+            }
+
+            // En cas de collision (très rare), on retente avec le numéro suivant
+            $souche->increment('last_number');
+            $retryCount++;
+        }
+
+        throw new \Exception('Impossible de générer un numéro de commande unique après plusieurs tentatives.');
+    });
+}
+
+
+
+
+
+
+
+
 }

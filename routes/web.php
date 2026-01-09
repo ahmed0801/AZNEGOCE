@@ -582,7 +582,10 @@ Route::get('/analytics', [AnalyticsController::class, 'index'])
 
 
 
-
+// Conversion devis → commande vente
+Route::post('/sales/convert-devis/{id}', [SalesController::class, 'convertDevisToCommande'])
+     ->name('sales.convert-devis');
+     
 
 
 

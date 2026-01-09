@@ -604,6 +604,21 @@
                                             <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
                                         </button>
                                         <div class="dropdown-menu">
+
+                                        @if($order->status === 'Devis' || $order->status === 'brouillon')
+    <form action="{{ route('sales.convert-devis', $order->id) }}" 
+          method="POST" 
+          onsubmit="return confirm('Convertir ce devis en commande vente ? Un nouveau numéro sera généré.');"
+          class="d-inline">
+        @csrf
+        <input type="hidden" name="status" value="brouillon"> <!-- ou "brouillon" si tu veux -->
+        <button type="submit" class="dropdown-item text-success">
+            <i class="fas fa-arrow-right"></i> Basculer en Commande Vente
+        </button>
+    </form>
+@endif
+
+
                                             @if($order->status === 'brouillon' or $order->status === 'Devis')
                                                 <a class="dropdown-item" href="{{ route('sales.edit', $order->id) }}">
                                                     <i class="fas fa-edit"></i> Modifier & valider
