@@ -258,7 +258,7 @@ td {
                     <p><strong>Date :</strong> {{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</p>
                     <p><strong>Client :</strong> {{ $invoice->customer->name ?? '-' }}</p>
                     @if($invoice->customer->address)
-                    <p><strong>Adresse :</strong> {{ $invoice->customer->address ?? '-' }}</p>
+                    <p><strong>Adresse :</strong> {{ $invoice->customer->address ?? '-' }} , {{ $invoice->customer->address_delivery ?? '-' }}</p>
                     @endif
                     <!-- <p><strong>N° Client :</strong> {{ $invoice->numclient ?? '-' }}</p> -->
                     <p><strong>Véhicule :</strong> {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}</p>
