@@ -431,6 +431,7 @@ Route::post('/salesinvoices/{id}/send-order-ready',
     [SalesInvoicesController::class, 'sendOrderReadyEmail'])
     ->name('salesinvoices.sendOrderReadyEmail');
 
+    Route::post('/salesorder/{id}/send-email', [SalesInvoicesController::class, 'sendEmailorder'])->name('salesorder.sendEmail');
 
 
 

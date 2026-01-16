@@ -592,6 +592,14 @@
                                             <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
                                         </button>
                                         <div class="dropdown-menu">
+
+
+                                         <a class="dropdown-item" href="#" data-toggle="modal" data-target="#sendEmailModal{{ $order->id }}">
+    <i class="fas fa-envelope"></i> Envoyer par mail
+</a>
+
+
+
                                             @if($order->status === 'brouillon' or $order->status === 'Devis')
                                                 <a class="dropdown-item" href="{{ route('sales.edit', $order->id) }}">
                                                     <i class="fas fa-edit"></i> Modifier & valider
@@ -648,6 +656,65 @@
                                 </div>
                             </div>
                         </div>
+
+
+
+
+                                              
+<!-- Modal Send Email -->
+<div class="modal fade" id="sendEmailModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="{{ route('salesorder.sendEmail', $order->id) }}" method="POST">
+        @csrf
+        <div class="modal-header">
+          <h5 class="modal-title">📧 Envoyer le Document N° :  {{ $order->numdoc }}</h5>
+          <button type="button" class="btn-close" data-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Email principal -->
+          <div class="form-group mb-2">
+            <label>Email client</label>
+            <input type="email" name="emails[]" class="form-control" value="{{ $order->customer->email ?? '' }}" required>
+          </div>
+
+          <!-- Autres destinataires -->
+          <div id="extraEmails{{ $order->id }}"></div>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addEmailField({{ $order->id }})">
+            + Ajouter un autre destinataire
+          </button>
+
+          <!-- Message -->
+          <div class="form-group mt-3">
+            <label>Message</label>
+            <textarea name="message" class="form-control" rows="4">{{ \App\Models\EmailMessage::first()->messagefacturevente ?? 'Veuillez trouver ci-joint votre Devis.' }}</textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Envoyer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function addEmailField(id) {
+    let container = document.getElementById('extraEmails' + id);
+    let input = document.createElement('input');
+    input.type = 'email';
+    input.name = 'emails[]';
+    input.placeholder = 'Autre email';
+    input.classList.add('form-control','mt-2');
+    container.appendChild(input);
+}
+</script>
+<!-- end mail  -->
+
+
+
+
+
                     @endforeach
                 </div>
             </div>
