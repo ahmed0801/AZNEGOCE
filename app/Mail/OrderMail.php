@@ -34,7 +34,7 @@ class OrderMail extends Mailable
     {
         return $this->from(config('mail.from.address'), config('mail.from.name'))
                     ->subject("Order {$this->order->numdoc}")
-                    ->view('emails.Order')
+                    ->view('emails.order')
                     ->attachData($this->pdfContent, "Order_{$this->order->numdoc}.pdf", [
                         'mime' => 'application/pdf',
                     ]);
