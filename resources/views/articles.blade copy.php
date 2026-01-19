@@ -199,7 +199,7 @@
     <div class="sidebar-logo">
         <div class="logo-header" data-background-color="dark">
             <a href="/" class="logo">
-                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
+                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="70" />
             </a>
             <div class="nav-toggle">
                 <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
@@ -225,7 +225,8 @@
                     <div class="collapse" id="ventes">
                         <ul class="nav nav-collapse">
                             <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
-                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/devislist"><span class="sub-item">Devis</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Commandes Ventes</span></a></li>
                             <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
                             <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
                             <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
@@ -617,15 +618,24 @@
 
           <!-- Bouton Familles Articles -->
         <a href="{{ url('/categories') }}" class="btn btn-outline-primary btn-round ms-2">
-            Familles Articles
+            Familles
             <i class="fas fa-layer-group ms-2"></i>
         </a>
 
         <!-- Bouton Marques Articles -->
         <a href="{{ url('/brands') }}" class="btn btn-outline-info btn-round ms-2">
-            Marques Articles
+            Marques
             <i class="fas fa-tags ms-2"></i>
         </a>
+
+         <a href="/groupremises" class="btn btn-outline-secondary btn-round ms-2">
+    <i class="fas fa-percent me-2"></i> Groupes Rem.
+</a>
+
+<button type="button" class="btn btn-outline-secondary btn-round ms-2" 
+        data-bs-toggle="modal" data-bs-target="#createDiscountGroupModal">
+    <i class="fas fa-plus-circle me-1"></i> Créer Grp. Remise
+</button>
 
 
                   <a href="{{ route('articles.import') }}" class="btn btn-outline-danger btn-round ms-2">
@@ -705,6 +715,21 @@
                                 @endforeach
                             </select>
                         </div>
+
+                        <!-- Groupe de remise -->
+<div class="mb-3 col-md-6">
+    <label for="discount_group_id" class="form-label">Groupe de remise</label>
+    <select class="form-control" id="discount_group_id" name="discount_group_id">
+        <option value="">-- Aucun (utilise standard) --</option>
+        @foreach($discountGroups as $group)
+            <option value="{{ $group->id }}" {{ old('discount_group_id') == $group->id ? 'selected' : '' }}>
+                {{ $group->name }}
+                (G: {{ $group->discount_rate }}% | J: {{ $group->discount_rate_jobber }}% | P: {{ $group->discount_rate_professionnel }}%)
+            </option>
+        @endforeach
+    </select>
+</div>
+
 
                         <!-- Prix d'achat -->
                         <div class="mb-3 col-md-3">
@@ -855,6 +880,160 @@
 
 
 
+
+
+
+
+<!-- essai groupe remise -->
+
+<!-- Application massive de groupe de remise -->
+<div class="mb-3 d-flex align-items-end gap-3 flex-wrap">
+    <div>
+        <label class="form-label fw-bold small">Appliquer groupe remise à la liste filtrée</label>
+        <select name="discount_group_id_mass" id="discount_group_id_mass" class="form-select form-select-sm" style="width: 400px;">
+            <option value="">-- Choisir un groupe --</option>
+            @foreach($discountGroups as $group)
+                <option value="{{ $group->id }}">
+                    {{ $group->name }}
+                    (Particulier: {{ $group->discount_rate }}% | Jobbeur: {{ $group->discount_rate_jobber }}% | Pro: {{ $group->discount_rate_professionnel }}%)
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <button type="button" class="btn btn-warning btn-sm px-4" id="applyMassDiscountBtn"
+            data-bs-toggle="modal" data-bs-target="#confirmMassDiscountModal"
+            disabled>
+        <i class="fas fa-percent me-1"></i> Appliquer à la liste filtrée
+    </button>
+
+
+    <!-- <button type="button" class="btn btn-secondary btn-sm px-4"
+        data-bs-toggle="modal" data-bs-target="#createDiscountGroupModal">
+    <i class="fas fa-plus-circle me-1"></i> Nouveau Groupe Remise
+</button> -->
+
+
+</div>
+
+<!-- Modal de confirmation -->
+<div class="modal fade" id="confirmMassDiscountModal" tabindex="-1" aria-labelledby="confirmMassDiscountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="confirmMassDiscountModalLabel">Confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Vous allez appliquer le groupe de remise sélectionné à
+                <strong id="countItemsToUpdate">0</strong> article(s).<br><br>
+                Cette action est <strong>irréversible</strong>.<br>
+                Continuer ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-warning" id="confirmMassApplyBtn">Oui, appliquer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Modal Création Groupe Remise -->
+<div class="modal fade" id="createDiscountGroupModal" tabindex="-1" aria-labelledby="createDiscountGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title" id="createDiscountGroupModalLabel">
+                    Créer un nouveau groupe de remise
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form action="{{ route('groupremise.store') }}" method="POST" id="createDiscountGroupForm">
+                @csrf
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-bold">Nom du groupe</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="name" 
+                               name="name" 
+                               placeholder="Exemple: filtres Valeo" 
+                               required>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="rate" class="form-label">Particulier (%)</label>
+                            <input type="number" 
+                                   step="0.01" 
+                                   min="0" 
+                                   max="100" 
+                                   class="form-control" 
+                                   name="rate" 
+                                   value="0" 
+                                   required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="rate_jobber" class="form-label">Jobber (%)</label>
+                            <input type="number" 
+                                   step="0.01" 
+                                   min="0" 
+                                   max="100" 
+                                   class="form-control" 
+                                   name="rate_jobber" 
+                                   value="0" 
+                                   required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="rate_professionnel" class="form-label">Professionnel (%)</label>
+                            <input type="number" 
+                                   step="0.01" 
+                                   min="0" 
+                                   max="100" 
+                                   class="form-control" 
+                                   name="rate_professionnel" 
+                                   value="0" 
+                                   required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">Créer le groupe</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- fin essai groupe remise -->
+
+
+
+
 <!-- fin recherche -->
 
 
@@ -915,6 +1094,7 @@
                     <th>Désignation</th>
                     <th>Marque</th>
                     <th>Famille</th>
+                    <th>Groupe Rem%</th>
                     <th>Prix A.HT</th>
                     <th>Prix V.HT</th>
                      <th>Fournisseur</th>
@@ -937,6 +1117,16 @@
                         <td>{{ $item->name }}</td>
                         <td>{{ $item->brand->name ?? '-' }}</td>
                         <td>{{ $item->category->name ?? '-' }}</td>
+                        
+                        <td>
+    {{ $item->discountGroup->name ?? 'Standard' }}<br>
+    <small class="text-muted">
+        Particulier: {{ $item->discountGroup->discount_rate ?? 0 }}%
+        | Jobbeur: {{ $item->discountGroup->discount_rate_jobber ?? 0 }}%
+        | Pro: {{ $item->discountGroup->discount_rate_professionnel ?? 0 }}%
+    </small>
+</td>
+
                         <td>{{ number_format($item->cost_price, 2, ',', ' ') }} €</td>
 @php
     $marge = $item->sale_price - $item->cost_price;
@@ -1234,9 +1424,24 @@
                             </select>
                         </div>
 
+                        <!-- Groupe de remise -->
+<div class="mb-3 col-md-6">
+    <label class="form-label">Groupe de remise</label>
+    <select name="discount_group_id" class="form-select" disabled>
+        <option value="">-- Aucun --</option>
+        @foreach($discountGroups as $group)
+            <option value="{{ $group->id }}" {{ $item->discount_group_id == $group->id ? 'selected' : '' }}>
+                {{ $group->name }}
+                (G: {{ $group->discount_rate }}% | J: {{ $group->discount_rate_jobber }}% | P: {{ $group->discount_rate_professionnel }}%)
+            </option>
+        @endforeach
+    </select>
+</div>
+
+
                         <div class="mb-3 col-md-3">
                             <label class="form-label">Prix Achat</label>
-                            <input type="number" name="cost_price" step="0.01" class="form-control" value="{{ $item->cost_price }}" readonly>
+                            <input type="number" name="cost_price" step="0.01" class="form-control" value="{{ $item->cost_price }}">
                         </div>
 
 
@@ -1459,11 +1664,11 @@ document.addEventListener("DOMContentLoaded", function () {
             </nav>
             <div class="copyright">
             © AZ NEGOCE. All Rights Reserved.
-              <!-- <a href="http://www.themekita.com">By Ahmed Arfaoui</a> -->
+              <!-- <a href="http://www.themekita.com">By AZ NEGOCE</a> -->
             </div>
             <div>
                by
-              <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.
+              <a target="_blank" href="https://themewagon.com/">AZ NEGOCE</a>.
             </div>
           </div>
         </footer>
@@ -1653,6 +1858,92 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+
+
+
+
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const selectGroup = document.getElementById('discount_group_id_mass');
+    const btnApply = document.getElementById('applyMassDiscountBtn');
+    const confirmBtn = document.getElementById('confirmMassApplyBtn');
+    const countSpan = document.getElementById('countItemsToUpdate');
+
+    // Activer/désactiver le bouton selon si un groupe est sélectionné
+    selectGroup.addEventListener('change', function() {
+        btnApply.disabled = !this.value;
+    });
+
+    // Mise à jour du nombre d'articles concernés (approximation via pagination)
+    function updateCountDisplay() {
+        // Approximation : nombre de lignes visibles dans le tableau
+        const visibleRows = document.querySelectorAll('#itemsTable tbody tr:not([style*="display: none"])');
+        countSpan.textContent = visibleRows.length;
+
+        // Option plus précise : récupérer le vrai total depuis Laravel (recommandé)
+        // → voir étape 4 pour la méthode idéale
+    }
+
+    // Mise à jour au chargement + quand on change de page
+    updateCountDisplay();
+
+    // Quand on change de page (Laravel pagination)
+    document.querySelectorAll('.pagination a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            // On laisse Laravel faire le chargement, puis on met à jour après
+            setTimeout(updateCountDisplay, 800);
+        });
+    });
+
+    // Confirmation → envoi réel
+    confirmBtn.addEventListener('click', function() {
+        const groupId = selectGroup.value;
+        if (!groupId) return;
+
+        // Récupération des mêmes filtres que la page actuelle
+        const form = document.querySelector('form[action="{{ route('articles.index') }}"]');
+        const formData = new FormData(form);
+        
+        // Ajout des paramètres spéciaux
+        const params = new URLSearchParams();
+        for (const [key, value] of formData) {
+            if (value) params.append(key, value);
+        }
+        params.append('mass_discount_group_id', groupId);
+        params.append('_token', '{{ csrf_token() }}');
+
+        fetch('{{ route("articles.mass-update-discount") }}', {
+            method: 'POST',
+            body: params,
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Mise à jour réussie ! ' + data.updated + ' article(s) modifié(s).');
+                location.reload(); // recharge la page pour voir les changements
+            } else {
+                alert('Erreur : ' + (data.message || 'Action impossible'));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Erreur technique lors de la mise à jour massive.');
+        });
+
+        // Ferme la modal
+        bootstrap.Modal.getInstance(document.getElementById('confirmMassDiscountModal')).hide();
+    });
+});
+    </script>
 
 
 

@@ -435,6 +435,14 @@ Route::post('/salesinvoices/{id}/send-order-ready',
 
 
 
+
+
+    // routes/web.php
+Route::post('/articles/mass-update-discount', [ItemController::class, 'massUpdateDiscount'])
+    ->name('articles.mass-update-discount');
+
+
+    
  
 // General Accounts Routes
 Route::get('/generalaccounts', [GeneralAccountsController::class, 'index'])->name('generalaccounts.index');

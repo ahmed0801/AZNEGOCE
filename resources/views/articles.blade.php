@@ -181,11 +181,56 @@
 
 
 
+/* Version compactée - filtres plus petits */
+.select2-wrapper {
+    position: relative;
+}
+
+/* Hauteur réduite + texte plus petit */
+.select2-container--default .select2-selection--single {
+    height: 28px !important;           /* plus petit que la version originale */
+    min-height: 28px !important;
+    padding: 0.2rem 0.4rem !important; /* padding intérieur réduit */
+    font-size: 0.82rem !important;     /* texte légèrement plus petit */
+    line-height: 1.35 !important;
+    border-radius: 0.25rem;
+}
+
+/* Texte dans le champ sélectionné */
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 26px !important;      /* aligné avec la hauteur */
+    padding-left: 6px !important;
+    padding-right: 22px !important;    /* espace pour la flèche */
+    color: #495057;
+}
+
+/* Flèche de dropdown */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 28px !important;
+    width: 20px !important;
+}
+
+/* Optionnel : placeholder plus discret */
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #999;
+    font-size: 0.82rem;
+}
+
+
 
 
 
 
     </style>
+
+
+
+<!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
+<!-- Select2 JS (après jQuery) -->
+
 
 
 
@@ -629,8 +674,13 @@
         </a>
 
          <a href="/groupremises" class="btn btn-outline-secondary btn-round ms-2">
-    <i class="fas fa-percent me-2"></i> Groupes Remises
+    <i class="fas fa-percent me-2"></i> Groupes Rem.
 </a>
+
+<button type="button" class="btn btn-outline-secondary btn-round ms-2" 
+        data-bs-toggle="modal" data-bs-target="#createDiscountGroupModal">
+    <i class="fas fa-plus-circle me-1"></i> Créer Grp. Remise
+</button>
 
 
                   <a href="{{ route('articles.import') }}" class="btn btn-outline-danger btn-round ms-2">
@@ -814,50 +864,62 @@
 
 
 <form method="GET" action="{{ route('articles.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-    <input type="text" name="search" class="form-control form-control-sm" style="width: 170px;"
-           placeholder="🔍 Rechercher..." value="{{ request('search') }}">
 
-    <select name="brand_id" class="form-select form-select-sm" style="width: 120px;">
-        <option value="">Marques (Tout)</option>
-        @foreach($brands as $brand)
-            <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
-                {{ $brand->name }}
-            </option>
-        @endforeach
-    </select>
+    <input type="text" name="search" class="form-control form-control-sm" 
+           style="width: 170px;" placeholder="🔍 Rechercher..." value="{{ request('search') }}">
 
-    <select name="category_id" class="form-select form-select-sm" style="width: 130px;">
-        <option value="">Familles (Tout)</option>
-        @foreach($categories as $category)
-            <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                {{ $category->name }}
-            </option>
-        @endforeach
-    </select>
+    <!-- On enlève width fixe + on ajoute une classe wrapper si besoin -->
+    <div class="select2-wrapper" style="min-width: 140px; flex: 1;">
+        <select name="brand_id" class="form-select form-select-sm select2-filter">
+            <option value="">Marques (Tout)</option>
+            @foreach($brands as $brand)
+                <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
+                    {{ $brand->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-    <select name="codefournisseur" class="form-select form-select-sm" style="width: 140px;">
-        <option value="">Fournisseurs (Tout)</option>
-        @foreach(\App\Models\Supplier::all() as $supplier)
-            <option value="{{ $supplier->code }}" {{ request('codefournisseur') == $supplier->code ? 'selected' : '' }}>
-                {{ $supplier->code }} - {{ $supplier->name }}
-            </option>
-        @endforeach
-    </select>
+    <div class="select2-wrapper" style="min-width: 150px; flex: 1;">
+        <select name="category_id" class="form-select form-select-sm select2-filter">
+            <option value="">Familles (Tout)</option>
+            @foreach($categories as $category)
+                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                    {{ $category->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-    <select name="store_id" class="form-select form-select-sm" style="width: 120px;">
-        <option value="">Magasins (Tout)</option>
-        @foreach($stores as $store)
-            <option value="{{ $store->id }}" {{ request('store_id') == $store->id ? 'selected' : '' }}>
-                {{ $store->name }}
-            </option>
-        @endforeach
-    </select>
+    <div class="select2-wrapper" style="min-width: 220px; flex: 1;">
+        <select name="codefournisseur" class="form-select form-select-sm select2-filter">
+            <option value="">Fournisseurs (Tout)</option>
+            @foreach(\App\Models\Supplier::all() as $supplier)
+                <option value="{{ $supplier->code }}" {{ request('codefournisseur') == $supplier->code ? 'selected' : '' }}>
+                    {{ $supplier->code }} - {{ $supplier->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-    <select name="is_active" class="form-select form-select-sm" style="width: 110px;">
-        <option value="">Statut (Tout)</option>
-        <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>Autorisé</option>
-        <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>Bloqué</option>
-    </select>
+    <!-- <div class="select2-wrapper" style="min-width: 140px;">
+        <select name="store_id" class="form-select form-select-sm select2-filter">
+            <option value="">Magasins (Tout)</option>
+            @foreach($stores as $store)
+                <option value="{{ $store->id }}" {{ request('store_id') == $store->id ? 'selected' : '' }}>
+                    {{ $store->name }}
+                </option>
+            @endforeach
+        </select>
+    </div> -->
+
+    <div class="select2-wrapper" style="min-width: 110px;">
+        <select name="is_active" class="form-select form-select-sm select2-filter">
+            <option value="">Statut (Tout)</option>
+            <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>Autorisé</option>
+            <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>Bloqué</option>
+        </select>
+    </div>
 
     <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
         <i class="fas fa-filter me-1"></i> Filtrer
@@ -872,6 +934,160 @@
         <i class="fas fa-undo me-1"></i> Réinitialiser
     </a>
 </form>
+
+
+
+
+
+
+
+<!-- essai groupe remise -->
+
+<!-- Application massive de groupe de remise -->
+<div class="mb-3 d-flex align-items-end gap-3 flex-wrap">
+    <div>
+        <label class="form-label fw-bold small">Appliquer groupe remise à la liste filtrée</label>
+        <select name="discount_group_id_mass" id="discount_group_id_mass" class="form-select form-select-sm" style="width: 400px;">
+            <option value="">-- Choisir un groupe --</option>
+            @foreach($discountGroups as $group)
+                <option value="{{ $group->id }}">
+                    {{ $group->name }}
+                    (Particulier: {{ $group->discount_rate }}% | Jobbeur: {{ $group->discount_rate_jobber }}% | Pro: {{ $group->discount_rate_professionnel }}%)
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <button type="button" class="btn btn-warning btn-sm px-4" id="applyMassDiscountBtn"
+            data-bs-toggle="modal" data-bs-target="#confirmMassDiscountModal"
+            disabled>
+        <i class="fas fa-percent me-1"></i> Appliquer à la liste filtrée
+    </button>
+
+
+    <!-- <button type="button" class="btn btn-secondary btn-sm px-4"
+        data-bs-toggle="modal" data-bs-target="#createDiscountGroupModal">
+    <i class="fas fa-plus-circle me-1"></i> Nouveau Groupe Remise
+</button> -->
+
+
+</div>
+
+<!-- Modal de confirmation -->
+<div class="modal fade" id="confirmMassDiscountModal" tabindex="-1" aria-labelledby="confirmMassDiscountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="confirmMassDiscountModalLabel">Confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Vous allez appliquer le groupe de remise sélectionné à
+                <strong id="countItemsToUpdate">0</strong> article(s).<br><br>
+                Cette action est <strong>irréversible</strong>.<br>
+                Continuer ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-warning" id="confirmMassApplyBtn">Oui, appliquer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Modal Création Groupe Remise -->
+<div class="modal fade" id="createDiscountGroupModal" tabindex="-1" aria-labelledby="createDiscountGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title" id="createDiscountGroupModalLabel">
+                    Créer un nouveau groupe de remise
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form action="{{ route('groupremise.store') }}" method="POST" id="createDiscountGroupForm">
+                @csrf
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-bold">Nom du groupe</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="name" 
+                               name="name" 
+                               placeholder="Exemple: filtres Valeo" 
+                               required>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="rate" class="form-label">Particulier (%)</label>
+                            <input type="number" 
+                                   step="0.01" 
+                                   min="0" 
+                                   max="100" 
+                                   class="form-control" 
+                                   name="rate" 
+                                   value="0" 
+                                   required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="rate_jobber" class="form-label">Jobber (%)</label>
+                            <input type="number" 
+                                   step="0.01" 
+                                   min="0" 
+                                   max="100" 
+                                   class="form-control" 
+                                   name="rate_jobber" 
+                                   value="0" 
+                                   required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="rate_professionnel" class="form-label">Professionnel (%)</label>
+                            <input type="number" 
+                                   step="0.01" 
+                                   min="0" 
+                                   max="100" 
+                                   class="form-control" 
+                                   name="rate_professionnel" 
+                                   value="0" 
+                                   required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">Créer le groupe</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- fin essai groupe remise -->
+
 
 
 
@@ -962,7 +1178,7 @@
                         <td>
     {{ $item->discountGroup->name ?? 'Standard' }}<br>
     <small class="text-muted">
-        Général: {{ $item->discountGroup->discount_rate ?? 0 }}%
+        Particulier: {{ $item->discountGroup->discount_rate ?? 0 }}%
         | Jobbeur: {{ $item->discountGroup->discount_rate_jobber ?? 0 }}%
         | Pro: {{ $item->discountGroup->discount_rate_professionnel ?? 0 }}%
     </small>
@@ -1522,6 +1738,9 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
 <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
 <!-- jQuery Scrollbar -->
 <script src="{{ asset('assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
 
@@ -1701,7 +1920,99 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+<script>
+$(document).ready(function() {
+    // 1. Initialisation Select2 pour tous les filtres
+    $('.select2-filter').select2({
+        placeholder: function() {
+            return $(this).find('option:first-child').text();
+        },
+        allowClear: true,
+        width: '100%',
+        minimumResultsForSearch: 0,
+        dropdownAutoWidth: true,
+        language: {
+            noResults: function() {
+                return "Aucun résultat trouvé";
+            }
+        }
+    });
 
+    // 2. Select2 pour le groupe remise massive
+    const selectGroup = $('#discount_group_id_mass').select2({
+        placeholder: "-- Choisir un groupe --",
+        allowClear: true,
+        width: '100%',
+        minimumResultsForSearch: 0
+    });
+
+    const btnApply = $('#applyMassDiscountBtn');
+    const confirmBtn = $('#confirmMassApplyBtn');
+    const countSpan = $('#countItemsToUpdate');
+
+    // 3. Écouter les ÉVÉNEMENTS SELECT2 (pas change natif !)
+    selectGroup.on('select2:select select2:unselect change', function(e) {
+        const hasValue = $(this).val() && $(this).val().trim() !== '';
+        btnApply.prop('disabled', !hasValue);
+    });
+
+    // 4. Déclenchement initial (si valeur pré-sélectionnée)
+    selectGroup.trigger('change');
+
+    // 5. Compteur d'articles (approximation)
+    function updateCountDisplay() {
+        const visibleRows = $('#itemsTable tbody tr:not([style*="display: none"])').length;
+        countSpan.text(visibleRows);
+    }
+    updateCountDisplay();
+
+    // 6. Mise à jour du compteur sur pagination
+    $('.pagination a').on('click', function() {
+        setTimeout(updateCountDisplay, 800);
+    });
+
+    // 7. Confirmation et envoi AJAX
+    confirmBtn.on('click', function() {
+        const groupId = selectGroup.val();
+        if (!groupId) return;
+
+        const form = $('form[action="{{ route("articles.index") }}"]');
+        const formData = new FormData(form[0]);
+        
+        const params = new URLSearchParams();
+        for (const [key, value] of formData.entries()) {
+            if (value) params.append(key, value);
+        }
+        params.append('mass_discount_group_id', groupId);
+        params.append('_token', '{{ csrf_token() }}');
+
+        fetch('{{ route("articles.mass-update-discount") }}', {
+            method: 'POST',
+            body: params,
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ Mise à jour réussie ! ' + data.updated + ' article(s) modifié(s).');
+                location.reload();
+            } else {
+                alert('❌ Erreur : ' + (data.message || 'Action impossible'));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('❌ Erreur technique lors de la mise à jour massive.');
+        });
+
+        // Ferme la modal
+        $('#confirmMassDiscountModal').modal('hide');
+    });
+});
+</script>
 
   </body>
 </html>

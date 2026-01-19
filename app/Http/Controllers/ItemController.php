@@ -688,5 +688,50 @@ public function searchtest(Request $request)
 
 
 
+    // ItemController.php
+public function massUpdateDiscount(Request $request)
+{
+    $groupId = $request->input('mass_discount_group_id');
+
+    if (!$groupId) {
+        return response()->json(['success' => false, 'message' => 'Aucun groupe sélectionné']);
+    }
+
+    $query = Item::query();
+
+    // On reprend **exactement** les mêmes filtres que dans index()
+    if ($request->filled('search')) {
+        $query->where(function ($q) use ($request) {
+            $q->where('name', 'like', $request->search . '%')
+              ->orWhere('code', 'like', $request->search);
+        });
+    }
+
+    if ($request->filled('brand_id'))    $query->where('brand_id', $request->brand_id);
+    if ($request->filled('category_id')) $query->where('category_id', $request->category_id);
+    if ($request->filled('store_id'))    $query->where('store_id', $request->store_id);
+    if ($request->filled('codefournisseur')) {
+        $query->where('codefournisseur', $request->codefournisseur);
+    }
+    if ($request->has('is_active') && $request->is_active !== '') {
+        $query->where('is_active', $request->is_active);
+    }
+
+    $count = $query->update([
+        'discount_group_id' => $groupId,
+        'updated_at'        => now(),
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'updated' => $count,
+        'message' => "$count article(s) ont reçu le nouveau groupe de remise."
+    ]);
+}
+
+
+
+
+
     
 }
