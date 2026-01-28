@@ -258,7 +258,7 @@ td {
                     <p><strong>Date :</strong> {{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</p>
                     <p><strong>Client :</strong> {{ $invoice->customer->name ?? '-' }}</p>
                     @if($invoice->customer->address)
-                    <p><strong>Adresse :</strong> {{ $invoice->customer->address ?? '-' }}</p>
+                    <p><strong>Adresse :</strong> {{ $invoice->customer->address ?? '-' }} , {{ $invoice->customer->address_delivery ?? '-' }}</p>
                     @endif
                     <!-- <p><strong>N° Client :</strong> {{ $invoice->numclient ?? '-' }}</p> -->
                     <p><strong>Véhicule :</strong> {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}</p>
@@ -282,6 +282,10 @@ td {
 <!-- === CONTENU PRINCIPAL === -->
 <main>
                     @if($invoice->notes )<p> Note : {{ $invoice->notes ?? '-' }}</p> @endif
+
+      
+
+
     <table class="items-table">
         <thead>
             <tr>
@@ -294,18 +298,90 @@ td {
                 <th>Total TTC</th>
             </tr>
         </thead>
-        <tbody>
-            @foreach ($invoice->lines as $line)
-            <tr>
-                <td>{{ $line->article_code ?? '-' }}</td>
-                <td>{{ $line->item->name ?? $line->description ?? '-' }}</td>
-                <td>{{ number_format($line->quantity, 0, ',', ' ') }}</td>
-                <td>{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
-                <td>{{ number_format($line->remise ?? 0, 2, ',', ' ') }}</td>
-                <td>{{ number_format($line->total_ligne_ht, 2, ',', ' ') }} €</td>
-                <td>{{ number_format($line->total_ligne_ttc, 2, ',', ' ') }} €</td>
-            </tr>
+                              <tbody>
+
+
+
+
+
+            @php
+                $groupedLines = $invoice->lines->groupBy(function ($line) {
+                    if ($line->sales_return_id) {
+                        $return = \App\Models\SalesReturn::find($line->sales_return_id);
+                        $vehicle = $return && $return->vehicle ? ' — ' . $return->vehicle->license_plate . ' (' . $return->vehicle->brand_name . ' ' . $return->vehicle->model_name . ')' : '';
+                        return 'Retour N° ' . ($return ? $return->numdoc : 'Inconnu') .
+                               ($return && $return->return_date ? ' — ' . \Carbon\Carbon::parse($return->return_date)->format('d/m/Y') : '') .
+                               $vehicle;
+                    } elseif ($line->delivery_note_id) {
+                        $dn = \App\Models\DeliveryNote::find($line->delivery_note_id);
+                        $vehicle = $dn && $dn->vehicle ? ' — ' . $dn->vehicle->license_plate . ' (' . $dn->vehicle->brand_name . ' ' . $dn->vehicle->model_name . ')' : '';
+                        return 'Bon de Livraison N° ' . ($dn ? $dn->numdoc : 'Inconnu') .
+                               ($dn && $dn->delivery_date ? ' — ' . \Carbon\Carbon::parse($dn->delivery_date)->format('d/m/Y') : '') .
+                               $vehicle;
+                    } else {
+                        return 'Facture directe';
+                    }
+                });
+            @endphp
+
+            @foreach($groupedLines as $header => $lines)
+                <!-- Entête discrète avec véhicule si présent -->
+
+                                                                    @if($invoice->type =="groupée")
+
+                <tr>
+                    <td colspan="7" style="
+                        background-color: {{ str_starts_with($header, 'Retour') ? '#fff5f5' : '#f0f8ff' }};
+                        color: {{ str_starts_with($header, 'Retour') ? '#c62828' : '#1976d2' }};
+                        font-weight: 600;
+                        font-size: 10px;
+                        text-align: left;
+                        padding: 4px 8px;
+                        border-left: 3px solid {{ str_starts_with($header, 'Retour') ? '#e57373' : '#2196f3' }};
+                        border-bottom: 1px solid #ddd;
+                    ">
+                       {{ $header }}
+                      
+                    </td>
+                </tr>
+ @endif
+
+
+
+                <!-- Lignes du groupe -->
+                @foreach($lines as $line)
+                    <tr style="background-color: {{ str_starts_with($header, 'Retour') ? '#fffafa' : 'inherit' }};">
+                        <td>{{ $line->article_code ?? '-' }}</td>
+                        <td>
+                            @if(str_starts_with($header, 'Retour'))
+                                <strong style="color: #c62828; font-size: 9px;">RETOUR :</strong>
+                            @endif
+                            {{ $line->item->name ?? $line->description ?? '-' }}
+                        </td>
+                        <td style="{{ str_starts_with($header, 'Retour') ? 'color: #c62828; font-weight: bold;' : '' }}">
+                            @if(str_starts_with($header, 'Retour'))
+                                -{{ number_format(abs($line->quantity ?? 0), 0, ',', ' ') }}
+                            @else
+                                {{ number_format($line->quantity ?? 0, 0, ',', ' ') }}
+                            @endif
+                        </td>
+                        <td>{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
+                        <td>{{ number_format($line->remise ?? 0, 2, ',', ' ') }}%</td>
+                        <td style="{{ str_starts_with($header, 'Retour') ? 'color: #c62828;' : '' }}">
+                            {{ number_format($line->total_ligne_ht, 2, ',', ' ') }} €
+                        </td>
+                        <td style="{{ str_starts_with($header, 'Retour') ? 'color: #c62828;' : '' }}">
+                            {{ number_format($line->total_ligne_ttc, 2, ',', ' ') }} €
+                        </td>
+                    </tr>
+                @endforeach
             @endforeach
+
+            @if($invoice->lines->isEmpty())
+                <tr>
+                    <td colspan="7" class="text-center text-muted">Aucune ligne</td>
+                </tr>
+            @endif
         </tbody>
     </table>
 

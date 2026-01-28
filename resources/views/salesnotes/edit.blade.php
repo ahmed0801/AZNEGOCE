@@ -581,8 +581,8 @@
                                     </div>
                                     <div class="col-md-6 text-end">
                                         <div class="p-3 bg-light border rounded shadow-sm">
-                                            <h5 class="mb-1">Total HT : <span id="grandTotal" class="text-success fw-bold">0,00</span> TND</h5>
-                                            <h6 class="mb-0">Total TTC : <span id="grandTotalTTC" class="text-danger fw-bold">0,00</span> TND</h6>
+                                            <h5 class="mb-1">Total HT : <span id="grandTotal" class="text-success fw-bold">0,00</span> €</h5>
+                                            <h6 class="mb-0">Total TTC : <span id="grandTotalTTC" class="text-danger fw-bold">0,00</span> €</h6>
                                         </div>
                                     </div>
                                 </div>
