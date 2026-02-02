@@ -14,8 +14,10 @@ use App\Models\SalesReturnLine;
 use App\Models\Souche;
 use App\Models\Stock;
 use App\Models\StockMovement;
+use App\Models\User;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +26,7 @@ class DeliveryNotesController extends Controller
 {
     public function list(Request $request)
     {
-$query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item'])
+$query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item','vehicle'])
     ->orderBy('delivery_notes.updated_at', 'desc');
 
         if ($request->filled('numclient')) {
@@ -43,10 +45,22 @@ $query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item'])
             $query->whereDate('delivery_notes.delivery_date', '<=', $request->date_to);
         }
 
-        $deliveryNotes = $query->get();
-        $customers = Customer::orderBy('name')->get();
+                     // ✅ NOUVEAU : filtre vendeur
+    if ($request->filled('vendeur')) {
+        $query->where('vendeur', $request->vendeur);
+    }
 
-        return view('delivery_notes.list', compact('deliveryNotes', 'customers'));
+
+        $deliveryNotes = $query->paginate(50); // Pagination au lieu de get()
+        $customers = Customer::orderBy('name')->get();
+                                // On récupère aussi la liste des vendeurs uniques pour le select
+    $vendeurs = User::where('role', 'vendeur')
+        ->orderBy('name')
+        ->pluck('name')
+        ->unique();
+        
+
+        return view('delivery_notes.list', compact('deliveryNotes', 'customers','vendeurs'));
     }
 
  public function exportSingle($id)
@@ -62,7 +76,7 @@ $query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item'])
 
    public function printSingle($id)
     {
-        $deliveryNote = DeliveryNote::with(['salesOrder', 'lines.item'])
+        $deliveryNote = DeliveryNote::with(['salesOrder', 'lines.item','vehicle'])
             ->leftJoin('customers', 'delivery_notes.numclient', '=', 'customers.code')
             ->select('delivery_notes.*', 'customers.name as customer_name')
             ->where('delivery_notes.id', $id)
@@ -144,7 +158,7 @@ $query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item'])
                     throw new \Exception("Article {$line['article_code']} introuvable.");
                 }
                 if ($request->input('action') === 'validate' && $item->stock_quantity < $line['delivered_quantity']) {
-                    throw new \Exception("Stock insuffisant pour l'article {$line['article_code']}.");
+                    // throw new \Exception("Stock insuffisant pour l'article {$line['article_code']}.");
                 }
 
                 $totalLigneHt = $line['delivered_quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
@@ -215,7 +229,7 @@ $query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item'])
                 'total_delivered' => $totalDelivered,
                 'total_ht' => $totalHt,
                 'total_ttc' => $totalHt * (1 + $tvaRate / 100),
-                'status' => $request->input('action') === 'validate' ? 'livré' : 'en_cours',
+                'status' => $request->input('action') === 'validate' ? 'expédié' : 'en_cours',
             ]);
 
             return redirect()->route('delivery_notes.list')
@@ -256,7 +270,8 @@ $query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item'])
         return DB::transaction(function () use ($request, $id) {
             $deliveryNote = DeliveryNote::findOrFail($id);
 
-            $deliveryNote->update(['status_livraison' => 'livré']);
+            $deliveryNote->update(['status_livraison' => 'livré',
+        'status' => 'expédié']);
 
             return redirect()->route('delivery_notes.list')
                 ->with('success', 'Bon de livraison validé avec succès.');
@@ -806,5 +821,62 @@ public function shippingNote(Request $request, $id)
             return redirect()->route('delivery_notes.returns.show', $return->id)->with('success', 'Retour de vente mis à jour avec succès.');
         });
     }
+
+
+
+
+
+
+
+
+
+    // tv client
+    public function tvClient()
+    {
+        $today = Carbon::today()->toDateString();
+        $deliveryNotes = DeliveryNote::with(['customer'])
+            ->whereIn('status', ['en_cours', 'expédié'])
+            ->whereDate('delivery_date', $today)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        $lastDeliveryNotes = $deliveryNotes->map(function ($note) {
+            return [
+                'id' => $note->id,
+                'numdoc' => $note->numdoc,
+                'customer_name' => isset($note->customer) ? $note->customer->name ?? 'Client inconnu' : 'Client inconnu',
+                'vendeur' => $note->vendeur ?? 'Non assigné',
+                'status' => $note->status,
+                'updated_at' => $note->updated_at->toIso8601String(),
+            ];
+        })->toArray();
+
+        return view('tvclient', compact('deliveryNotes', 'lastDeliveryNotes'));
+    }
+
+    public function tvClientData(Request $request)
+    {
+        $today = Carbon::today()->toDateString();
+        $deliveryNotes = DeliveryNote::with(['customer'])
+            ->whereIn('status', ['en_cours', 'expédié'])
+            ->whereDate('delivery_date', $today)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'deliveryNotes' => $deliveryNotes->map(function ($note) {
+                return [
+                    'id' => $note->id,
+                    'numdoc' => $note->numdoc,
+                    'customer_name' => isset($note->customer) ? $note->customer->name ?? 'Client inconnu' : 'Client inconnu',
+                    'vendeur' => $note->vendeur ?? 'Non assigné',
+                    'status' => $note->status,
+                    'updated_at' => $note->updated_at->toIso8601String(),
+                ];
+            })->toArray(),
+            'current_time' => Carbon::now('Europe/Paris')->format('d/m/Y H:i:s'),
+        ]);
+    }
+
     
 }

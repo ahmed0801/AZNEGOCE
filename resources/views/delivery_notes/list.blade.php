@@ -459,8 +459,8 @@
         {{-- Vendeur --}}
         <select name="vendeur"
                 class="form-select form-select-sm"
-                style="width: 120px;">
-            <option value="">Vendeur (Tous)</option>
+                style="width: 100px;">
+            <option value="">Vendeurs (Tous)</option>
             @foreach($vendeurs as $vendeur)
                 <option value="{{ $vendeur }}"
                     {{ request('vendeur') == $vendeur ? 'selected' : '' }}>
@@ -469,10 +469,38 @@
             @endforeach
         </select>
 
+
+
+        <!-- Facturé / Non facturé -->
+        <div class="col-md-1 col-sm-6">
+            <label class="form-label small fw-bold">Facturation</label>
+            <select name="facture_status" class="form-select form-select-sm">
+                <option value="">Tous</option>
+                <option value="facture"     {{ request('facture_status') == 'facture'     ? 'selected' : '' }}>Facturés</option>
+                <option value="non_facture" {{ request('facture_status') == 'non_facture' ? 'selected' : '' }}>Non facturés</option>
+            </select>
+        </div>
+
+        <!-- Numéro BL -->
+        <div class="col-md-1 col-sm-6">
+            <label class="form-label small fw-bold">N° BL</label>
+            <input type="text" name="search_bl" class="form-control form-control-sm"
+                   placeholder="Ex: BL-2026-..." value="{{ request('search_bl') }}">
+        </div>
+
+        <!-- Article (code ou nom) -->
+        <div class="col-md-1 col-sm-6">
+            <label class="form-label small fw-bold">Article</label>
+            <input type="text" name="search_article" class="form-control form-control-sm"
+                   placeholder="Réf ou Desc..." value="{{ request('search_article') }}">
+        </div>
+
+
+
         {{-- Statut BL --}}
         <select name="status"
                 class="form-select form-select-sm"
-                style="width: 110px;">
+                style="width: 100px;">
             <option value="">Statut BL</option>
             <option value="en_cours" {{ request('status') == 'en_cours' ? 'selected' : '' }}>En cours</option>
             <option value="expédié" {{ request('status') == 'expédié' ? 'selected' : '' }}>Expédié</option>
@@ -483,7 +511,7 @@
         <input type="date"
                name="date_from"
                class="form-control form-control-sm"
-               style="width: 97px;"
+               style="width: 90px;"
                value="{{ request('date_from') }}">
 
         <span class="mx-0">à</span>
@@ -491,7 +519,7 @@
         <input type="date"
                name="date_to"
                class="form-control form-control-sm"
-               style="width: 97px;"
+               style="width: 90px;"
                value="{{ request('date_to') }}">
 
         {{-- Boutons --}}
@@ -769,7 +797,7 @@
 
     <script>
         $(document).ready(function () {
-            $('.select2').select2({ width: '30%' });
+            $('.select2').select2({ width: '15%' });
         });
 
         function toggleLines(id) {

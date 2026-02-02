@@ -28,8 +28,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InvoiceMail;
+use App\Mail\OrderMail;
 use App\Mail\OrderReadyMail;
 use App\Models\EmailMessage;
+use App\Models\SalesOrder;
 use App\Models\User;
 
 class SalesInvoicesController extends Controller
@@ -1242,22 +1244,38 @@ public function notesList(Request $request)
 
     public function storeSalesNote(Request $request)
     {
-        $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'note_date' => 'required|date',
-            'tva_rate' => 'required|numeric|min:0',
-            'source_type' => 'required|in:return,invoice',
-            'source_ids' => 'required|array',
-            'source_ids.*' => 'required|numeric',
-            'lines' => 'required|array',
-            'lines.*.quantity' => 'required|numeric|gt:0',
-            'lines.*.unit_price_ht' => 'required|numeric|gt:0',
-            'lines.*.remise' => 'nullable|numeric|min:0|max:100',
-            'lines.*.article_code' => 'required|exists:items,code',
-            'lines.*.source_id' => 'required|numeric',
-            'notes' => 'nullable|string|max:500',
-            'action' => 'required|in:save,validate',
-        ]);
+        $rules = [
+    'customer_id'          => 'required|exists:customers,id',
+    'note_date'            => 'required|date',
+    'tva_rate'             => 'required|numeric|min:0',
+    'source_type'          => 'required|in:return,invoice,free',
+    'source_ids'           => 'nullable|array',
+    'source_ids.*'         => 'nullable|numeric|integer',
+    'lines'                => 'required|array|min:1',
+    'lines.*.quantity'     => 'required|numeric|gt:0',
+    'lines.*.unit_price_ht'=> 'required|numeric|gt:0',
+    'lines.*.remise'       => 'nullable|numeric|min:0|max:100',
+    'lines.*.article_code' => 'required|string|max:100',
+    'lines.*.description'  => 'nullable|string|max:500',
+    'lines.*.source_id'    => 'nullable|numeric|integer',
+    'notes'                => 'nullable|string|max:500',
+    'action'               => 'required|in:save,validate',
+];
+
+// Ajustements conditionnels
+if (in_array($request->input('source_type'), ['return', 'invoice'])) {
+    $rules['source_ids']           = 'required|array|min:1';
+    $rules['source_ids.*']         = 'required|numeric|integer';
+    $rules['lines.*.source_id']    = 'required|numeric|integer';
+    $rules['lines.*.article_code'] .= '|exists:items,code';
+}
+
+if ($request->input('source_type') === 'free') {
+    $rules['lines.*.description'] = 'required|string|max:500';
+    // Pas d'exists sur article_code → on crée l'article
+}
+
+$request->validate($rules);
 
         return DB::transaction(function () use ($request) {
             \Log::info('storeSalesNote called', [
@@ -2158,6 +2176,74 @@ public function sendOrderReadyEmail(Request $request, $id)
 
     return back()->with('success', 'Notification de retrait envoyée au client !');
 }
+
+
+
+
+
+
+
+
+
+
+public function sendEmailorder(Request $request, $id)
+{
+    // Validation
+    $request->validate([
+        'emails' => 'required|array|min:1',
+        'emails.*' => 'required|email',
+        'message' => 'nullable|string',
+    ]);
+
+    // Récupérer la facture
+            $order = SalesOrder::with(['customer', 'deliveryNote', 'lines.item', 'customer.tvaGroup'])->findOrFail($id);
+
+
+    // Company fallback
+    $company = CompanyInformation::first() ?? new CompanyInformation([
+        'name' => 'Test Company S.A.R.L',
+        'address' => '123 Rue Fictive, Tunis 1000',
+        'phone' => '+216 12 345 678',
+        'email' => 'contact@testcompany.com',
+        'matricule_fiscal' => '1234567ABC000',
+        'swift' => 'TESTTNTT',
+        'rib' => '123456789012',
+        'iban' => 'TN59 1234 5678 9012 3456 7890',
+        'logo_path' => 'assets/img/test_logo.png',
+    ]);
+
+    // Message : soit celui passé par le form, soit la valeur par défaut en BDD
+    $defaultMessages = EmailMessage::first();
+    $messageText = $request->input('message')
+                 ?? ($defaultMessages->messagefacturevente ?? 'Veuillez trouver ci-joint votre facture de vente.');
+
+    // Générer le barcode (si utilisé dans la vue PDF)
+    $generator = new BarcodeGeneratorPNG();
+    $barcode = 'data:image/png;base64,' . base64_encode(
+        $generator->getBarcode($order->numdoc, $generator::TYPE_CODE_128)
+    );
+
+    // Générer le PDF en mémoire
+    $pdf = Pdf::loadView('pdf.devissansref', compact('order', 'company', 'barcode'))->output();
+
+    // Destinataires : first -> To ; reste -> CC
+    $emails = $request->input('emails', []);
+    $primary = array_shift($emails); // premier email
+    $cc = $emails; // reste des adresses
+
+    try {
+        Mail::to($primary)
+            ->cc($cc)
+            ->send(new OrderMail($order, $company, $pdf, $messageText));
+    } catch (\Exception $e) {
+        // log si tu veux : \Log::error($e);
+        return back()->with('error', 'Erreur lors de l\'envoi du mail : ' . $e->getMessage());
+    }
+
+    return back()->with('success', 'Document envoyé avec succès !');
+}
+
+
 
 
 

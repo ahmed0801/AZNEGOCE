@@ -508,6 +508,7 @@
                                             <option value="">Sélectionner le type</option>
                                             <option value="return">Retour (non facturé)</option>
                                             <option value="invoice">Facture (validée)</option>
+                                            <option value="free">Avoir libre (saisie manuelle)</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6">
@@ -515,6 +516,20 @@
                                         <select name="source_ids[]" id="source_ids" class="form-control select2-documents" multiple required></select>
                                     </div>
                                 </div>
+
+
+                                <!-- Bouton + zone de saisie manuelle (cachée par défaut) -->
+<div class="mb-3" id="free_lines_actions" style="display:none;">
+    <button type="button" id="add_free_line" class="btn btn-outline-primary">
+        <i class="fas fa-plus"></i> Ajouter une ligne
+    </button>
+    <!-- <button type="button" id="search_existing_item" class="btn btn-outline-success btn-sm ms-2">
+        <i class="fas fa-search"></i> Rechercher article existant
+    </button> -->
+</div>
+
+
+
                                 <h6 class="fw-bold mb-3">🧾 Lignes de l'Avoir</h6>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-bordered align-middle" id="lines-table">
@@ -580,166 +595,224 @@
     <script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
 
+    
+
+
     <script>
-        let lineIndex = 0;
-        const tvaMap = {!! json_encode($tvaRates ?? []) !!};
+    let lineIndex = 0;
+    const tvaMap = {!! json_encode($tvaRates ?? []) !!};
 
-        $(document).ready(function () {
-            console.log('Document ready, initializing Select2 and form');
+    $(document).ready(function () {
+        console.log('Document ready – Initialisation Select2');
 
-            // Initialize Select2 for customer and source type dropdowns
-            $('.select2').select2({ width: '100%' });
+        // Init Select2 simples
+        $('.select2').select2({ width: '100%' });
 
-            // Initialize Select2 for source documents
-            $('.select2-documents').select2({
-                ajax: {
-                    url: "{{ route('salesnotes.source.documents') }}",
-                    dataType: 'json',
-                    delay: 500,
-                    data: function (params) {
-                        return {
-                            term: params.term || '',
-                            source_type: $('#source_type').val() || '',
-                            customer_id: $('#customer_id').val() || ''
-                        };
-                    },
-                    processResults: function (data) {
-                        console.log('Search Response:', data);
-                        return {
-                            results: data.documents.map(item => ({
-                                id: item.id,
-                                text: `${item.numdoc} - ${item.customer_name || 'N/A'}`
-                            }))
-                        };
-                    },
-                    cache: true
+        // Init Select2 documents (multiple + AJAX)
+        const $sourceSelect = $('#source_ids');
+        $sourceSelect.select2({
+            ajax: {
+                url: "{{ route('salesnotes.source.documents') }}",
+                dataType: 'json',
+                delay: 500,
+                data: function (params) {
+                    return {
+                        term: params.term || '',
+                        source_type: $('#source_type').val() || '',
+                        customer_id: $('#customer_id').val() || ''
+                    };
                 },
-                placeholder: 'Sélectionner des retours ou factures',
-                minimumInputLength: 0,
-                width: '100%',
-                allowClear: true
+                processResults: function (data) {
+                    console.log('Documents chargés:', data);
+                    return {
+                        results: data.documents.map(item => ({
+                            id: item.id,
+                            text: `${item.numdoc} - ${item.customer_name || 'N/A'}`
+                        }))
+                    };
+                },
+                cache: true
+            },
+            placeholder: 'Sélectionner des retours ou factures',
+            minimumInputLength: 0,
+            width: '100%',
+            allowClear: true
+        });
+
+        // Calcul TVA client
+        function getTVA() {
+            const customerId = parseInt($('#customer_id').val()) || 0;
+            return parseFloat(tvaMap[customerId]) || 0;
+        }
+
+        // Recalcul global
+        function recalculate() {
+            let totalHT = 0;
+            const tva = getTVA();
+
+            $('#lines tr').each(function () {
+                const qty    = parseFloat($(this).find('.qty').val())    || 0;
+                const pu     = parseFloat($(this).find('.pu').val())     || 0;
+                const remise = parseFloat($(this).find('.remise').val()) || 0;
+
+                const lineHT  = -qty * pu * (1 - remise / 100);
+                const lineTTC = lineHT * (1 + tva / 100);
+
+                $(this).find('.tva_ligne').val(tva.toFixed(2));
+                $(this).find('.total').val(lineHT.toLocaleString('fr-FR', { minimumFractionDigits: 2 }));
+                $(this).find('.totalttc').val(lineTTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 }));
+
+                totalHT += lineHT;
             });
 
-            function getTVA() {
-                const customerId = parseInt($('#customer_id').val());
-                const selectedItems = $('.select2-documents').select2('data');
-                if (selectedItems.length === 0) return parseFloat(tvaMap[customerId]) || 0;
-                return parseFloat(tvaMap[customerId]) || 0;
+            const totalTTC = totalHT * (1 + tva / 100);
+            $('#grandTotal').text(totalHT.toLocaleString('fr-FR', { minimumFractionDigits: 2 }));
+            $('#grandTotalTTC').text(totalTTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 }));
+            $('#tva_rate').val(tva);
+            $('#tva_display').val(tva.toFixed(2));
+        }
+
+        // Changement client → reset documents
+        $('#customer_id').on('change', function () {
+            const selected = $(this).find('option:selected');
+            $('#numclient').val(selected.data('code') || '');
+            $sourceSelect.val(null).trigger('change');
+            $('#lines').empty();
+            lineIndex = 0;
+            recalculate();
+        });
+
+        // Changement type source → reset tout
+        $('#source_type').on('change', function () {
+            const type = $(this).val();
+            console.log('Type source changé →', type);
+
+            // Reset lignes
+            $('#lines').empty();
+            lineIndex = 0;
+
+            // Reset complet Select2 documents
+            $sourceSelect
+                .val(null)
+                .trigger('change')
+                .next('.select2-container').find('.select2-selection__rendered').empty();
+
+            // Affichage conditionnel
+            if (type === 'free') {
+                $('#source_documents_group').hide();
+                $('#free_lines_actions').show();
+                $sourceSelect.prop('required', false);
+            } else {
+                $('#source_documents_group').show();
+                $('#free_lines_actions').hide();
+                $sourceSelect.prop('required', true);
             }
-
-            function recalculate() {
-                console.log('Recalculating totals');
-                let totalHT = 0;
-                const tva = getTVA();
-                $('#lines tr').each(function () {
-                    const qty = parseFloat($(this).find('.qty').val()) || 0;
-                    const pu = parseFloat($(this).find('.pu').val()) || 0;
-                    const remise = parseFloat($(this).find('.remise').val()) || 0;
-                    const lineHT = -qty * pu * (1 - remise / 100); // Negative for credit note
-                    const lineTTC = lineHT * (1 + tva / 100);
-                    $(this).find('.tva_ligne').val(tva.toFixed(2));
-                    $(this).find('.total').val(lineHT.toLocaleString('fr-FR', { minimumFractionDigits: 2 }));
-                    $(this).find('.totalttc').val(lineTTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 }));
-                    totalHT += lineHT;
-                });
-                const totalTTC = totalHT * (1 + tva / 100);
-                $('#grandTotal').text(totalHT.toLocaleString('fr-FR', { minimumFractionDigits: 2 }));
-                $('#grandTotalTTC').text(totalTTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 }));
-                $('#tva_rate').val(tva);
-                $('#tva_display').val(tva.toFixed(2));
-            }
-
-            $('#customer_id').on('change', function () {
-                console.log('Customer changed:', $(this).val());
-                const selectedOption = $(this).find('option:selected');
-                const numclient = selectedOption.data('code') || '';
-                $('#numclient').val(numclient);
-                $('.select2-documents').val(null).trigger('change');
-                recalculate();
-            });
-
-            $('#source_type').on('change', function () {
-                console.log('Source type changed:', $(this).val());
-                $('.select2-documents').val(null).trigger('change');
-                $('#lines').empty();
-                lineIndex = 0;
-                recalculate();
-            });
-
-            $('#lines').on('input', '.qty, .pu, .remise', function () {
-                console.log('Line input changed, recalculating');
-                recalculate();
-            });
-
-            $('#lines').on('click', '.remove-line', function () {
-                console.log('Removing line');
-                $(this).closest('tr').remove();
-                recalculate();
-            });
-
-            $('.select2-documents').on('select2:select select2:unselect', function (e) {
-                console.log('Select2 event:', e.type, 'selected:', $(this).val());
-                $('#lines').empty();
-                lineIndex = 0;
-                const selectedIds = $(this).val() || [];
-                const sourceType = $('#source_type').val();
-                if (!sourceType || selectedIds.length === 0) {
-                    recalculate();
-                    return;
-                }
-
-                $.ajax({
-                    url: "{{ route('salesnotes.source.lines') }}",
-                    data: {
-                        source_type: sourceType,
-                        source_ids: selectedIds
-                    },
-                    dataType: 'json',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    success: function (data) {
-                        console.log('AJAX Success, Lines:', data);
-                        const tva = getTVA();
-                        $('#tva_display').val(tva.toFixed(2));
-                        $('#tva_rate').val(tva);
-                        data.lines.forEach(line => {
-                            const qty = Math.abs(parseFloat(line.quantity)) || 1;
-                            const lineHT = -qty * line.unit_price_ht * (1 - (line.remise || 0) / 100);
-                            const lineTTC = lineHT * (1 + tva / 100);
-                            const row = `
-                                <tr>
-                                    <td>
-                                        <input type="text" value="${line.source_numdoc || 'N/A'}" class="form-control" readonly>
-                                        <input type="hidden" name="lines[${lineIndex}][source_id]" value="${line.source_id}">
-                                    </td>
-                                    <td>
-                                        <input type="text" value="${line.article_code} - ${line.description || 'N/A'}" class="form-control" readonly>
-                                        <input type="hidden" name="lines[${lineIndex}][article_code]" value="${line.article_code}">
-                                    </td>
-                                    <td><input type="number" name="lines[${lineIndex}][quantity]" class="form-control qty" value="${qty}" max="${qty}" min="0" step="0.01" required></td>
-                                    <td><input type="number" step="0.01" name="lines[${lineIndex}][unit_price_ht]" class="form-control pu" value="${line.unit_price_ht}" min="0" required></td>
-                                    <td><input type="number" step="0.01" name="lines[${lineIndex}][remise]" class="form-control remise" value="${line.remise || 0}" min="0" max="100"></td>
-                                    <td><input type="text" name="lines[${lineIndex}][tva]" class="form-control tva_ligne" value="${tva.toFixed(2)}" readonly></td>
-                                    <td><input type="text" class="form-control total" value="${lineHT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}" readonly></td>
-                                    <td><input type="text" class="form-control totalttc" value="${lineTTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}" readonly></td>
-                                    <td><button type="button" class="btn btn-outline-danger btn-sm remove-line">×</button></td>
-                                </tr>`;
-                            $('#lines').append(row);
-                            lineIndex++;
-                        });
-                        recalculate();
-                    },
-                    error: function (xhr, status, error) {
-                        console.error('AJAX Error:', status, error, xhr.responseText);
-                        $('#lines').html('<tr><td colspan="9">Erreur lors du chargement des lignes.</td></tr>');
-                        recalculate();
-                    }
-                });
-            });
 
             recalculate();
         });
-    </script>
+
+        // Sélection documents → charger lignes (UN SEUL gestionnaire)
+        $sourceSelect.on('select2:select select2:unselect', function (e) {
+            console.log('Documents changés →', e.type, $(this).val());
+
+            $('#lines').empty();
+            lineIndex = 0;
+
+            const selectedIds = $(this).val() || [];
+            const sourceType = $('#source_type').val();
+
+            if (!sourceType || selectedIds.length === 0 || sourceType === 'free') {
+                recalculate();
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('salesnotes.source.lines') }}",
+                type: 'GET',
+                data: {
+                    source_type: sourceType,
+                    source_ids: selectedIds
+                },
+                dataType: 'json',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                success: function (data) {
+                    console.log('Lignes reçues:', data.lines?.length || 0, 'lignes');
+
+                    const tva = getTVA();
+                    $('#tva_display').val(tva.toFixed(2));
+                    $('#tva_rate').val(tva);
+
+                    (data.lines || []).forEach(line => {
+                        const qty = Math.abs(parseFloat(line.quantity)) || 1;
+                        const lineHT = -qty * (line.unit_price_ht || 0) * (1 - (line.remise || 0) / 100);
+                        const lineTTC = lineHT * (1 + tva / 100);
+
+                        const row = `
+                            <tr>
+                                <td>
+                                    <input type="text" value="${line.source_numdoc || 'N/A'}" class="form-control" readonly>
+                                    <input type="hidden" name="lines[${lineIndex}][source_id]" value="${line.source_id}">
+                                </td>
+                                <td>
+                                    <input type="text" value="${line.article_code} - ${line.description || 'N/A'}" class="form-control" readonly>
+                                    <input type="hidden" name="lines[${lineIndex}][article_code]" value="${line.article_code}">
+                                </td>
+                                <td><input type="number" name="lines[${lineIndex}][quantity]" class="form-control qty" value="${qty}" max="${qty}" min="0" step="0.01" required></td>
+                                <td><input type="number" step="0.01" name="lines[${lineIndex}][unit_price_ht]" class="form-control pu" value="${line.unit_price_ht || 0}" min="0" required></td>
+                                <td><input type="number" step="0.01" name="lines[${lineIndex}][remise]" class="form-control remise" value="${line.remise || 0}" min="0" max="100"></td>
+                                <td><input type="text" name="lines[${lineIndex}][tva]" class="form-control tva_ligne" value="${tva.toFixed(2)}" readonly></td>
+                                <td><input type="text" class="form-control total" value="${lineHT.toLocaleString('fr-FR', {minimumFractionDigits:2})}" readonly></td>
+                                <td><input type="text" class="form-control totalttc" value="${lineTTC.toLocaleString('fr-FR', {minimumFractionDigits:2})}" readonly></td>
+                                <td><button type="button" class="btn btn-outline-danger btn-sm remove-line">×</button></td>
+                            </tr>`;
+
+                        $('#lines').append(row);
+                        lineIndex++;
+                    });
+
+                    recalculate();
+                },
+                error: function (xhr) {
+                    console.error('Erreur AJAX:', xhr);
+                    $('#lines').html('<tr><td colspan="9" class="text-danger">Erreur chargement</td></tr>');
+                    recalculate();
+                }
+            });
+        });
+
+        // Ajout ligne manuelle (free)
+        $('#add_free_line').on('click', function () {
+            const tva = getTVA() || 20;
+            const row = `
+                <tr>
+                    <td><input type="text" name="lines[${lineIndex}][article_code]" class="form-control" placeholder="Réf article" required></td>
+                    <td><input type="text" name="lines[${lineIndex}][description]" class="form-control" placeholder="Désignation" required></td>
+                    <td><input type="number" name="lines[${lineIndex}][quantity]" class="form-control qty" value="1" min="0.01" step="0.01" required></td>
+                    <td><input type="number" step="0.01" name="lines[${lineIndex}][unit_price_ht]" class="form-control pu" value="0.00" min="0" required></td>
+                    <td><input type="number" step="0.01" name="lines[${lineIndex}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
+                    <td><input type="text" name="lines[${lineIndex}][tva]" class="form-control tva_ligne" value="${tva.toFixed(2)}" readonly></td>
+                    <td><input type="text" class="form-control total" value="0,00" readonly></td>
+                    <td><input type="text" class="form-control totalttc" value="0,00" readonly></td>
+                    <td><button type="button" class="btn btn-outline-danger btn-sm remove-line">×</button></td>
+                </tr>`;
+
+            $('#lines').append(row);
+            lineIndex++;
+            recalculate();
+        });
+
+        // Événements lignes
+        $('#lines').on('input', '.qty, .pu, .remise', recalculate);
+        $('#lines').on('click', '.remove-line', function () {
+            $(this).closest('tr').remove();
+            recalculate();
+        });
+
+        // Init initial
+        recalculate();
+    });
+</script>
+
+
 </body>
 </html>

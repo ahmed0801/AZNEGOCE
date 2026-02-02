@@ -977,7 +977,7 @@ public function exportInvoices(Request $request)
                     throw new \Exception("Ligne de retour introuvable pour l'article {$line['article_code']}.");
                 }
                 if ($line['quantity'] > $returnLine->returned_quantity) {
-                    throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
+                    // throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
                 }
 
                 $totalLigneHt = -$line['quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
@@ -1084,7 +1084,7 @@ public function exportInvoices(Request $request)
                     throw new \Exception("Ligne de facture introuvable pour l'article {$line['article_code']}.");
                 }
                 if ($line['quantity'] > $invoiceLine->quantity) {
-                    throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
+                    // throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
                 }
 
                 $totalLigneHt = -$line['quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
@@ -1242,265 +1242,285 @@ public function notesList(Request $request)
         return view('salesnotes.create_sales_note', compact('customers', 'returns', 'invoices', 'tvaRates'));
     }
 
+
+
+
     public function storeSalesNote(Request $request)
-    {
-        $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'note_date' => 'required|date',
-            'tva_rate' => 'required|numeric|min:0',
-            'source_type' => 'required|in:return,invoice',
-            'source_ids' => 'required|array',
-            'source_ids.*' => 'required|numeric',
-            'lines' => 'required|array',
-            'lines.*.quantity' => 'required|numeric|gt:0',
-            'lines.*.unit_price_ht' => 'required|numeric|gt:0',
-            'lines.*.remise' => 'nullable|numeric|min:0|max:100',
-            'lines.*.article_code' => 'required|exists:items,code',
-            'lines.*.source_id' => 'required|numeric',
-            'notes' => 'nullable|string|max:500',
-            'action' => 'required|in:save,validate',
+{
+    $rules = [
+    'customer_id'          => 'required|exists:customers,id',
+    'note_date'            => 'required|date',
+    'tva_rate'             => 'required|numeric|min:0',
+    'source_type'          => 'required|in:return,invoice,free',
+    'source_ids'           => 'nullable|array',
+    'source_ids.*'         => 'nullable|numeric|integer',
+    'lines'                => 'required|array|min:1',
+    'lines.*.quantity'     => 'required|numeric|gt:0',
+    'lines.*.unit_price_ht'=> 'required|numeric|gt:0',
+    'lines.*.remise'       => 'nullable|numeric|min:0|max:100',
+    'lines.*.article_code' => 'required|string|max:100',
+    'lines.*.description'  => 'nullable|string|max:500',
+    'lines.*.source_id'    => 'nullable|numeric|integer',
+    'notes'                => 'nullable|string|max:500',
+    'action'               => 'required|in:save,validate',
+];
+
+// Ajustements conditionnels
+if (in_array($request->input('source_type'), ['return', 'invoice'])) {
+    $rules['source_ids']           = 'required|array|min:1';
+    $rules['source_ids.*']         = 'required|numeric|integer';
+    $rules['lines.*.source_id']    = 'required|numeric|integer';
+    $rules['lines.*.article_code'] .= '|exists:items,code';
+}
+
+if ($request->input('source_type') === 'free') {
+    $rules['lines.*.description'] = 'required|string|max:500';
+    // Pas d'exists sur article_code → on crée l'article
+}
+
+$request->validate($rules);
+
+    return DB::transaction(function () use ($request) {
+
+        \Log::info('storeSalesNote called', $request->all());
+
+        $customer = Customer::with(['tvaGroup', 'paymentTerm'])->findOrFail($request->customer_id);
+        $tvaRate  = $request->tva_rate;
+        $dueDate  = $customer->paymentTerm
+            ? Carbon::parse($request->note_date)->addDays($customer->paymentTerm->days)
+            : null;
+
+        // Souche avoir vente
+        $souche = Souche::where('type', 'avoir_vente')->lockForUpdate()->firstOrFail();
+
+        $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
+        $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
+
+        $note = SalesNote::create([
+            'numdoc'          => $numdoc,
+            'customer_id'     => $request->customer_id,
+            'note_date'       => $request->note_date,
+            'due_date'        => $dueDate,
+            'status'          => $request->action === 'validate' ? 'validée' : 'brouillon',
+            'paid'            => false,
+            'total_ht'        => 0,
+            'total_ttc'       => 0,
+            'tva_rate'        => $tvaRate,
+            'notes'           => $request->notes,
+            // On garde une nomenclature cohérente avec tes autres types
+            'type'            => $request->source_type === 'free' ? 'free' : ($request->source_type === 'return' ? 'from_return' : 'from_invoice'),
+            'sales_return_id' => $request->source_type === 'return'  ? ($request->source_ids[0] ?? null) : null,
+            'sales_invoice_id'=> $request->source_type === 'invoice' ? ($request->source_ids[0] ?? null) : null,
         ]);
 
-        return DB::transaction(function () use ($request) {
-            \Log::info('storeSalesNote called', [
+        $totalHt = 0;
+        $returnLinesForAutoReturn = []; // utilisé seulement si source = invoice
+
+        foreach ($request->lines as $index => $line) {
+
+            $quantity    = (float) $line['quantity'];
+            $unitPriceHt = (float) $line['unit_price_ht'];
+            $remise      = (float) ($line['remise'] ?? 0);
+            $articleCode = trim($line['article_code']);
+
+            // -------------------------------------------------------------------------
+            // 1. Gestion de l'article selon le type de source
+            // -------------------------------------------------------------------------
+            if ($request->source_type === 'free') {
+                // Mode libre → on crée ou met à jour l'article
+                $item = Item::updateOrCreate(
+                    ['code' => $articleCode],
+                    [
+                        'name'       => $line['description'] ?? $articleCode,
+                        'sale_price' => $unitPriceHt,
+                        // On peut aussi vouloir conserver / mettre à jour d'autres champs
+                        // 'cost_price'  => ...,
+                        // 'location'    => ...,
+                        'is_active'  => 1,
+                    ]
+                );
+                $description = $line['description'] ?? $item->name;
+            } 
+            else {
+                // return ou invoice → l'article doit déjà exister
+                $item = Item::where('code', $articleCode)->first();
+                if (!$item) {
+                    throw new \Exception("Article {$articleCode} introuvable en base.");
+                }
+                $description = $line['description'] ?? $item->name;
+            }
+
+            // -------------------------------------------------------------------------
+            // 2. Contrôles de quantité max selon la source (return / invoice)
+            // -------------------------------------------------------------------------
+            if ($request->source_type === 'return') {
+                $source = SalesReturn::findOrFail($line['source_id']);
+                $sourceLine = $source->lines->where('article_code', $articleCode)->first();
+                if (!$sourceLine) {
+                    throw new \Exception("Ligne de retour introuvable pour l'article {$articleCode}.");
+                }
+                if ($quantity > $sourceLine->returned_quantity) {
+                    // throw new \Exception("Quantité d'avoir invalide pour l'article {$articleCode}.");
+                }
+            } 
+            elseif ($request->source_type === 'invoice') {
+                $source = Invoice::findOrFail($line['source_id']);
+                $sourceLine = $source->lines->where('article_code', $articleCode)->first();
+                if (!$sourceLine) {
+                    throw new \Exception("Ligne de facture introuvable pour l'article {$articleCode}.");
+                }
+                if ($quantity > $sourceLine->quantity) {
+                    // throw new \Exception("Quantité d'avoir invalide pour l'article {$articleCode}.");
+                }
+                if ($sourceLine->quantity <= 0 || $sourceLine->unit_price_ht <= 0) {
+                    // throw new \Exception("Données de facture invalides pour l'article {$articleCode}.");
+                }
+
+                // Préparation pour créer le retour auto plus tard
+                $returnLinesForAutoReturn[] = [
+                    'article_code'      => $articleCode,
+                    'returned_quantity' => $quantity,
+                    'unit_price_ht'     => $unitPriceHt,
+                    'remise'            => $remise,
+                    'description'       => $description,
+                ];
+            }
+
+            // -------------------------------------------------------------------------
+            // 3. Calculs ligne avoir (négatif)
+            // -------------------------------------------------------------------------
+            $totalLigneHt  = -$quantity * $unitPriceHt * (1 - $remise / 100);
+            $totalLigneTtc = $totalLigneHt * (1 + $tvaRate / 100);
+
+            SalesNoteLine::create([
+                'sales_note_id'    => $note->id,
+                'sales_return_id'  => $request->source_type === 'return'  ? ($line['source_id'] ?? null) : null,
+                'sales_invoice_id' => $request->source_type === 'invoice' ? ($line['source_id'] ?? null) : null,
+                'article_code'     => $articleCode,
+                'quantity'         => -$quantity,
+                'unit_price_ht'    => $unitPriceHt,
+                'remise'           => $remise,
+                'total_ligne_ht'   => $totalLigneHt,
+                'total_ligne_ttc'  => $totalLigneTtc,
+                'description'      => $description, // ← ajouté pour cohérence
+            ]);
+
+            $totalHt += $totalLigneHt;
+        }
+
+        $note->update([
+            'total_ht'  => $totalHt,
+            'total_ttc' => $totalHt * (1 + $tvaRate / 100),
+        ]);
+
+        // -------------------------------------------------------------------------
+        // Création automatique du retour vente UNIQUEMENT si origine = facture
+        // -------------------------------------------------------------------------
+        if ($request->action === 'validate' && $request->source_type === 'invoice') {
+
+            $returnSouche = Souche::where('type', 'retour_vente')->lockForUpdate()->firstOrFail();
+
+            $returnNextNumber = str_pad($returnSouche->last_number + 1, $returnSouche->number_length, '0', STR_PAD_LEFT);
+            $returnNumdoc = ($returnSouche->prefix ?? '') . ($returnSouche->suffix ?? '') . $returnNextNumber;
+
+            $salesReturn = SalesReturn::create([
+                'numdoc'      => $returnNumdoc,
                 'customer_id' => $request->customer_id,
-                'source_type' => $request->source_type,
-                'source_ids' => $request->source_ids,
-                'lines' => $request->lines,
-                'action' => $request->action,
+                'return_date' => $request->note_date,
+                'invoiced'    => false,
+                'tva_rate'    => $tvaRate,
+                'total_ht'    => 0,
+                'total_ttc'   => 0,
+                'store_id'    => 1,
+                'notes'       => 'Retour généré automatiquement pour avoir #' . $note->numdoc,
             ]);
 
-            $customer = Customer::with(['tvaGroup', 'paymentTerm'])->findOrFail($request->customer_id);
-            $tvaRate = $request->tva_rate;
-            $dueDate = $customer->paymentTerm
-                ? Carbon::parse($request->note_date)->addDays($customer->paymentTerm->days)
-                : null;
+            $returnTotalHt = 0;
 
-            $souche = Souche::where('type', 'avoir_vente')->lockForUpdate()->first();
-            if (!$souche) {
-                throw new \Exception('Souche avoir vente manquante.');
-            }
+            foreach ($returnLinesForAutoReturn as $rLine) {
+                $lineHt = $rLine['returned_quantity'] * $rLine['unit_price_ht'] * (1 - $rLine['remise'] / 100);
 
-            $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
-            $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
-
-            $note = SalesNote::create([
-                'numdoc' => $numdoc,
-                'customer_id' => $request->customer_id,
-                'note_date' => $request->note_date,
-                'due_date' => $dueDate,
-                'status' => $request->action === 'validate' ? 'validée' : 'brouillon',
-                'paid' => false,
-                'total_ht' => 0,
-                'total_ttc' => 0,
-                'tva_rate' => $tvaRate,
-                'notes' => $request->notes,
-                'type' => $request->source_type === 'return' ? 'from_return' : 'from_invoice',
-                'sales_return_id' => $request->source_type === 'return' ? $request->source_ids[0] : null,
-                'sales_invoice_id' => $request->source_type === 'invoice' ? $request->source_ids[0] : null,
-            ]);
-
-            $totalHt = 0;
-            $returnLines = [];
-
-            foreach ($request->lines as $index => $line) {
-                if ($request->source_type === 'return') {
-                    $source = SalesReturn::findOrFail($line['source_id']);
-                    $sourceLine = $source->lines->where('article_code', $line['article_code'])->first();
-                    if (!$sourceLine) {
-                        throw new \Exception("Ligne de retour introuvable pour l'article {$line['article_code']}.");
-                    }
-                    if ($line['quantity'] > $sourceLine->returned_quantity) {
-                        throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
-                    }
-                } else {
-                    $source = Invoice::findOrFail($line['source_id']);
-                    $sourceLine = $source->lines->where('article_code', $line['article_code'])->first();
-                    if (!$sourceLine) {
-                        throw new \Exception("Ligne de facture introuvable pour l'article {$line['article_code']}.");
-                    }
-                    if ($line['quantity'] > $sourceLine->quantity) {
-                        throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
-                    }
-                    if ($sourceLine->quantity <= 0 || $sourceLine->unit_price_ht <= 0) {
-                        \Log::warning('Invalid InvoiceLine data', [
-                            'invoice_id' => $source->id,
-                            'article_code' => $line['article_code'],
-                            'quantity' => $sourceLine->quantity,
-                            'unit_price_ht' => $sourceLine->unit_price_ht,
-                        ]);
-                        throw new \Exception("Données de facture invalides pour l'article {$line['article_code']}.");
-                    }
-                    $returnLines[] = [
-                        'article_code' => $line['article_code'],
-                        'returned_quantity' => $line['quantity'],
-                        'unit_price_ht' => $line['unit_price_ht'],
-                        'remise' => $line['remise'] ?? 0,
-                        'description' => $sourceLine->description ?? ($sourceLine->item->name ?? $line['article_code']),
-                    ];
-                }
-
-                $totalLigneHt = -$line['quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
-                $totalLigneTtc = $totalLigneHt * (1 + $tvaRate / 100);
-
-                SalesNoteLine::create([
-                    'sales_note_id' => $note->id,
-                    'sales_return_id' => $request->source_type === 'return' ? $line['source_id'] : null,
-                    'sales_invoice_id' => $request->source_type === 'invoice' ? $line['source_id'] : null,
-                    'article_code' => $line['article_code'],
-                    'quantity' => -$line['quantity'],
-                    'unit_price_ht' => $line['unit_price_ht'],
-                    'remise' => $line['remise'] ?? 0,
-                    'total_ligne_ht' => $totalLigneHt,
-                    'total_ligne_ttc' => $totalLigneTtc,
+                SalesReturnLine::create([
+                    'sales_return_id'   => $salesReturn->id,
+                    'article_code'      => $rLine['article_code'],
+                    'returned_quantity' => $rLine['returned_quantity'],
+                    'unit_price_ht'     => $rLine['unit_price_ht'],
+                    'remise'            => $rLine['remise'],
+                    'total_ligne_ht'    => $lineHt,
+                    'description'       => $rLine['description'],
                 ]);
 
-                $totalHt += $totalLigneHt;
-            }
+                $returnTotalHt += $lineHt;
 
-            $note->update([
-                'total_ht' => $totalHt,
-                'total_ttc' => $totalHt * (1 + $tvaRate / 100),
-            ]);
-
-            if ($request->action === 'validate' && $request->source_type === 'invoice') {
-                $returnSouche = Souche::where('type', 'retour_vente')->lockForUpdate()->first();
-                if (!$returnSouche) {
-                    throw new \Exception('Souche retour vente manquante.');
-                }
-
-                $returnNextNumber = str_pad($returnSouche->last_number + 1, $returnSouche->number_length, '0', STR_PAD_LEFT);
-                $returnNumdoc = ($returnSouche->prefix ?? '') . ($returnSouche->suffix ?? '') . $returnNextNumber;
-
-                $returnTotalHt = 0;
-
-                $salesReturn = SalesReturn::create([
-                    'numdoc' => $returnNumdoc,
-                    'customer_id' => $request->customer_id,
-                    'return_date' => $request->note_date,
-                    'invoiced' => false,
-                    'tva_rate' => $tvaRate,
-                    'total_ht' => 0,
-                    'total_ttc' => 0,
-                    'store_id' => 1,
-                    'delivery_note_id' => null,
-                    'notes' => 'Retour généré automatiquement pour avoir #' . $note->numdoc,
-                ]);
-
-                \Log::info('SalesReturn created', [
-                    'id' => $salesReturn->id,
-                    'numdoc' => $returnNumdoc,
-                    'customer_id' => $request->customer_id,
-                ]);
-
-                foreach ($returnLines as $returnLine) {
-                    \Log::info('Processing SalesReturnLine', [
-                        'article_code' => $returnLine['article_code'],
-                        'returned_quantity' => $returnLine['returned_quantity'],
-                        'unit_price_ht' => $returnLine['unit_price_ht'],
-                        'remise' => $returnLine['remise'],
+                // Mouvement stock +++
+                $item = Item::where('code', $rLine['article_code'])->first();
+                if ($item) {
+                    $stock = Stock::firstOrNew([
+                        'item_id'  => $item->id,
+                        'store_id' => $salesReturn->store_id ?? 1,
                     ]);
+                    $stock->quantity = ($stock->quantity ?? 0) + $rLine['returned_quantity'];
+                    $stock->save();
 
-                    $totalLigneHt = $returnLine['returned_quantity'] * $returnLine['unit_price_ht'] * (1 - ($returnLine['remise'] / 100));
-                    \Log::info('Calculated total_ligne_ht', [
-                        'total_ligne_ht' => $totalLigneHt,
-                        'calculation' => "{$returnLine['returned_quantity']} * {$returnLine['unit_price_ht']} * (1 - {$returnLine['remise']}/100)",
+                    StockMovement::create([
+                        'item_id'     => $item->id,
+                        'store_id'    => $salesReturn->store_id ?? 1,
+                        'type'        => 'retour_vente',
+                        'quantity'    => $rLine['returned_quantity'],
+                        'cost_price'  => $rLine['unit_price_ht'] * (1 - $rLine['remise'] / 100),
+                        'supplier_name' => $customer->name,
+                        'reason'      => 'Retour auto pour avoir vente #' . $note->numdoc,
+                        'reference'   => $note->numdoc,
                     ]);
-
-                    if ($totalLigneHt == 0) {
-                        \Log::warning('total_ligne_ht is zero', [
-                            'returnLine' => $returnLine,
-                        ]);
-                        throw new \Exception("Le total HT de la ligne est zéro pour l'article {$returnLine['article_code']}.");
-                    }
-
-                    $returnTotalHt += $totalLigneHt;
-
-                    SalesReturnLine::create([
-                        'sales_return_id' => $salesReturn->id,
-                        'article_code' => $returnLine['article_code'],
-                        'returned_quantity' => $returnLine['returned_quantity'],
-                        'unit_price_ht' => $returnLine['unit_price_ht'],
-                        'remise' => $returnLine['remise'],
-                        'total_ligne_ht' => $totalLigneHt,
-                        'description' => $returnLine['description'],
-                    ]);
-
-                    $item = Item::where('code', $returnLine['article_code'])->first();
-                    if ($item) {
-                        $storeId = $salesReturn->store_id ?? 1;
-                        $stock = Stock::firstOrNew([
-                            'item_id' => $item->id,
-                            'store_id' => $storeId,
-                        ]);
-                        $stock->quantity = ($stock->quantity ?? 0) + $returnLine['returned_quantity'];
-                        $stock->save();
-
-                        StockMovement::create([
-                            'item_id' => $item->id,
-                            'store_id' => $storeId,
-                            'type' => 'retour_vente',
-                            'quantity' => $returnLine['returned_quantity'],
-                            'cost_price' => $returnLine['unit_price_ht'] * (1 - ($returnLine['remise'] / 100)),
-                            'supplier_name' => $customer->name,
-                            'reason' => 'Retour automatique pour avoir vente #' . $note->numdoc,
-                            'reference' => $note->numdoc,
-                        ]);
-                    }
                 }
-
-                $salesReturn->update([
-                    'total_ht' => $returnTotalHt,
-                    'total_ttc' => $returnTotalHt * (1 + $tvaRate / 100),
-                ]);
-
-                \Log::info('SalesReturn updated with totals', [
-                    'id' => $salesReturn->id,
-                    'total_ht' => $returnTotalHt,
-                    'total_ttc' => $returnTotalHt * (1 + $tvaRate / 100),
-                ]);
-
-                $returnSouche->last_number += 1;
-                $returnSouche->save();
-
-                $note->update(['sales_return_id' => $salesReturn->id]);
-
             }
 
-
-
-                        if ($request->action === 'validate') {
-// Update customer balance solde client
-                     $totalTtc = $totalHt * (1 + $tvaRate / 100);
-                    $customer->solde = ($customer->solde ?? 0) + $totalTtc;
-                    $customer->save();
-            }
-
-
-
-            if ($request->action === 'validate' && $request->source_type === 'return') {
-                SalesReturn::whereIn('id', $request->source_ids)
-                    ->where('invoiced', false)
-                    ->update(['invoiced' => true]);
-            }
-
-            $souche->last_number += 1;
-            $souche->save();
-
-            \Log::info('SalesNote created', [
-                'id' => $note->id,
-                'numdoc' => $note->numdoc,
-                'type' => $note->type,
-                'sales_return_id' => $note->sales_return_id,
-                'sales_invoice_id' => $note->sales_invoice_id,
+            $salesReturn->update([
+                'total_ht'  => $returnTotalHt,
+                'total_ttc' => $returnTotalHt * (1 + $tvaRate / 100),
             ]);
 
-            return redirect()->route('salesnotes.list')
-                ->with('success', $request->action === 'validate'
-                    ? 'Avoir validé avec succès.'
-                    : 'Avoir enregistré comme brouillon.');
-        });
-    }
+            $returnSouche->last_number += 1;
+            $returnSouche->save();
+
+            $note->update(['sales_return_id' => $salesReturn->id]);
+        }
+
+        // -------------------------------------------------------------------------
+        // Mise à jour solde client (tous les cas validés)
+        // -------------------------------------------------------------------------
+        if ($request->action === 'validate') {
+            $totalTtc = $totalHt * (1 + $tvaRate / 100);
+            $customer->solde = ($customer->solde ?? 0) + $totalTtc; // + car avoir = crédit client
+            $customer->save();
+        }
+
+        // -------------------------------------------------------------------------
+        // Marquer les retours comme facturés (seulement si origine = return)
+        // -------------------------------------------------------------------------
+        if ($request->action === 'validate' && $request->source_type === 'return') {
+            SalesReturn::whereIn('id', $request->source_ids)
+                ->where('invoiced', false)
+                ->update(['invoiced' => true]);
+        }
+
+        $souche->last_number += 1;
+        $souche->save();
+
+        \Log::info('SalesNote finalisée', [
+            'id'              => $note->id,
+            'numdoc'          => $note->numdoc,
+            'type'            => $note->type,
+            'sales_return_id' => $note->sales_return_id,
+            'sales_invoice_id'=> $note->sales_invoice_id,
+        ]);
+
+        return redirect()->route('salesnotes.list')
+            ->with('success', $request->action === 'validate'
+                ? 'Avoir validé avec succès.'
+                : 'Avoir enregistré comme brouillon.');
+    });
+}
 
 
 
@@ -1557,14 +1577,14 @@ public function notesList(Request $request)
             'customer_id' => 'required|exists:customers,id',
             'note_date' => 'required|date',
             'tva_rate' => 'required|numeric|min:0',
-            'source_type' => 'required|in:return,invoice',
-            'source_ids' => 'required|array',
-            'source_ids.*' => 'required|numeric',
+            'source_type' => 'required|in:return,invoice,free',
+            'source_ids' => 'array',
+            'source_ids.*' => 'numeric',
             'lines' => 'required|array',
             'lines.*.quantity' => 'required|numeric|gt:0',
             'lines.*.unit_price_ht' => 'required|numeric|gt:0',
             'lines.*.remise' => 'nullable|numeric|min:0|max:100',
-            'lines.*.article_code' => 'required|exists:items,code',
+            'lines.*.article_code' => 'required',
             'lines.*.source_id' => 'required|numeric',
             'notes' => 'nullable|string|max:500',
             'action' => 'required|in:save,validate',
@@ -1603,7 +1623,7 @@ public function notesList(Request $request)
                         throw new \Exception("Ligne de retour introuvable pour l'article {$line['article_code']}.");
                     }
                     if ($line['quantity'] > $sourceLine->returned_quantity) {
-                        throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
+                        // throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
                     }
                 } else {
                     $source = Invoice::findOrFail($line['source_id']);
@@ -1612,17 +1632,9 @@ public function notesList(Request $request)
                         throw new \Exception("Ligne de facture introuvable pour l'article {$line['article_code']}.");
                     }
                     if ($line['quantity'] > $sourceLine->quantity) {
-                        throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
+                        // throw new \Exception("Quantité d'avoir invalide pour l'article {$line['article_code']}.");
                     }
-                    if ($sourceLine->quantity <= 0 || $sourceLine->unit_price_ht <= 0) {
-                        \Log::warning('Invalid InvoiceLine data', [
-                            'invoice_id' => $source->id,
-                            'article_code' => $line['article_code'],
-                            'quantity' => $sourceLine->quantity,
-                            'unit_price_ht' => $sourceLine->unit_price_ht,
-                        ]);
-                        throw new \Exception("Données de facture invalides pour l'article {$line['article_code']}.");
-                    }
+                    
                     $returnLines[] = [
                         'article_code' => $line['article_code'],
                         'returned_quantity' => $line['quantity'],

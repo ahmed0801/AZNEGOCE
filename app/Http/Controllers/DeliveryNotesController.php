@@ -24,44 +24,79 @@ use Illuminate\Support\Facades\DB;
 
 class DeliveryNotesController extends Controller
 {
+    
+    
+
     public function list(Request $request)
-    {
-$query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item','vehicle'])
-    ->orderBy('delivery_notes.updated_at', 'desc');
+{
+    $query = DeliveryNote::with(['customer', 'salesOrder', 'lines.item', 'vehicle'])
+        ->orderBy('delivery_notes.updated_at', 'desc');
 
-        if ($request->filled('numclient')) {
-            $query->where('delivery_notes.numclient', $request->numclient);
-        }
+    // Filtre client
+    if ($request->filled('numclient')) {
+        $query->where('delivery_notes.numclient', $request->numclient);
+    }
 
-        if ($request->filled('status')) {
-            $query->where('delivery_notes.status', $request->status);
-        }
+    // Filtre statut
+    if ($request->filled('status')) {
+        $query->where('delivery_notes.status', $request->status);
+    }
 
-        if ($request->filled('date_from')) {
-            $query->whereDate('delivery_notes.delivery_date', '>=', $request->date_from);
-        }
+    // Filtre dates
+    if ($request->filled('date_from')) {
+        $query->whereDate('delivery_notes.delivery_date', '>=', $request->date_from);
+    }
+    if ($request->filled('date_to')) {
+        $query->whereDate('delivery_notes.delivery_date', '<=', $request->date_to);
+    }
 
-        if ($request->filled('date_to')) {
-            $query->whereDate('delivery_notes.delivery_date', '<=', $request->date_to);
-        }
-
-                     // ✅ NOUVEAU : filtre vendeur
+    // Filtre vendeur
     if ($request->filled('vendeur')) {
         $query->where('vendeur', $request->vendeur);
     }
 
+    // NOUVEAU : Filtre par numéro de BL (recherche partielle)
+    if ($request->filled('search_bl')) {
+        $query->where('delivery_notes.numdoc', 'like', '%' . trim($request->search_bl) . '%');
+    }
 
-        $deliveryNotes = $query->paginate(50); // Pagination au lieu de get()
-        $customers = Customer::orderBy('name')->get();
-                                // On récupère aussi la liste des vendeurs uniques pour le select
+    // NOUVEAU : Filtre par article (code ou nom)
+    if ($request->filled('search_article')) {
+        $search = trim($request->search_article);
+
+        $query->whereHas('lines', function ($q) use ($search) {
+            $q->where('article_code', 'like', "%{$search}%")
+              ->orWhereHas('item', function ($sub) use ($search) {
+                  $sub->where('name', 'like', "%{$search}%");
+              });
+        });
+    }
+
+
+    // Filtre par statut facturé / non facturé
+    if ($request->filled('facture_status')) {
+        if ($request->facture_status === 'facture') {
+            $query->where('invoiced', true);
+        } elseif ($request->facture_status === 'non_facture') {
+            $query->where('invoiced', false);
+        }
+        // 'tous' → pas de filtre
+    }
+
+    
+
+    $deliveryNotes = $query->paginate(50)->withQueryString();
+
+    $customers = Customer::orderBy('name')->get();
     $vendeurs = User::where('role', 'vendeur')
         ->orderBy('name')
         ->pluck('name')
         ->unique();
-        
 
-        return view('delivery_notes.list', compact('deliveryNotes', 'customers','vendeurs'));
-    }
+    return view('delivery_notes.list', compact('deliveryNotes', 'customers', 'vendeurs'));
+}
+
+
 
  public function exportSingle($id)
     {

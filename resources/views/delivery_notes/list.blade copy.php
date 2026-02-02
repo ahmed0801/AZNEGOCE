@@ -57,6 +57,17 @@
         .card .text-info { color: #17a2b8 !important; }
         .btn-primary { font-size: 1.1rem; padding: 1rem 1.5rem; border-radius: 8px; transition: all 0.3s ease; }
         .btn-primary:hover { background-color: #0056b3; box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); }
+
+
+.filter-box {
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    padding: 6px 8px !important;
+    background: #f2f1f1ff;
+}
+
+
+
     </style>
 </head>
 <body>
@@ -92,7 +103,8 @@
                     <div class="collapse" id="ventes">
                         <ul class="nav nav-collapse">
                             <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
-                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/devislist"><span class="sub-item">Devis</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Commandes Ventes</span></a></li>
                             <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
                             <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
                             <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
@@ -425,36 +437,77 @@
 </a>
                     </h4>
 
-                    <form method="GET" action="{{ route('delivery_notes.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-                        <select name="numclient" class="form-select form-select-sm select2" style="width: 150px;">
-                            <option value="">Client (Tous)</option>
-                            @foreach($customers as $customer)
-                                <option value="{{ $customer->code }}" {{ request('numclient') == $customer->code ? 'selected' : '' }}>
-                                    {{ $customer->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                    <div class="filter-box mb-2 p-2">
+    <form method="GET"
+          action="{{ route('delivery_notes.list') }}"
+          class="d-flex flex-wrap align-items-end gap-2">
 
-                        <select name="status" class="form-select form-select-sm" style="width: 170px;">
-                            <option value="">Statut BL (Tous)</option>
-                            <option value="en_cours" {{ request('status') == 'en_cours' ? 'selected' : '' }}>En cours</option>
-                            <option value="expédié" {{ request('status') == 'expédié' ? 'selected' : '' }}>Expédié</option>
-                            <option value="annulé" {{ request('status') == 'annulé' ? 'selected' : '' }}>Annulé</option>
+        {{-- Client --}}
+        <select name="numclient"
+                class="form-select form-select-sm select2"
+                style="width: 140px;">
+            <option value="">Client (Tous)</option>
+            @foreach($customers as $customer)
+                <option value="{{ $customer->code }}"
+                    {{ request('numclient') == $customer->code ? 'selected' : '' }}>
+                    {{ $customer->name }}
+                </option>
+            @endforeach
+        </select>
+        
 
-                        </select>
+        {{-- Vendeur --}}
+        <select name="vendeur"
+                class="form-select form-select-sm"
+                style="width: 120px;">
+            <option value="">Vendeur (Tous)</option>
+            @foreach($vendeurs as $vendeur)
+                <option value="{{ $vendeur }}"
+                    {{ request('vendeur') == $vendeur ? 'selected' : '' }}>
+                    {{ $vendeur }}
+                </option>
+            @endforeach
+        </select>
 
-                        <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début" value="{{ request('date_from') }}">
-                        <span>à</span>
-                        <input type="date" name="date_to" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin" value="{{ request('date_to') }}">
+        {{-- Statut BL --}}
+        <select name="status"
+                class="form-select form-select-sm"
+                style="width: 110px;">
+            <option value="">Statut BL</option>
+            <option value="en_cours" {{ request('status') == 'en_cours' ? 'selected' : '' }}>En cours</option>
+            <option value="expédié" {{ request('status') == 'expédié' ? 'selected' : '' }}>Expédié</option>
+            <option value="annulé" {{ request('status') == 'annulé' ? 'selected' : '' }}>Annulé</option>
+        </select>
 
-                        <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                            <i class="fas fa-filter me-1"></i> Filtrer
-                        </button>
+        {{-- Dates --}}
+        <input type="date"
+               name="date_from"
+               class="form-control form-control-sm"
+               style="width: 97px;"
+               value="{{ request('date_from') }}">
 
-                        <a href="{{ route('delivery_notes.list') }}" class="btn btn-outline-secondary btn-sm px-3">
-                            <i class="fas fa-undo me-1"></i> Réinitialiser
-                        </a>
-                    </form>
+        <span class="mx-0">à</span>
+
+        <input type="date"
+               name="date_to"
+               class="form-control form-control-sm"
+               style="width: 97px;"
+               value="{{ request('date_to') }}">
+
+        {{-- Boutons --}}
+        <button type="submit"
+                class="btn btn-outline-primary btn-sm px-3">
+            <i class="fas fa-filter me-1"></i> Filtrer
+        </button>
+
+        <a href="{{ route('delivery_notes.list') }}"
+           class="btn btn-outline-secondary btn-sm px-3">
+            <i class="fas fa-undo me-1"></i> Réinitialiser
+        </a>
+
+    </form>
+</div>
+
 
 
                                                                                                     <!-- Pagination avec conservation des filtres -->
@@ -512,6 +565,20 @@
                                     <a href="{{ route('delivery_notes.print_single', $deliveryNote->id) }}" class="btn btn-xs btn-outline-primary" title="Télécharger PDF" target="_blank">
                                         PDF <i class="fas fa-print"></i>
                                     </a>
+
+                                    @if($deliveryNote->status === 'en_cours' && $deliveryNote->status_livraison === 'non_livré')
+    <form action="{{ route('delivery_notes.validate', $deliveryNote->id) }}"
+          method="POST"
+          class="d-inline"
+          onsubmit="return confirm('Valider cette expédition ?')">
+        @csrf
+        <button type="submit" class="btn btn-xs btn-outline-success">
+            ✅ Valider l'exp.
+        </button>
+    </form>
+@endif
+
+
 
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
@@ -702,7 +769,7 @@
 
     <script>
         $(document).ready(function () {
-            $('.select2').select2({ width: '100%' });
+            $('.select2').select2({ width: '30%' });
         });
 
         function toggleLines(id) {
