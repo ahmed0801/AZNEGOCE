@@ -417,6 +417,13 @@
                         <!-- analytics -->
 
 
+
+                    
+
+
+
+
+
                             <a href="/salesinvoices" class="btn btn-label-info btn-round me-2">
                                 <span class="btn-label"><i class="fas fa-list"></i></span> Voir Factures Ventes
                             </a>
@@ -424,6 +431,22 @@
                              <a href="/delivery_notes/list" class="btn btn-label-info btn-round me-2">
                                 <span class="btn-label"><i class="fas fa-list"></i></span> Voir Bons de Livraison
                             </a>
+
+
+
+                                                    <button 
+        type="button" 
+        class="btn btn-label-danger btn-round me-2" 
+        data-bs-toggle="modal" 
+        data-bs-target="#helpRetourAvoirModal"
+    >
+        <span class="btn-label"><i class="fas fa-question-circle"></i></span>
+        Aide Retour/Avoir
+    </button>
+
+
+
+
 
                             <a href="/sales/delivery/create" class="btn btn-primary btn-round">
                                 <span class="btn-label"><i class="fas fa-plus"></i></span> Nouvelle Commande
@@ -920,5 +943,92 @@
             });
         });
     </script>
+
+
+
+
+
+
+
+
+
+
+<!-- Modal Aide Retour vs Avoir -->
+<div class="modal fade" id="helpRetourAvoirModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="helpModalLabel">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Retour Vente ou Avoir Vente ? Comment choisir ?
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body" style="font-size: 1.05rem; line-height: 1.6;">
+                <div class="alert alert-info mb-4">
+                    <strong>Objectif :</strong> Éviter les erreurs en comptabilité et gagner du temps !
+                </div>
+
+                <h6 class="fw-bold text-primary mt-4">1. Quand faire un <span class="text-danger">RETOUR</span> ?</h6>
+                <ul>
+                    <li>Uniquement pour un <strong>bon de livraison (BL) NON FACTURÉ</strong></li>
+                    <li>Le retour <strong>ne touche PAS la comptabilité</strong></li>
+                    <li>Il sert à corriger / annuler une livraison qui n'a pas encore été facturée</li>
+                </ul>
+
+                <p class="mt-3"><strong>Comment faire ?</strong></p>
+                <ol class="ps-4">
+                    <li>Aller dans <strong>Ventes → Bons de Livraison</strong></li>
+                    <li>Chercher le BL concerné</li>
+                    <li>Cliquer sur les <strong>parametres (<i class="fas fa-cog"></i>)</strong> ou le menu Paramètres du BL</li>
+                    <li>Choisir <strong>Créer un retour</strong> (Retour total ou partiel)</li>
+                </ol>
+
+                <hr class="my-4">
+
+                <h6 class="fw-bold text-primary mt-4">2. Quand faire un <span class="text-danger">AVOIR</span> ?</h6>
+                <ul>
+                    <li>Quand il s'agit d'une <strong>facture de vente déjà validée</strong> (comptabilisée)</li>
+                    <li>L’avoir permet d’avoir un impact en <strong>comptabilité</strong></li>
+                </ul>
+
+                <p class="mt-3"><strong>Comment faire ?</strong></p>
+                <ol class="ps-4">
+                    <li>Aller dans <strong>Ventes → Avoirs → Nouvel Avoir</strong></li>
+                    <li>Sélectionner le client</li>
+                    <li>Choisir le type d’avoir parmi les 3 possibilités :</li>
+                    <ul class="list-unstyled ps-4 mt-2">
+                        <li>→ Avoir à partir d’un <strong>retour non facturé</strong></li>
+                        <li>→ Avoir à partir d’une <strong>facture vente validée</strong></li>
+                        <li>→ Avoir <strong>libre</strong> (saisie manuelle)</li>
+                    </ul>
+                </ol>
+
+                <div class="alert alert-warning mt-4 mb-2">
+                    <strong>Résumé rapide à retenir :</strong><br>
+                    BL non facturé → <strong>Retour</strong> (pas de compta)<br>
+                    Facture déjà validée → <strong>Avoir</strong> (impact comptable)
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
 </body>
 </html>

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>AZ NEGOCE - Dashboard</title>
+    <title>NEGOPARTS - Dashboard</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
 
@@ -41,7 +41,7 @@
     <div class="sidebar-logo">
         <div class="logo-header" data-background-color="dark">
             <a href="/" class="logo">
-                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
+                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="70" />
             </a>
             <div class="nav-toggle">
                 <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
@@ -67,7 +67,8 @@
                     <div class="collapse" id="ventes">
                         <ul class="nav nav-collapse">
                             <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
-                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/devislist"><span class="sub-item">Devis</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Commandes Ventes</span></a></li>
                             <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
                             <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
                             <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
@@ -153,6 +154,7 @@
                     </a>
                     <div class="collapse" id="outils">
                         <ul class="nav nav-collapse">
+                            <li><a href="/analytics"><span class="sub-item">Analytics</span></a></li>
                             <li><a href="/tecdoc"><span class="sub-item">TecDoc</span></a></li>
                             <li><a href="/voice"><span class="sub-item">NEGOBOT</span></a></li>
                         </ul>
@@ -407,6 +409,14 @@
                             </h6>
                         </div>
                         <div class="ms-md-auto py-2 py-md-0">
+
+                        <!-- analytics -->
+                                                 <a href="{{ route('analytics') }}" class="btn btn-label-warning btn-round me-2">
+        <span class="btn-label"><i class="fas fa-chart-line"></i></span> Analytics
+    </a>
+                        <!-- analytics -->
+
+
                             <a href="/salesinvoices" class="btn btn-label-info btn-round me-2">
                                 <span class="btn-label"><i class="fas fa-list"></i></span> Voir Factures Ventes
                             </a>
@@ -727,10 +737,10 @@
             <footer class="footer">
                 <div class="container-fluid d-flex justify-content-between">
                     <div class="copyright">
-                        © AZ NEGOCE. All Rights Reserved.
+                        © DESTOCK PA. All Rights Reserved.
                     </div>
                     <div>
-                        by <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.
+                        by <a target="_blank" href="https://themewagon.com/">AZ NEGOCE</a>.
                     </div>
                 </div>
             </footer>
