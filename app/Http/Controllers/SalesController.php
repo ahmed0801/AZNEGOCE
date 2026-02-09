@@ -133,6 +133,30 @@ class SalesController extends Controller
         });
     }
 
+
+
+    // NOUVEAU : Filtre par véhicule (lié OU dans les notes)
+    if ($request->filled('search_vehicle')) {
+        $search = trim($request->search_vehicle);
+
+        $query->where(function ($q) use ($search) {
+            // 1. Véhicule lié
+            $q->whereHas('vehicle', function ($sub) use ($search) {
+                $sub->where('license_plate', 'like', "%{$search}%")
+                    ->orWhere('brand_name', 'like', "%{$search}%")
+                    ->orWhere('model_name', 'like', "%{$search}%")
+                    ->orWhereRaw("CONCAT(brand_name, ' ', model_name) LIKE ?", ["%{$search}%"]);
+            })
+            // 2. OU recherche dans les notes du devis
+            ->orWhere('notes', 'like', "%{$search}%");
+        });
+    }
+
+
+    
+
+    
+
     // Récupération des données pour les filtres
     $vendeurs = User::where('role', 'vendeur')
         ->orderBy('name')

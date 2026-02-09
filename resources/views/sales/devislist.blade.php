@@ -467,7 +467,7 @@
            class="form-control form-control-sm"
            placeholder="N° Devis"
            value="{{ request('numdoc') }}"
-           style="width: 100px;">
+           style="width: 90px;">
 </div>
 
 
@@ -484,6 +484,21 @@
                 </option>
             @endforeach
         </select>
+
+
+
+
+        <!-- Véhicule (nouveau) -->
+        <div class="col-md-1 col-sm-6">
+            <label class="form-label small fw-bold">Véhicule</label>
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="fas fa-car"></i></span>
+                <input type="text" name="search_vehicle" class="form-control"
+                       placeholder="Immat/Marque..." value="{{ request('search_vehicle') }}">
+            </div>
+        </div>
+
+
 
         {{-- Statut devis --}}
         <select name="status"
@@ -515,7 +530,7 @@
         <input type="date"
                name="date_from"
                class="form-control form-control-sm"
-               style="width: 97px;"
+               style="width: 93px;"
                value="{{ request('date_from') }}">
 
         <span class="mx-0">à</span>
@@ -523,7 +538,7 @@
         <input type="date"
                name="date_to"
                class="form-control form-control-sm"
-               style="width: 97px;"
+               style="width: 93px;"
                value="{{ request('date_to') }}">
 
         {{-- Boutons --}}

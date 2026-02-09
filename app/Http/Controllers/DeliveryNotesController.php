@@ -83,6 +83,24 @@ class DeliveryNotesController extends Controller
         // 'tous' → pas de filtre
     }
 
+
+// NOUVEAU : Filtre par véhicule (recherche sur véhicule lié OU dans les notes)
+if ($request->filled('search_vehicle')) {
+    $search = trim($request->search_vehicle);
+
+    $query->where(function ($q) use ($search) {
+        // 1. Recherche dans le véhicule associé (si lié)
+        $q->whereHas('vehicle', function ($sub) use ($search) {
+            $sub->where('license_plate', 'like', "%{$search}%")
+                ->orWhere('brand_name', 'like', "%{$search}%")
+                ->orWhere('model_name', 'like', "%{$search}%")
+                ->orWhereRaw("CONCAT(brand_name, ' ', model_name) LIKE ?", ["%{$search}%"]);
+        })
+        // 2. OU recherche dans les notes du BL (cas où le véhicule est saisi manuellement)
+        ->orWhere('delivery_notes.notes', 'like', "%{$search}%");
+    });
+}
+
     
 
     $deliveryNotes = $query->paginate(50)->withQueryString();

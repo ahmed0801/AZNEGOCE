@@ -437,6 +437,9 @@
 </a>
                     </h4>
 
+
+                    
+
                     <div class="filter-box mb-2 p-2">
     <form method="GET"
           action="{{ route('delivery_notes.list') }}"
@@ -459,7 +462,7 @@
         {{-- Vendeur --}}
         <select name="vendeur"
                 class="form-select form-select-sm"
-                style="width: 100px;">
+                style="width: 90px;">
             <option value="">Vendeurs (Tous)</option>
             @foreach($vendeurs as $vendeur)
                 <option value="{{ $vendeur }}"
@@ -488,6 +491,23 @@
                    placeholder="Ex: BL-2026-..." value="{{ request('search_bl') }}">
         </div>
 
+
+
+        <!-- Dans la row g-2 du formulaire filtre -->
+<div class="col-md-1 col-sm-6">
+    <label class="form-label small fw-bold">Véhicule</label>
+<div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="fas fa-car"></i></span>
+                <input type="text" name="search_vehicle" class="form-control"
+                       placeholder="Immat/Marque..." value="{{ request('search_vehicle') }}">
+            </div>
+</div>
+
+
+
+
+
+
         <!-- Article (code ou nom) -->
         <div class="col-md-1 col-sm-6">
             <label class="form-label small fw-bold">Article</label>
@@ -500,7 +520,7 @@
         {{-- Statut BL --}}
         <select name="status"
                 class="form-select form-select-sm"
-                style="width: 100px;">
+                style="width: 75px;">
             <option value="">Statut BL</option>
             <option value="en_cours" {{ request('status') == 'en_cours' ? 'selected' : '' }}>En cours</option>
             <option value="expédié" {{ request('status') == 'expédié' ? 'selected' : '' }}>Expédié</option>
@@ -511,7 +531,7 @@
         <input type="date"
                name="date_from"
                class="form-control form-control-sm"
-               style="width: 90px;"
+               style="width: 87px;"
                value="{{ request('date_from') }}">
 
         <span class="mx-0">à</span>
@@ -519,8 +539,11 @@
         <input type="date"
                name="date_to"
                class="form-control form-control-sm"
-               style="width: 90px;"
+               style="width: 87px;"
                value="{{ request('date_to') }}">
+
+
+               
 
         {{-- Boutons --}}
         <button type="submit"

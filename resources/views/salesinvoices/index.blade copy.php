@@ -979,7 +979,7 @@
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="makePaymentModalLabel{{ $invoice->id }}">Faire un règlement pour {{ $invoice->numdoc }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <form action="{{ route('salesinvoices.make_payment', $invoice->id) }}" method="POST">
                                             @csrf
@@ -1031,7 +1031,7 @@
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
 
                                                                                                 <!-- Nouveau bouton Enregistrer et Imprimer -->
         <button type="submit" class="btn btn-success" onclick="document.getElementById('print_after{{ $invoice->id }}').value = 1;">

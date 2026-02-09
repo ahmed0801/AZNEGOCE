@@ -487,10 +487,12 @@
             @endforeach
         </select>
 
-        <input type="text" name="numdoc" class="form-control form-control-sm" style="width: 95px;"
+        <input type="text" name="numdoc" class="form-control form-control-sm" style="width: 75px;"
                placeholder="N° facture" value="{{ request('numdoc') }}">
 
-        <select name="vendeur" class="form-select form-select-sm" style="width: 120px;">
+
+
+        <select name="vendeur" class="form-select form-select-sm" style="width: 110px;">
             <option value="">Vendeur (Tous)</option>
             @foreach($vendeurs as $v)
                 <option value="{{ $v }}" {{ request('vendeur') == $v ? 'selected' : '' }}>
@@ -498,6 +500,20 @@
                 </option>
             @endforeach
         </select>
+
+
+        <!-- vehicule -->
+<!-- Véhicule (nouveau) -->
+        <div class="col-md-1 col-sm-6">
+            <label class="form-label small fw-bold">Véhicule</label>
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="fas fa-car"></i></span>
+                <input type="text" name="search_vehicle" class="form-control"
+                       placeholder="Immat/Marque..." value="{{ request('search_vehicle') }}">
+            </div>
+        </div>
+
+
 
         <select name="status" class="form-select form-select-sm" style="width: 80px;">
             <option value="">Statut (Tous)</option>
@@ -511,9 +527,9 @@
             <option value="0" {{ request('paid') == '0' ? 'selected' : '' }}>Non payé</option>
         </select>
 
-        <input type="date" name="date_from" class="form-control form-control-sm" style="width: 97px;" value="{{ request('date_from') }}">
+        <input type="date" name="date_from" class="form-control form-control-sm" style="width: 90px;" value="{{ request('date_from') }}">
         <span class="mx-0">à</span>
-        <input type="date" name="date_to" class="form-control form-control-sm" style="width: 97px;" value="{{ request('date_to') }}">
+        <input type="date" name="date_to" class="form-control form-control-sm" style="width: 90px;" value="{{ request('date_to') }}">
 
         <button id="btnFilter" type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
             <i class="fas fa-filter me-1"></i> Filtrer (F8)

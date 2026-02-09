@@ -616,6 +616,18 @@
 
        </h4>
 
+
+
+
+
+       
+
+      
+
+
+
+
+
     <!-- Modal création -->
     <div class="modal fade" id="createItemModal" tabindex="-1" aria-labelledby="createItemModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -906,6 +918,124 @@
 <!-- <div class="mb-2 d-flex justify-content-center">
     <input type="text" id="searchItemInput" class="form-control search-box" placeholder="🔍 Rechercher un client...">
 </div> -->
+
+
+
+
+
+
+
+
+
+
+ <!-- essai kpi -->
+
+<!-- KPI Clients – Vue direction -->
+<div class="row mb-4 g-3">
+    <!-- 1. Total Clients -->
+<!-- 5. Clients avec / sans véhicules -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center py-4">
+                <h6 class="display-5 fw-bold mb-0">TOTAL : {{ number_format($totalCustomers, 0, ',', ' ') }} CLIENTS</h6>
+
+                <i class="fas fa-car-side fa-3x mb-3 text-info"></i>
+                <h6 class="fw-bold mb-1">CLIENTS & VÉHICULES</h6>
+                <div class="d-flex justify-content-center gap-4 mb-3">
+                    <div>
+                        <h4 class="fw-bold text-info mb-0">{{ number_format($clientsAvecVehicules, 0, ',', ' ') }}</h4>
+                        <small>Avec véhicule</small>
+                    </div>
+                    <div class="vr mx-2"></div>
+                    <div>
+                        <h4 class="fw-bold text-secondary mb-0">{{ number_format($clientsSansVehicules, 0, ',', ' ') }}</h4>
+                        <small>Sans véhicule</small>
+                    </div>
+                </div>
+                <small class="text-muted">
+                    Taux équipés : <strong>{{ $totalCustomers > 0 ? round(($clientsAvecVehicules / $totalCustomers) * 100, 1) : 0 }}%</strong>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Actifs / Inactifs -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center py-4">
+                <div class="d-flex justify-content-center gap-4 mb-3">
+                    <div>
+                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                        <h6 class="small mb-1">Actifs</h6>
+                        <h4 class="fw-bold text-success mb-0">{{ number_format($activeCustomers, 0, ',', ' ') }}</h4>
+                    </div>
+                    <div class="vr mx-2"></div>
+                    <div>
+                        <i class="fas fa-ban fa-2x text-danger"></i>
+                        <h6 class="small mb-1">Inactifs</h6>
+                        <h4 class="fw-bold text-danger mb-0">{{ number_format($inactiveCustomers, 0, ',', ' ') }}</h4>
+                    </div>
+                </div>
+                <small class="text-muted">
+                    Taux d'activité : <strong>{{ $totalCustomers > 0 ? round(($activeCustomers / $totalCustomers) * 100, 1) : 0 }}%</strong>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Répartition par type -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center py-4">
+                <i class="fas fa-layer-group fa-2x text-primary mb-3"></i>
+                <h6 class="fw-bold mb-2">RÉPARTITION PAR TYPE</h6>
+                <div class="progress mb-3" style="height: 12px; background: #e9ecef;">
+                    <div class="progress-bar bg-primary" role="progressbar" 
+                         style="width: {{ $totalCustomers > 0 ? ($particuliersCount / $totalCustomers * 100) : 0 }}%" 
+                         aria-valuenow="{{ $particuliersCount }}"></div>
+                    <div class="progress-bar bg-warning" role="progressbar" 
+                         style="width: {{ $totalCustomers > 0 ? ($jobbersCount / $totalCustomers * 100) : 0 }}%" 
+                         aria-valuenow="{{ $jobbersCount }}"></div>
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: {{ $totalCustomers > 0 ? ($prosCount / $totalCustomers * 100) : 0 }}%" 
+                         aria-valuenow="{{ $prosCount }}"></div>
+                </div>
+                <div class="small fw-bold text-center">
+                    <span class="text-primary">{{ number_format($particuliersCount) }}</span> Part. • 
+                    <span class="text-warning">{{ number_format($jobbersCount) }}</span> Job. • 
+                    <span class="text-success">{{ number_format($prosCount) }}</span> Pros
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Clients non soldés (solde ≠ 0) -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center py-4">
+                <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
+                <h6 class="fw-bold mb-1">CLIENTS NON SOLDÉS</h6>
+                <h2 class="display-5 fw-bold text-warning mb-2">{{ number_format($clientsNonSoldes, 0, ',', ' ') }}</h2>
+                <small class="d-block mb-2">
+                    <span class="text-danger fw-bold">{{ number_format($clientsNousDoivent) }}</span> nous doivent • 
+                    <span class="text-success fw-bold">{{ number_format($clientsOnDoit) }}</span> on doit
+                </small>
+                <h6 class="text-muted mb-1">Solde global</h6>
+                <h4 class="{{ $totalSoldeClients >= 0 ? 'text-success' : 'text-danger' }} fw-bold">
+                    {{ number_format($totalSoldeClients, 2, ',', ' ') }} €
+                </h4>
+            </div>
+        </div>
+    </div>
+
+    
+</div>
+       <!-- fin essai kpi -->
+
+
+
+
+       
 
 
     @if ($customers->count())
