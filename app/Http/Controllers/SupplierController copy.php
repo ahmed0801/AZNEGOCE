@@ -58,24 +58,6 @@ public function index(Request $request)
             $query->where('discount_group_id', $request->discount_group_id);
         }
 
-
-
-
-
-        // KPI globaux (calculés sur TOUS les fournisseurs – NON filtrés)
-    $totalSuppliers             = Supplier::count();
-    $activeSuppliers            = Supplier::where('blocked', 0)->count();
-    $inactiveSuppliers          = Supplier::where('blocked', 1)->count();
-
-    // Fournisseurs non soldés = solde != 0
-    $suppliersNonSoldes         = Supplier::where('solde', '!=', 0)->count();
-    $suppliersNousDoivent       = Supplier::where('solde', '<', 0)->count();   // solde négatif = ils nous doivent
-    $suppliersOnDoit            = Supplier::where('solde', '>', 0)->count();   // solde positif = on leur doit
-
-    // Solde global
-    $totalSoldeSuppliers        = Supplier::sum('solde');
-
-
         $suppliers = $query->orderBy('name')->paginate(50);
 
         $tvaGroups = TvaGroup::all();
@@ -92,15 +74,7 @@ public function index(Request $request)
             'discountGroups', 
             'paymentModes', 
             'paymentTerms',
-            'cities',
-            // KPI
-        'totalSuppliers',
-        'activeSuppliers',
-        'inactiveSuppliers',
-        'suppliersNonSoldes',
-        'suppliersNousDoivent',
-        'suppliersOnDoit',
-        'totalSoldeSuppliers'
+            'cities'
         ));
     }
 

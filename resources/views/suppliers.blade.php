@@ -932,6 +932,74 @@
 
 
 
+
+<!-- KPI Fournisseurs – Vue direction -->
+<div class="row mb-4 g-3">
+    <!-- 1. Total Fournisseurs (simple, sans véhicules) -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card shadow-sm border-0 h-100 bg-gradient-primary text-white">
+            <div class="card-body text-center py-4">
+                <i class="fas fa-truck fa-3x mb-3 opacity-75"></i>
+                <h6 class="fw-bold mb-1">TOTAL FOURNISSEURS : {{ number_format($totalSuppliers, 0, ',', ' ') }}</h6>
+                <!-- <h2 class="display-5 fw-bold mb-0">{{ number_format($totalSuppliers, 0, ',', ' ') }}</h2> -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Actifs / Inactifs -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center py-4">
+                <div class="d-flex justify-content-center gap-4 mb-3">
+                    <div>
+                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                        <h6 class="small mb-1">Actifs</h6>
+                        <h4 class="fw-bold text-success mb-0">{{ number_format($activeSuppliers, 0, ',', ' ') }}</h4>
+                    </div>
+                    <div class="vr mx-2"></div>
+                    <div>
+                        <i class="fas fa-ban fa-2x text-danger"></i>
+                        <h6 class="small mb-1">Inactifs</h6>
+                        <h4 class="fw-bold text-danger mb-0">{{ number_format($inactiveSuppliers, 0, ',', ' ') }}</h4>
+                    </div>
+                </div>
+                <small class="text-muted">
+                    Taux d'activité : <strong>{{ $totalSuppliers > 0 ? round(($activeSuppliers / $totalSuppliers) * 100, 1) : 0 }}%</strong>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Fournisseurs non soldés (solde ≠ 0) – carte plus large car KPI clé -->
+    <div class="col-xl-6 col-lg-8 col-md-12">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center py-4">
+                <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
+                <h6 class="fw-bold mb-1">FOURNISSEURS NON SOLDÉS</h6>
+                <h2 class="display-5 fw-bold text-warning mb-2">{{ number_format($suppliersNonSoldes, 0, ',', ' ') }}</h2>
+                <div class="d-flex justify-content-center gap-5 mb-3">
+                    <div>
+                        <span class="text-danger fw-bold fs-4">{{ number_format($suppliersNousDoivent) }}</span>
+                        <small class="d-block text-danger">nous doivent</small>
+                    </div>
+                    <div class="vr bg-dark opacity-25"></div>
+                    <div>
+                        <span class="text-success fw-bold fs-4">{{ number_format($suppliersOnDoit) }}</span>
+                        <small class="d-block text-success">on doit</small>
+                    </div>
+                </div>
+                <h6 class="text-muted mb-1">Solde global fournisseurs</h6>
+                <h4 class="{{ $totalSoldeSuppliers >= 0 ? 'text-success' : 'text-danger' }} fw-bold">
+                    {{ number_format($totalSoldeSuppliers, 2, ',', ' ') }} €
+                </h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
     @if ($suppliers->count())
         <div class="table-responsive">
             <table class="table table-bordered table-hover table-text-small" id="itemsTable">

@@ -199,7 +199,7 @@
     <div class="sidebar-logo">
         <div class="logo-header" data-background-color="dark">
             <a href="/" class="logo">
-                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
+                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="70" />
             </a>
             <div class="nav-toggle">
                 <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
@@ -225,7 +225,8 @@
                     <div class="collapse" id="ventes">
                         <ul class="nav nav-collapse">
                             <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
-                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/devislist"><span class="sub-item">Devis</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Commandes Ventes</span></a></li>
                             <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
                             <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
                             <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
@@ -650,6 +651,32 @@
             <input type="text" name="phone2" class="form-control">
         </div>
 
+
+        <!-- === CHAMP B2B === -->
+<div class="mb-3 col-md-6">
+    <label class="form-label d-block">
+        <i class="fas fa-shopping-cart text-success"></i> Plateforme B2B (site marchand)
+    </label>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" name="has_b2b" value="1" id="has_b2b_create">
+        <label class="form-check-label fw-bold text-success" for="has_b2b_create">
+            Ce fournisseur a un site B2B (Destock, AZ, OttoGo, etc.)
+        </label>
+    </div>
+    <small class="text-muted">
+        Si coché, ce fournisseur apparaîtra dans le select "Fournisseur" lors de la création de commande
+    </small>
+</div>
+
+<!-- Optionnel : URL du site B2B -->
+<div class="mb-3 col-md-6">
+    <label class="form-label">URL du site B2B (facultatif)</label>
+    <input type="url" name="b2b_url" class="form-control" placeholder="https://destockpiecesauto.autodata.fr">
+</div>
+
+
+        
+
         <div class="mb-3 col-md-4">
             <label class="form-label">Ville</label>
             <input type="text" name="city" class="form-control">
@@ -698,7 +725,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">TVA</label>
             <select name="tva_group_id" class="form-control" required>
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($tvaGroups as $group)
                     <option value="{{ $group->id }}">{{ $group->name }} : {{ $group->rate }} %</option>
                 @endforeach
@@ -708,7 +735,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">Groupe Remise</label required>
             <select name="discount_group_id" class="form-control">
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($discountGroups as $group)
                     <option value="{{ $group->id }}">{{ $group->name }} : {{ $group->discount_rate }} %</option>
                 @endforeach
@@ -718,7 +745,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">Mode de paiement</label>
             <select name="payment_mode_id" class="form-control">
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($paymentModes as $mode)
                     <option value="{{ $mode->id }}">{{ $mode->name }}</option>
                 @endforeach
@@ -728,7 +755,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">Condition de paiement</label>
             <select name="payment_term_id" class="form-control">
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($paymentTerms as $term)
                     <option value="{{ $term->id }}">{{ $term->label }} : {{ $term->days }} Jours</option>
                 @endforeach
@@ -914,6 +941,7 @@
                         <th>Nom</th>
                         <th>Adresse & Ville</th>
                         <th>Contact</th>
+                        <th>B2B</th>
                         <th>Solde</th>
                         <th>Statut</th>
                         <th>Actions</th>
@@ -929,6 +957,16 @@
                             <td>📞 Standard : {{ $customer->phone1 }} <br>
                             📞 Commercial : {{ $customer->phone2 }} <br>
                          📧 {{ $customer->email }} </td>
+
+                         <td>
+    @if($customer->has_b2b)
+        <span class="badge bg-success">Oui</span>
+    @else
+        <span class="badge bg-secondary">Non</span>
+    @endif
+</td>
+
+
 
                              <td>
  <button type="button" class="btn btn-sm btn-outline-primary solde-btn" data-bs-toggle="modal" data-bs-target="#accountingModal{{ $customer->id }}" data-customer-id="{{ $customer->id }}">
@@ -1092,6 +1130,28 @@
             <input type="text" name="phone2" class="form-control" value="{{ $customer->phone2 }}" disabled>
         </div>
 
+<!-- === CHAMP B2B (édition) === -->
+<div class="mb-3 col-md-6">
+    <label class="form-label d-block">
+        Plateforme B2B (site marchand)
+    </label>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" name="has_b2b" value="1"
+               id="has_b2b_edit{{ $customer->id }}" {{ $customer->has_b2b ? 'checked' : '' }}>
+        <label class="form-check-label fw-bold text-success" for="has_b2b_edit{{ $customer->id }}">
+            Ce fournisseur a un site B2B
+        </label>
+    </div>
+</div>
+
+<div class="mb-3 col-md-6">
+    <label class="form-label">URL du site B2B</label>
+    <input type="url" name="b2b_url" class="form-control"
+           value="{{ $customer->b2b_url }}" placeholder="https://...">
+</div>
+
+
+
         <div class="mb-3 col-md-4">
             <label class="form-label">Ville</label>
             <input type="text" name="city" class="form-control" value="{{ $customer->city }}" disabled>
@@ -1150,7 +1210,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">TVA</label>
             <select name="tva_group_id" class="form-control" disabled>
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($tvaGroups as $group)
                     <option value="{{ $group->id }}" {{ $customer->tva_group_id == $group->id ? 'selected' : '' }}>
                         {{ $group->name }} : {{ $group->rate }} %
@@ -1162,7 +1222,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">Groupe Remise</label>
             <select name="discount_group_id" class="form-control" disabled>
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($discountGroups as $group)
                     <option value="{{ $group->id }}" {{ $customer->discount_group_id == $group->id ? 'selected' : '' }}>
                         {{ $group->name }} : {{ $group->discount_rate }} %
@@ -1174,7 +1234,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">Mode de paiement</label>
             <select name="payment_mode_id" class="form-control" disabled>
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($paymentModes as $mode)
                     <option value="{{ $mode->id }}" {{ $customer->payment_mode_id == $mode->id ? 'selected' : '' }}>
                         {{ $mode->name }}
@@ -1186,7 +1246,7 @@
         <div class="mb-3 col-md-6">
             <label class="form-label">Condition de paiement</label>
             <select name="payment_term_id" class="form-control" disabled>
-                <option value="">-- Choisir --</option>
+                <!-- <option value="">-- Choisir --</option> -->
                 @foreach($paymentTerms as $term)
                     <option value="{{ $term->id }}" {{ $customer->payment_term_id == $term->id ? 'selected' : '' }}>
                         {{ $term->label }} : {{ $term->days }} Jours
@@ -1396,11 +1456,11 @@ document.addEventListener("DOMContentLoaded", function() {
             </nav>
             <div class="copyright">
             © AZ NEGOCE. All Rights Reserved.
-              <!-- <a href="http://www.themekita.com">By Ahmed Arfaoui</a> -->
+              <!-- <a href="http://www.themekita.com">By AZ NEGOCE</a> -->
             </div>
             <div>
                by
-              <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.
+              <a target="_blank" href="https://themewagon.com/">AZ NEGOCE</a>.
             </div>
           </div>
         </footer>
