@@ -1650,7 +1650,7 @@ function initSupplierSelect($select, supplierId = null) {
         <tr data-line-id="${lineCount}">
             <td>
                 <div class="d-flex align-items-center gap-1">
-                    <span class="font-weight-bold">${code}</span>
+                    <span class="font-weight-bold"><b>${code}</b></span>
                     <button type="button"
                             class="btn btn-xs btn-outline-secondary copy-line-code px-1 py-0"
                             data-code="${code}"
@@ -1662,7 +1662,7 @@ function initSupplierSelect($select, supplierId = null) {
                 <span class="badge bg-${isActive ? 'success' : 'danger'} badge-very-sm">${isActive ? 'actif' : 'bloqué'}</span>
                 <input type="hidden" name="lines[${lineCount}][article_code]" value="${code}">
             </td>
-            <td>${name}</td>
+            <td><b>${name}</b></td>
            
            <td class="p-1">
     <div class="purchase-price-block">
@@ -2651,7 +2651,7 @@ $form.on('submit', function (e) {
         let engine = '';
 
         try {
-            const resp = await fetch(`https://api.apiplaqueimmatriculation.com/plaque?immatriculation=${plate}&token=TokenDemo2025A&pays=FR`);
+            const resp = await fetch(`https://api.apiplaqueimmatriculation.com/plaque?immatriculation=${plate}&token=TokenDemo2026B&pays=FR`);
             const json = await resp.json();
             if (json?.data && !json.data.erreur) {
                 brand = json.data.marque || 'INCONNUE';
