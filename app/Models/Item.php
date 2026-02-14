@@ -10,7 +10,10 @@ class Item extends Model
     protected $fillable = [
         'code', 'name', 'description', 'category_id',
         'brand_id', 'unit_id', 'barcode',
-        'cost_price', 'sale_price','tva_group_id',
+        'cost_price', 'remise_achat',
+    'codefournisseur_2', 'cost_price_2', 'remise_achat_2',
+    'codefournisseur_3', 'cost_price_3', 'remise_achat_3'
+    , 'sale_price','tva_group_id',
         'stock_min', 'stock_max', 'store_id', 'location', 'is_active','codefournisseur','Poids','Hauteur','Longueur','Largeur','Ref_TecDoc','Code_pays','Code_douane','discount_group_id'
     ];
 
@@ -63,6 +66,17 @@ public function supplier()
 {
     return $this->belongsTo(Supplier::class, 'codefournisseur', 'code');
 }
+
+public function supplier2()
+{
+    return $this->belongsTo(Supplier::class, 'codefournisseur_2', 'code');
+}
+
+public function supplier3()
+{
+    return $this->belongsTo(Supplier::class, 'codefournisseur_3', 'code');
+}
+
 
 
 // Nouvelle relation

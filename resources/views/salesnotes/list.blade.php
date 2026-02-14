@@ -7,7 +7,7 @@
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
 
     <!-- jQuery + Bootstrap JS (v4) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Fonts and icons -->
@@ -34,8 +34,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}" />
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
 
     <style>
         .table { width: 100%; margin-bottom: 0; }
@@ -615,7 +614,7 @@
                                                         </div>
                                                         <div class="mb-3">
                                                             <label for="payment_mode{{ $note->id }}" class="form-label">Mode de paiement</label>
-                                                            <select class="form-control select2" id="payment_mode{{ $note->id }}" name="payment_mode" required>
+                                                            <select class="form-control" id="payment_mode{{ $note->id }}" name="payment_mode" required>
                                                             <option value="">Sélectionner le mode de paiement</option>
                                                                 @foreach(\App\Models\PaymentMode::where('type', 'décaissement')->get() as $mode)
                                                                     <option value="{{ $mode->name }}">{{ $mode->name }}</option>
@@ -681,11 +680,13 @@
     <script src="{{ asset('assets/js/plugin/jsvectormap/world.js') }}"></script>
     <script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
     $(document).ready(function () {
         // Initialize Select2
-        $('.select2').select2({ width: '100%' });
+        $('.select2').select2({ width: '30%' });
 
         // Prevent double form submission
         $('.payment-form').on('submit', function (e) {

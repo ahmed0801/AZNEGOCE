@@ -82,7 +82,7 @@
     <div class="sidebar-logo">
         <div class="logo-header" data-background-color="dark">
             <a href="/" class="logo">
-                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
+                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="70" />
             </a>
             <div class="nav-toggle">
                 <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
@@ -108,7 +108,8 @@
                     <div class="collapse" id="ventes">
                         <ul class="nav nav-collapse">
                             <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
-                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/devislist"><span class="sub-item">Devis</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Commandes Ventes</span></a></li>
                             <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
                             <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
                             <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
@@ -192,6 +193,7 @@
                     </a>
                     <div class="collapse" id="outils">
                         <ul class="nav nav-collapse">
+                            <li><a href="/analytics"><span class="sub-item">Analytics</span></a></li>
                             <li><a href="/tecdoc"><span class="sub-item">TecDoc</span></a></li>
                             <li><a href="/voice"><span class="sub-item">NEGOBOT</span></a></li>
                         </ul>
@@ -595,7 +597,18 @@
                                                             <label for="amount{{ $note->id }}" class="form-label">Montant (€)</label>
                                                             <input type="number" step="0.01" class="form-control" id="amount{{ $note->id }}" name="amount"  required>
                                                             <small>Reste à payer : {{ number_format($note->getRemainingBalanceAttribute(), 2, ',', ' ') }} €</small>
+                                                                <!-- Bouton Lettrer -->
+    <button 
+        type="button" 
+        class="btn btn-outline-danger btn-sm"
+        onclick="document.getElementById('amount{{ $note->id }}').value = '{{ abs($note->getRemainingBalanceAttribute()) }}'"
+    >
+        Lettrer
+    </button>
                                                         </div>
+
+                                                        
+
                                                         <div class="mb-3">
                                                             <label for="payment_date{{ $note->id }}" class="form-label">Date de paiement</label>
                                                             <input type="date" class="form-control" id="payment_date{{ $note->id }}" name="payment_date" value="{{ now()->format('Y-m-d') }}" required>
@@ -603,7 +616,8 @@
                                                         <div class="mb-3">
                                                             <label for="payment_mode{{ $note->id }}" class="form-label">Mode de paiement</label>
                                                             <select class="form-control select2" id="payment_mode{{ $note->id }}" name="payment_mode" required>
-                                                                @foreach(\App\Models\PaymentMode::all() as $mode)
+                                                            <option value="">Sélectionner le mode de paiement</option>
+                                                                @foreach(\App\Models\PaymentMode::where('type', 'décaissement')->get() as $mode)
                                                                     <option value="{{ $mode->name }}">{{ $mode->name }}</option>
                                                                 @endforeach
                                                             </select>
@@ -647,7 +661,7 @@
             <footer class="footer">
                 <div class="container-fluid d-flex justify-content-between">
                     <div class="copyright">© AZ NEGOCE. All Rights Reserved.</div>
-                    <div>by <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.</div>
+                    <div>by <a target="_blank" href="https://themewagon.com/">AZ NEGOCE</a>.</div>
                 </div>
             </footer>
         </div>

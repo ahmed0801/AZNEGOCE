@@ -146,6 +146,15 @@ public function store(Request $request)
         'codefournisseur'=> 'nullable|exists:suppliers,code',
         'location'       => 'nullable|string|max:255',
         'discount_group_id' => 'nullable|exists:discount_groups,id', // ← Nouveau champ
+
+        'remise_achat'      => 'nullable|numeric|min:0|max:100',
+        'codefournisseur_2' => 'nullable|exists:suppliers,code',
+        'cost_price_2'      => 'nullable|numeric|min:0',
+        'remise_achat_2'    => 'nullable|numeric|min:0|max:100',
+        'codefournisseur_3' => 'nullable|exists:suppliers,code',
+        'cost_price_3'      => 'nullable|numeric|min:0',
+        'remise_achat_3'    => 'nullable|numeric|min:0|max:100',
+
     ]);
 
     // 2️⃣ Gestion du code pour qu’il soit unique
@@ -178,6 +187,16 @@ public function store(Request $request)
         'location'        => $validated['location'] ?? null,
         'is_active'       => true,
         'discount_group_id' => $validated['discount_group_id'] ?? 1, // ← Par défaut groupe ID 1
+
+
+        'remise_achat'      => $validated['remise_achat'] ?? 0.00,
+        'codefournisseur_2' => $validated['codefournisseur_2'] ?? null,
+        'cost_price_2'      => $validated['cost_price_2'] ?? 0.00,
+        'remise_achat_2'    => $validated['remise_achat_2'] ?? 0.00,
+        'codefournisseur_3' => $validated['codefournisseur_3'] ?? null,
+        'cost_price_3'      => $validated['cost_price_3'] ?? 0.00,
+        'remise_achat_3'    => $validated['remise_achat_3'] ?? 0.00,
+
     ]);
 
     // 4️⃣ Redirection avec message précisant le code final
@@ -221,6 +240,16 @@ public function update(Request $request, $id)
 'location' => 'nullable|string|max:255',
 'is_active' => 'required|boolean',
 'discount_group_id' => 'nullable|exists:discount_groups,id', // ← Nouveau champ
+
+
+'remise_achat'      => 'nullable|numeric|min:0|max:100',
+        'codefournisseur_2' => 'nullable|exists:suppliers,code',
+        'cost_price_2'      => 'nullable|numeric|min:0',
+        'remise_achat_2'    => 'nullable|numeric|min:0|max:100',
+        'codefournisseur_3' => 'nullable|exists:suppliers,code',
+        'cost_price_3'      => 'nullable|numeric|min:0',
+        'remise_achat_3'    => 'nullable|numeric|min:0|max:100',
+        
 
     ]);
 

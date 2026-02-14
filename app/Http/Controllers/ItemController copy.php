@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\ArticleExport;
 use App\Models\Arrivage;
 use App\Models\Brand;
+use App\Models\DiscountGroup;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\Store;
@@ -73,6 +74,7 @@ if ($request->has('is_active') && $request->is_active !== null && $request->is_a
         'units' => Unit::all(),
         'stores' => Store::all(),
         'tvaGroups' => TvaGroup::all(),
+        'discountGroups' => DiscountGroup::orderBy('name')->get(), // ← À ajouter
         'search' => $request->search,
         'brand_id' => $request->brand_id,
         'category_id' => $request->category_id,
@@ -143,7 +145,7 @@ public function store(Request $request)
         'store_id'       => 'nullable|exists:stores,id',
         'codefournisseur'=> 'nullable|exists:suppliers,code',
         'location'       => 'nullable|string|max:255',
-        
+        'discount_group_id' => 'nullable|exists:discount_groups,id', // ← Nouveau champ
     ]);
 
     // 2️⃣ Gestion du code pour qu’il soit unique
@@ -175,6 +177,7 @@ public function store(Request $request)
         'codefournisseur' => $validated['codefournisseur'] ?? null,
         'location'        => $validated['location'] ?? null,
         'is_active'       => true,
+        'discount_group_id' => $validated['discount_group_id'] ?? 1, // ← Par défaut groupe ID 1
     ]);
 
     // 4️⃣ Redirection avec message précisant le code final
@@ -217,6 +220,7 @@ public function update(Request $request, $id)
         'codefournisseur' => 'nullable|exists:suppliers,code',
 'location' => 'nullable|string|max:255',
 'is_active' => 'required|boolean',
+'discount_group_id' => 'nullable|exists:discount_groups,id', // ← Nouveau champ
 
     ]);
 
@@ -679,6 +683,51 @@ public function searchtest(Request $request)
         return view('commandetest', compact('vendors', 'selectedClient', 'clients', 'items', 'itemFilter', 'descriptionFilter', 'originReferenceFilter', 'articles', 'scrollTo'));
     }
 
+
+
+
+
+
+    // ItemController.php
+public function massUpdateDiscount(Request $request)
+{
+    $groupId = $request->input('mass_discount_group_id');
+
+    if (!$groupId) {
+        return response()->json(['success' => false, 'message' => 'Aucun groupe sélectionné']);
+    }
+
+    $query = Item::query();
+
+    // On reprend **exactement** les mêmes filtres que dans index()
+    if ($request->filled('search')) {
+        $query->where(function ($q) use ($request) {
+            $q->where('name', 'like', $request->search . '%')
+              ->orWhere('code', 'like', $request->search);
+        });
+    }
+
+    if ($request->filled('brand_id'))    $query->where('brand_id', $request->brand_id);
+    if ($request->filled('category_id')) $query->where('category_id', $request->category_id);
+    if ($request->filled('store_id'))    $query->where('store_id', $request->store_id);
+    if ($request->filled('codefournisseur')) {
+        $query->where('codefournisseur', $request->codefournisseur);
+    }
+    if ($request->has('is_active') && $request->is_active !== '') {
+        $query->where('is_active', $request->is_active);
+    }
+
+    $count = $query->update([
+        'discount_group_id' => $groupId,
+        'updated_at'        => now(),
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'updated' => $count,
+        'message' => "$count article(s) ont reçu le nouveau groupe de remise."
+    ]);
+}
 
 
 

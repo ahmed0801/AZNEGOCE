@@ -181,11 +181,56 @@
 
 
 
+/* Version compactée - filtres plus petits */
+.select2-wrapper {
+    position: relative;
+}
+
+/* Hauteur réduite + texte plus petit */
+.select2-container--default .select2-selection--single {
+    height: 28px !important;           /* plus petit que la version originale */
+    min-height: 28px !important;
+    padding: 0.2rem 0.4rem !important; /* padding intérieur réduit */
+    font-size: 0.82rem !important;     /* texte légèrement plus petit */
+    line-height: 1.35 !important;
+    border-radius: 0.25rem;
+}
+
+/* Texte dans le champ sélectionné */
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 26px !important;      /* aligné avec la hauteur */
+    padding-left: 6px !important;
+    padding-right: 22px !important;    /* espace pour la flèche */
+    color: #495057;
+}
+
+/* Flèche de dropdown */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 28px !important;
+    width: 20px !important;
+}
+
+/* Optionnel : placeholder plus discret */
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #999;
+    font-size: 0.82rem;
+}
+
+
 
 
 
 
     </style>
+
+
+
+<!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
+<!-- Select2 JS (après jQuery) -->
+
 
 
 
@@ -819,50 +864,62 @@
 
 
 <form method="GET" action="{{ route('articles.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-    <input type="text" name="search" class="form-control form-control-sm" style="width: 170px;"
-           placeholder="🔍 Rechercher..." value="{{ request('search') }}">
 
-    <select name="brand_id" class="form-select form-select-sm" style="width: 120px;">
-        <option value="">Marques (Tout)</option>
-        @foreach($brands as $brand)
-            <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
-                {{ $brand->name }}
-            </option>
-        @endforeach
-    </select>
+    <input type="text" name="search" class="form-control form-control-sm" 
+           style="width: 170px;" placeholder="🔍 Rechercher..." value="{{ request('search') }}">
 
-    <select name="category_id" class="form-select form-select-sm" style="width: 130px;">
-        <option value="">Familles (Tout)</option>
-        @foreach($categories as $category)
-            <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                {{ $category->name }}
-            </option>
-        @endforeach
-    </select>
+    <!-- On enlève width fixe + on ajoute une classe wrapper si besoin -->
+    <div class="select2-wrapper" style="min-width: 140px; flex: 1;">
+        <select name="brand_id" class="form-select form-select-sm select2-filter">
+            <option value="">Marques (Tout)</option>
+            @foreach($brands as $brand)
+                <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
+                    {{ $brand->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-    <select name="codefournisseur" class="form-select form-select-sm" style="width: 140px;">
-        <option value="">Fournisseurs (Tout)</option>
-        @foreach(\App\Models\Supplier::all() as $supplier)
-            <option value="{{ $supplier->code }}" {{ request('codefournisseur') == $supplier->code ? 'selected' : '' }}>
-                {{ $supplier->code }} - {{ $supplier->name }}
-            </option>
-        @endforeach
-    </select>
+    <div class="select2-wrapper" style="min-width: 150px; flex: 1;">
+        <select name="category_id" class="form-select form-select-sm select2-filter">
+            <option value="">Familles (Tout)</option>
+            @foreach($categories as $category)
+                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                    {{ $category->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-    <select name="store_id" class="form-select form-select-sm" style="width: 120px;">
-        <option value="">Magasins (Tout)</option>
-        @foreach($stores as $store)
-            <option value="{{ $store->id }}" {{ request('store_id') == $store->id ? 'selected' : '' }}>
-                {{ $store->name }}
-            </option>
-        @endforeach
-    </select>
+    <div class="select2-wrapper" style="min-width: 220px; flex: 1;">
+        <select name="codefournisseur" class="form-select form-select-sm select2-filter">
+            <option value="">Fournisseurs (Tout)</option>
+            @foreach(\App\Models\Supplier::all() as $supplier)
+                <option value="{{ $supplier->code }}" {{ request('codefournisseur') == $supplier->code ? 'selected' : '' }}>
+                    {{ $supplier->code }} - {{ $supplier->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-    <select name="is_active" class="form-select form-select-sm" style="width: 110px;">
-        <option value="">Statut (Tout)</option>
-        <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>Autorisé</option>
-        <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>Bloqué</option>
-    </select>
+    <!-- <div class="select2-wrapper" style="min-width: 140px;">
+        <select name="store_id" class="form-select form-select-sm select2-filter">
+            <option value="">Magasins (Tout)</option>
+            @foreach($stores as $store)
+                <option value="{{ $store->id }}" {{ request('store_id') == $store->id ? 'selected' : '' }}>
+                    {{ $store->name }}
+                </option>
+            @endforeach
+        </select>
+    </div> -->
+
+    <div class="select2-wrapper" style="min-width: 110px;">
+        <select name="is_active" class="form-select form-select-sm select2-filter">
+            <option value="">Statut (Tout)</option>
+            <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>Autorisé</option>
+            <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>Bloqué</option>
+        </select>
+    </div>
 
     <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
         <i class="fas fa-filter me-1"></i> Filtrer
@@ -1681,6 +1738,9 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
 <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
 <!-- jQuery Scrollbar -->
 <script src="{{ asset('assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
 
@@ -1860,58 +1920,67 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-
-
-
-
-
-
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    const selectGroup = document.getElementById('discount_group_id_mass');
-    const btnApply = document.getElementById('applyMassDiscountBtn');
-    const confirmBtn = document.getElementById('confirmMassApplyBtn');
-    const countSpan = document.getElementById('countItemsToUpdate');
-
-    // Activer/désactiver le bouton selon si un groupe est sélectionné
-    selectGroup.addEventListener('change', function() {
-        btnApply.disabled = !this.value;
+$(document).ready(function() {
+    // 1. Initialisation Select2 pour tous les filtres
+    $('.select2-filter').select2({
+        placeholder: function() {
+            return $(this).find('option:first-child').text();
+        },
+        allowClear: true,
+        width: '100%',
+        minimumResultsForSearch: 0,
+        dropdownAutoWidth: true,
+        language: {
+            noResults: function() {
+                return "Aucun résultat trouvé";
+            }
+        }
     });
 
-    // Mise à jour du nombre d'articles concernés (approximation via pagination)
+    // 2. Select2 pour le groupe remise massive
+    const selectGroup = $('#discount_group_id_mass').select2({
+        placeholder: "-- Choisir un groupe --",
+        allowClear: true,
+        width: '100%',
+        minimumResultsForSearch: 0
+    });
+
+    const btnApply = $('#applyMassDiscountBtn');
+    const confirmBtn = $('#confirmMassApplyBtn');
+    const countSpan = $('#countItemsToUpdate');
+
+    // 3. Écouter les ÉVÉNEMENTS SELECT2 (pas change natif !)
+    selectGroup.on('select2:select select2:unselect change', function(e) {
+        const hasValue = $(this).val() && $(this).val().trim() !== '';
+        btnApply.prop('disabled', !hasValue);
+    });
+
+    // 4. Déclenchement initial (si valeur pré-sélectionnée)
+    selectGroup.trigger('change');
+
+    // 5. Compteur d'articles (approximation)
     function updateCountDisplay() {
-        // Approximation : nombre de lignes visibles dans le tableau
-        const visibleRows = document.querySelectorAll('#itemsTable tbody tr:not([style*="display: none"])');
-        countSpan.textContent = visibleRows.length;
-
-        // Option plus précise : récupérer le vrai total depuis Laravel (recommandé)
-        // → voir étape 4 pour la méthode idéale
+        const visibleRows = $('#itemsTable tbody tr:not([style*="display: none"])').length;
+        countSpan.text(visibleRows);
     }
-
-    // Mise à jour au chargement + quand on change de page
     updateCountDisplay();
 
-    // Quand on change de page (Laravel pagination)
-    document.querySelectorAll('.pagination a').forEach(link => {
-        link.addEventListener('click', function(e) {
-            // On laisse Laravel faire le chargement, puis on met à jour après
-            setTimeout(updateCountDisplay, 800);
-        });
+    // 6. Mise à jour du compteur sur pagination
+    $('.pagination a').on('click', function() {
+        setTimeout(updateCountDisplay, 800);
     });
 
-    // Confirmation → envoi réel
-    confirmBtn.addEventListener('click', function() {
-        const groupId = selectGroup.value;
+    // 7. Confirmation et envoi AJAX
+    confirmBtn.on('click', function() {
+        const groupId = selectGroup.val();
         if (!groupId) return;
 
-        // Récupération des mêmes filtres que la page actuelle
-        const form = document.querySelector('form[action="{{ route('articles.index') }}"]');
-        const formData = new FormData(form);
+        const form = $('form[action="{{ route("articles.index") }}"]');
+        const formData = new FormData(form[0]);
         
-        // Ajout des paramètres spéciaux
         const params = new URLSearchParams();
-        for (const [key, value] of formData) {
+        for (const [key, value] of formData.entries()) {
             if (value) params.append(key, value);
         }
         params.append('mass_discount_group_id', groupId);
@@ -1928,25 +1997,22 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Mise à jour réussie ! ' + data.updated + ' article(s) modifié(s).');
-                location.reload(); // recharge la page pour voir les changements
+                alert('✅ Mise à jour réussie ! ' + data.updated + ' article(s) modifié(s).');
+                location.reload();
             } else {
-                alert('Erreur : ' + (data.message || 'Action impossible'));
+                alert('❌ Erreur : ' + (data.message || 'Action impossible'));
             }
         })
         .catch(err => {
             console.error(err);
-            alert('Erreur technique lors de la mise à jour massive.');
+            alert('❌ Erreur technique lors de la mise à jour massive.');
         });
 
         // Ferme la modal
-        bootstrap.Modal.getInstance(document.getElementById('confirmMassDiscountModal')).hide();
+        $('#confirmMassDiscountModal').modal('hide');
     });
 });
-    </script>
-
-
-
+</script>
 
   </body>
 </html>

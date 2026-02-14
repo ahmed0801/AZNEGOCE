@@ -88,7 +88,7 @@ class SalesInvoicesController extends Controller
         });
     }
 
-    
+
 
 
 
@@ -1448,7 +1448,7 @@ $request->validate($rules);
                 'numdoc'      => $returnNumdoc,
                 'customer_id' => $request->customer_id,
                 'return_date' => $request->note_date,
-                'invoiced'    => false,
+                'invoiced'    => true,
                 'tva_rate'    => $tvaRate,
                 'total_ht'    => 0,
                 'total_ttc'   => 0,

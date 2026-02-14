@@ -221,6 +221,49 @@
 
 
 
+
+
+/* Tableau compact multi-fournisseurs */
+.table-responsive {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+/* .table-text-small th, .table-text-small td {
+    font-size: 10px !important;
+    padding: 4px 6px !important;
+    white-space: nowrap;
+} */
+
+.multi-supplier-cell {
+    font-size: 9px;
+    line-height: 1.1;
+}
+
+.multi-supplier-cell .sup {
+    color: #0069d9;
+    font-weight: bold;
+}
+
+.multi-supplier-cell .price {
+    color: #dc3545;
+}
+
+.multi-supplier-cell .rem {
+    color: #28a745;
+}
+
+/* Sur mobile : réduire encore + masquer certaines colonnes */
+@media (max-width: 992px) {
+    .table-text-small th:nth-child(n+8), 
+    .table-text-small td:nth-child(n+8) {
+        display: none;
+    }
+    .table-text-small {
+        font-size: 9px !important;
+    }
+}
+
     </style>
 
 
@@ -776,11 +819,7 @@
 </div>
 
 
-                        <!-- Prix d'achat -->
-                        <div class="mb-3 col-md-3">
-                            <label for="cost_price" class="form-label">Prix d’achat</label>
-                            <input type="number" step="0.01" class="form-control" name="cost_price" value="0.00">
-                        </div>
+
 
                         <!-- Marge (%) -->
 <div class="mb-3 col-md-2">
@@ -813,15 +852,84 @@
                         </div>
 
 <!-- Code Fournisseur -->
-<div class="mb-3 col-md-6">
-    <label for="codefournisseur" class="form-label">Code Fournisseur</label>
-    <select name="codefournisseur" id="codefournisseur" class="form-select">
-        <option value="">-- Choisir --</option>
-        @foreach(\App\Models\Supplier::all() as $supplier)
-            <option value="{{ $supplier->code }}">{{ $supplier->code }} - {{ $supplier->name }}</option>
-        @endforeach
-    </select>
+
+
+
+
+
+
+<div class="border p-3 rounded mb-4 bg-light">
+    <h6 class="mb-3 text-primary">Informations fournisseurs (prix d'achat)</h6>
+    <div class="row g-3">
+        <!-- Fournisseur 1 -->
+        <div class="col-md-4">
+            <label>Fournisseur principal</label>
+            <select name="codefournisseur" class="form-select">
+                <option value="">-- Aucun --</option>
+        @foreach(\App\Models\Supplier::all() as $s)
+                    <option value="{{ $s->code }}" {{ old('codefournisseur', $item->codefournisseur ?? '') == $s->code ? 'selected' : '' }}>
+                        {{ $s->code }} - {{ $s->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label>Prix achat principal</label>
+            <input type="number" step="0.0001" name="cost_price" class="form-control" value="{{ old('cost_price', $item->cost_price ?? 0) }}">
+        </div>
+        <div class="col-md-4">
+            <label>Remise achat principal (%)</label>
+            <input type="number" step="0.01" name="remise_achat" class="form-control" value="{{ old('remise_achat', $item->remise_achat ?? 0) }}">
+        </div>
+
+        <!-- Fournisseur 2 -->
+        <div class="col-md-4">
+            <label>Fournisseur 2</label>
+            <select name="codefournisseur_2" class="form-select">
+                <option value="">-- Aucun --</option>
+        @foreach(\App\Models\Supplier::all() as $s)
+                    <option value="{{ $s->code }}" {{ old('codefournisseur_2', $item->codefournisseur_2 ?? '') == $s->code ? 'selected' : '' }}>
+                        {{ $s->code }} - {{ $s->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label>Prix achat 2</label>
+            <input type="number" step="0.0001" name="cost_price_2" class="form-control" value="{{ old('cost_price_2', $item->cost_price_2 ?? 0) }}">
+        </div>
+        <div class="col-md-4">
+            <label>Remise achat 2 (%)</label>
+            <input type="number" step="0.01" name="remise_achat_2" class="form-control" value="{{ old('remise_achat_2', $item->remise_achat_2 ?? 0) }}">
+        </div>
+
+        <!-- Fournisseur 3 -->
+        <div class="col-md-4">
+            <label>Fournisseur 3</label>
+            <select name="codefournisseur_3" class="form-select">
+                <option value="">-- Aucun --</option>
+        @foreach(\App\Models\Supplier::all() as $s)
+                    <option value="{{ $s->code }}" {{ old('codefournisseur_3', $item->codefournisseur_3 ?? '') == $s->code ? 'selected' : '' }}>
+                        {{ $s->code }} - {{ $s->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label>Prix achat 3</label>
+            <input type="number" step="0.0001" name="cost_price_3" class="form-control" value="{{ old('cost_price_3', $item->cost_price_3 ?? 0) }}">
+        </div>
+        <div class="col-md-4">
+            <label>Remise achat 3 (%)</label>
+            <input type="number" step="0.01" name="remise_achat_3" class="form-control" value="{{ old('remise_achat_3', $item->remise_achat_3 ?? 0) }}">
+        </div>
+    </div>
 </div>
+
+
+
+
+
 
 
                         <!-- Magasin -->
@@ -1152,9 +1260,9 @@
                     <th>Marque</th>
                     <th>Famille</th>
                     <th>Groupe Rem%</th>
-                    <th>Prix A.HT</th>
-                    <th>Prix V.HT</th>
-                     <th>Fournisseur</th>
+                    <!-- <th>Prix A.HT</th> -->
+                     <th>Fourn./Prix A.HT</th>
+                     <th>Prix.V/Marge</th>
                     <th>Stock</th>
                     <th>Actions</th>
                 </tr>
@@ -1184,26 +1292,48 @@
     </small>
 </td>
 
-                        <td>{{ number_format($item->cost_price, 2, ',', ' ') }} €</td>
+                        <!-- <td>{{ number_format($item->cost_price, 2, ',', ' ') }} €</td> -->
+
+
+
+              
+<td class="multi-supplier-cell">
+    @if($item->codefournisseur)
+        <span class="sup">1</span>: {{ $item->supplier->name  }}<br>
+        <span class="price">{{ number_format($item->cost_price, 2, ',', ' ') }} €</span> 
+        <span class="rem">(-{{ number_format($item->remise_achat ?? 0, 2) }}%)</span><br>
+    @endif
+
+    @if($item->codefournisseur_2)
+        <span class="sup">2</span>: {{ $item->supplier2->name  }}<br>
+        <span class="price">{{ number_format($item->cost_price_2, 2, ',', ' ') }} €</span> 
+        <span class="rem">(-{{ number_format($item->remise_achat_2 ?? 0, 2) }}%)</span><br>
+    @endif
+
+    @if($item->codefournisseur_3)
+        <span class="sup">3</span>: {{ $item->supplier3->name  }}<br>
+        <span class="price">{{ number_format($item->cost_price_3, 2, ',', ' ') }} €</span> 
+        <span class="rem">(-{{ number_format($item->remise_achat_3 ?? 0, 2) }}%)</span>
+    @endif
+
+    @if(!$item->codefournisseur && !$item->codefournisseur_2 && !$item->codefournisseur_3)
+        <span class="text-muted">—</span>
+    @endif
+</td>
+
 @php
     $marge = $item->sale_price - $item->cost_price;
     $marge_pct = $item->cost_price > 0 ? ($marge / $item->cost_price) * 100 : 0;
 @endphp
-
 <td>
-    {{ number_format($item->sale_price, 2, ',', ' ') }} € <br>
+    {{ number_format($item->sale_price, 2, ',', ' ') }} € HT <br>
     <small class="{{ $marge >= 0 ? 'text-success' : 'text-danger' }}">
         {{ $marge >= 0 ? '+' : '' }}{{ number_format($marge, 2, ',', ' ') }} €
         ({{ number_format($marge_pct, 0, ',', ' ') }}%)
     </small>
 </td>
 
-                        
-<td>
-    {{ $item->supplier->name ?? '-' }}
-    <br>
-    <small class="text-muted">{{ $item->codefournisseur ?? '' }}</small>
-</td>
+          
 
 <td>
     <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#stockDetailsModal{{ $item->id }}" title="Voir les détails du stock">
@@ -1445,7 +1575,7 @@
                             </select>
                         </div>
 
-                        <div class="mb-3 col-md-6">
+                        <div class="mb-3 col-md-3">
                             <label class="form-label">Marque</label>
                             <select name="brand_id" class="form-select" disabled>
                                 <option value="">-- Choisir --</option>
@@ -1457,7 +1587,7 @@
                             </select>
                         </div>
 
-                        <div class="mb-3 col-md-6">
+                        <div class="mb-3 col-md-3">
                             <label class="form-label">Unité</label>
                             <select name="unit_id" class="form-select" disabled>
                                 <option value="">-- Choisir --</option>
@@ -1469,7 +1599,7 @@
                             </select>
                         </div>
 
-                        <div class="mb-3 col-md-6">
+                        <div class="mb-3 col-md-3">
                             <label class="form-label">TVA</label>
                             <select class="form-select" name="tva_group_id" disabled>
                                 <option value="">-- Choisir --</option>
@@ -1482,7 +1612,7 @@
                         </div>
 
                         <!-- Groupe de remise -->
-<div class="mb-3 col-md-6">
+<div class="mb-3 col-md-4">
     <label class="form-label">Groupe de remise</label>
     <select name="discount_group_id" class="form-select" disabled>
         <option value="">-- Aucun --</option>
@@ -1496,10 +1626,6 @@
 </div>
 
 
-                        <div class="mb-3 col-md-3">
-                            <label class="form-label">Prix Achat</label>
-                            <input type="number" name="cost_price" step="0.01" class="form-control" value="{{ $item->cost_price }}">
-                        </div>
 
 
                         <!-- Marge (%) - Calculée -->
@@ -1539,15 +1665,94 @@
                         </div>
 
                         <!-- Code Fournisseur -->
-<div class="mb-3 col-md-6">
-    <label for="codefournisseur" class="form-label">Fournisseur</label>
-    <select name="codefournisseur" id="codefournisseur" class="form-select" disabled>
-        <option value="{{ $item->codefournisseur }}">-- Choisir --</option>
-        @foreach(\App\Models\Supplier::all() as $supplier)
-            <option value="{{ $supplier->code }}" {{ $item->codefournisseur == $supplier->code ? 'selected' : '' }}>{{ $supplier->code }} - {{ $supplier->name }}</option>
+
+                        
+
+
+
+
+
+
+<div class="border p-3 rounded mb-4 bg-light">
+    <h6 class="mb-3 text-primary">Informations fournisseurs (prix d'achat)</h6>
+    <div class="row g-3">
+        <!-- Fournisseur 1 -->
+        <div class="col-md-4">
+    <label>Fournisseur principal</label>
+    <select name="codefournisseur" class="form-select" disabled>
+        <option value="">-- Aucun --</option>
+        @foreach(\App\Models\Supplier::all() as $s)
+            <option value="{{ $s->code }}" {{ $item->codefournisseur == $s->code ? 'selected' : '' }}>
+                {{ $s->code }} - {{ $s->name }}
+            </option>
         @endforeach
     </select>
 </div>
+        <div class="col-md-4">
+            <label>Prix achat principal</label>
+            <input type="number" step="0.0001" name="cost_price" class="form-control" value="{{ $item->cost_price ?? 0 }}" disabled>
+        </div>
+        <div class="col-md-4">
+            <label>Remise achat principal (%)</label>
+            <input type="number" step="0.01" name="remise_achat" class="form-control" value="{{ $item->remise_achat ?? 0 }}" disabled>
+        </div>
+
+        <!-- Fournisseur 2 -->
+        
+<div class="col-md-4">
+    <label>Fournisseur 2</label>
+    <select name="codefournisseur_2" class="form-select" disabled>
+        <option value="">-- Aucun --</option>
+        @foreach(\App\Models\Supplier::all() as $s)
+            <option value="{{ $s->code }}" {{ $item->codefournisseur_2 == $s->code ? 'selected' : '' }}>
+                {{ $s->code }} - {{ $s->name }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
+<div class="col-md-4">
+    <label>Prix achat 2</label>
+    <input type="number" step="0.0001" name="cost_price_2" class="form-control" value="{{ $item->cost_price_2 ?? 0 }}" disabled>
+</div>
+
+<div class="col-md-4">
+    <label>Remise achat 2 (%)</label>
+    <input type="number" step="0.01" name="remise_achat_2" class="form-control" value="{{ $item->remise_achat_2 ?? 0 }}" disabled>
+</div>
+        <!-- Fournisseur 3 -->
+        <div class="col-md-4">
+    <label>Fournisseur 3</label>
+    <select name="codefournisseur_3" class="form-select" disabled>
+        <option value="">-- Aucun --</option>
+        @foreach(\App\Models\Supplier::all() as $s)
+            <option value="{{ $s->code }}" {{ $item->codefournisseur_3 == $s->code ? 'selected' : '' }}>
+                {{ $s->code }} - {{ $s->name }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
+<div class="col-md-4">
+    <label>Prix achat 3</label>
+    <input type="number" step="0.0001" name="cost_price_3" class="form-control" value="{{ $item->cost_price_3 ?? 0 }}" disabled>
+</div>
+
+<div class="col-md-4">
+    <label>Remise achat 3 (%)</label>
+    <input type="number" step="0.01" name="remise_achat_." class="form-control" value="{{ $item->remise_achat_3 ?? 0 }}" disabled>
+</div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
 
 
                         <div class="mb-3 col-md-6">
