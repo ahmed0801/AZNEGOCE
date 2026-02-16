@@ -403,6 +403,11 @@ Route::get('/sales/orders/search', [SalesInvoicesController::class, 'search'])->
 
 
 
+// Analyse comportement clients
+Route::get('/customers/behavior', [AnalyticsController::class, 'customerBehavior'])->name('customer.behavior');   // ou le middleware que tu utilises pour l'admin
+
+
+
 // Payments reglement
 Route::get('/paymentlist', [PaymentController::class, 'index'])->name('payments.index');
 Route::get('/paymentlist/export/pdf', [PaymentController::class, 'exportPdf'])->name('payments.export_pdf');

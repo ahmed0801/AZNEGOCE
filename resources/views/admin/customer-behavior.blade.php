@@ -1,8 +1,10 @@
+<!-- resources/views/admin/customer-behavior.blade.php -->
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>AZ NEGOCE - Dashboard</title>
+    <title>Analyse Comportement Clients - AZ ERP</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
 
@@ -12,17 +14,10 @@
         WebFont.load({
             google: { families: ["Public Sans:300,400,500,600,700"] },
             custom: {
-                families: [
-                    "Font Awesome 5 Solid",
-                    "Font Awesome 5 Regular",
-                    "Font Awesome 5 Brands",
-                    "simple-line-icons",
-                ],
+                families: ["Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"],
                 urls: ["{{ asset('assets/css/fonts.min.css') }}"],
             },
-            active: function () {
-                sessionStorage.fonts = true;
-            },
+            active: function () { sessionStorage.fonts = true; },
         });
     </script>
 
@@ -30,7 +25,15 @@
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .tooltip-inner { max-width: 320px; text-align: left; }
+        .info-icon { cursor: help; opacity: 0.7; }
+        .info-icon:hover { opacity: 1; }
+    </style>
 </head>
 <body>
     <div class="wrapper">
@@ -366,330 +369,237 @@
                 </nav>
             </div>
 
+            <!-- Contenu principal -->
             <div class="container">
-            <div class="page-inner">
+                <div class="page-inner">
 
-                <!-- HEADER -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h3 class="fw-bold mb-1">Analytics Ventes</h3>
-                        <p class="text-muted mb-0">Pilotage en temps réel – CA Net après retours</p>
-                    </div>
-                        <a href="{{ route('customer.behavior') }}" class="btn btn-outline-danger btn-round ms-2">
-        <i class="fas fa-chart-line fa-lg me-2"></i>
-        Analyse Comportement Clients
+                    <!-- En-tête -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h3 class="fw-bold mb-1">Analyse Comportement Clients
+
+<a href="{{ route('analytics') }}" class="btn btn-label-warning btn-round me-2">
+        <span class="btn-label"><i class="fas fa-chart-line"></i></span> Analytics
     </a>
-    
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-secondary btn-sm" onclick="location.reload()">
-                            <i class="fas fa-sync-alt"></i> Actualiser
-                        </button>
-                        <a href="#" class="btn btn-success btn-sm">
-                            <i class="fas fa-file-excel"></i> Export Excel
-                        </a>
-                    </div>
-                </div>
 
-                <!-- FILTRE + PÉRIODE -->
-                <div class="card card-round mb-4">
-                    <div class="card-body py-3">
-                        <form method="GET" action="{{ route('analytics') }}" class="row g-2 align-items-center">
-                            <div class="col-auto">
-                                <input type="date" name="start_date" class="form-control form-control-sm"
-                                       value="{{ $start ? $start->format('Y-m-d') : '' }}">
-                            </div>
-                            <div class="col-auto"><strong>→</strong></div>
-                            <div class="col-auto">
-                                <input type="date" name="end_date" class="form-control form-control-sm"
-                                       value="{{ $end ? $end->format('Y-m-d') : '' }}">
-                            </div>
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-primary btn-sm">Filtrer</button>
-                                @if(request()->has('start_date'))
-                                    <a href="{{ route('analytics') }}" class="btn btn-outline-secondary btn-sm">Supprimer les filtres</a>
-                                @endif
-                            </div>
-                        </form>
+        <a href="/dashboard" class="btn btn-label-secondary btn-round me-2">
+        <span class="btn-label"></span>Dashboard
+    </a>
 
-                        @if($start && $end)
-                            <div class="mt-2 small text-success">
-                                <i class="fas fa-calendar-alt"></i>
-                                <strong>Période :</strong> {{ $start->format('d/m/Y') }} → {{ $end->format('d/m/Y') }}
-                            </div>
-                        @endif
-                    </div>
-                </div>
+    <a href="/customers" class="btn btn-label-primary btn-round me-2">
+        <span class="btn-label"></span>Page Clients
+    </a>
 
-                <!-- ONGLETS -->
-                <ul class="nav nav-tabs mb-4" id="periodTabs">
-                    @php $active = !$start || $period === 'last30' ? 'active' : '' @endphp
-                    <li class="nav-item">
-                        <a href="{{ route('analytics', ['period' => 'last30']) }}"
-                           class="nav-link {{ $active }} {{ request()->has('start_date') ? 'disabled' : '' }}">
-                            Derniers 30 jours
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('analytics', ['period' => 'thisMonth']) }}"
-                           class="nav-link {{ $period === 'thisMonth' ? 'active' : '' }} {{ request()->has('start_date') ? 'disabled' : '' }}">
-                            Ce mois
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('analytics', ['period' => 'today']) }}"
-                           class="nav-link {{ $period === 'today' ? 'active' : '' }} {{ request()->has('start_date') ? 'disabled' : '' }}">
-                            Aujourd'hui
-                        </a>
-                    </li>
-                </ul>
 
-                @if(request()->has('start_date'))
-                    <div class="alert alert-warning small py-2 mb-4">
-                        <i class="fas fa-info-circle"></i> Les onglets sont désactivés en filtre personnalisé.
-                    </div>
-                @endif
-
-                <!-- KPI CARDS -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card card-stats card-round">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <p class="text-muted mb-1 small">CA NET</p>
-                                        <h4 class="mb-0 text-success fw-bold">
-                                            {{ number_format($metrics['caNet'], 0, ',', ' ') }} €
-                                        </h4>
-                                        <small class="text-success">
-                                            @if($caNetPrev > 0)
-                                                +{{ round((($metrics['caNet'] - $caNetPrev) / $caNetPrev) * 100, 1) }}% VS période précedente
-                                            @else - @endif
-                                        </small>
-                                    </div>
-                                    <div class="avatar avatar-xl">
-                                        <div class="avatar-title rounded-circle bg-success text-white kpi-icon">
-                                            <i class="fas fa-euro-sign"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            </h3>
+                            <p class="text-muted mb-0">Segmentation RFM, indicateurs clés & recommandations stratégiques</p>
+                        </div>
+                        <div>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="location.reload()">
+                                <i class="fas fa-sync-alt"></i> Actualiser
+                            </button>
                         </div>
                     </div>
 
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card card-stats card-round">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <p class="text-muted mb-1 small">RETOURS</p>
-                                        <h4 class="mb-0 text-danger fw-bold">
-                                            -{{ number_format($metrics['caRetour'], 0, ',', ' ') }} €
-                                        </h4>
-                                        <small class="text-danger">
-                                            {{ $metrics['caBrut'] > 0 ? round(($metrics['caRetour'] / $metrics['caBrut']) * 100, 1) : 0 }}% du CA brut
-                                        </small>
-                                    </div>
-                                    <div class="avatar avatar-xl">
-                                        <div class="avatar-title rounded-circle bg-danger text-white kpi-icon">
-                                            <i class="fas fa-undo"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3 col-sm-6"> 
-                        <div class="card card-stats card-round">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <p class="text-muted mb-1 small">BONS LIVRÉS</p>
-                                        <h4 class="mb-0 text-primary fw-bold">{{ $metrics['nbBl'] }}</h4>
-                                        <small class="text-primary">
-                                            Panier moyen: {{ number_format($metrics['panierMoyen'], 0, ',', ' ') }} €
-                                        </small>
-                                    </div>
-                                    <div class="avatar avatar-xl">
-                                        <div class="avatar-title rounded-circle bg-primary text-white kpi-icon">
-                                            <i class="fas fa-truck"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card card-stats card-round">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <p class="text-muted mb-1 small">PRÉVISION J+1</p>
-                                        <h4 class="mb-0 text-info fw-bold">{{ number_format($forecast, 0, ',', ' ') }} €</h4>
-                                        <small class="text-info">+3% vs Moyenne 7j</small>
-                                    </div>
-                                    <div class="avatar avatar-xl">
-                                        <div class="avatar-title rounded-circle bg-info text-white kpi-icon">
-                                            <i class="fas fa-chart-line"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- GRAPHIQUES -->
-                <div class="row g-4">
-
-                    <!-- Classement Vendeurs + Top Vendeurs -->
-                    <div class="col-lg-6">
-                        <div class="card card-round">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Classement Vendeurs</h5>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead class="bg-light">
-                                        <tr>
-                                            <th class="ps-3">#</th>
-                                            <th>Vendeur</th>
-                                            <th>CA Net</th>
-                                            <th>Retours</th>
-                                            <th>Taux</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        @if(auth()->user()->role == "vendeur")
-                                            <tr><td colspan="5" class="text-center text-muted py-4">
-                                            <u>vous n'êtes pas autorisé, merci de contacter votre administrateur</u>
-
-                                            </td></tr>
-                                        @else
-                                            @forelse($returnRateBySeller as $i => $s)
-                                                <tr class="{{ $i === 0 ? 'table-success' : '' }}">
-                                                    <td class="ps-3"><strong>{{ $i + 1 }}</strong></td>
-                                                    <td>{{ $s['vendeur'] }}</td>
-                                                    <td>{{ number_format($s['ventes'] - $s['retours'], 0, ',', ' ') }} €</td>
-                                                    <td class="text-danger">-{{ number_format($s['retours'], 0, ',', ' ') }} €</td>
-                                                    <td>
-                                                        <span class="badge badge-xs bg-{{ $s['taux_retour'] > 10 ? 'danger' : ($s['taux_retour'] > 5 ? 'warning' : 'success') }}">
-                                                            {{ $s['taux_retour'] }}%
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr><td colspan="5" class="text-center py-4">Aucun vendeur</td></tr>
-                                            @endforelse
-                                        @endif
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6">
+                    <!-- Graphiques principaux -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-6">
                             <div class="card card-round">
                                 <div class="card-header">
-                                    <h5 class="card-title mb-0">Top Vendeurs</h5>
+                                    <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+                                        Segmentation RFM
+                                        <span class="info-icon text-info" 
+                                              data-bs-toggle="tooltip" 
+                                              data-bs-placement="top" 
+                                              title="Segmentation basée sur la Récence (dernier achat), Fréquence (nombre d’achats) et Montant dépensé. Ici simplifiée en 4 catégories.">
+                                            <i class="fas fa-info-circle"></i>
+                                        </span>
+                                    </h5>
                                 </div>
                                 <div class="card-body">
-                                     @if(auth()->user()->role != "vendeur")
-                                    <div class="chart-container">
-                                        <canvas id="sellerChart"></canvas>
+                                    <div class="chart-container" style="position: relative; height: 280px;">
+                                        <canvas id="segmentsChart"></canvas>
                                     </div>
-                                    @else
-                                    <u>vous n'êtes pas autorisé, merci de contacter votre administrateur</u>
-                                    @endif
                                 </div>
                             </div>
-                        
-                    </div>
+                        </div>
 
-                    <!-- Évolution CA Net -->
-                    <div class="col-12">
-                        <div class="card card-round">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Évolution CA Net</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart-container">
-                                    <canvas id="caNetChart"></canvas>
+                        <div class="col-lg-6">
+                            <div class="card card-round">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Répartition par Type de Client</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 280px;">
+                                        <canvas id="typesChart"></canvas>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Taux de Retour -->
-                    <div class="col-md-8">
-                        <div class="card card-round">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Taux de Retour (%)</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart-container">
-                                    <canvas id="returnRateChart"></canvas>
+                    <!-- KPIs avec tooltips -->
+                    <div class="row g-3 mb-4">
+                        @php
+                            $kpis = [
+                                ['title' => 'Total Clients', 'value' => number_format($totalCustomers), 'icon' => 'users', 'color' => 'primary'],
+                                ['title' => 'Clients Actifs', 'value' => number_format($activeCustomers), 'icon' => 'user-check', 'color' => 'success'],
+                                ['title' => 'Solde Moyen', 'value' => number_format($avgSolde ?? 0, 2) . ' €', 'icon' => 'balance-scale', 'color' => 'info'],
+                                ['title' => 'Avec Véhicules', 'value' => number_format($withVehicles) . ' (' . ($totalCustomers > 0 ? round(($withVehicles / $totalCustomers) * 100, 1) : 0) . '%)', 'icon' => 'car', 'color' => 'warning'],
+                                ['title' => 'Panier Moyen', 'value' => number_format($avgOrderValue ?? 0, 2) . ' €', 'icon' => 'shopping-cart', 'color' => 'primary'],
+                                ['title' => 'Taux Rétention', 'value' => round($retentionRate ?? 0, 1) . '%', 'icon' => 'redo', 'color' => 'success'],
+                                ['title' => 'Taux Churn', 'value' => round($churnRate ?? 0, 1) . '%', 'icon' => 'user-times', 'color' => 'danger'],
+                                ['title' => 'Fréquence Achat', 'value' => round($purchaseFrequency ?? 0, 2), 'icon' => 'repeat', 'color' => 'info'],
+                                ['title' => 'Taux Repeat', 'value' => round($repeatPurchaseRate ?? 0, 1) . '%', 'icon' => 'sync', 'color' => 'warning'],
+                                ['title' => 'Délai entre Achats', 'value' => round($avgTimeBetweenPurchases ?? 0, 1) . ' j', 'icon' => 'clock', 'color' => 'secondary'],
+                                ['title' => 'CLV Estimé', 'value' => number_format($clv ?? 0, 0) . ' €', 'icon' => 'euro-sign', 'color' => 'success'],
+                                ['title' => 'Récence Moyenne', 'value' => round($avgRecency ?? 0, 1) . ' j', 'icon' => 'calendar-alt', 'color' => 'primary'],
+                            ];
+
+                            $kpiExplanations = [
+                                'Total Clients'          => 'Nombre total de clients enregistrés dans la base, qu’ils aient déjà acheté ou non.',
+                                'Clients Actifs'         => 'Clients non bloqués (champ "blocked" = 0). Ce sont ceux qui peuvent théoriquement passer commande.',
+                                'Solde Moyen'            => 'Moyenne des soldes clients. Positif = nous devons au client, négatif = le client nous doit.',
+                                'Avec Véhicules'         => 'Pourcentage de clients ayant au moins un véhicule associé (utile pour personnalisation pièces auto).',
+                                'Panier Moyen'           => 'Valeur moyenne d’une commande (AOV = Average Order Value). Plus élevé = clients dépensent plus par achat.',
+                                'Taux Rétention'         => 'Pourcentage de clients ayant acheté dans les 30 derniers jours (clients "actifs" dans la segmentation RFM).',
+                                'Taux Churn'             => 'Pourcentage de clients perdus : aucun achat depuis plus de 90 jours (segment "Perdus").',
+                                'Fréquence Achat'        => 'Nombre moyen de commandes par client ayant déjà acheté au moins une fois.',
+                                'Taux Repeat'            => 'Pourcentage de clients qui ont passé plus d’une commande dans leur historique.',
+                                'Délai entre Achats'     => 'Nombre moyen de jours entre deux achats pour les clients multi-achats.',
+                                'CLV Estimé'             => 'Customer Lifetime Value : estimation de la valeur totale qu’un client moyen va générer sur sa durée de vie (approximation).',
+                                'Récence Moyenne'        => 'Nombre moyen de jours écoulés depuis le dernier achat pour les clients ayant déjà commandé.',
+                            ];
+                        @endphp
+
+                        @foreach ($kpis as $kpi)
+                            <div class="col-md-3 col-sm-6">
+                                <div class="card card-stats card-round">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div style="flex: 1;">
+                                                <p class="text-muted mb-1 small d-flex align-items-center gap-2">
+                                                    {{ $kpi['title'] }}
+                                                    <span class="info-icon text-info"
+                                                          data-bs-toggle="tooltip"
+                                                          data-bs-placement="top"
+                                                          title="{{ $kpiExplanations[$kpi['title']] ?? 'Aucune description disponible.' }}">
+                                                        <i class="fas fa-info-circle"></i>
+                                                    </span>
+                                                </p>
+                                                <h4 class="mb-0 fw-bold text-{{ $kpi['color'] }}">
+                                                    {{ $kpi['value'] }}
+                                                </h4>
+                                            </div>
+                                            <div class="avatar avatar-xl">
+                                                <div class="avatar-title rounded-circle bg-{{ $kpi['color'] }} text-white">
+                                                    <i class="fas fa-{{ $kpi['icon'] }}"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endforeach
                     </div>
 
-                    <!-- Répartition Statut -->
-                    <div class="col-md-4">
-                        <div class="card card-round">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Répartition Statut BL</h5>
-                            </div>
-                            <div class="card-body text-center">
-                                <div class="chart-container">
-                                    <canvas id="statusChart"></canvas>
-                                </div>
-                                <div class="mt-3">
-                                    @foreach($statusRepartition as $label => $count)
-                                        <span class="badge me-1 mb-1 bg-{{ $label === 'Expédié' ? 'success' : ($label === 'En cours' ? 'warning' : 'danger') }}">
-                                            {{ $label }}: {{ $count }}
+                    <!-- Répartition Villes + Top Soldes -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-8">
+                            <div class="card card-round">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+                                        Répartition Géographique (Top 10 Villes)
+                                        <span class="info-icon text-info" 
+                                              data-bs-toggle="tooltip" 
+                                              data-bs-placement="top" 
+                                              title="Nombre de clients par ville. Permet d’identifier les zones de forte concentration.">
+                                            <i class="fas fa-info-circle"></i>
                                         </span>
-                                    @endforeach
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 320px;">
+                                        <canvas id="citiesChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card card-round">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Top 5 Soldes Clients</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th>Client</th>
+                                                    <th class="text-end">Solde</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @forelse($topSolde as $client)
+                                                    <tr>
+                                                        <td>{{ $client->name }}</td>
+                                                        <td class="text-end {{ $client->solde >= 0 ? 'text-success' : 'text-danger' }}">
+                                                            {{ number_format($client->solde, 2, ',', ' ') }} €
+                                                        </td>
+                                                    </tr>
+                                                @empty
+                                                    <tr><td colspan="2" class="text-center py-4">Aucun client</td></tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Top 10 Clients -->
-                    <div class="col-lg-8">
-                        <div class="card card-round">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Top 10 Clients</h5>
+                    <!-- Conseils & Recommandations -->
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <div class="card card-round">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Conseils Stratégiques</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        @forelse($advice as $item)
+                                            <li class="list-group-item">{{ $item }}</li>
+                                        @empty
+                                            <li class="list-group-item text-muted">Aucun conseil particulier pour le moment</li>
+                                        @endforelse
+                                    </ul>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <div class="chart-container">
-                                    <canvas id="topClientsChart"></canvas>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card card-round">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Recommandations</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        @forelse($recommendations as $item)
+                                            <li class="list-group-item">{{ $item }}</li>
+                                        @empty
+                                            <li class="list-group-item text-muted">Aucune recommandation pour le moment</li>
+                                        @endforelse
+                                    </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Comparatif 3 mois -->
-                    <div class="col-lg-4">
-                        <div class="card card-round">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Comparatif 3 mois</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart-container">
-                                    <canvas id="monthsCaChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-
             </div>
-        </div>
 
+            <!-- Footer -->
             <footer class="footer">
                 <div class="container-fluid d-flex justify-content-between">
                     <div class="copyright">
@@ -703,110 +613,83 @@
         </div>
     </div>
 
-    <!-- Core JS Files -->
+    <!-- Scripts -->
     <script src="{{ asset('assets/js/core/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
     <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
     <script src="{{ asset('assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
-    <script src="{{ asset('assets/js/plugin/chart.js/chart.min.js') }}"></script>
-    <script src="{{ asset('assets/js/plugin/datatables/datatables.min.js') }}"></script>
-    <script src="{{ asset('assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
-    <script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const ctx = (id) => document.getElementById(id).getContext('2d');
+    <!-- Activation des tooltips -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialisation des tooltips Bootstrap
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            [...tooltipTriggerList].forEach(el => new bootstrap.Tooltip(el, {
+                html: true,
+                boundary: 'window'
+            }));
 
-        new Chart(ctx('caNetChart'), {
-            type: 'line',
-            data: {
-                labels: Object.keys(@json($caNetByDay)),
-                datasets: [{
-                    label: 'CA Net',
-                    data: Object.values(@json($caNetByDay)),
-                    borderColor: '#28a745',
-                    backgroundColor: 'rgba(40,167,69,0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            // Charts
+            const ctx = id => document.getElementById(id)?.getContext('2d');
+            if (!ctx) return;
+
+            if (ctx('segmentsChart')) {
+                new Chart(ctx('segmentsChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['Nouveaux', 'Actifs', 'À Risque', 'Perdus'],
+                        datasets: [{
+                            data: [{{ $segments['new'] }}, {{ $segments['active'] }}, {{ $segments['at_risk'] }}, {{ $segments['lost'] }}],
+                            backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545'],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            if (ctx('typesChart')) {
+                new Chart(ctx('typesChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: {!! json_encode($types->pluck('type')->toArray()) !!},
+                        datasets: [{
+                            data: {!! json_encode($types->pluck('count')->toArray()) !!},
+                            backgroundColor: ['#6f42c1', '#fd7e14', '#20c997', '#17a2b8'],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            if (ctx('citiesChart')) {
+                new Chart(ctx('citiesChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: {!! json_encode($cities->pluck('city')->toArray()) !!},
+                        datasets: [{
+                            label: 'Nombre de clients',
+                            data: {!! json_encode($cities->pluck('count')->toArray()) !!},
+                            backgroundColor: '#1d7af3',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
         });
-
-        new Chart(ctx('returnRateChart'), {
-            type: 'line',
-            data: {
-                labels: Object.keys(@json($returnRateByDay)),
-                datasets: [{
-                    label: 'Taux (%)',
-                    data: Object.values(@json($returnRateByDay)),
-                    borderColor: '#dc3545',
-                    backgroundColor: 'rgba(220,53,69,0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { display: false } } }
-        });
-
-        new Chart(ctx('sellerChart'), {
-            type: 'bar',
-            data: {
-                labels: @json($salesBySeller->pluck('vendeur')),
-                datasets: [{
-                    label: 'CA Net',
-                    data: @json($salesBySeller->pluck('ca')),
-                    backgroundColor: '#fd7e14'
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { display: false } } }
-        });
-
-        new Chart(ctx('topClientsChart'), {
-            type: 'bar',
-            data: {
-                labels: @json($topClients->pluck('client')),
-                datasets: [{
-                    label: 'CA Net',
-                    data: @json($topClients->pluck('ca')),
-                    backgroundColor: '#1d7af3'
-                }]
-            },
-            options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } } }
-        });
-
-        new Chart(ctx('statusChart'), {
-            type: 'doughnut',
-            data: {
-                labels: @json(array_keys($statusRepartition)),
-                datasets: [{
-                    data: @json(array_values($statusRepartition)),
-                    backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#6c757d']
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { display: false } } }
-        });
-
-        new Chart(ctx('monthsCaChart'), {
-            type: 'bar',
-            data: {
-                labels: @json(array_keys($monthsCa)),
-                datasets: [{
-                    label: 'CA Net',
-                    data: @json(array_values($monthsCa)),
-                    backgroundColor: '#28a745'
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { display: false } } }
-        });
-    });
-
-
-
-
-    
-</script>
+    </script>
 </body>
 </html>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -303,4 +304,174 @@ class AnalyticsController extends Controller
             'ca' => (float) $item->ca_net
         ]);
     }
+
+
+
+
+
+
+
+
+
+
+   public function customerBehavior()
+    {
+        $now = Carbon::now();
+
+        // Stats de base
+        $totalCustomers = Customer::count();
+        $activeCustomers = Customer::where('blocked', 0)->count();
+        $avgSolde = Customer::avg('solde');
+        $withVehicles = Customer::has('vehicles')->count();
+        $topSolde = Customer::orderByDesc('solde')->take(5)->get();
+        $types = Customer::groupBy('type')->select('type', DB::raw('count(*) as count'))->get();
+
+        // Comportement clients (RFM simplifié)
+        $customersBehavior = DB::table('customers as c')
+            ->leftJoin(DB::raw("(
+                SELECT numclient, COUNT(id) as purchase_count, SUM(total_ttc) as total_spent, MAX(delivery_date) as last_purchase
+                FROM delivery_notes
+                WHERE status IN ('Expédié', 'en_cours')
+                GROUP BY numclient
+            ) as s"), 'c.code', '=', 's.numclient')
+            ->leftJoin(DB::raw("(
+                SELECT customer_id, SUM(total_ttc) as total_returns
+                FROM sales_returns
+                GROUP BY customer_id
+            ) as r"), 'c.code', '=', 'r.customer_id')
+            ->select(
+                'c.id', 'c.name', 'c.type', 'c.solde', 'c.city', 'c.blocked',
+                DB::raw('COALESCE(s.purchase_count, 0) as purchase_count'),
+                DB::raw('COALESCE(s.total_spent - COALESCE(r.total_returns, 0), 0) as total_spent'),
+                's.last_purchase'
+            )
+            ->get();
+
+        $segments = ['new' => 0, 'active' => 0, 'at_risk' => 0, 'lost' => 0];
+        foreach ($customersBehavior as $cb) {
+            if ($cb->purchase_count == 0) {
+                $segments['new']++;
+            } elseif ($cb->last_purchase && $now->diffInDays(Carbon::parse($cb->last_purchase)) <= 30) {
+                $segments['active']++;
+            } elseif ($cb->last_purchase && $now->diffInDays(Carbon::parse($cb->last_purchase)) <= 90) {
+                $segments['at_risk']++;
+            } else {
+                $segments['lost']++;
+            }
+        }
+
+        // KPIs avancés
+        $totalSales = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])->sum('total_ttc');
+        $totalPurchases = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])->count();
+        $uniqueCustomersWithPurchases = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])->distinct('numclient')->count('numclient');
+        $avgOrderValue = $totalPurchases > 0 ? $totalSales / $totalPurchases : 0; // AOV
+
+        $churnRate = $totalCustomers > 0 ? ($segments['lost'] / $totalCustomers) * 100 : 0;
+        $retentionRate = $totalCustomers > 0 ? ($segments['active'] / $totalCustomers) * 100 : 0;
+
+        // Nouveaux KPIs
+        $purchaseFrequency = $uniqueCustomersWithPurchases > 0 ? $totalPurchases / $uniqueCustomersWithPurchases : 0; // Fréquence d'achat
+
+$repeatCustomersCount = DeliveryNote::whereIn('status', ['Expédié', 'en_cours'])
+    ->select('numclient')
+    ->groupBy('numclient')
+    ->havingRaw('COUNT(*) > 1')
+    ->count();
+
+$repeatPurchaseRate = $uniqueCustomersWithPurchases > 0 
+    ? ($repeatCustomersCount / $uniqueCustomersWithPurchases) * 100 
+    : 0;
+
+        // Temps moyen entre achats (Average Time Between Purchases)
+        $avgTimeBetweenPurchases = DB::table('delivery_notes')
+            ->whereIn('status', ['Expédié', 'en_cours'])
+            ->select('numclient', DB::raw('DATEDIFF(MAX(delivery_date), MIN(delivery_date)) / (COUNT(*) - 1) as avg_days'))
+            ->groupBy('numclient')
+            ->havingRaw('COUNT(*) > 1')
+            ->avg('avg_days') ?? 0;
+
+        // Customer Lifetime Value (CLV simplifié) = AOV * Purchase Frequency * Avg Lifespan (1 / churn rate annualisé approx)
+        $avgLifespan = $churnRate > 0 ? 1 / ($churnRate / 100) : 1; // Simplifié en années
+        $clv = $avgOrderValue * $purchaseFrequency * $avgLifespan;
+
+        // Recency moyenne (jours depuis dernier achat pour clients actifs)
+        $avgRecency = $customersBehavior->where('last_purchase', '!=', null)->avg(function($cb) use ($now) {
+            return $now->diffInDays(Carbon::parse($cb->last_purchase));
+        }) ?? 0;
+
+        // Cart Abandonment Rate (si tu as une table pour carts, sinon approx via sessions ou assume 0 si pas de data)
+        // Pour exemple, assume on a une table 'carts' avec 'abandoned' flag
+        // $cartAbandonmentRate = ... ; Pour l'instant, set to 0 or calculate if possible
+
+        $cities = Customer::groupBy('city')->select('city', DB::raw('count(*) as count'))->orderByDesc('count')->take(10)->get();
+
+        // Explications KPIs (array pour vue)
+        $kpiExplanations = [
+            'totalCustomers' => "Nombre total de clients enregistrés. Indique la taille de la base clients.",
+            'activeCustomers' => "Clients non bloqués. Mesure l'activité potentielle de la base.",
+            'avgSolde' => "Solde moyen par client. Indique le niveau d'endettement ou crédit moyen.",
+            'withVehicles' => "Clients avec véhicules associés. Utile pour personnalisation (e.g., pièces auto).",
+            'segments' => "Segmentation RFM: Nouveaux (sans achat), Actifs (achat <30j), À risque (30-90j), Perdus (>90j).",
+            'avgOrderValue' => "Valeur moyenne d'une commande. Plus élevé = clients dépensent plus par achat.",
+            'churnRate' => "Taux de perte clients (% perdus). Bas = bonne rétention.",
+            'retentionRate' => "Taux de rétention (% actifs). Élevé = clients fidèles.",
+            'purchaseFrequency' => "Nombre moyen d'achats par client. Indique la fidélité.",
+            'repeatPurchaseRate' => "% de clients qui achètent plus d'une fois. Mesure la loyauté.",
+            'avgTimeBetweenPurchases' => "Temps moyen (jours) entre achats répétés. Court = engagement élevé.",
+            'clv' => "Valeur vie client estimée. Prédit le revenu futur par client.",
+            'avgRecency' => "Temps moyen depuis dernier achat. Court = clients récents et engagés.",
+            // Ajoute plus si needed
+        ];
+
+        // Conseils et recommandations avancés
+        $advice = [];
+        if ($churnRate > 20) {
+            $advice[] = "Taux de churn élevé ({$churnRate}%). Lancez des campagnes de réengagement (emails personnalisés, offres spéciales).";
+        }
+        if ($retentionRate < 50) {
+            $advice[] = "Rétention faible ({$retentionRate}%). Implémentez un programme de fidélité (points, remises).";
+        }
+        if ($withVehicles / $totalCustomers < 0.5) {
+            $advice[] = "Seulement " . round(($withVehicles / $totalCustomers) * 100, 1) . "% avec véhicules. Incitez à l'enregistrement via incentives.";
+        }
+        $proCount = $types->where('type', 'professionnel')->first()->count ?? 0;
+        $proPercent = $totalCustomers > 0 ? ($proCount / $totalCustomers) * 100 : 0;
+        if ($proPercent > 40) {
+            $advice[] = "Pros : {$proPercent}%. Développez offres B2B (prix volume, crédit).";
+        }
+        if ($cities->first() && ($cities->first()->count / $totalCustomers > 0.3)) {
+            $advice[] = "Concentration à {$cities->first()->city} (" . round(($cities->first()->count / $totalCustomers) * 100, 1) . "%). Événements locaux ou pubs ciblées.";
+        }
+        if ($purchaseFrequency < 2) {
+            $advice[] = "Fréquence d'achat faible ({$purchaseFrequency}). Encouragez upsell/cross-sell.";
+        }
+        if ($repeatPurchaseRate < 30) {
+            $advice[] = "Taux de repeat bas ({$repeatPurchaseRate}%). Améliorez post-achat (follow-up, surveys).";
+        }
+        if ($avgTimeBetweenPurchases > 60) {
+            $advice[] = "Délai entre achats long ({$avgTimeBetweenPurchases} jours). Envoyez rappels périodiques.";
+        }
+        if ($clv < 500) { // Seuil arbitraire, ajuste
+            $advice[] = "CLV bas ({$clv}€). Augmentez AOV via bundles ou premium.";
+        }
+
+        $recommendations = [
+            "Personnalisez marketing via segments RFM pour booster conversions de 20-30%.",
+            "Analysez parcours client pour réduire abandons (e.g., checkout simplifié).",
+            "Utilisez data véhicules pour recommandations ciblées, augmentant AOV de 15%.",
+            "Implémentez NPS surveys pour mesurer satisfaction et prédire churn.",
+            "Cohortes analysis: Comparez comportement par date d'acquisition.",
+            "Intégrez AI pour prédictions (e.g., next purchase timing).",
+        ];
+
+        return view('admin.customer-behavior', compact(
+            'totalCustomers', 'activeCustomers', 'avgSolde', 'withVehicles', 'topSolde', 'types',
+            'segments', 'avgOrderValue', 'churnRate', 'retentionRate', 'cities', 'advice', 'recommendations',
+            'customersBehavior', 'purchaseFrequency', 'repeatPurchaseRate', 'avgTimeBetweenPurchases',
+            'clv', 'avgRecency', 'kpiExplanations'
+        ));
+    }
 }
+
+
+    

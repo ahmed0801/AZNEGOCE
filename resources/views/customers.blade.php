@@ -614,6 +614,18 @@
                             </button>
 
 
+
+                            <!-- Après la row des KPIs -->
+
+    <a href="{{ route('customer.behavior') }}" class="btn btn-outline-danger btn-round ms-2">
+        <i class="fas fa-chart-line fa-lg me-2"></i>
+        Analyse Comportement Clients
+    </a>
+
+
+
+
+
        </h4>
 
 
@@ -1035,7 +1047,7 @@
 
 
 
-       
+
 
 
     @if ($customers->count())
