@@ -500,7 +500,7 @@ td {
 </main>
 
 <!-- === FOOTER === -->
-<footer>
+<footer class="{{ $invoice->type === 'groupée' ? 'hidden' : '' }}">
     <p><strong>{{ $company->name }}</strong> | Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
          style="height: 14px; vertical-align: middle; margin-right: 1px;"> {{ $company->phone ?? '-' }} | Email : {{ $company->email ?? '-' }}</p>
     <p>SIRET : {{ $company->matricule_fiscal }}</p>

@@ -309,15 +309,28 @@ td {
                     if ($line->sales_return_id) {
                         $return = \App\Models\SalesReturn::find($line->sales_return_id);
                         $vehicle = $return && $return->vehicle ? ' — ' . $return->vehicle->license_plate . ' (' . $return->vehicle->brand_name . ' ' . $return->vehicle->model_name . ')' : '';
+                        
+                        
+            $notes = $return && $return->notes && trim($return->notes) !== '' 
+                ? '<br><span style="font-style: italic; color: #555;">Note : ' . e($return->notes) . '</span>' 
+                : '';
+
+
                         return 'Retour N° ' . ($return ? $return->numdoc : 'Inconnu') .
                                ($return && $return->return_date ? ' — ' . \Carbon\Carbon::parse($return->return_date)->format('d/m/Y') : '') .
-                               $vehicle;
+                               $vehicle . $notes;
                     } elseif ($line->delivery_note_id) {
                         $dn = \App\Models\DeliveryNote::find($line->delivery_note_id);
                         $vehicle = $dn && $dn->vehicle ? ' — ' . $dn->vehicle->license_plate . ' (' . $dn->vehicle->brand_name . ' ' . $dn->vehicle->model_name . ')' : '';
+
+            $notes = $dn && $dn->notes && trim($dn->notes) !== '' 
+                ? '<br><span style="font-style: italic; color: #555;">Note : ' . e($dn->notes) . '</span>' 
+                : '';
+
+
                         return 'Bon de Livraison N° ' . ($dn ? $dn->numdoc : 'Inconnu') .
                                ($dn && $dn->delivery_date ? ' — ' . \Carbon\Carbon::parse($dn->delivery_date)->format('d/m/Y') : '') .
-                               $vehicle;
+                               $vehicle . $notes;
                     } else {
                         return 'Facture directe';
                     }
@@ -340,7 +353,7 @@ td {
                         border-left: 3px solid {{ str_starts_with($header, 'Retour') ? '#e57373' : '#2196f3' }};
                         border-bottom: 1px solid #ddd;
                     ">
-                       {{ $header }}
+                       {!! $header !!}
                       
                     </td>
                 </tr>

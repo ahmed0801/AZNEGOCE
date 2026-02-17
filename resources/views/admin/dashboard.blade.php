@@ -552,8 +552,8 @@
                                     <div class="card-head-row">
                                         <div class="card-title">Chiffre d’Affaires (30 derniers jours)</div>
                                         <div class="card-tools">
-                                            <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
-                                                <span class="btn-label"><i class="fa fa-download"></i></span> Exporter
+                                            <a href="/analytics" class="btn btn-label-success btn-round btn-sm me-2">
+                                                <span class="btn-label"><i class="fa fa-download"></i></span> Analytics
                                             </a>
                                         </div>
                                     </div>
@@ -621,8 +621,8 @@
                                     <div class="card-head-row card-tools-still-right">
                                         <h4 class="card-title">Top 5 Articles par Quantité Expédié</h4>
                                         <div class="card-tools">
-                                            <a href="#" class="btn btn-label-info btn-round btn-sm">
-                                                <span class="btn-label"><i class="fa fa-download"></i></span> Exporter
+                                            <a href="/articles" class="btn btn-label-info btn-round btn-sm">
+                                                <span class="btn-label"><i class="fa fa-download"></i></span> Aller a la Page Articles
                                             </a>
                                         </div>
                                     </div>
@@ -660,9 +660,10 @@
                                     <div class="card-head-row card-tools-still-right">
                                         <h4 class="card-title">Top 5 Clients par CA</h4>
                                         <div class="card-tools">
-                                            <a href="#" class="btn btn-label-info btn-round btn-sm">
-                                                <span class="btn-label"><i class="fa fa-download"></i></span> Exporter
+                                            <a href="{{ route('analytics') }}" class="btn btn-label-info btn-round btn-sm">
+                                                <span class="btn-label"><i class="fa fa-download"></i></span> Analyse Comportement Clients
                                             </a>
+                                            
                                         </div>
                                     </div>
                                     <p class="card-category">Clients avec le plus de CA (bons livrés et en cours)</p>
