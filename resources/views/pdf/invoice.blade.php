@@ -393,6 +393,31 @@ td {
                         </td>
                     </tr>
                 @endforeach
+
+                <!-- ──────────────────────────────────────────────── -->
+    <!-- AJOUT DU TOTAL PAR GROUPE (seulement si groupée) -->
+    <!-- ──────────────────────────────────────────────── -->
+    @if($invoice->type === "groupée")
+        @php
+            // Calcul du total TTC pour ce groupe uniquement
+            $groupTotalTTC = $lines->sum('total_ligne_ttc');
+        @endphp
+
+        <tr style="font-weight: bold; background-color: #f8f9fa;">
+            <td colspan="5" style="text-align: right; padding: 8px; border-top: 2px solid #ddd;">
+                Total {{ str_starts_with($header, 'Retour') ? 'retour' : 'bon de livraison' }} TTC :
+            </td>
+            <td colspan="2" style="text-align: right; padding: 8px; border-top: 2px solid #ddd; color: #1976d2;">
+                {{ number_format($groupTotalTTC, 2, ',', ' ') }} €
+            </td>
+        </tr>
+
+        <!-- Optionnel : petite ligne de séparation visuelle -->
+        <tr>
+            <td colspan="7" style="height: 8px; border: none; background: transparent;"></td>
+        </tr>
+    @endif
+    
             @endforeach
 
             @if($invoice->lines->isEmpty())

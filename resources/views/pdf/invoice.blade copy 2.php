@@ -4,39 +4,80 @@
 <meta charset="UTF-8">
 <title>Facture #{{ $invoice->numdoc }}</title>
 <style>
-@page { margin: 20mm 15mm; }
+@page { 
+    margin: 8mm 10mm 4mm 10mm; /* on réduit un peu le haut et le bas */
+}
 body {
     font-family: 'DejaVu Sans', Arial, sans-serif;
     color: #2c3e50;
-    font-size: 12px;
+    font-size: 10px;
     margin: 0;
     padding: 0;
 }
 
-/* === HEADER === */
-header {
-    background: linear-gradient(135deg, #007bff, #0056b3);
-    color: white;
-    padding: 15px 25px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 4px solid #004a99;
+/* === HEADER AVEC CADRE === */
+.header-box {
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 6px;
+    background-color: #f8fbff;
 }
-header img.logo {
-    height: 70px;
+
+.header-table {
+    width: 100%;
+    border-collapse: collapse;
 }
-header .info {
+.header-table td {
+    vertical-align: top;
+    border: none;
+    padding: 0 5px;
+}
+.header-left {
+    width: 50%;
+}
+.header-left img {
+    height: 110px; /* Logo encore plus grand */
+}
+.header-left p {
+    margin: 3px 0 0 5px;
+    font-size: 11px;
+    color: #555;
+}
+.header-left .address {
+    margin: 3px 0 0 5px;
+    font-size: 11px;
+    color: #555;
+    white-space: pre-line;
+    word-wrap: break-word;
+    max-width: 250px;
+    line-height: 1.3;
+}
+
+.header-right {
+    width: 50%;
     text-align: right;
 }
-header h1 {
-    font-size: 22px;
-    margin-bottom: 5px;
+.header-right h2 {
+    margin: 0;
+    font-size: 16px;
+    color: #0056b3;
     text-transform: uppercase;
+    font-weight: bold;
 }
-header .subtitle {
-    font-size: 13px;
-    opacity: 0.9;
+.header-right img {
+    height: 25px;
+    margin-top: 3px;
+}
+.header-right .details {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.1;
+    text-align: right;
+}
+.header-right .details strong {
+    color: #003f88;
+    font-size: 12px;
 }
 
 /* === FOOTER === */
@@ -50,13 +91,13 @@ footer {
     border-top: 2px solid #007bff;
     font-size: 10px;
     text-align: center;
-    padding: 8px 20px;
+    padding: 6px 15px;
 }
 footer p { margin: 2px 0; }
-
-/* === SECTIONS === */
-.section {
-    margin: 20px 0;
+footer .hours {
+    color: #0056b3;
+    font-size: 10px;
+    margin-top: 1px;
 }
 
 /* === TABLES === */
@@ -77,31 +118,19 @@ td {
 }
 .items-table tr:nth-child(even) { background-color: #f9f9f9; }
 
-/* === INFO CLIENT / FACTURE === */
-.info-table td {
-    border: none;
-    padding: 4px 6px;
-}
-.info-table tr:nth-child(odd) { background-color: #f6f8fb; }
-.info-table strong { color: #0056b3; }
-
 /* === TOTALS === */
 .totals-box {
-    margin-top: 15px;
+    margin-top: 4px;
     width: 280px;
     margin-left: auto;
     border: 2px solid #0056b3;
     border-radius: 6px;
-    padding: 8px 10px;
+    padding: 6px 10px;
     background-color: #f8fbff;
-}
-.totals-box table {
-    width: 100%;
-    border: none;
 }
 .totals-box td {
     border: none;
-    padding: 4px 2px;
+    padding: 2px;
 }
 .totals-box td.label {
     text-align: left;
@@ -111,128 +140,263 @@ td {
     text-align: right;
 }
 
-/* === NOTES === */
-.notes {
-    margin-top: 15px;
-    font-style: italic;
-    color: #555;
-    border-left: 3px solid #007bff;
-    padding-left: 10px;
+/* === CONDITIONS === */
+/* === CONDITIONS DE VENTE EN 2 COLONNES === */
+/* === CONDITIONS DE VENTE EN 2 COLONNES (compatible DomPDF) === */
+.conditions {
+    margin-top: 3px;
+    font-size: 8px;
+    line-height: 1.3;
+    color: #333;
+    border: 1.5px solid #007bff;
+    border-radius: 8px;
+    padding: 10px;
+    background: #f8fbff;
+    page-break-inside: avoid;
+    overflow: hidden;
 }
+
+.conditions h3 {
+    text-align: center;
+    color: #0056b3;
+    font-size: 11px;
+    margin: 0 0 2px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.columns {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.col {
+    display: table-cell;
+    width: 50%;
+    padding: 0 10px;
+    vertical-align: top;
+}
+
+.col:first-child {
+    padding-left: 0;
+    border-right: 1px dotted #007bff;
+}
+
+.col:last-child {
+    padding-right: 0;
+}
+
+.conditions ul {
+    margin: 0;
+    padding-left: 16px;
+    list-style-type: disc;
+}
+
+.conditions li {
+    margin-bottom: 4px;
+}
+
+.conditions li ul {
+    margin: 3px 0 0 0;
+    padding-left: 14px;
+    list-style-type: circle;
+}
+
+
+
+/* === ENCAISSEMENTS === */
+.enc-payment-table {
+    font-size: 10px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+}
+.enc-payment-table th {
+    background-color: #e8f5e8;
+    color: #1e7e34;
+    font-weight: bold;
+    padding: 5px;
+    border: 1px solid #28a745;
+    text-align: left;
+}
+.enc-payment-table td {
+    padding: 4px;
+    border: 1px solid #ddd;
+}
+.enc-payment-table .total-row {
+    background-color: #f0fdf0;
+    font-weight: bold;
+}
+.enc-payment-table .amount {
+    text-align: right;
+    color: #1e7e34;
+}
+
+
 </style>
 </head>
 
 <body>
-<header>
-    <img src="{{ public_path($company->logo_path) }}" alt="Logo" class="logo">
-    <h4>Facture N° : {{ $invoice->numdoc }}</h4>
-    <img src="{{ $barcode }}" alt="Code-barres" class="barcode">
-    <div class="triangle-top-right"></div>
-    <div class="triangle-bottom-left"></div>
-</header>
 
-<style>
-header {
-    text-align: center;
-    border: 3px double #007bff;
-    background-color: #f8f9fa;
-    padding: 10px 0 6px 0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    position: relative;
-    height: auto;
-}
+<!-- === HEADER === -->
+<div class="header-box">
+    <table class="header-table">
+        <tr>
+            <td class="header-left">
+                <img src="{{ public_path($company->logo_path) }}" alt="Logo">
+                <p class="address">{{ $company->address }}</p>
+                <p>Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
+         style="height: 14px; vertical-align: middle; margin-right: 1px;">  {{ $company->phone ?? '-' }}</p>
+                <p>Email : {{ $company->email ?? '-' }}</p>
+            </td>
 
-header .logo {
-    height: 70px;
-    width: auto;
-    display: block;
-    margin: 0 auto 5px auto;
-}
+            <td class="header-right">
+                <h2>Facture N° {{ $invoice->numdoc }}</h2>
+                <img src="{{ $barcode }}" alt="Code-barres">
+                <div class="details">
+                    <p><strong>Date :</strong> {{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</p>
+                    <p><strong>Client :</strong> {{ $invoice->customer->name ?? '-' }}</p>
+                    @if($invoice->customer->address)
+                    <p><strong>Adresse :</strong> {{ $invoice->customer->address ?? '-' }} , {{ $invoice->customer->address_delivery ?? '-' }}</p>
+                    @endif
+                    <!-- <p><strong>N° Client :</strong> {{ $invoice->numclient ?? '-' }}</p> -->
+                    <p><strong>Véhicule :</strong> {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}</p>
+                        
+                    @if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
+                                                   @php
+        $firstDeliveryNote = $invoice->deliveryNotes->first();
+    @endphp
+    @if($firstDeliveryNote)
+            <p><strong> Vendeur :</strong>   {{ $firstDeliveryNote->vendeur}}</p>
 
-header h4 {
-    margin: 4px 0 2px 0;
-    font-size: 14px;
-    color: #2c3e50;
-    font-weight: bold;
-}
-
-header .barcode {
-    height: 14px;
-    margin-top: 3px;
-}
-
-header .triangle-top-right,
-header .triangle-bottom-left {
-    position: absolute;
-    width: 0; height: 0; border-style: solid;
-}
-
-header .triangle-top-right {
-    top: -1px; right: -1px;
-    border-width: 0 15px 15px 0;
-    border-color: transparent #007bff transparent transparent;
-}
-
-header .triangle-bottom-left {
-    bottom: -1px; left: -1px;
-    border-width: 15px 0 0 15px;
-    border-color: transparent transparent transparent #007bff;
-}
-</style>
-
-
-<main>
-    <div class="section">
-        <table class="info-table">
-            <tr>
-                <td><strong>Client :</strong> {{ $invoice->customer->name ?? '-' }}</td>
-                <td><strong>N° Client :</strong> {{ $invoice->numclient ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td><strong>Adresse :</strong> {{ $invoice->customer->address ?? '-' }}</td>
-                <td><strong>Statut :</strong> {{ ucfirst($invoice->status) }}</td>
-            </tr>
-            <tr>
-                <td><strong>Date Facture :</strong> {{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</td>
-                <td><strong>Véhicule :</strong> {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}</td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="section">
-        <table class="items-table">
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Désignation</th>
-                    <th>Qté</th>
-                    <th>PU HT</th>
-                    <th>Remise (%)</th>
-                    <th>Total HT</th>
-                    <th>Total TTC</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($invoice->lines as $line)
-                <tr>
-                    <td>{{ $line->article_code ?? '-' }}</td>
-                    <td>{{ $line->item->name ?? $line->description ?? '-' }}</td>
-                    <td>{{ number_format($line->quantity, 0, ',', ' ') }}</td>
-                    <td>{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
-                    <td>{{ number_format($line->remise ?? 0, 2, ',', ' ') }}</td>
-                    <td>{{ number_format($line->total_ligne_ht, 2, ',', ' ') }} €</td>
-                    <td>{{ number_format($line->total_ligne_ttc, 2, ',', ' ') }} €</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    @if($invoice->notes)
-    <div class="notes">
-        <strong>Note :</strong> {{ $invoice->notes }}
-    </div>
     @endif
+    @endif
+
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- === CONTENU PRINCIPAL === -->
+<main>
+                    @if($invoice->notes )<p> Note : {{ $invoice->notes ?? '-' }}</p> @endif
+
+      
+
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Désignation</th>
+                <th>Qté</th>
+                <th>PU HT</th>
+                <th>Remise (%)</th>
+                <th>Total HT</th>
+                <th>Total TTC</th>
+            </tr>
+        </thead>
+                              <tbody>
+
+
+
+
+
+            @php
+                $groupedLines = $invoice->lines->groupBy(function ($line) {
+                    if ($line->sales_return_id) {
+                        $return = \App\Models\SalesReturn::find($line->sales_return_id);
+                        $vehicle = $return && $return->vehicle ? ' — ' . $return->vehicle->license_plate . ' (' . $return->vehicle->brand_name . ' ' . $return->vehicle->model_name . ')' : '';
+                        
+                        
+            $notes = $return && $return->notes && trim($return->notes) !== '' 
+                ? '<br><span style="font-style: italic; color: #555;">Note : ' . e($return->notes) . '</span>' 
+                : '';
+
+
+                        return 'Retour N° ' . ($return ? $return->numdoc : 'Inconnu') .
+                               ($return && $return->return_date ? ' — ' . \Carbon\Carbon::parse($return->return_date)->format('d/m/Y') : '') .
+                               $vehicle . $notes;
+                    } elseif ($line->delivery_note_id) {
+                        $dn = \App\Models\DeliveryNote::find($line->delivery_note_id);
+                        $vehicle = $dn && $dn->vehicle ? ' — ' . $dn->vehicle->license_plate . ' (' . $dn->vehicle->brand_name . ' ' . $dn->vehicle->model_name . ')' : '';
+
+            $notes = $dn && $dn->notes && trim($dn->notes) !== '' 
+                ? '<br><span style="font-style: italic; color: #555;">Note : ' . e($dn->notes) . '</span>' 
+                : '';
+
+
+                        return 'Bon de Livraison N° ' . ($dn ? $dn->numdoc : 'Inconnu') .
+                               ($dn && $dn->delivery_date ? ' — ' . \Carbon\Carbon::parse($dn->delivery_date)->format('d/m/Y') : '') .
+                               $vehicle . $notes;
+                    } else {
+                        return 'Facture directe';
+                    }
+                });
+            @endphp
+
+            @foreach($groupedLines as $header => $lines)
+                <!-- Entête discrète avec véhicule si présent -->
+
+                                                                    @if($invoice->type =="groupée")
+
+                <tr>
+                    <td colspan="7" style="
+                        background-color: {{ str_starts_with($header, 'Retour') ? '#fff5f5' : '#f0f8ff' }};
+                        color: {{ str_starts_with($header, 'Retour') ? '#c62828' : '#1976d2' }};
+                        font-weight: 600;
+                        font-size: 10px;
+                        text-align: left;
+                        padding: 4px 8px;
+                        border-left: 3px solid {{ str_starts_with($header, 'Retour') ? '#e57373' : '#2196f3' }};
+                        border-bottom: 1px solid #ddd;
+                    ">
+                       {!! $header !!}
+                      
+                    </td>
+                </tr>
+ @endif
+
+
+
+                <!-- Lignes du groupe -->
+                @foreach($lines as $line)
+                    <tr style="background-color: {{ str_starts_with($header, 'Retour') ? '#fffafa' : 'inherit' }};">
+                        <td>{{ $line->article_code ?? '-' }}</td>
+                        <td>
+                            @if(str_starts_with($header, 'Retour'))
+                                <strong style="color: #c62828; font-size: 9px;">RETOUR :</strong>
+                            @endif
+                            {{ $line->item->name ?? $line->description ?? '-' }}
+                        </td>
+                        <td style="{{ str_starts_with($header, 'Retour') ? 'color: #c62828; font-weight: bold;' : '' }}">
+                            @if(str_starts_with($header, 'Retour'))
+                                -{{ number_format(abs($line->quantity ?? 0), 0, ',', ' ') }}
+                            @else
+                                {{ number_format($line->quantity ?? 0, 0, ',', ' ') }}
+                            @endif
+                        </td>
+                        <td>{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
+                        <td>{{ number_format($line->remise ?? 0, 2, ',', ' ') }}%</td>
+                        <td style="{{ str_starts_with($header, 'Retour') ? 'color: #c62828;' : '' }}">
+                            {{ number_format($line->total_ligne_ht, 2, ',', ' ') }} €
+                        </td>
+                        <td style="{{ str_starts_with($header, 'Retour') ? 'color: #c62828;' : '' }}">
+                            {{ number_format($line->total_ligne_ttc, 2, ',', ' ') }} €
+                        </td>
+                    </tr>
+                @endforeach
+            @endforeach
+
+            @if($invoice->lines->isEmpty())
+                <tr>
+                    <td colspan="7" class="text-center text-muted">Aucune ligne</td>
+                </tr>
+            @endif
+        </tbody>
+    </table>
 
     <div class="totals-box">
         <table>
@@ -241,7 +405,7 @@ header .triangle-bottom-left {
                 <td class="amount">{{ number_format($invoice->total_ht, 2, ',', ' ') }} €</td>
             </tr>
             <tr>
-                <td class="label">TVA ({{ number_format($invoice->tva_rate, 2, ',', ' ') }}%) :</td>
+                <td class="label">TVA {{ number_format($invoice->tva_rate, 2, ',', ' ') }}% :</td>
                 <td class="amount">{{ number_format($invoice->total_ttc - $invoice->total_ht, 2, ',', ' ') }} €</td>
             </tr>
             <tr>
@@ -251,61 +415,97 @@ header .triangle-bottom-left {
         </table>
     </div>
 
+<!-- === STATUT PAIEMENT + ENCAISSEMENTS === -->
+<div style="margin-top: 10px; border: 2px solid #28a745; border-radius: 15px; padding: 4px; background-color: #f8fff8;">
 
-    <div class="conditions">
-    <h3>Conditions Générales de Vente</h3>
-    <ul>
-        <li>Aucun remboursement n’est possible après validation — seul un avoir peut être accordé.</li>
-        <li>Les retours sont acceptés sous 15 jours maximum avec la facture originale.</li>
-        <li>Pièces refusées si emballage abîmé, montage effectué ou référence erronée.</li>
-        <li>Les pièces électriques ne sont ni reprises ni échangées.</li>
-        <li>Le traitement des garanties peut nécessiter jusqu’à 3 mois selon les fournisseurs.</li>
-        <li>Pour les échanges standards, la consigne doit être identique et non endommagée.</li>
-        <li>Les commandes spéciales (≥ 24h de délai) ne sont pas reprises sauf défaut constaté.</li>
-        <li>Les commandes sont conservées 7 jours maximum au magasin.</li>
-        <li><strong style="color:#c0392b;">Aucune pièce ne sera servie sans présentation de la facture.</strong></li>
-    </ul>
+
+    @if($invoice->payments->count() > 0)
+        <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+
+            <tbody>
+                @foreach($invoice->payments as $payment)
+                    <tr>
+                        <td style="padding: 4px; border: 1px solid #ddd;">{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
+                        <td style="padding: 4px; border: 1px solid #ddd;">{{$payment->payment_mode }}</td>
+                        <td style="padding: 4px; border: 1px solid #ddd; text-align: right; font-weight: bold; color: #1e7e34;">
+                            {{ number_format(abs($payment->amount), 2, ',', ' ') }} €
+                        </td>
+                        <td style="padding: 4px; border: 1px solid #ddd;">{{ $payment->reference ?? '-' }}</td>
+                    </tr>
+                @endforeach
+                <tr style="background-color: #f0fdf0;">
+
+<td style="padding: 5px; text-align: right; font-weight: bold; color: #1e7e34;">
+                @if($invoice->paid)
+            Payée
+        @else
+            Non payé : {{ number_format($invoice->getRemainingBalanceAttribute(), 2, ',', ' ') }} €
+        @endif
+
+</td>
+                    <td style="padding: 5px; text-align: right; font-weight: bold;">Total encaissé :</td>
+                    <td style="padding: 5px; text-align: right; font-weight: bold; color: #1e7e34;">
+                        {{ number_format($invoice->payments->sum('amount'), 2, ',', ' ') }} €
+                    </td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    @else
+        <p style="margin: 0; font-style: italic; color: #6c757d;">Aucun encaissement enregistré.</p>
+    @endif
 </div>
 
-<style>
-.conditions {
-    margin-top: 20px;
-    border: 1px solid #007bff;
-    border-radius: 6px;
-    padding: 8px 12px;
-    background-color: #f9fbff;
-    font-size: 10.5px;
-    line-height: 1.4;
-    color: #333;
-}
-
-.conditions h3 {
-    text-align: center;
-    font-size: 12px;
-    color: #0056b3;
-    text-transform: uppercase;
-    margin-bottom: 5px;
-    border-bottom: 1px solid #007bff;
-    padding-bottom: 2px;
-}
-
-.conditions ul {
-    margin: 0;
-    padding-left: 15px;
-}
-
-.conditions li {
-    margin-bottom: 2px;
-}
-</style>
 
 
+
+
+
+   <!-- Remplace tout ton bloc .conditions actuel par ÇA : -->
+<div class="conditions">
+    <h3>Conditions Générales de Vente</h3>
+    
+    <div class="columns">
+        <div class="col">
+            <ul>
+                <li>En cas de désistement, aucun remboursement ne sera effectué — seul un avoir pourra être proposé.</li>
+                <li>Aucun retour ne sera accepté après <strong>15 jours</strong>.</li>
+                <li>Tout retour sera refusé si :
+                    <ul>
+                        <li>l’emballage d’origine est détérioré, marqué ou scotché / le produit présente des traces de montage.</li>
+                        <li>les pièces ne correspondent pas à la référence d’origine / des pièces sont manquantes dans l’emballage.</li>
+                    </ul>
+                </li>
+                <li>Pour un retour ou une garantie, <strong>la facture est obligatoire</strong>.</li>
+                <li>Les pièces électriques ne sont <strong>ni reprises, ni échangées</strong>.</li>
+            </ul>
+        </div>
+        
+        <div class="col">
+            <ul>
+                <li>Le traitement des garanties fournisseurs peut nécessiter <strong>2 à 3 mois</strong>.</li>
+                <li>Articles en échange standard :
+                    <ul>
+                        <li>la consigne doit être retournée dans la boîte d’origine / elle ne doit présenter aucun dommage physique (cassures, fissures, etc.)</li>
+                        <li>elle doit être <strong>identique à la pièce commandée</strong> pour remboursement.</li>
+                    </ul>
+                </li>
+                <li>Les pièces avec un délai ≥ 24h ne sont ni reprises ni échangées, sauf en cas de dysfonctionnement.</li>
+                <li>Les commandes sont disponibles <strong>7 jours</strong> au magasin avant retour fournisseur.</li>
+                <li style="color:#c0392b; font-weight:bold;">Aucune pièce ne sera servie sans présentation de la facture.</li>
+            </ul>
+        </div>
+    </div>
+</div>
 </main>
 
+<!-- === FOOTER === -->
 <footer>
-    <p><strong>{{ $company->name }}</strong> | {{ $company->address }}</p>
-    <p>MF : {{ $company->matricule_fiscal }} | Tél : {{ $company->phone }} | Email : {{ $company->email }}</p>
-    <p>RIB : {{ $company->rib ?? '-' }} | IBAN : {{ $company->iban ?? '-' }} | SWIFT : {{ $company->swift ?? '-' }}</p>
+    <p><strong>{{ $company->name }}</strong> | Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
+         style="height: 14px; vertical-align: middle; margin-right: 1px;"> {{ $company->phone ?? '-' }} | Email : {{ $company->email ?? '-' }}</p>
+    <p>SIRET : {{ $company->matricule_fiscal }}</p>
+    <p class="hours">🕒 Horaires : Lundi à Samedi de 9h à 19h — Fermé le Vendredi de 12h30 à 15h</p>
 </footer>
+
 </body>
 </html>
