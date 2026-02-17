@@ -93,6 +93,11 @@ footer {
     text-align: center;
     padding: 6px 15px;
 }
+
+.no-print {
+    display: none !important;
+}
+
 footer p { margin: 2px 0; }
 footer .hours {
     color: #0056b3;
@@ -500,8 +505,8 @@ td {
 </main>
 
 <!-- === FOOTER === -->
-<footer class="{{ $invoice->type === 'groupée' ? 'hidden' : '' }}">
-    <p><strong>{{ $company->name }}</strong> | Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
+<footer class="{{ $invoice->type === 'groupée' ? 'no-print' : '' }}">
+        <p><strong>{{ $company->name }}</strong> | Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
          style="height: 14px; vertical-align: middle; margin-right: 1px;"> {{ $company->phone ?? '-' }} | Email : {{ $company->email ?? '-' }}</p>
     <p>SIRET : {{ $company->matricule_fiscal }}</p>
     <p class="hours">🕒 Horaires : Lundi à Samedi de 9h à 19h — Fermé le Vendredi de 12h30 à 15h</p>
