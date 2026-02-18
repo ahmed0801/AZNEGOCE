@@ -678,17 +678,8 @@
 
 @endif
 
-@if($deliveryNote->invoiced)
-        <form action="{{ route('delivery_notes.mark_uninvoiced', $deliveryNote->id) }}" 
-              method="POST" 
-              class="d-inline">
-            @csrf
-            <button type="submit" class="dropdown-item text-danger">
-                <i class="fas fa-undo"></i> Marquer comme non facturé
-            </button>
-        </form>
-    @endif
-    
+
+
 
 @if($deliveryNote->status === 'expédié')
                                                  <a class="dropdown-item" href="#" data-toggle="modal" data-target="#commentModal" 
@@ -714,6 +705,16 @@
                                                     </a>
                                                 @endif
 
+                                                @if($deliveryNote->invoiced)
+        <form action="{{ route('delivery_notes.mark_uninvoiced', $deliveryNote->id) }}" 
+              method="POST" 
+              class="d-inline">
+            @csrf
+            <button type="submit" class="dropdown-item text-danger">
+                <i class="fas fa-undo"></i> Marquer comme non facturé
+            </button>
+        </form>
+    @endif
 
 
                                         </div>
