@@ -1546,6 +1546,30 @@ $request->validate($rules);
 
 
 
+
+public function markAsUninvoiced(Request $request, $id)
+{
+    $deliveryNote = DeliveryNote::findOrFail($id);
+
+    if (!$deliveryNote->invoiced) {
+        return back()->with('warning', 'Ce bon de livraison n\'est pas marqué comme facturé.');
+    }
+
+    // Option : vérifier si la facture associée existe encore / est annulable
+    // Exemple simple : on suppose qu'on peut toujours "démarquer"
+    $deliveryNote->invoiced = false;
+    $deliveryNote->save();
+
+    // Option bonus : logger l'action
+    // Activity::log("BL {$deliveryNote->numdoc} démarcé comme non facturé par " . auth()->user()->name);
+
+    return back()->with('success', 'Le bon de livraison a été marqué comme **non facturé**.');
+}
+
+
+
+
+
     
   public function editSalesNote($id)
 {

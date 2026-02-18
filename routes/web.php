@@ -407,6 +407,9 @@ Route::get('/sales/orders/search', [SalesInvoicesController::class, 'search'])->
 Route::get('/customers/behavior', [AnalyticsController::class, 'customerBehavior'])->name('customer.behavior');   // ou le middleware que tu utilises pour l'admin
 
 
+Route::post('/delivery-notes/{id}/mark-uninvoiced', [SalesInvoicesController::class, 'markAsUninvoiced'])
+    ->name('delivery_notes.mark_uninvoiced');
+
 
 // Payments reglement
 Route::get('/paymentlist', [PaymentController::class, 'index'])->name('payments.index');
