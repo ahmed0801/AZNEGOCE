@@ -580,6 +580,9 @@
  <span class="badge bg-{{ $deliveryNote->status === 'en_cours' ? 'warning' : ($deliveryNote->status === 'expédié' ? 'success' : 'danger') }}">
                                            BL {{ ucfirst($deliveryNote->status) }}
   </span>  
+
+  <span class="badge rounded-pill text-bg-secondary">Total  TTC : {{ number_format($deliveryNote->total_ttc, 2, ',', ' ') }} €</span> 
+
   <span class="badge bg-{{ $deliveryNote->status_livraison === 'non_livré' ? 'warning' : ($deliveryNote->status_livraison === 'livré' ? 'success' : 'danger') }}">
                                            {{ ucfirst($deliveryNote->status_livraison) }}
                                         </span> 

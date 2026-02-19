@@ -2,8 +2,8 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Bon de Livraison #{{ $deliveryNote->numdoc }}</title>
-    <style>
+    <title>Avoir de Vente #{{ $salesNote->numdoc }}</title>
+     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 12px; color: #333333; margin: 40px 40px 60px 40px; line-height: 1.4; }
         @page { margin: 15mm; }
@@ -26,8 +26,6 @@
         th { background-color: #e9ecef; color: #2c3e50; font-weight: bold; border-bottom: 2px solid #007bff; }
         .info-table { margin-bottom: 20px; border: 1px solid #2c3e50; }
         .info-table td { text-align: left; padding: 6px; border: none; }
-                .info-table .vehicle-row { background-color: #e3f2fd; font-style: italic; }
-
         .info-table tr:nth-child(odd) { background-color: #f8f9fa; }
         .items-table tr:nth-child(even) { background-color: #f9f9f9; }
         .totals-box { width: 300px; margin: 20px 0 0 auto; border: 2px double #2c3e50; padding: 10px; background-color: #ffffff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
@@ -41,7 +39,7 @@
     <header>
         <img src="{{ public_path($company->logo_path) }}" alt="Logo" class="logo">
         <h1>{{ $company->name }}</h1>
-        <h4>Bon de Livraison N° : {{ $deliveryNote->numdoc }}</h4>
+        <h4>Avoir de Vente N° : {{ $salesNote->numdoc }}</h4>
         <h4 class="barcode-container"><img src="{{ $barcode }}" alt="Code-barres" class="barcode"></h4>
         <div class="triangle-top-right"></div>
         <div class="triangle-bottom-left"></div>
@@ -50,30 +48,37 @@
     <main>
         <table class="info-table">
             <tr>
-                <td><strong>Client :</strong> {{ $deliveryNote->customer_name ?? '-' }}</td>
-                <td><strong>Date Livraison :</strong> {{ \Carbon\Carbon::parse($deliveryNote->delivery_date)->format('d/m/Y') }}</td>
+                <td><strong>Client :</strong> {{ $salesNote->customer->name ?? '-' }}</td>
+                <td><strong>Date Avoir :</strong> {{ \Carbon\Carbon::parse($salesNote->note_date)->format('d/m/Y') }}</td>
             </tr>
             <tr>
-                <td><strong>N° Client :</strong> {{ $deliveryNote->numclient ?? '-' }}</td>
-                <td><strong>Statut :</strong> {{ ucfirst($deliveryNote->status) }}</td>
+                <td><strong>N° Client :</strong> {{ $salesNote->customer->code ?? '-' }}</td>
+                <td><strong>Statut :</strong> {{ ucfirst($salesNote->status) }}</td>
             </tr>
             <tr>
-                <td><strong>TVA :</strong> {{ number_format($deliveryNote->tva_rate, 2, ',', ' ') }}%</td>
-                <td><strong>N° Commande :</strong> {{ $deliveryNote->salesOrder->numdoc ?? '-' }}</td>
+                <td><strong>Adresse :</strong> {{ $salesNote->customer->address ?? '-' }}</td>
+                <td><strong>Type :</strong> {{ ucfirst($salesNote->type ?? 'N/A') }}</td>
             </tr>
-                        <tr class="vehicle-row">
-                <td class="vehicle-icon"><strong>Véhicule :</strong> {{ $deliveryNote->vehicle ? ($deliveryNote->vehicle->license_plate . ' (' . $deliveryNote->vehicle->brand_name . ' ' . $deliveryNote->vehicle->model_name . ')') : '-' }}</td>
-                <td></td>
+            <tr>
+                <td><strong>TVA :</strong> {{ number_format($salesNote->tva_rate, 2, ',', ' ') }}%</td>
+                <td>
+                    @if($salesNote->sales_invoice_id)
+                        <strong>Facture :</strong> {{ $salesNote->salesInvoice->numdoc ?? 'N/A' }}
+                    @elseif($salesNote->sales_return_id)
+                        <strong>Retour :</strong> {{ $salesNote->salesReturn->numdoc ?? 'N/A' }}
+                    @else
+                        <strong>Document :</strong> N/A
+                    @endif
+                </td>
             </tr>
         </table>
-        
 
         <table class="items-table">
             <thead>
                 <tr>
                     <th>Code Article</th>
                     <th>Désignation</th>
-                    <th>Qté Livrée</th>
+                    <th>Qté</th>
                     <th>PU HT</th>
                     <th>Remise (%)</th>
                     <th>Total HT</th>
@@ -81,35 +86,33 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($deliveryNote->lines as $line)
+                @foreach ($salesNote->lines as $line)
                     <tr>
                         <td>{{ $line->article_code ?? '-' }}</td>
-                        <td>{{ $line->item->name ?? '-' }}</td>
-                        <td>{{ $line->delivered_quantity }}</td>
+                        <td>{{ $line->item->name ?? $line->description ?? '-' }}</td>
+                        <td>{{ number_format($line->quantity, 0, ',', ' ') }}</td>
                         <td>{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
-                        <td>{{ $line->remise }}%</td>
+                        <td>{{ number_format($line->remise ?? 0, 2, ',', ' ') }}%</td>
                         <td>{{ number_format($line->total_ligne_ht, 2, ',', ' ') }} €</td>
                         <td>{{ number_format($line->total_ligne_ttc, 2, ',', ' ') }} €</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
-@if($deliveryNote->notes)
-        <p><b>Note :</b> <u>{{ $deliveryNote->notes ?? '-' }}</u></p>
-@endif
+
         <div class="totals-box">
             <table>
                 <tr>
                     <td class="label">Total HT :</td>
-                    <td>{{ number_format($deliveryNote->total_ht, 2, ',', ' ') }} €</td>
+                    <td>{{ number_format($salesNote->total_ht, 2, ',', ' ') }} €</td>
                 </tr>
                 <tr>
-                    <td class="label">TVA ({{ number_format($deliveryNote->tva_rate, 2, ',', ' ') }}%) :</td>
-                    <td>{{ number_format($deliveryNote->total_ttc - $deliveryNote->total_ht, 2, ',', ' ') }} €</td>
+                    <td class="label">TVA ({{ number_format($salesNote->tva_rate, 2, ',', ' ') }}%) :</td>
+                    <td>{{ number_format($salesNote->total_ttc - $salesNote->total_ht, 2, ',', ' ') }} €</td>
                 </tr>
                 <tr>
                     <td class="label">Total TTC :</td>
-                    <td>{{ number_format($deliveryNote->total_ttc, 2, ',', ' ') }} €</td>
+                    <td>{{ number_format($salesNote->total_ttc, 2, ',', ' ') }} €</td>
                 </tr>
             </table>
         </div>
@@ -121,8 +124,8 @@
         <hr>
         <p>
             <strong>{{ $company->name }}</strong> | {{ $company->address }}<br>
-            MF : {{ $company->matricule_fiscal }} | SWIFT : {{ $company->swift }} | Tél : {{ $company->phone }}<br>
-            RIB : {{ $company->rib }} | IBAN : {{ $company->iban }} | Email : <strong>{{ $company->email }}</strong>
+            MF : {{ $company->matricule_fiscal }} | SWIFT : {{ $company->swift ?? '-' }} | Tél : {{ $company->phone }}<br>
+            RIB : {{ $company->rib ?? '-' }} | IBAN : {{ $company->iban ?? '-' }} | Email : <strong>{{ $company->email }}</strong>
         </p>
     </footer>
 </body>
