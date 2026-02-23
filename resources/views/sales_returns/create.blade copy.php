@@ -500,8 +500,7 @@
                                                     <td>{{ $line->item->name ?? '-' }}</td>
                                                     <td class="text-center">{{ $line->delivered_quantity }}</td>
                                                     <td>
-                                                        <!-- <input type="number" name="lines[{{ $line->article_code }}][returned_quantity]" class="form-control quantity-input @error("lines.{$line->article_code}.returned_quantity") is-invalid @enderror" min="0" max="{{ $maxReturnable }}" value="{{ old("lines.{$line->article_code}.returned_quantity", 0) }}" {{ old("lines.{$line->article_code}.selected") != 1 ? 'disabled' : '' }}> -->
-                                                                                                                 <input type="number" name="lines[{{ $line->article_code }}][returned_quantity]" class="form-control quantity-input @error("lines.{$line->article_code}.returned_quantity") is-invalid @enderror" min="0" max="{{ $maxReturnable }}" value="1">
+                                                        <input type="number" name="lines[{{ $line->article_code }}][returned_quantity]" class="form-control quantity-input @error("lines.{$line->article_code}.returned_quantity") is-invalid @enderror" min="0" max="{{ $maxReturnable }}" value="{{ old("lines.{$line->article_code}.returned_quantity", 0) }}" {{ old("lines.{$line->article_code}.selected") != 1 ? 'disabled' : '' }}>
                                                         @error("lines.{$line->article_code}.returned_quantity")
                                                             <span class="error">{{ $message }}</span>
                                                         @enderror

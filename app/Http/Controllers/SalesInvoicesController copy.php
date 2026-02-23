@@ -71,6 +71,27 @@ class SalesInvoicesController extends Controller
 
 
 
+    // NOUVEAU : Filtre par véhicule (lié OU dans les notes)
+    if ($request->filled('search_vehicle')) {
+        $search = trim($request->search_vehicle);
+
+        $query->where(function ($q) use ($search) {
+            // 1. Véhicule lié
+            $q->whereHas('vehicle', function ($sub) use ($search) {
+                $sub->where('license_plate', 'like', "%{$search}%")
+                    ->orWhere('brand_name', 'like', "%{$search}%")
+                    ->orWhere('model_name', 'like', "%{$search}%")
+                    ->orWhereRaw("CONCAT(brand_name, ' ', model_name) LIKE ?", ["%{$search}%"]);
+            })
+            // 2. OU dans les notes de la facture
+            ->orWhere('notes', 'like', "%{$search}%");
+        });
+    }
+
+
+
+
+
         $invoices = $query->paginate(50);
         $customers = Customer::orderBy('name')->get();
 
@@ -1427,7 +1448,7 @@ $request->validate($rules);
                 'numdoc'      => $returnNumdoc,
                 'customer_id' => $request->customer_id,
                 'return_date' => $request->note_date,
-                'invoiced'    => false,
+                'invoiced'    => true,
                 'tva_rate'    => $tvaRate,
                 'total_ht'    => 0,
                 'total_ttc'   => 0,
@@ -1521,6 +1542,30 @@ $request->validate($rules);
                 : 'Avoir enregistré comme brouillon.');
     });
 }
+
+
+
+
+
+public function markAsUninvoiced(Request $request, $id)
+{
+    $deliveryNote = DeliveryNote::findOrFail($id);
+
+    if (!$deliveryNote->invoiced) {
+        return back()->with('warning', 'Ce bon de livraison n\'est pas marqué comme facturé.');
+    }
+
+    // Option : vérifier si la facture associée existe encore / est annulable
+    // Exemple simple : on suppose qu'on peut toujours "démarquer"
+    $deliveryNote->invoiced = false;
+    $deliveryNote->save();
+
+    // Option bonus : logger l'action
+    // Activity::log("BL {$deliveryNote->numdoc} démarcé comme non facturé par " . auth()->user()->name);
+
+    return back()->with('success', 'Le bon de livraison a été marqué comme **non facturé**.');
+}
+
 
 
 
