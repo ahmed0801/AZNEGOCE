@@ -263,7 +263,7 @@ class SalesInvoicesController extends Controller
 
 
         // Puis dans le code :
-$action = $request->input('action', 'validate'); // default = validate
+$action ='validate'; // default = validate
 $status = $action === 'validate' ? 'validée' : 'brouillon';
 
 
