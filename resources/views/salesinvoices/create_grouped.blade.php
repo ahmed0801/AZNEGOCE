@@ -553,7 +553,7 @@ Si non renseignées, tous les documents non facturés seront sélectionnés.
                                     </div>
                                 </div>
                                 <div class="text-end">
-                                    <button type="submit" name="action" value="save" class="btn btn-primary px-4">✅ Enregistrer Brouillon</button>
+                                    <!-- <button type="submit" name="action" value="save" class="btn btn-primary px-4">✅ Enregistrer Brouillon</button> -->
                                     <button type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2">✔️ Valider la Facture</button>
                                     <a href="{{ route('salesinvoices.index') }}" class="btn btn-danger px-4 ms-2">Annuler</a>
                                 </div>
@@ -836,5 +836,33 @@ $('#resetFilters').on('click', function () {
 
         });
     </script>
+
+
+
+
+
+<script>
+    // Force l'envoi du champ action quand on clique sur un bouton submit
+    document.querySelectorAll('button[type="submit"][name="action"]').forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Pas de preventDefault ici, on laisse le submit normal
+            console.log('Bouton cliqué : ' + this.value); // Debug console
+        });
+    });
+
+    // Si jamais tu as un submit via JS ailleurs, force l'ajout
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Si pas de action dans formData, ajoute-le manuellement (rare)
+        if (!this.querySelector('input[name="action"]')) {
+            const hiddenAction = document.createElement('input');
+            hiddenAction.type = 'hidden';
+            hiddenAction.name = 'action';
+            hiddenAction.value = 'validate'; // ou 'save' par défaut
+            this.appendChild(hiddenAction);
+        }
+    });
+</script>
+
+
 </body>
 </html>
