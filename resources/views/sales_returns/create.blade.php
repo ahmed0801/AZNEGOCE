@@ -457,15 +457,7 @@
                                             <input type="hidden" name="customer_id" value="{{ $deliveryNote->customer->id }}">
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label>Date du retour</label>
-                                            <input type="date" name="return_date" class="form-control @error('return_date') is-invalid @enderror" value="{{ old('return_date', now()->format('Y-m-d')) }}" required>
-                                            @error('return_date')
-                                                <span class="error">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
+                                    
                                     <div class="col-md-3">
     <div class="form-group">
         <label class="fw-bold fs-5 mb-2 d-block text-primary">
@@ -491,6 +483,18 @@
         </div>
     </div>
 </div>
+
+<div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Date du retour</label>
+                                            <input type="date" name="return_date" class="form-control @error('return_date') is-invalid @enderror" value="{{ old('return_date', now()->format('Y-m-d')) }}" required>
+                                            @error('return_date')
+                                                <span class="error">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    
                                 </div>
                                 
                                 <div id="partialReturnSection" class="mt-4" style="{{ old('type', 'total') == 'total' ? 'display: none;' : '' }}">
