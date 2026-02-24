@@ -238,21 +238,42 @@ class SalesInvoicesController extends Controller
 
     public function storeGroupedInvoice(Request $request)
     {
-        $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'invoice_date' => 'required|date',
-            'documents' => 'required|array',
-            'documents.*' => 'required',
-            'notes' => 'nullable|string|max:500',
-            'action' => 'required|in:save,validate',
-            'lines' => 'required|array',
-            'lines.*.quantity' => 'required|numeric',
-            'lines.*.unit_price_ht' => 'required|numeric|min:0',
-            'lines.*.remise' => 'nullable|numeric|min:0|max:100',
+        
+
+        
+        try {
+        $validated = $request->validate([
+            'customer_id'          => 'required|exists:customers,id',
+            'invoice_date'         => 'required|date',
+            'documents'            => 'required|array|min:1',
+            'documents.*'          => 'string',
+            'notes'                => 'nullable|string|max:500',
+            'action'               => 'required|in:save,validate',
+            'tva_rate'             => 'required|numeric|min:0|max:100',  // ← ajoute required !
+            'lines'                => 'required|array|min:1',
+            'lines.*.quantity'     => 'required|numeric',  // accepte négatifs
+            'lines.*.unit_price_ht'=> 'required|numeric|min:0.01',
+            'lines.*.remise'       => 'nullable|numeric|min:0|max:100',
             'lines.*.article_code' => 'required|exists:items,code',
-            'lines.*.delivery_note_id' => 'nullable',
-            'lines.*.sales_return_id' => 'nullable',
+            'lines.*.delivery_note_id'  => 'nullable|integer|exists:delivery_notes,id',
+            'lines.*.sales_return_id'   => 'nullable|integer|exists:sales_returns,id',
         ]);
+
+        \Log::info('Validation OK', $validated);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Validation échouée', [
+            'errors' => $e->errors(),
+            'request' => $request->all(),
+        ]);
+
+        return redirect()->back()
+            ->withErrors($e->validator)
+            ->withInput();
+    }
+
+
+    
 
         return DB::transaction(function () use ($request) {
 $customer = Customer::with(['tvaGroup', 'paymentTerm'])->findOrFail($request->customer_id);
@@ -308,24 +329,28 @@ $paymentTermLabel = strtolower($customer->paymentTerm->label); // pour éviter l
 
             $totalHt = 0;
             $pivotData = [];
+            
             $deliveryNoteIds = [];
-            $salesReturnIds = [];
+$salesReturnIds = [];
 
-            foreach ($request->documents as $document) {
-                // dd($document);
-                [$type, $id] = explode('_', $document);
-                if ($type === 'delivery') {
-                $pivotData["delivery_{$id}"] = [
-                    'delivery_note_id' => $id,
-                    'sales_return_id'  => null,
-                ];
-            } else {
-                $pivotData["return_{$id}"] = [
-                    'delivery_note_id' => null,
-                    'sales_return_id'  => $id,
-                ];
-            }
-        }
+foreach ($request->documents as $document) {
+    [$type, $id] = explode('_', $document);
+    $id = (int) $id;  // sécurité : force entier
+
+    if ($type === 'delivery') {
+        $deliveryNoteIds[] = $id;  // ← AJOUT ICI
+        $pivotData["delivery_{$id}"] = [
+            'delivery_note_id' => $id,
+            'sales_return_id'  => null,
+        ];
+    } else {
+        $salesReturnIds[] = $id;   // ← AJOUT ICI
+        $pivotData["return_{$id}"] = [
+            'delivery_note_id' => null,
+            'sales_return_id'  => $id,
+        ];
+    }
+}
 
             foreach ($request->lines as $index => $line) {
                 $totalLigneHt = $line['quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);

@@ -781,7 +781,7 @@ if (filteredData.length === 0) {
 
             filteredData.forEach(item => {
                 const option = new Option(
-                    `${item.type === 'delivery' ? '' : ''} ${item.numdoc} - ${item.customer_name} (${new Date(item.order_date).toLocaleDateString()})`,
+                    `${item.type === 'delivery' ? 'BL' : 'Ret'} #${item.numdoc} - ${item.customer_name} (${new Date(item.order_date).toLocaleDateString()})`,
                     `${item.type}_${item.id}`,
                     true,
                     true
