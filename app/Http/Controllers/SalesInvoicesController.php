@@ -353,6 +353,7 @@ foreach ($request->documents as $document) {
 }
 
             foreach ($request->lines as $index => $line) {
+                $qty = (float) $line['quantity'];  // ← force float, accepte -1.00
                 $totalLigneHt = $line['quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
                 $totalLigneTtc = $totalLigneHt * (1 + $tvaRate / 100);
 
