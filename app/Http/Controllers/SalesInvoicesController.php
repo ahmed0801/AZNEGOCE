@@ -304,7 +304,7 @@ class SalesInvoicesController extends Controller
                 'customer_id' => $request->customer_id,
                 'invoice_date' => $request->invoice_date,
                 'due_date' => $dueDate,
-                'status' => 'validate',
+                'status' => 'Validée',
                 'paid' => false,
                 'total_ht' => 0,
                 'total_ttc' => 0,
