@@ -315,13 +315,17 @@ $paymentTermLabel = strtolower($customer->paymentTerm->label); // pour éviter l
                 // dd($document);
                 [$type, $id] = explode('_', $document);
                 if ($type === 'delivery') {
-                    $deliveryNoteIds[] = $id;
-                    $pivotData[$id] = ['delivery_note_id' => $id];
-                } else {
-                    $salesReturnIds[] = $id;
-                    $pivotData[$id] = ['sales_return_id' => $id];
-                }
+                $pivotData["delivery_{$id}"] = [
+                    'delivery_note_id' => $id,
+                    'sales_return_id'  => null,
+                ];
+            } else {
+                $pivotData["return_{$id}"] = [
+                    'delivery_note_id' => null,
+                    'sales_return_id'  => $id,
+                ];
             }
+        }
 
             foreach ($request->lines as $index => $line) {
                 $totalLigneHt = $line['quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
