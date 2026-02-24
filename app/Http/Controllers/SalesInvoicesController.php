@@ -263,8 +263,6 @@ class SalesInvoicesController extends Controller
 
 
         // Puis dans le code :
-$action ='validate'; // default = validate
-$status = $action === 'validate' ? 'validée' : 'brouillon';
 
 
 
@@ -275,6 +273,8 @@ $status = $action === 'validate' ? 'validée' : 'brouillon';
     }
 
     try {
+
+        $action ='validate'; 
         return DB::transaction(function () use ($request, $validated) {
             $customer = Customer::with(['tvaGroup', 'paymentTerm'])->findOrFail($request->customer_id);
             $tvaRate = (float) $request->tva_rate;  // force float
@@ -304,7 +304,7 @@ $status = $action === 'validate' ? 'validée' : 'brouillon';
                 'customer_id' => $request->customer_id,
                 'invoice_date' => $request->invoice_date,
                 'due_date' => $dueDate,
-                'status' => $request->action === 'validate' ? 'validée' : 'brouillon',
+                'status' => 'validate',
                 'paid' => false,
                 'total_ht' => 0,
                 'total_ttc' => 0,
@@ -363,8 +363,8 @@ $status = $action === 'validate' ? 'validée' : 'brouillon';
                 'total_ht' => $totalHt,
                 'total_ttc' => $totalHt * (1 + $tvaRate / 100),
             ]);
-
-            if ($request->action === 'validate') {
+$action ='validate'; 
+            if ($action === 'validate') {
                 if (!empty($deliveryNoteIds)) {
                     DeliveryNote::whereIn('id', $deliveryNoteIds)
                         ->where('invoiced', false)
