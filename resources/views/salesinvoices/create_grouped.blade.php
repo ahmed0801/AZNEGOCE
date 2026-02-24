@@ -553,8 +553,8 @@ Si non renseignées, tous les documents non facturés seront sélectionnés.
                                     </div>
                                 </div>
                                 <div class="text-end">
-                                    <!-- <button type="submit" name="action" value="save" class="btn btn-primary px-4">✅ Enregistrer Brouillon</button> -->
-                                    <button type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2">✔️ Valider la Facture</button>
+<input type="submit" name="action" value="save" class="btn btn-primary px-4" />
+<input type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2" />
                                     <a href="{{ route('salesinvoices.index') }}" class="btn btn-danger px-4 ms-2">Annuler</a>
                                 </div>
                             </form>
