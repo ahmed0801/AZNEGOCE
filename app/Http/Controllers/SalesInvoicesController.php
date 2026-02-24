@@ -242,7 +242,7 @@ class SalesInvoicesController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'invoice_date' => 'required|date',
             'documents' => 'required|array',
-            'documents.*' => 'string',
+            'documents.*' => 'required',
             'notes' => 'nullable|string|max:500',
             'action' => 'required|in:save,validate',
             'lines' => 'required|array',
