@@ -552,14 +552,11 @@ Si non renseignées, tous les documents non facturés seront sélectionnés.
                                         </div>
                                     </div>
                                 </div>
-                                
                                 <div class="text-end">
                                     <!-- <button type="submit" name="action" value="save" class="btn btn-primary px-4">✅ Enregistrer Brouillon</button> -->
                                     <button type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2">✔️ Valider la Facture</button>
-    <a href="{{ route('salesinvoices.index') }}" class="btn btn-danger px-4 ms-2">Annuler</a>
-</div>
-<input type="hidden" name="action_fallback" id="action_fallback" value="">
-
+                                    <a href="{{ route('salesinvoices.index') }}" class="btn btn-danger px-4 ms-2">Annuler</a>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -839,27 +836,5 @@ $('#resetFilters').on('click', function () {
 
         });
     </script>
-
-
-
-
-<script>
-    // Debug + force action
-    document.querySelectorAll('input[type="submit"][name="action"]').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.getElementById('action_fallback').value = this.value;
-            console.log('Action forcée : ' + this.value); // Vérifie dans console F12
-        });
-    });
-
-    // Si jamais le form est soumis sans action visible
-    document.querySelector('form').addEventListener('submit', function(e) {
-        if (!this.querySelector('input[name="action"]') && !this.querySelector('input[name="action_fallback"][value]')) {
-            console.warn('Action manquante lors du submit !');
-        }
-    });
-</script>
-
-
 </body>
 </html>

@@ -382,7 +382,7 @@ foreach ($request->documents as $document) {
         $updated = DeliveryNote::whereIn('id', $deliveryNoteIds)
             ->where('invoiced', false)
             ->where('numclient', $customer->code)
-            ->update(['invoiced' => true]);
+            ->update(['invoiced' => false]);
 
         \Log::info('BL marqués facturés', [
             'count_expected' => count($deliveryNoteIds),
