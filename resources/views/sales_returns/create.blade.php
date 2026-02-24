@@ -500,8 +500,7 @@
                                                     <td>{{ $line->item->name ?? '-' }}</td>
                                                     <td class="text-center">{{ $line->delivered_quantity }}</td>
                                                     <td>
-                                                        <!-- <input type="number" name="lines[{{ $line->article_code }}][returned_quantity]" class="form-control quantity-input @error("lines.{$line->article_code}.returned_quantity") is-invalid @enderror" min="0" max="{{ $maxReturnable }}" value="{{ old("lines.{$line->article_code}.returned_quantity", 0) }}" {{ old("lines.{$line->article_code}.selected") != 1 ? 'disabled' : '' }}> -->
-                                                                                                                 <input type="number" name="lines[{{ $line->article_code }}][returned_quantity]" class="form-control quantity-input @error("lines.{$line->article_code}.returned_quantity") is-invalid @enderror" min="0" max="{{ $maxReturnable }}" value="1">
+                                                        <input type="number" name="lines[{{ $line->article_code }}][returned_quantity]" class="form-control quantity-input @error("lines.{$line->article_code}.returned_quantity") is-invalid @enderror" min="0" max="{{ $maxReturnable }}" value="{{ old("lines.{$line->article_code}.returned_quantity", 0) }}" {{ old("lines.{$line->article_code}.selected") != 1 ? 'disabled' : '' }}>
                                                         @error("lines.{$line->article_code}.returned_quantity")
                                                             <span class="error">{{ $message }}</span>
                                                         @enderror
@@ -564,42 +563,109 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-            $('.select2').select2({ width: '100%' });
+$(document).ready(function () {
+    // Initialisation Select2
+    $('.select2').select2({ width: '100%' });
 
-            $('#returnType').on('change', function () {
-                if ($(this).val() === 'partiel') {
-                    $('#partialReturnSection').show();
-                    $('.select-line').prop('disabled', false);
-                    $('.quantity-input').each(function () {
-                        if ($(this).closest('tr').find('.select-line').is(':checked')) {
-                            $(this).prop('disabled', false);
-                        }
-                    });
-                } else {
-                    $('#partialReturnSection').hide();
-                    $('.select-line').prop('disabled', true);
-                    $('.quantity-input').prop('disabled', true);
-                }
-            });
+    // Afficher/masquer la section partielle
+    $('#returnType').on('change', function () {
+        if ($(this).val() === 'partiel') {
+            $('#partialReturnSection').slideDown(300);
+            $('.select-line').prop('disabled', false);
+            syncQuantityFields();
+        } else {
+            $('#partialReturnSection').slideUp(300);
+            $('.select-line').prop('disabled', true).prop('checked', false);
+            $('.quantity-input').prop('disabled', true).val(0);
+        }
+    });
 
-            $('.select-line').on('change', function () {
-                const quantityInput = $(this).closest('tr').find('.quantity-input');
-                quantityInput.prop('disabled', !this.checked);
-                if (!this.checked) {
-                    quantityInput.val(0);
-                }
-            });
+    // Activer/désactiver quantité quand on coche/décoche
+    $('.select-line').on('change', function () {
+        const $row = $(this).closest('tr');
+        const $qtyInput = $row.find('.quantity-input');
 
-            $('.quantity-input').on('input', function () {
-                const max = parseFloat($(this).attr('max')) || 0;
-                const value = parseFloat($(this).val()) || 0;
-                if (value > max) {
-                    $(this).val(max);
-                    alert('La quantité à retourner ne peut pas dépasser la quantité livrée restante.');
-                }
-            });
+        $qtyInput.prop('disabled', !this.checked);
+
+        if (!this.checked) {
+            $qtyInput.val(0);
+        } else if ($qtyInput.val() == 0) {
+            // Option : pré-remplir avec 1 ou la qté max restante
+            // $qtyInput.val(1); // décommente si tu veux
+        }
+    });
+
+    // Limiter la quantité saisie
+    $('.quantity-input').on('input', function () {
+        let val = parseFloat($(this).val()) || 0;
+        const max = parseFloat($(this).attr('max')) || 0;
+
+        if (val > max) {
+            val = max;
+            $(this).val(max);
+        }
+        if (val < 0) {
+            val = 0;
+            $(this).val(0);
+        }
+    });
+
+    // Validation avant soumission
+    $('form').on('submit', function (e) {
+        const returnType = $('#returnType').val();
+
+        // Si c'est un retour TOTAL → pas de contrôle sur les lignes
+        if (returnType === 'total') {
+            return true; // OK
+        }
+
+        // Retour PARTIEL → on vérifie les lignes sélectionnées
+        let hasError = false;
+        let errorMessage = '';
+
+        $('.select-line:checked').each(function () {
+            const $row = $(this).closest('tr');
+            const $qtyInput = $row.find('.quantity-input');
+            const qty = parseFloat($qtyInput.val()) || 0;
+            const article = $row.find('td:nth-child(2)').text().trim(); // code article
+
+            if (qty <= 0) {
+                hasError = true;
+                errorMessage += `• L'article ${article} est sélectionné mais quantité retournée = ${qty}\n`;
+                $qtyInput.addClass('is-invalid');
+            } else {
+                $qtyInput.removeClass('is-invalid');
+            }
         });
-    </script>
+
+        // Si aucune ligne sélectionnée → on bloque aussi (sinon retour partiel vide)
+        const selectedCount = $('.select-line:checked').length;
+        if (selectedCount === 0) {
+            hasError = true;
+            errorMessage = 'Pour un retour partiel, vous devez sélectionner au moins une ligne avec une quantité > 0.';
+        }
+
+        if (hasError) {
+            e.preventDefault();
+            alert('Erreur de validation :\n\n' + errorMessage + '\nVeuillez corriger avant de continuer.');
+            return false;
+        }
+
+        // Tout est OK → on laisse passer
+        return true;
+    });
+
+    // Fonction utilitaire pour synchroniser l'état au chargement
+    function syncQuantityFields() {
+        $('.select-line').each(function () {
+            const checked = $(this).is(':checked');
+            $(this).closest('tr').find('.quantity-input').prop('disabled', !checked);
+        });
+    }
+
+    // Appel initial
+    syncQuantityFields();
+});
+</script>
 </body>
 </html>
