@@ -353,7 +353,6 @@ foreach ($request->documents as $document) {
 }
 
             foreach ($request->lines as $index => $line) {
-                $qty = (float) $line['quantity'];  // ← force float, accepte -1.00
                 $totalLigneHt = $line['quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
                 $totalLigneTtc = $totalLigneHt * (1 + $tvaRate / 100);
 
@@ -379,17 +378,30 @@ foreach ($request->documents as $document) {
 
             if ($request->action === 'validate') {
                 if (!empty($deliveryNoteIds)) {
-                    DeliveryNote::whereIn('id', $deliveryNoteIds)
-                        ->where('invoiced', false)
-                        ->where('numclient', $customer->code)
-                        ->update(['invoiced' => true]);
-                }
-                if (!empty($salesReturnIds)) {
-                    SalesReturn::whereIn('id', $salesReturnIds)
-                        ->where('invoiced', false)
-                        ->where('customer_id', $request->customer_id)
-                        ->update(['invoiced' => true]);
-                }
+        $updated = DeliveryNote::whereIn('id', $deliveryNoteIds)
+            ->where('invoiced', false)
+            ->where('numclient', $customer->code)
+            ->update(['invoiced' => true]);
+
+        \Log::info('BL marqués facturés', [
+            'count_expected' => count($deliveryNoteIds),
+            'count_updated'  => $updated,
+            'ids'            => $deliveryNoteIds,
+        ]);
+    }
+
+    if (!empty($salesReturnIds)) {
+        $updated = SalesReturn::whereIn('id', $salesReturnIds)
+            ->where('invoiced', false)
+            ->where('customer_id', $request->customer_id)
+            ->update(['invoiced' => true]);
+
+        \Log::info('Retours marqués facturés', [
+            'count_expected' => count($salesReturnIds),
+            'count_updated'  => $updated,
+            'ids'            => $salesReturnIds,
+        ]);
+    }
 
                                                  // Update customer balance solde client
                      $totalTtc = $totalHt * (1 + $tvaRate / 100);
