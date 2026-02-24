@@ -552,11 +552,14 @@ Si non renseignées, tous les documents non facturés seront sélectionnés.
                                         </div>
                                     </div>
                                 </div>
+                                
                                 <div class="text-end">
-<input type="submit" name="action" value="save" class="btn btn-primary px-4" />
-<input type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2" />
-                                    <a href="{{ route('salesinvoices.index') }}" class="btn btn-danger px-4 ms-2">Annuler</a>
-                                </div>
+    <input type="submit" name="action" value="save" class="btn btn-primary px-4" />
+    <input type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2" />
+    <a href="{{ route('salesinvoices.index') }}" class="btn btn-danger px-4 ms-2">Annuler</a>
+</div>
+<input type="hidden" name="action_fallback" id="action_fallback" value="">
+
                             </form>
                         </div>
                     </div>
@@ -840,25 +843,19 @@ $('#resetFilters').on('click', function () {
 
 
 
-
 <script>
-    // Force l'envoi du champ action quand on clique sur un bouton submit
-    document.querySelectorAll('button[type="submit"][name="action"]').forEach(button => {
-        button.addEventListener('click', function(e) {
-            // Pas de preventDefault ici, on laisse le submit normal
-            console.log('Bouton cliqué : ' + this.value); // Debug console
+    // Debug + force action
+    document.querySelectorAll('input[type="submit"][name="action"]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('action_fallback').value = this.value;
+            console.log('Action forcée : ' + this.value); // Vérifie dans console F12
         });
     });
 
-    // Si jamais tu as un submit via JS ailleurs, force l'ajout
+    // Si jamais le form est soumis sans action visible
     document.querySelector('form').addEventListener('submit', function(e) {
-        // Si pas de action dans formData, ajoute-le manuellement (rare)
-        if (!this.querySelector('input[name="action"]')) {
-            const hiddenAction = document.createElement('input');
-            hiddenAction.type = 'hidden';
-            hiddenAction.name = 'action';
-            hiddenAction.value = 'validate'; // ou 'save' par défaut
-            this.appendChild(hiddenAction);
+        if (!this.querySelector('input[name="action"]') && !this.querySelector('input[name="action_fallback"][value]')) {
+            console.warn('Action manquante lors du submit !');
         }
     });
 </script>
