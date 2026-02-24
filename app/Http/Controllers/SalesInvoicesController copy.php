@@ -236,23 +236,219 @@ class SalesInvoicesController extends Controller
 
 
 
+
     public function storeGroupedInvoice(Request $request)
-    {
-        $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'invoice_date' => 'required|date',
-            'documents' => 'required|array',
-            'documents.*' => 'string',
-            'notes' => 'nullable|string|max:500',
-            'action' => 'required|in:save,validate',
-            'lines' => 'required|array',
-            'lines.*.quantity' => 'required|numeric',
-            'lines.*.unit_price_ht' => 'required|numeric|min:0',
-            'lines.*.remise' => 'nullable|numeric|min:0|max:100',
+{
+    // Log entrée
+    \Log::info('storeGroupedInvoice - Début', $request->all());
+
+    try {
+        $validated = $request->validate([
+            'customer_id'          => 'required|exists:customers,id',
+            'invoice_date'         => 'required|date',
+            'documents'            => 'required|array|min:1',
+            'documents.*'          => 'string',
+            'notes'                => 'nullable|string|max:500',
+            'action' => 'nullable|in:save,validate',  // plus required
+            'tva_rate'             => 'required|numeric|min:0|max:100',  // REQUIRED ajouté
+            'lines'                => 'required|array|min:1',
+            'lines.*.quantity'     => 'required|numeric',  // accepte négatifs
+            'lines.*.unit_price_ht'=> 'required|numeric|min:0.01',
+            'lines.*.remise'       => 'nullable|numeric|min:0|max:100',
             'lines.*.article_code' => 'required|exists:items,code',
-            'lines.*.delivery_note_id' => 'nullable',
-            'lines.*.sales_return_id' => 'nullable',
+            'lines.*.delivery_note_id'  => 'nullable|integer|exists:delivery_notes,id',
+            'lines.*.sales_return_id'   => 'nullable|integer|exists:sales_returns,id',
         ]);
+        \Log::info('Validation OK', $validated);
+
+
+        // Puis dans le code :
+
+
+
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Validation échouée', $e->errors());
+        return redirect()->back()->withErrors($e->errors())->withInput();
+    }
+
+    try {
+
+        $action ='validate'; 
+        return DB::transaction(function () use ($request, $validated) {
+            $customer = Customer::with(['tvaGroup', 'paymentTerm'])->findOrFail($request->customer_id);
+            $tvaRate = (float) $request->tva_rate;  // force float
+
+            if (!$customer->paymentTerm) {
+                throw new \Exception('Terme de paiement manquant pour le client ' . $customer->id);
+            }
+
+            $invoiceDate = Carbon::parse($request->invoice_date);
+            $days = $customer->paymentTerm->days ?? 0;
+            $dueDate = $invoiceDate->copy()->endOfMonth()->addDays($days);
+
+            $souche = Souche::where('type', 'facture_vente')->lockForUpdate()->first();
+            if (!$souche) {
+                throw new \Exception('Souche facture vente manquante.');
+            }
+
+            $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
+            $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
+
+            \Log::info('Création invoice', ['numdoc' => $numdoc]);
+
+            $invoice = Invoice::create([
+                'numdoc' => $numdoc,
+                'type' => 'groupée',
+                'numclient' => $customer->code ?? null,
+                'customer_id' => $request->customer_id,
+                'invoice_date' => $request->invoice_date,
+                'due_date' => $dueDate,
+                'status' => 'Validée',
+                'paid' => false,
+                'total_ht' => 0,
+                'total_ttc' => 0,
+                'tva_rate' => $tvaRate,
+                'notes' => $request->notes,
+            ]);
+
+            $totalHt = 0;
+            $pivotData = [];
+            $deliveryNoteIds = [];
+            $salesReturnIds = [];
+
+            foreach ($request->documents as $document) {
+                [$type, $id] = explode('_', $document);
+                $id = (int) $id;
+
+                if ($type === 'delivery') {
+                    $deliveryNoteIds[] = $id;
+                    $pivotData["delivery_{$id}"] = [
+                        'delivery_note_id' => $id,
+                        'sales_return_id'  => null,
+                    ];
+                } else {
+                    $salesReturnIds[] = $id;
+                    $pivotData["return_{$id}"] = [
+                        'delivery_note_id' => null,
+                        'sales_return_id'  => $id,
+                    ];
+                }
+            }
+
+            foreach ($request->lines as $index => $line) {
+                $qty = (float) $line['quantity'];
+                $unitPriceHt = (float) $line['unit_price_ht'];
+                $remise = (float) ($line['remise'] ?? 0);
+
+                $totalLigneHt = $qty * $unitPriceHt * (1 - $remise / 100);
+                $totalLigneTtc = $totalLigneHt * (1 + $tvaRate / 100);
+
+                InvoiceLine::create([
+                    'invoice_id' => $invoice->id,
+                    'delivery_note_id' => $line['delivery_note_id'] ?? null,
+                    'sales_return_id' => $line['sales_return_id'] ?? null,
+                    'article_code' => $line['article_code'],
+                    'quantity' => $qty,
+                    'unit_price_ht' => $unitPriceHt,
+                    'remise' => $remise,
+                    'total_ligne_ht' => $totalLigneHt,
+                    'total_ligne_ttc' => $totalLigneTtc,
+                ]);
+
+                $totalHt += $totalLigneHt;
+            }
+
+            $invoice->update([
+                'total_ht' => $totalHt,
+                'total_ttc' => $totalHt * (1 + $tvaRate / 100),
+            ]);
+$action ='validate'; 
+            if ($action === 'validate') {
+                if (!empty($deliveryNoteIds)) {
+                    DeliveryNote::whereIn('id', $deliveryNoteIds)
+                        ->where('invoiced', false)
+                        ->where('numclient', $customer->code)
+                        ->update(['invoiced' => true]);
+                }
+                if (!empty($salesReturnIds)) {
+                    SalesReturn::whereIn('id', $salesReturnIds)
+                        ->where('invoiced', false)
+                        ->where('customer_id', $request->customer_id)
+                        ->update(['invoiced' => true]);
+                }
+
+                // Update solde client
+                $totalTtc = $totalHt * (1 + $tvaRate / 100);
+                $customer->solde = ($customer->solde ?? 0) + $totalTtc;
+                $customer->save();
+            }
+
+            $souche->last_number += 1;
+            $souche->save();
+
+            $invoice->deliveryNotes()->sync($pivotData);
+
+            return redirect()->route('salesinvoices.index')
+                ->with('success', $request->action === 'validate'
+                    ? 'Facture groupée validée avec succès.'
+                    : 'Facture groupée enregistrée comme brouillon.');
+        });
+    } catch (\Exception $e) {
+        \Log::error('Erreur lors de la création de la facture groupée', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+        return redirect()->back()->with('error', 'Erreur lors de la création de la facture : ' . $e->getMessage());
+    }
+}
+
+
+
+
+
+
+
+
+
+    public function storeGroupedInvoice_old(Request $request)
+    {
+        
+
+        
+        try {
+        $validated = $request->validate([
+            'customer_id'          => 'required|exists:customers,id',
+            'invoice_date'         => 'required|date',
+            'documents'            => 'required|array|min:1',
+            'documents.*'          => 'string',
+            'notes'                => 'nullable|string|max:500',
+            'action'               => 'required|in:save,validate',
+            'tva_rate'             => 'required|numeric|min:0|max:100',  // ← ajoute required !
+            'lines'                => 'required|array|min:1',
+            'lines.*.quantity'     => 'required|numeric',  // accepte négatifs
+            'lines.*.unit_price_ht'=> 'required|numeric|min:0.01',
+            'lines.*.remise'       => 'nullable|numeric|min:0|max:100',
+            'lines.*.article_code' => 'required|exists:items,code',
+            'lines.*.delivery_note_id'  => 'nullable|integer|exists:delivery_notes,id',
+            'lines.*.sales_return_id'   => 'nullable|integer|exists:sales_returns,id',
+        ]);
+
+        \Log::info('Validation OK', $validated);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Validation échouée', [
+            'errors' => $e->errors(),
+            'request' => $request->all(),
+        ]);
+
+        return redirect()->back()
+            ->withErrors($e->validator)
+            ->withInput();
+    }
+
+
+    
 
         return DB::transaction(function () use ($request) {
 $customer = Customer::with(['tvaGroup', 'paymentTerm'])->findOrFail($request->customer_id);
@@ -308,24 +504,28 @@ $paymentTermLabel = strtolower($customer->paymentTerm->label); // pour éviter l
 
             $totalHt = 0;
             $pivotData = [];
+            
             $deliveryNoteIds = [];
-            $salesReturnIds = [];
+$salesReturnIds = [];
 
-            foreach ($request->documents as $document) {
-                // dd($document);
-                [$type, $id] = explode('_', $document);
-                if ($type === 'delivery') {
-                $pivotData["delivery_{$id}"] = [
-                    'delivery_note_id' => $id,
-                    'sales_return_id'  => null,
-                ];
-            } else {
-                $pivotData["return_{$id}"] = [
-                    'delivery_note_id' => null,
-                    'sales_return_id'  => $id,
-                ];
-            }
-        }
+foreach ($request->documents as $document) {
+    [$type, $id] = explode('_', $document);
+    $id = (int) $id;  // sécurité : force entier
+
+    if ($type === 'delivery') {
+        $deliveryNoteIds[] = $id;  // ← AJOUT ICI
+        $pivotData["delivery_{$id}"] = [
+            'delivery_note_id' => $id,
+            'sales_return_id'  => null,
+        ];
+    } else {
+        $salesReturnIds[] = $id;   // ← AJOUT ICI
+        $pivotData["return_{$id}"] = [
+            'delivery_note_id' => null,
+            'sales_return_id'  => $id,
+        ];
+    }
+}
 
             foreach ($request->lines as $index => $line) {
                 $totalLigneHt = $line['quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
@@ -353,17 +553,30 @@ $paymentTermLabel = strtolower($customer->paymentTerm->label); // pour éviter l
 
             if ($request->action === 'validate') {
                 if (!empty($deliveryNoteIds)) {
-                    DeliveryNote::whereIn('id', $deliveryNoteIds)
-                        ->where('invoiced', false)
-                        ->where('numclient', $customer->code)
-                        ->update(['invoiced' => true]);
-                }
-                if (!empty($salesReturnIds)) {
-                    SalesReturn::whereIn('id', $salesReturnIds)
-                        ->where('invoiced', false)
-                        ->where('customer_id', $request->customer_id)
-                        ->update(['invoiced' => true]);
-                }
+        $updated = DeliveryNote::whereIn('id', $deliveryNoteIds)
+            ->where('invoiced', false)
+            ->where('numclient', $customer->code)
+            ->update(['invoiced' => true]);
+
+        \Log::info('BL marqués facturés', [
+            'count_expected' => count($deliveryNoteIds),
+            'count_updated'  => $updated,
+            'ids'            => $deliveryNoteIds,
+        ]);
+    }
+
+    if (!empty($salesReturnIds)) {
+        $updated = SalesReturn::whereIn('id', $salesReturnIds)
+            ->where('invoiced', false)
+            ->where('customer_id', $request->customer_id)
+            ->update(['invoiced' => true]);
+
+        \Log::info('Retours marqués facturés', [
+            'count_expected' => count($salesReturnIds),
+            'count_updated'  => $updated,
+            'ids'            => $salesReturnIds,
+        ]);
+    }
 
                                                  // Update customer balance solde client
                      $totalTtc = $totalHt * (1 + $tvaRate / 100);
@@ -383,6 +596,8 @@ $paymentTermLabel = strtolower($customer->paymentTerm->label); // pour éviter l
                     : 'Facture groupée enregistrée comme brouillon.');
         });
     }
+
+
 
 
 
