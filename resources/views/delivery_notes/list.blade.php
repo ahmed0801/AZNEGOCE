@@ -435,6 +435,13 @@
 
 
 </a>
+
+
+<a href="{{ route('delivery_notes.returns.free.create') }}" class="btn btn-outline-danger btn-round ms-2">
+                            Créer Retour Libre <i class="fas fa-plus-circle ms-2"></i>
+                        </a>
+
+
                     </h4>
 
 

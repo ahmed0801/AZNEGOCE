@@ -540,6 +540,17 @@ Route::get('/salesnotes/create', [SalesInvoicesController::class, 'createSalesNo
 Route::post('/salesnotes/store', [SalesInvoicesController::class, 'storeSalesNote'])->name('salesnotes.store_sales_note');
 
 
+
+// Retour vente libre (non lié à un BL)
+Route::get('/delivery_notes/returns/free/create', [SalesReturnController::class, 'createFree'])
+    ->name('delivery_notes.returns.free.create');
+
+Route::post('/delivery_notes/returns/free/store', [SalesReturnController::class, 'storeFree'])
+    ->name('delivery_notes.returns.free.store');
+
+
+    
+
     Route::get('/salesnotes/list', [SalesInvoicesController::class, 'notesList'])->name('salesnotes.list');
     Route::get('/salesnotes/edit/{id}', [SalesInvoicesController::class, 'editSalesNote'])->name('salesnotes.edit');
     Route::put('/salesnotes/update/{id}', [SalesInvoicesController::class, 'updateSalesNote'])->name('salesnotes.update');

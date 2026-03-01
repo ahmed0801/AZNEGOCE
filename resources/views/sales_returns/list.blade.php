@@ -417,10 +417,19 @@
 
             <div class="container">
                 <div class="page-inner">
-                    <h4>📋 Liste des retours de vente :</h4>
-<div class="alert alert-primary" role="alert">
+                    <h4>📋 Liste des retours de vente :
+
+
+<a href="{{ route('delivery_notes.returns.free.create') }}" class="btn btn-outline-danger btn-round ms-2">
+                            Créer Retour Libre <i class="fas fa-plus-circle ms-2"></i>
+                        </a>
+
+
+                        </h4>
+
+<!-- <div class="alert alert-primary" role="alert">
   La création d’un retour de vente se fait à partir d’un <a href="/delivery_notes/list" class="alert-link">bon de livraison</a>, ou est générée automatiquement à partir d’un avoir.
-</div>
+</div> -->
                     @if(session('success'))
                         <div class="alert alert-success">{{ session('success') }}</div>
                     @endif
