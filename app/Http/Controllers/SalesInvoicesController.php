@@ -253,7 +253,7 @@ class SalesInvoicesController extends Controller
             'tva_rate'             => 'required|numeric|min:0|max:100',  // ← ajoute required !
             'lines'                => 'required|array|min:1',
             'lines.*.quantity'     => 'required|numeric',  // accepte négatifs
-            'lines.*.unit_price_ht'=> 'required|numeric|min:0.01',
+            'lines.*.unit_price_ht'=> 'required|numeric|min:0',
             'lines.*.remise'       => 'nullable|numeric|min:0|max:100',
             'lines.*.article_code' => 'required|exists:items,code',
             'lines.*.delivery_note_id'  => 'nullable|integer|exists:delivery_notes,id',
