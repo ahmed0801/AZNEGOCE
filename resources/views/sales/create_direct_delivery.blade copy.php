@@ -839,10 +839,11 @@
                                         </div>
                                     </div>
                                 </div>
+                                
                                 <div class="mb-3">
  <label class="form-label">Rechercher un article </label>
 <div class="input-group mb-3">
-  <input type="text" id="search_item"  class="form-control" placeholder="Par réference ou description, minimum 4 caratéres">
+  <input type="text" id="search_item"  class="form-control ps-5 pe-3 py-2 shadow-sm border border-secondary-subtle rounded-pill" placeholder="Par réference ou description, minimum 4 caratéres" style="width: 100%; max-width: 430px; transition: all 0.3s ease; background: #e1f4faff;">
   &nbsp;
   <div class="input-group-append">
             <button type="button" id="add_divers_item" class="btn btn-primary btn-sm">

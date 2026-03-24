@@ -2652,7 +2652,7 @@ $form.on('submit', function (e) {
         let engine = '';
 
         try {
-            const resp = await fetch(`https://api.apiplaqueimmatriculation.com/plaque?immatriculation=${plate}&token=TokenDemo2026B&pays=FR`);
+            const resp = await fetch(`https://api.apiplaqueimmatriculation.com/plaque?immatriculation=${plate}&token=acce455746476e1d0679a0aa1c4ae93f&pays=FR`);
             const json = await resp.json();
             if (json?.data && !json.data.erreur) {
                 brand = json.data.marque || 'INCONNUE';
