@@ -496,7 +496,7 @@
 
 
 
-        <select name="vendeur" class="form-select form-select-sm" style="width: 110px;">
+        <select name="vendeur" class="form-select form-select-sm" style="width: 100px;">
             <option value="">Vendeur (Tous)</option>
             @foreach($vendeurs as $v)
                 <option value="{{ $v }}" {{ request('vendeur') == $v ? 'selected' : '' }}>
@@ -519,13 +519,22 @@
 
 
 
-        <select name="status" class="form-select form-select-sm" style="width: 80px;">
+        <div class="col-md-1 col-sm-6">
+    <label class="form-label small fw-bold">Article</label>
+    <input type="text" name="search_article" class="form-control form-control-sm"
+           placeholder="Réf ou  Description" value="{{ request('search_article') }}">
+</div>
+
+
+
+
+        <select name="status" class="form-select form-select-sm" style="width: 75px;">
             <option value="">Statut (Tous)</option>
             <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
             <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
         </select>
 
-        <select name="paid" class="form-select form-select-sm" style="width: 85px;">
+        <select name="paid" class="form-select form-select-sm" style="width: 75px;">
             <option value="">Payé (Tous)</option>
             <option value="1" {{ request('paid') == '1' ? 'selected' : '' }}>Payé</option>
             <option value="0" {{ request('paid') == '0' ? 'selected' : '' }}>Non payé</option>

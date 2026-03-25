@@ -153,7 +153,17 @@ class SalesController extends Controller
     }
 
 
-    
+    if ($request->filled('search_article')) {
+    $search = trim($request->search_article);
+    $query->whereHas('lines', function ($q) use ($search) {
+        $q->where('article_code', 'like', "%{$search}%")
+          ->orWhereHas('item', function ($sub) use ($search) {
+              $sub->where('name', 'like', "%{$search}%");
+          });
+    });
+}
+
+
 
     
 
@@ -163,7 +173,7 @@ class SalesController extends Controller
         ->pluck('name')
         ->unique();
 
-    $sales = $query->get();
+    $sales = $query->paginate(50); // 50 par page, ultra rapide
     $customers = Customer::orderBy('name')->get();
 
     return view('sales.devislist', compact('sales', 'customers', 'vendeurs'));

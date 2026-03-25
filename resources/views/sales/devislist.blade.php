@@ -467,7 +467,7 @@
            class="form-control form-control-sm"
            placeholder="N° Devis"
            value="{{ request('numdoc') }}"
-           style="width: 90px;">
+           style="width: 87px;">
 </div>
 
 
@@ -475,7 +475,7 @@
         {{-- Vendeur --}}
         <select name="vendeur"
                 class="form-select form-select-sm"
-                style="width: 110px;">
+                style="width: 105px;">
             <option value="">Vendeur (Tous)</option>
             @foreach($vendeurs as $vendeur)
                 <option value="{{ $vendeur }}"
@@ -498,12 +498,18 @@
             </div>
         </div>
 
+        <div class="col-md-1 col-sm-6">
+    <label class="form-label small fw-bold">Article</label>
+    <input type="text" name="search_article" class="form-control form-control-sm"
+           placeholder="Réf ou Desc" value="{{ request('search_article') }}">
+</div>
+
 
 
         {{-- Statut devis --}}
         <select name="status"
                 class="form-select form-select-sm"
-                style="width: 80px;">
+                style="width: 75px;">
             <option value="">Statut</option>
             <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>
                 Brouillon
@@ -516,7 +522,7 @@
         {{-- Statut BL --}}
         <select name="delivery_status"
                 class="form-select form-select-sm"
-                style="width: 80px;">
+                style="width: 75px;">
             <option value="">BL (Tous)</option>
             <option value="en_cours" {{ request('delivery_status') == 'en_cours' ? 'selected' : '' }}>
                 En cours
@@ -553,6 +559,12 @@
         </a>
 
     </form>
+</div>
+
+
+                                                                <!-- Pagination avec conservation des filtres -->
+<div class="d-flex justify-content-center mt-3">
+    {{ $sales->appends(request()->query())->links() }}
 </div>
 
 
@@ -756,7 +768,15 @@ function addEmailField(id) {
 
 
                     @endforeach
+                    
                 </div>
+
+                <!-- Pagination avec conservation des filtres -->
+<div class="d-flex justify-content-center mt-3">
+    {{ $sales->appends(request()->query())->links() }}
+</div>
+
+
             </div>
 
             <footer class="footer">

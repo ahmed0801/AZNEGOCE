@@ -70,6 +70,24 @@ class SalesInvoicesController extends Controller
     }
 
 
+// recherche par reference
+//     if ($request->filled('search_article')) {
+//     $query->whereHas('lines', function ($q) use ($request) {
+//         $q->where('article_code', 'like', '%' . trim($request->search_article) . '%');
+//     });
+// }
+
+// réf et description
+if ($request->filled('search_article')) {
+    $search = trim($request->search_article);
+    $query->whereHas('lines', function ($q) use ($search) {
+        $q->where('article_code', 'like', "%{$search}%")
+          ->orWhereHas('item', function ($sub) use ($search) {
+              $sub->where('name', 'like', "%{$search}%");
+          });
+    });
+}
+
 
     // NOUVEAU : Filtre par véhicule (lié OU dans les notes)
     if ($request->filled('search_vehicle')) {

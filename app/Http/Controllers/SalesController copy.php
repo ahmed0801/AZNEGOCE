@@ -96,51 +96,78 @@ class SalesController extends Controller
 
 
 
-    public function devislist(Request $request)
-    {
-        $query = SalesOrder::with(['customer', 'lines.item', 'deliveryNote'])
-                ->where('numdoc', 'like', 'D%') // ✅ uniquement les devis
-                ->orderBy('updated_at', 'desc');
+   public function devislist(Request $request)
+{
+    $query = SalesOrder::with(['customer', 'lines.item', 'deliveryNote'])
+            ->where('numdoc', 'like', 'D%') // uniquement les devis
+            ->orderBy('updated_at', 'desc');
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
+    // Recherche par numéro de document (numdoc) avec LIKE
+    if ($request->filled('numdoc')) {
+        $query->where('numdoc', 'like', '%' . trim($request->numdoc) . '%');
+    }
 
-        if ($request->filled('customer_id')) {
-            $query->where('customer_id', $request->customer_id);
-        }
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
 
-        if ($request->filled('date_from')) {
-            $query->whereDate('order_date', '>=', $request->date_from);
-        }
+    if ($request->filled('customer_id')) {
+        $query->where('customer_id', $request->customer_id);
+    }
 
-         // ✅ NOUVEAU : filtre vendeur
     if ($request->filled('vendeur')) {
         $query->where('vendeur', $request->vendeur);
     }
 
+    if ($request->filled('date_from')) {
+        $query->whereDate('order_date', '>=', $request->date_from);
+    }
 
-        if ($request->filled('date_to')) {
-            $query->whereDate('order_date', '<=', $request->date_to);
-        }
+    if ($request->filled('date_to')) {
+        $query->whereDate('order_date', '<=', $request->date_to);
+    }
 
-        if ($request->filled('delivery_status')) {
-            $query->whereHas('deliveryNote', function ($q) use ($request) {
-                $q->where('status', $request->delivery_status);
-            });
-        }
+    if ($request->filled('delivery_status')) {
+        $query->whereHas('deliveryNote', function ($q) use ($request) {
+            $q->where('status', $request->delivery_status);
+        });
+    }
 
-                // On récupère aussi la liste des vendeurs uniques pour le select
+
+
+    // NOUVEAU : Filtre par véhicule (lié OU dans les notes)
+    if ($request->filled('search_vehicle')) {
+        $search = trim($request->search_vehicle);
+
+        $query->where(function ($q) use ($search) {
+            // 1. Véhicule lié
+            $q->whereHas('vehicle', function ($sub) use ($search) {
+                $sub->where('license_plate', 'like', "%{$search}%")
+                    ->orWhere('brand_name', 'like', "%{$search}%")
+                    ->orWhere('model_name', 'like', "%{$search}%")
+                    ->orWhereRaw("CONCAT(brand_name, ' ', model_name) LIKE ?", ["%{$search}%"]);
+            })
+            // 2. OU recherche dans les notes du devis
+            ->orWhere('notes', 'like', "%{$search}%");
+        });
+    }
+
+
+    
+
+    
+
+    // Récupération des données pour les filtres
     $vendeurs = User::where('role', 'vendeur')
         ->orderBy('name')
         ->pluck('name')
         ->unique();
 
-        $sales = $query->get();
-        $customers = Customer::orderBy('name')->get();
+    $sales = $query->get();
+    $customers = Customer::orderBy('name')->get();
 
-        return view('sales.devislist', compact('sales', 'customers','vendeurs'));
-    }
+    return view('sales.devislist', compact('sales', 'customers', 'vendeurs'));
+}
 
 
 
@@ -2009,6 +2036,75 @@ public function exportSingle($id)
 
         \Log::error('Failed to find unique numdoc after retries', ['last_numdoc' => $numdoc, 'retries' => $maxRetries]);
         throw new \Exception('Impossible de générer un numéro de document unique après plusieurs tentatives.');
+    });
+}
+
+
+
+
+
+
+
+
+
+
+public function convertDevisToCommande(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:validée,brouillon', // tu peux autoriser les deux ou forcer 'validée'
+    ]);
+
+    return DB::transaction(function () use ($request, $id) {
+        $order = SalesOrder::with('customer.tvaGroup')->findOrFail($id);
+
+        // Sécurité : on ne convertit que les devis (ou brouillon si tu veux)
+        if (!in_array($order->status, ['Devis', 'brouillon'])) {
+            throw new \Exception('Seuls les devis peuvent être convertis en commande vente.');
+        }
+
+        $newStatus = $request->status; // 'validée' ou 'brouillon'
+
+        $maxRetries = 5;
+        $retryCount = 0;
+
+        while ($retryCount < $maxRetries) {
+            // On prend la souche des commandes vente
+            $souche = Souche::where('type', 'commande_vente')->lockForUpdate()->first();
+
+            if (!$souche) {
+                throw new \Exception('Souche commande vente manquante dans la base.');
+            }
+
+            $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
+            $newNumdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
+
+            // Vérifier l'unicité du nouveau numéro
+            if (!SalesOrder::where('numdoc', $newNumdoc)->exists()) {
+                // Tout est bon → on met à jour le devis
+                $order->update([
+                    'numdoc'  => $newNumdoc,
+                    'status'  => $newStatus,
+                ]);
+
+                // Incrémenter la souche
+                $souche->increment('last_number');
+
+                \Log::info('Devis converti en commande', [
+                    'old_numdoc' => $order->getOriginal('numdoc'),
+                    'new_numdoc' => $newNumdoc,
+                    'order_id'   => $order->id,
+                ]);
+
+                return redirect()->route('sales.list')
+                    ->with('success', "Devis {$order->getOriginal('numdoc')} converti en commande vente n° {$newNumdoc}");
+            }
+
+            // En cas de collision (très rare), on retente avec le numéro suivant
+            $souche->increment('last_number');
+            $retryCount++;
+        }
+
+        throw new \Exception('Impossible de générer un numéro de commande unique après plusieurs tentatives.');
     });
 }
 
