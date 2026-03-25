@@ -81,12 +81,10 @@ class SalesController extends Controller
         ->pluck('name')
         ->unique();
 
-        $sales = $query->get();
+            $sales = $query->paginate(50); // 50 par page, ultra rapide
         $customers = Customer::orderBy('name')->get();
 
 
-        $sales = $query->get();
-        $customers = Customer::orderBy('name')->get();
 
         return view('sales.list', compact('sales', 'customers','vendeurs'));
     }
