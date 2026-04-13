@@ -441,6 +441,8 @@ Route::post('/salesinvoices/{id}/send-order-ready',
 
     Route::post('/salesorder/{id}/send-email', [SalesInvoicesController::class, 'sendEmailorder'])->name('salesorder.sendEmail');
 
+    Route::post('/salesorderwithoutref/{id}/send-email', [SalesInvoicesController::class, 'sendEmailorderwithoutref'])->name('salesorder.sendEmailwithoutref');
+
 
 
 

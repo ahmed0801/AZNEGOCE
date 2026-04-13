@@ -467,7 +467,7 @@
            class="form-control form-control-sm"
            placeholder="N° Devis"
            value="{{ request('numdoc') }}"
-           style="width: 100px;">
+           style="width: 87px;">
 </div>
 
 
@@ -475,7 +475,7 @@
         {{-- Vendeur --}}
         <select name="vendeur"
                 class="form-select form-select-sm"
-                style="width: 110px;">
+                style="width: 105px;">
             <option value="">Vendeur (Tous)</option>
             @foreach($vendeurs as $vendeur)
                 <option value="{{ $vendeur }}"
@@ -485,10 +485,31 @@
             @endforeach
         </select>
 
+
+
+
+        <!-- Véhicule (nouveau) -->
+        <div class="col-md-1 col-sm-6">
+            <label class="form-label small fw-bold">Véhicule</label>
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="fas fa-car"></i></span>
+                <input type="text" name="search_vehicle" class="form-control"
+                       placeholder="Immat/Marque..." value="{{ request('search_vehicle') }}">
+            </div>
+        </div>
+
+        <div class="col-md-1 col-sm-6">
+    <label class="form-label small fw-bold">Article</label>
+    <input type="text" name="search_article" class="form-control form-control-sm"
+           placeholder="Réf ou Desc" value="{{ request('search_article') }}">
+</div>
+
+
+
         {{-- Statut devis --}}
         <select name="status"
                 class="form-select form-select-sm"
-                style="width: 80px;">
+                style="width: 75px;">
             <option value="">Statut</option>
             <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>
                 Brouillon
@@ -501,7 +522,7 @@
         {{-- Statut BL --}}
         <select name="delivery_status"
                 class="form-select form-select-sm"
-                style="width: 80px;">
+                style="width: 75px;">
             <option value="">BL (Tous)</option>
             <option value="en_cours" {{ request('delivery_status') == 'en_cours' ? 'selected' : '' }}>
                 En cours
@@ -515,7 +536,7 @@
         <input type="date"
                name="date_from"
                class="form-control form-control-sm"
-               style="width: 97px;"
+               style="width: 93px;"
                value="{{ request('date_from') }}">
 
         <span class="mx-0">à</span>
@@ -523,7 +544,7 @@
         <input type="date"
                name="date_to"
                class="form-control form-control-sm"
-               style="width: 97px;"
+               style="width: 93px;"
                value="{{ request('date_to') }}">
 
         {{-- Boutons --}}
@@ -538,6 +559,12 @@
         </a>
 
     </form>
+</div>
+
+
+                                                                <!-- Pagination avec conservation des filtres -->
+<div class="d-flex justify-content-center mt-3">
+    {{ $sales->appends(request()->query())->links() }}
 </div>
 
 
@@ -604,6 +631,15 @@
                                             <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
                                         </button>
                                         <div class="dropdown-menu">
+
+
+
+
+
+                                         <a class="dropdown-item" href="#" data-toggle="modal" data-target="#sendEmailModal{{ $order->id }}">
+    <i class="fas fa-envelope"></i> Envoyer par mail
+</a>
+
 
                                         @if($order->status === 'Devis' || $order->status === 'brouillon')
     <form action="{{ route('sales.convert-devis', $order->id) }}" 
@@ -675,8 +711,72 @@
                                 </div>
                             </div>
                         </div>
+
+
+
+                        
+<!-- Modal Send Email -->
+<div class="modal fade" id="sendEmailModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="{{ route('salesorder.sendEmail', $order->id) }}" method="POST">
+        @csrf
+        <div class="modal-header">
+          <h5 class="modal-title">📧 Envoyer le Document N° :  {{ $order->numdoc }}</h5>
+          <button type="button" class="btn-close" data-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Email principal -->
+          <div class="form-group mb-2">
+            <label>Email client</label>
+            <input type="email" name="emails[]" class="form-control" value="{{ $order->customer->email ?? '' }}" required>
+          </div>
+
+          <!-- Autres destinataires -->
+          <div id="extraEmails{{ $order->id }}"></div>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addEmailField({{ $order->id }})">
+            + Ajouter un autre destinataire
+          </button>
+
+          <!-- Message -->
+          <div class="form-group mt-3">
+            <label>Message</label>
+            <textarea name="message" class="form-control" rows="4">{{ \App\Models\EmailMessage::first()->messagefacturevente ?? 'Veuillez trouver ci-joint votre Devis.' }}</textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Envoyer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function addEmailField(id) {
+    let container = document.getElementById('extraEmails' + id);
+    let input = document.createElement('input');
+    input.type = 'email';
+    input.name = 'emails[]';
+    input.placeholder = 'Autre email';
+    input.classList.add('form-control','mt-2');
+    container.appendChild(input);
+}
+</script>
+<!-- end mail  -->
+
+
+
                     @endforeach
+                    
                 </div>
+
+                <!-- Pagination avec conservation des filtres -->
+<div class="d-flex justify-content-center mt-3">
+    {{ $sales->appends(request()->query())->links() }}
+</div>
+
+
             </div>
 
             <footer class="footer">
