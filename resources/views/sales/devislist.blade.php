@@ -578,7 +578,7 @@
                                         <span class="text-muted small">({{ \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') }})</span>
 
                                                                               
-<span class="badge badge-secondary ml-1">
+<span class="badge badge-secondary ml-1" style="font-size: 0.75em;">
         &#128338; créé le {{ $order->created_at->format('d/m/Y H:i') }}
     </span>
 

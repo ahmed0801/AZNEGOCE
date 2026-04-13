@@ -583,7 +583,7 @@
                                         (&#x1F482;{{ $deliveryNote->numclient }} – {{ $deliveryNote->customer->name?? 'Client inconnu'}} )
                                         <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($deliveryNote->delivery_date)->format('d/m/Y') }}</span>
                                         
-<span class="badge badge-secondary ml-1">
+<span class="badge badge-secondary ml-1" style="font-size: 0.75em;">
         &#128338; créé le {{ $deliveryNote->created_at->format('d/m/Y H:i') }}
     </span>
                                     </h6>

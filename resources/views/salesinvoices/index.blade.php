@@ -586,9 +586,9 @@
     <i class="fas fa-brain me-1"></i> Smart View
 </button>
 
-<span class="badge badge-secondary ml-1">
-        &#128338; Créée le {{ $invoice->created_at->format('d/m/Y H:i') }}
-    </span>
+<span class="badge badge-secondary ml-1" style="font-size: 0.75em;">
+    &#128338; Créée le {{ $invoice->created_at->format('d/m/Y H:i') }}
+</span>
 
                                         
                                         </h6>
