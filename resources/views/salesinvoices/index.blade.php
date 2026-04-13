@@ -586,6 +586,10 @@
     <i class="fas fa-brain me-1"></i> Smart View
 </button>
 
+<span class="badge badge-secondary ml-1">
+        &#128338; Créée le {{ $invoice->created_at->format('d/m/Y H:i') }}
+    </span>
+
                                         
                                         </h6>
                                         @if($invoice->status === 'brouillon')
@@ -613,7 +617,7 @@
 
     @endif
                                                 @endif
-                                                 <span class="text-muted small"> Créée le <b> {{ $invoice->created_at->format('Y-m-d H:i') }} </b></span>
+                                                 <!-- <span class="text-muted small"> Créée le <b> {{ $invoice->created_at->format('Y-m-d H:i') }} </b></span> -->
 
 
                                                                                         @if($invoice->due_date != $invoice->invoice_date)

@@ -576,6 +576,12 @@
                                         <strong>Devis N° : {{ $order->numdoc }}</strong> 
                                         ( {{ $order->numclient }} – {{ $order->customer->name }} )
                                         <span class="text-muted small">({{ \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') }})</span>
+
+                                                                              
+<span class="badge badge-secondary ml-1">
+        &#128338; créé le {{ $order->created_at->format('d/m/Y H:i') }}
+    </span>
+
                                     </h6>
                                     @if($order->status === 'brouillon')
                                         <span class="badge bg-secondary">{{ ucfirst($order->status) }}</span>

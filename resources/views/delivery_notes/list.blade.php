@@ -582,6 +582,10 @@
                                         <strong>BL N° : {{ $deliveryNote->numdoc }}</strong>
                                         (&#x1F482;{{ $deliveryNote->numclient }} – {{ $deliveryNote->customer->name?? 'Client inconnu'}} )
                                         <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($deliveryNote->delivery_date)->format('d/m/Y') }}</span>
+                                        
+<span class="badge badge-secondary ml-1">
+        &#128338; créé le {{ $deliveryNote->created_at->format('d/m/Y H:i') }}
+    </span>
                                     </h6>
      
  <span class="badge bg-{{ $deliveryNote->status === 'en_cours' ? 'warning' : ($deliveryNote->status === 'expédié' ? 'success' : 'danger') }}">
