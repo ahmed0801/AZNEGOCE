@@ -844,6 +844,13 @@
  <label class="form-label">Rechercher un article </label>
 <div class="input-group mb-3">
   <input type="text" id="search_item"  class="form-control ps-5 pe-3 py-2 shadow-sm border border-secondary-subtle rounded-pill" placeholder="Par réference ou description, minimum 4 caratéres" style="width: 100%; max-width: 430px; transition: all 0.3s ease; background: #e1f4faff;">
+  
+  <!-- NOUVEAU : filtre fournisseur/marque (caché par défaut) -->
+  <select id="filter_supplier_brand" class="form-control form-control-sm" 
+          style="display:none; max-width: 160px; font-size: 0.82rem; background: #fff8e1; border-left: 3px solid #ffc107;">
+    <option value="">🔍 Fourn./Marque</option>
+  </select>
+
   &nbsp;
   <div class="input-group-append">
             <button type="button" id="add_divers_item" class="btn btn-primary btn-sm">
@@ -1444,110 +1451,119 @@ $vehicleSelect.prop('disabled', false).removeClass('vehicle-empty');
                 updateHistoryButton();
             });
 
+            
+            
             let searchTimeout;
-            $('#search_item').on('input', function () {
-                clearTimeout(searchTimeout);
-                let query = $(this).val();
-                if (query.length > 3) {
-                    searchTimeout = setTimeout(() => {
-                    $.ajax({
-                        url: '{{ route("sales.items.search") }}',
-                        method: 'GET',
-                        data: { query: query },
-                        success: function (data) {
-                            let results = $('#search_results').empty();
-                            if (data.length === 0) {
-                                results.append('<div class="p-2 text-gray-500">Aucun article trouvé.</div>');
-                            } else {
-                                data.forEach(item => {
-                                    results.append(`
-                                        <div class="p-2 border-b cursor-pointer hover:bg-gray-100"
-                                             data-code="${item.code}"
-                                             data-name="${item.name}"
-                                             data-price="${item.sale_price}"
-                                             data-cost-price="${item.cost_price}"
-                                             data-stock="${item.stock_quantity || 0}"
-                                             data-location="${item.location || ''}"
-                                             data-discount-rate="${item.discount_rate || 20}"
-     data-discount-rate-jobber="${item.discount_rate_jobber || 0}"
-     data-discount-rate-professionnel="${item.discount_rate_professionnel || 0}"
-     
-                                             data-is-active="${item.is_active}"
-                                             data-supplier-id="${item.supplier_id || ''}">
-                                            <span class="badge rounded-pill text-bg-light"><b> ${item.code}</b>
-                                             
-                                            <button class="btn btn-xs btn-outline-secondary copy-code px-1 py-0"
-                                                data-code="${item.code}"
-                                                title="Copier la référence">
+$('#search_item').on('input', function () {
+    clearTimeout(searchTimeout);
+    let query = $(this).val();
+
+    if (query.length > 3) {
+        // Afficher le filtre
+        $('#filter_supplier_brand').fadeIn(200);
+
+        searchTimeout = setTimeout(() => {
+            let filterVal = $('#filter_supplier_brand').val();
+
+            $.ajax({
+                url: '{{ route("sales.items.search") }}',
+                method: 'GET',
+                data: { query: query, supplier_brand: filterVal },
+                success: function (data) {
+                    // Mettre à jour les options du filtre (sans perdre la sélection)
+                    let currentFilter = $('#filter_supplier_brand').val();
+                    let existingOptions = new Set();
+                    $('#filter_supplier_brand option').each(function () {
+                        existingOptions.add($(this).val());
+                    });
+
+                    data.forEach(item => {
+                        let supplier = item.supplier || '';
+                        let brand = item.brand || '';
+                        [supplier, brand].forEach(val => {
+                            if (val && !existingOptions.has(val)) {
+                                $('#filter_supplier_brand').append(
+                                    `<option value="${val}">🏷 ${val}</option>`
+                                );
+                                existingOptions.add(val);
+                            }
+                        });
+                    });
+
+                    // Restaurer la sélection
+                    $('#filter_supplier_brand').val(currentFilter);
+
+                    // Filtrer les résultats affichés
+                    let filteredData = filterVal
+                        ? data.filter(item => item.supplier === filterVal || item.brand === filterVal)
+                        : data;
+
+                    let results = $('#search_results').empty();
+                    if (filteredData.length === 0) {
+                        results.append('<div class="p-2 text-gray-500">Aucun article trouvé.</div>');
+                    } else {
+                        filteredData.forEach(item => {
+                            results.append(`
+                                <div class="p-2 border-b cursor-pointer hover:bg-gray-100"
+                                     data-code="${item.code}"
+                                     data-name="${item.name}"
+                                     data-price="${item.sale_price}"
+                                     data-cost-price="${item.cost_price}"
+                                     data-stock="${item.stock_quantity || 0}"
+                                     data-location="${item.location || ''}"
+                                     data-discount-rate="${item.discount_rate || 20}"
+                                     data-discount-rate-jobber="${item.discount_rate_jobber || 0}"
+                                     data-discount-rate-professionnel="${item.discount_rate_professionnel || 0}"
+                                     data-is-active="${item.is_active}"
+                                     data-supplier-id="${item.supplier_id || ''}">
+                                    <span class="badge rounded-pill text-bg-light"><b>${item.code}</b>
+                                        <button class="btn btn-xs btn-outline-secondary copy-code px-1 py-0"
+                                            data-code="${item.code}" title="Copier la référence">
                                             <i class="fas fa-copy"></i>
                                         </button>
-                                        </span>
-                                         	&#8660;  ${item.name} : ${item.sale_price} € HT
+                                    </span>
+                                    &#8660; ${item.name} : ${item.sale_price} € HT
+                                    ${item.stock_quantity > 0
+                                        ? `<br><button class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap" style="font-size: 0.75rem;" data-item='${JSON.stringify(item)}'><i class="fas fa-eye me-1"></i> Détails Article</button> 🟢 ${item.stock_quantity} En Stock`
+                                        : `<br><button class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap" style="font-size: 0.75rem;" data-item='${JSON.stringify(item)}'><i class="fas fa-eye me-1"></i> Détails Article</button> 🔴 Disponible auprès de <span class="badge text-bg-secondary">${item.supplier}</span> au prix de <span class="badge text-bg-success">${item.cost_price} € HT</span>`
+                                    }
+                                </div>
+                                <hr class="my-1">
+                            `);
+                        });
 
-
-
-
-                                                ${item.stock_quantity> 0
-? `<br>                                             <button
-    class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap"
-    style="font-size: 0.75rem;"
-    data-item='${JSON.stringify(item)}'
->
-    <i class="fas fa-eye me-1"></i> Détails Article
-</button>
- 🟢 ${item.stock_quantity} En Stock`
-: `<br>                                             <button
-    class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap"
-    style="font-size: 0.75rem;"
-    data-item='${JSON.stringify(item)}'
->
-    <i class="fas fa-eye me-1"></i> Détails Article
-</button>
- 🔴 Disponible auprès de <span class="badge text-bg-secondary"> ${item.supplier} </span>  au prix de <span class="badge text-bg-success"> ${item.cost_price}  € HT </span>` }
-
-
-
-                                    
-                                        </div>
-                                                <hr class="my-1">
-
-                                    `);
-                                });
-
-
-
-                                // === Gestion du bouton "Copier" ===
+                        // Rebind copie
                         $('.copy-code').off('click').on('click', function (e) {
-                            e.stopPropagation(); // Empêche la sélection de l'article
+                            e.stopPropagation();
                             let code = $(this).data('code');
                             navigator.clipboard.writeText(code).then(() => {
                                 let btn = $(this);
                                 let originalHtml = btn.html();
                                 btn.html('<i class="fas fa-check text-success"></i>').prop('disabled', true);
-                                setTimeout(() => {
-                                    btn.html(originalHtml).prop('disabled', false);
-                                }, 1000);
-                            }).catch(err => {
-                                alert('Erreur copie : ' + err);
+                                setTimeout(() => btn.html(originalHtml).prop('disabled', false), 1000);
                             });
                         });
-
-
-                        
-
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.error('AJAX Error:', status, error, xhr.responseText);
-                            $('#search_results').empty().append('<div class="p-2 text-red-500">Erreur lors de la recherche.</div>');
-                        }
-                    });
-                            }, 300); // délai 300ms
-
-                } else {
-                    $('#search_results').empty();
+                    }
                 }
             });
+        }, 300);
+
+    } else {
+        // Cacher et réinitialiser le filtre si recherche trop courte
+        $('#filter_supplier_brand').fadeOut(150).val('').find('option:not(:first)').remove();
+        $('#search_results').empty();
+    }
+});
+
+// Relancer la recherche quand on change le filtre
+$('#filter_supplier_brand').on('change', function () {
+    $('#search_item').trigger('input');
+});
+
+
+
+
+
 
 
 
