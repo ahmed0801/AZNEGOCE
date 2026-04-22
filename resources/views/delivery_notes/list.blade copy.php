@@ -435,6 +435,13 @@
 
 
 </a>
+
+
+<a href="{{ route('delivery_notes.returns.free.create') }}" class="btn btn-outline-danger btn-round ms-2">
+                            Créer Retour Libre <i class="fas fa-plus-circle ms-2"></i>
+                        </a>
+
+
                     </h4>
 
 
@@ -575,11 +582,18 @@
                                         <strong>BL N° : {{ $deliveryNote->numdoc }}</strong>
                                         (&#x1F482;{{ $deliveryNote->numclient }} – {{ $deliveryNote->customer->name?? 'Client inconnu'}} )
                                         <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($deliveryNote->delivery_date)->format('d/m/Y') }}</span>
+                                        
+<span class="badge badge-secondary ml-1" style="font-size: 0.75em;">
+        &#128338; créé le {{ $deliveryNote->created_at->format('d/m/Y H:i') }}
+    </span>
                                     </h6>
      
  <span class="badge bg-{{ $deliveryNote->status === 'en_cours' ? 'warning' : ($deliveryNote->status === 'expédié' ? 'success' : 'danger') }}">
                                            BL {{ ucfirst($deliveryNote->status) }}
   </span>  
+
+  <span class="badge rounded-pill text-bg-secondary">Total  TTC : {{ number_format($deliveryNote->total_ttc, 2, ',', ' ') }} €</span> 
+
   <span class="badge bg-{{ $deliveryNote->status_livraison === 'non_livré' ? 'warning' : ($deliveryNote->status_livraison === 'livré' ? 'success' : 'danger') }}">
                                            {{ ucfirst($deliveryNote->status_livraison) }}
                                         </span> 

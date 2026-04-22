@@ -443,6 +443,7 @@ Route::post('/salesinvoices/{id}/send-order-ready',
 
     Route::post('/salesorderwithoutref/{id}/send-email', [SalesInvoicesController::class, 'sendEmailorderwithoutref'])->name('salesorder.sendEmailwithoutref');
 
+    Route::post('/bl/{id}/send-email', [SalesInvoicesController::class, 'sendEmailbl'])->name('bl.sendEmail');
 
 
 

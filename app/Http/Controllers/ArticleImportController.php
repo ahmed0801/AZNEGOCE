@@ -18,108 +18,160 @@ class ArticleImportController extends Controller
     }
 
     public function downloadTemplate()
-{
-    $fileName = 'articles_template.xlsx';
-    $filePath = storage_path('app/' . $fileName);
+    {
+        $fileName = 'articles_template.xlsx';
+        $filePath = storage_path('app/' . $fileName);
 
-    if (file_exists($filePath)) unlink($filePath);
+        if (file_exists($filePath)) unlink($filePath);
 
-    // ← Ajout de 'discount_group' à la fin
-    $columns = [
-        'code','name','description','category','brand','unit','barcode',
-        'cost_price','sale_price','tva_group','stock_min','stock_max','store',
-        'location','is_active','supplier','Poids','Hauteur','Longueur','Largeur',
-        'Ref_TecDoc','Code_pays','Code_douane','discount_group'
-    ];
+        $columns = [
+            'code', 'name', 'description', 'category', 'brand', 'unit', 'barcode',
+            'cost_price', 'remise_achat', 'sale_price', 'tva_group', 'stock_min', 'stock_max', 'store',
+            'location', 'is_active',
+            'supplier',   'remise_achat',
+            'supplier_2', 'cost_price_2', 'remise_achat_2',
+            'supplier_3', 'cost_price_3', 'remise_achat_3',
+            'Poids', 'Hauteur', 'Longueur', 'Largeur',
+            'Ref_TecDoc', 'Code_pays', 'Code_douane', 'discount_group'
+        ];
 
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-    $sheet->fromArray($columns, NULL, 'A1');
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->fromArray($columns, NULL, 'A1');
 
-    // Exemple mis à jour
-    $example = [
-        '57044',
-        'SUPPORT MOTEUR LA PIECE',
-        '',
-        'LIAISON AU SOL',
-        'MULTIMARQUES',
-        'PIECE',
-        '8435108604300',
-        '141.35',
-        '141.35',
-        'ASSUJ (20.00%)',
-        '2',
-        '0',
-        'MAGASIN CENTRALE',
-        'Emplacement',
-        '1',
-        'Exa - EXADIS',
-        '', '', '', '', '', '', '',
-        'R0' // ← Exemple de groupe de remise
-    ];
+        $example = [
+            '57044', 'SUPPORT MOTEUR LA PIECE', '', 'LIAISON AU SOL', 'MULTIMARQUES',
+            'PIECE', '8435108604300',
+            '141.35', '0',                          // cost_price, remise_achat (fourn. 1)
+            '183.76', 'ASSUJ (20.00%)',
+            '2', '0', 'MAGASIN CENTRALE', 'A-12-3', '1',
+            'Exa - EXADIS', '5.00',                  // supplier, remise_achat
+            '', '', '',                              // supplier_2, cost_price_2, remise_achat_2
+            '', '', '',                              // supplier_3, cost_price_3, remise_achat_3
+            '', '', '', '',                          // Poids, Hauteur, Longueur, Largeur
+            '', '', '', 'R0'                         // Ref_TecDoc, Code_pays, Code_douane, discount_group
+        ];
 
-    $sheet->fromArray($example, NULL, 'A2');
+        $nbCols  = count($columns);
+        $lastCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($nbCols);
 
-    $sheet->getStyle('A1:X1')->getFont()->setBold(true); // ← X car +1 colonne
-    foreach (range('A', 'X') as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
+        $sheet->fromArray($example, NULL, 'A2');
+        $sheet->getStyle('A1:' . $lastCol . '1')->getFont()->setBold(true);
 
-    $writer = new Xlsx($spreadsheet);
-    $writer->save($filePath);
+        // Colorier les groupes fournisseurs pour lisibilité
+        $groupColors = [
+            // fourn. 1 : colonnes supplier(Q=17) + remise_achat(R=18) → bleu clair
+            ['Q', 'R', 'dce6f1'],
+            // fourn. 2 : S, T, U → vert clair
+            ['S', 'T', 'U', 'e2efda'],
+            // fourn. 3 : V, W, X → orange clair
+            ['V', 'W', 'X', 'fce4d6'],
+        ];
+        foreach ($groupColors as $grp) {
+            $color = array_pop($grp);
+            foreach ($grp as $letter) {
+                $sheet->getStyle($letter . '1:' . $letter . '2')
+                    ->getFill()
+                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB($color);
+            }
+        }
 
-    return response()->download($filePath)->deleteFileAfterSend(false);
-}
+        for ($c = 1; $c <= $nbCols; $c++) {
+            $sheet->getColumnDimensionByColumn($c)->setAutoSize(true);
+        }
 
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filePath);
+
+        return response()->download($filePath)->deleteFileAfterSend(false);
+    }
+    
+
+    /**
+     * Import with selected columns only
+     */
     public function import(Request $request)
     {
         $request->validate([
-            'file'=>'required|file|mimes:xlsx,xls,csv|max:2048',
+            'file'            => 'required|file|mimes:xlsx,xls,csv|max:10240',
+            'selected_columns' => 'nullable|array',
+            'update_mode'     => 'nullable|in:skip,update',
         ]);
 
+        $selectedColumns = $request->input('selected_columns', []);
+        $updateMode      = $request->input('update_mode', 'update');
+
         try {
-            Excel::import(new ItemsImport, $request->file('file'));
-            return redirect()->back()->with('success','Importation réussie !');
+            $importer = new ItemsImport($selectedColumns, $updateMode);
+            Excel::import($importer, $request->file('file'));
+
+            $stats = $importer->getStats();
+
+            $msg = "Importation réussie ! {$stats['created']} créé(s), {$stats['updated']} mis à jour, {$stats['skipped']} ignoré(s).";
+            if (!empty($stats['errors'])) {
+                $msg .= ' ' . count($stats['errors']) . ' erreur(s).';
+            }
+
+            return redirect()->back()->with('success', $msg)->with('import_stats', $stats);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error','Erreur lors de l’import : '.$e->getMessage());
+            return redirect()->back()->with('error', 'Erreur lors de l\'import : ' . $e->getMessage());
         }
     }
 
+    /**
+     * Preview the file and return columns + rows
+     */
     public function preview(Request $request)
     {
         $request->validate([
-            'file'=>'required|file|mimes:xlsx,xls,csv|max:2048',
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        $file = $request->file('file');
+        $file        = $request->file('file');
         $spreadsheet = IOFactory::load($file->getPathname());
-        $rows = $spreadsheet->getActiveSheet()->toArray();
-        $headers = array_map('strtolower', $rows[0]);
+        $rows        = $spreadsheet->getActiveSheet()->toArray();
 
-        $dataPreview = [];
-        $errors = [];
-
-        for ($i=1; $i<count($rows); $i++) {
-        $row = array_combine($headers, $rows[$i]);
-
-        $isEmpty = true;
-        foreach ($row as $v) { if(trim($v) !== '') { $isEmpty=false; break; } }
-        if($isEmpty) continue;
-
-        $existing = Item::where('code', $row['code'] ?? '')->first();
-        $status = $existing ? '⚠️ Mise à jour' : '✅ Nouveau';
-
-        if(empty(trim($row['code'])) || empty(trim($row['name']))) {
-            $errors[] = "Ligne ".($i+1)." : Code ou Nom manquant";
-            $status = '❌ Erreur';
+        if (empty($rows)) {
+            return response()->json(['error' => 'Fichier vide'], 422);
         }
 
-        // ← Ajout du groupe dans l'aperçu
-        $dataPreview[] = array_merge(['row_number'=>$i+1,'status'=>$status], $row);
+        $headers    = array_map('strtolower', array_map('trim', $rows[0]));
+        $dataPreview = [];
+        $errors      = [];
+
+        $limit = min(count($rows), 11); // header + 10 rows max for preview
+
+        for ($i = 1; $i < $limit; $i++) {
+            if (count($rows[$i]) < count($headers)) {
+                $rows[$i] = array_pad($rows[$i], count($headers), '');
+            }
+            $row = array_combine($headers, array_slice($rows[$i], 0, count($headers)));
+
+            $isEmpty = true;
+            foreach ($row as $v) {
+                if (trim((string)$v) !== '') { $isEmpty = false; break; }
+            }
+            if ($isEmpty) continue;
+
+            $existing = Item::where('code', trim($row['code'] ?? ''))->first();
+            $status   = $existing ? 'update' : 'new';
+
+            if (empty(trim($row['code'] ?? ''))) {
+                $errors[] = "Ligne " . ($i + 1) . " : Code manquant";
+                $status   = 'error';
+            }
+
+            $dataPreview[] = array_merge(['row_number' => $i + 1, 'status' => $status], $row);
+        }
+
+        $totalRows = count($rows) - 1;
+
+        return response()->json([
+            'preview'    => $dataPreview,
+            'errors'     => $errors,
+            'headers'    => $headers,
+            'total_rows' => $totalRows,
+        ]);
     }
-
-        return response()->json(['preview'=>$dataPreview,'errors'=>$errors]);
-    }
-
-
-
-    
 }

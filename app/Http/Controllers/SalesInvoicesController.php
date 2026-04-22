@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\SalesNoteExport;
 use App\Exports\SalesNotesExport;
+use App\Mail\DeliveryNoteMail;
 use App\Models\Customer;
 use App\Models\DeliveryNote;
 use App\Models\Invoice;
@@ -2603,6 +2604,108 @@ public function sendEmailorderwithoutref(Request $request, $id)
 
     return back()->with('success', 'Document envoyé avec succès !');
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+public function sendEmailbl(Request $request, $id)
+{
+    // Validation
+    $request->validate([
+        'emails' => 'required|array|min:1',
+        'emails.*' => 'required|email',
+        'message' => 'nullable|string',
+    ]);
+
+    // Récupérer le bon de livraison
+    $deliveryNote = DeliveryNote::with(['salesOrder', 'lines.item', 'vehicle'])
+        ->leftJoin('customers', 'delivery_notes.numclient', '=', 'customers.code')
+        ->select('delivery_notes.*', 'customers.name as customer_name')
+        ->where('delivery_notes.id', $id)
+        ->firstOrFail();
+
+    // Company fallback
+    $company = CompanyInformation::first() ?? new CompanyInformation([
+        'name' => 'Test Company S.A.R.L',
+        'address' => '123 Rue Fictive, Tunis 1000',
+        'phone' => '+216 12 345 678',
+        'email' => 'contact@testcompany.com',
+        'matricule_fiscal' => '1234567ABC000',
+        'swift' => 'TESTTNTT',
+        'rib' => '123456789012',
+        'iban' => 'TN59 1234 5678 9012 3456 7890',
+        'logo_path' => 'assets/img/test_logo.png',
+    ]);
+
+    // Message
+    $defaultMessages = EmailMessage::first();
+    $messageText = $request->input('message')
+                 ?? ($defaultMessages->messagebl ?? 'Veuillez trouver ci-joint votre bon de livraison.');
+
+    // Barcode
+    $generator = new BarcodeGeneratorPNG();
+    $barcode = 'data:image/png;base64,' . base64_encode(
+        $generator->getBarcode($deliveryNote->numdoc, $generator::TYPE_CODE_128)
+    );
+
+    // Générer PDF
+    $pdf = Pdf::loadView('pdf.delivery_note', compact('deliveryNote', 'company', 'barcode'))->output();
+
+    // Emails
+    $emails = $request->input('emails', []);
+    $primary = array_shift($emails);
+    $cc = $emails;
+
+    try {
+        Mail::to($primary)
+            ->cc($cc)
+            ->send(new DeliveryNoteMail($deliveryNote, $company, $pdf, $messageText));
+    } catch (\Exception $e) {
+        return back()->with('error', 'Erreur lors de l\'envoi du mail : ' . $e->getMessage());
+    }
+
+    return back()->with('success', 'Bon de livraison envoyé avec succès !');
+}
+
+
+public function printSingle($id)
+    {
+        $deliveryNote = DeliveryNote::with(['salesOrder', 'lines.item','vehicle'])
+            ->leftJoin('customers', 'delivery_notes.numclient', '=', 'customers.code')
+            ->select('delivery_notes.*', 'customers.name as customer_name')
+            ->where('delivery_notes.id', $id)
+            ->firstOrFail();
+
+        $company = CompanyInformation::first() ?? new CompanyInformation([
+            'name' => 'Test Company S.A.R.L',
+            'address' => '123 Rue Fictive, Tunis 1000',
+            'phone' => '+216 12 345 678',
+            'email' => 'contact@testcompany.com',
+            'matricule_fiscal' => '1234567ABC000',
+            'swift' => 'TESTTNTT',
+            'rib' => '123456789012',
+            'iban' => 'TN59 1234 5678 9012 3456 7890',
+            'logo_path' => 'assets/img/test_logo.png',
+        ]);
+
+        $generator = new BarcodeGeneratorPNG();
+        $barcode = 'data:image/png;base64,' . base64_encode(
+            $generator->getBarcode($deliveryNote->numdoc, $generator::TYPE_CODE_128)
+        );
+
+        $pdf = Pdf::loadView('pdf.delivery_note', compact('deliveryNote', 'company', 'barcode'));
+        return $pdf->stream("bon_livraison_{$deliveryNote->numdoc}.pdf");
+    }
+
 
 
 

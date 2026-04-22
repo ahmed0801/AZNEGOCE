@@ -844,6 +844,25 @@
  <label class="form-label">Rechercher un article </label>
 <div class="input-group mb-3">
   <input type="text" id="search_item"  class="form-control ps-5 pe-3 py-2 shadow-sm border border-secondary-subtle rounded-pill" placeholder="Par réference ou description, minimum 4 caratéres" style="width: 100%; max-width: 430px; transition: all 0.3s ease; background: #e1f4faff;">
+  
+  <!-- NOUVEAU : filtre fournisseur/marque (caché par défaut) -->
+ 
+
+  <!-- Filtre Fournisseur -->
+  <select id="filter_supplier_brand" class="form-control form-control-sm ms-1" 
+          style="display:none; max-width: 150px; font-size: 0.82rem; background: #fff8e1; border-left: 3px solid #ffc107;">
+    <option value="">🏭 Fournisseur (tous)</option>
+  </select>
+
+  <!-- Filtre Marque (NOUVEAU) -->
+  <select id="filter_brand" class="form-control form-control-sm ms-1" 
+          style="display:none; max-width: 140px; font-size: 0.82rem; background: #f0fff4; border-left: 3px solid #28a745;">
+    <option value="">🏷 Marque (toutes)</option>
+  </select>
+
+
+
+
   &nbsp;
   <div class="input-group-append">
             <button type="button" id="add_divers_item" class="btn btn-primary btn-sm">
@@ -1444,110 +1463,134 @@ $vehicleSelect.prop('disabled', false).removeClass('vehicle-empty');
                 updateHistoryButton();
             });
 
-            let searchTimeout;
-            $('#search_item').on('input', function () {
-                clearTimeout(searchTimeout);
-                let query = $(this).val();
-                if (query.length > 3) {
-                    searchTimeout = setTimeout(() => {
-                    $.ajax({
-                        url: '{{ route("sales.items.search") }}',
-                        method: 'GET',
-                        data: { query: query },
-                        success: function (data) {
-                            let results = $('#search_results').empty();
-                            if (data.length === 0) {
-                                results.append('<div class="p-2 text-gray-500">Aucun article trouvé.</div>');
-                            } else {
-                                data.forEach(item => {
-                                    results.append(`
-                                        <div class="p-2 border-b cursor-pointer hover:bg-gray-100"
-                                             data-code="${item.code}"
-                                             data-name="${item.name}"
-                                             data-price="${item.sale_price}"
-                                             data-cost-price="${item.cost_price}"
-                                             data-stock="${item.stock_quantity || 0}"
-                                             data-location="${item.location || ''}"
-                                             data-discount-rate="${item.discount_rate || 20}"
-     data-discount-rate-jobber="${item.discount_rate_jobber || 0}"
-     data-discount-rate-professionnel="${item.discount_rate_professionnel || 0}"
-     
-                                             data-is-active="${item.is_active}"
-                                             data-supplier-id="${item.supplier_id || ''}">
-                                            <span class="badge rounded-pill text-bg-light"><b> ${item.code}</b>
-                                             
-                                            <button class="btn btn-xs btn-outline-secondary copy-code px-1 py-0"
-                                                data-code="${item.code}"
-                                                title="Copier la référence">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                        </span>
-                                         	&#8660;  ${item.name} : ${item.sale_price} € HT
+            
+            
+           let searchTimeout;
+$('#search_item').on('input', function () {
+    clearTimeout(searchTimeout);
+    let query = $(this).val();
 
+    if (query.length > 3) {
+        $('#filter_supplier_brand').fadeIn(200);
+        $('#filter_brand').fadeIn(200);
 
+        searchTimeout = setTimeout(() => {
+            let filterSupplier = $('#filter_supplier_brand').val();
+            let filterBrand    = $('#filter_brand').val();
 
+            $.ajax({
+                url: '{{ route("sales.items.search") }}',
+                method: 'GET',
+                data: { query: query },
+                success: function (data) {
+                    // === Mise à jour filtre Fournisseur ===
+                    let currentSupplier = $('#filter_supplier_brand').val();
+                    let existingSuppliers = new Set(['']);
+                    $('#filter_supplier_brand option').each(function () { existingSuppliers.add($(this).val()); });
 
-                                                ${item.stock_quantity> 0
-? `<br>                                             <button
-    class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap"
-    style="font-size: 0.75rem;"
-    data-item='${JSON.stringify(item)}'
->
-    <i class="fas fa-eye me-1"></i> Détails Article
-</button>
- 🟢 ${item.stock_quantity} En Stock`
-: `<br>                                             <button
-    class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap"
-    style="font-size: 0.75rem;"
-    data-item='${JSON.stringify(item)}'
->
-    <i class="fas fa-eye me-1"></i> Détails Article
-</button>
- 🔴 Disponible auprès de <span class="badge text-bg-secondary"> ${item.supplier} </span>  au prix de <span class="badge text-bg-success"> ${item.cost_price}  € HT </span>` }
+                    // === Mise à jour filtre Marque ===
+                    let currentBrand = $('#filter_brand').val();
+                    let existingBrands = new Set(['']);
+                    $('#filter_brand option').each(function () { existingBrands.add($(this).val()); });
 
-
-
-                                    
-                                        </div>
-                                                <hr class="my-1">
-
-                                    `);
-                                });
-
-
-
-                                // === Gestion du bouton "Copier" ===
-                        $('.copy-code').off('click').on('click', function (e) {
-                            e.stopPropagation(); // Empêche la sélection de l'article
-                            let code = $(this).data('code');
-                            navigator.clipboard.writeText(code).then(() => {
-                                let btn = $(this);
-                                let originalHtml = btn.html();
-                                btn.html('<i class="fas fa-check text-success"></i>').prop('disabled', true);
-                                setTimeout(() => {
-                                    btn.html(originalHtml).prop('disabled', false);
-                                }, 1000);
-                            }).catch(err => {
-                                alert('Erreur copie : ' + err);
-                            });
-                        });
-
-
-                        
-
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.error('AJAX Error:', status, error, xhr.responseText);
-                            $('#search_results').empty().append('<div class="p-2 text-red-500">Erreur lors de la recherche.</div>');
+                    data.forEach(item => {
+                        // Fournisseur
+                        if (item.supplier && !existingSuppliers.has(item.supplier)) {
+                            $('#filter_supplier_brand').append(`<option value="${item.supplier}">🏭 ${item.supplier}</option>`);
+                            existingSuppliers.add(item.supplier);
+                        }
+                        // Marque
+                        if (item.brand && !existingBrands.has(item.brand)) {
+                            $('#filter_brand').append(`<option value="${item.brand}">🏷 ${item.brand}</option>`);
+                            existingBrands.add(item.brand);
                         }
                     });
-                            }, 300); // délai 300ms
 
-                } else {
-                    $('#search_results').empty();
+                    // Restaurer les sélections
+                    $('#filter_supplier_brand').val(currentSupplier);
+                    $('#filter_brand').val(currentBrand);
+
+                    // Filtrage côté client
+                    let filteredData = data.filter(item => {
+                        let matchSupplier = !filterSupplier || item.supplier === filterSupplier;
+                        let matchBrand    = !filterBrand    || item.brand    === filterBrand;
+                        return matchSupplier && matchBrand;
+                    });
+
+                    let results = $('#search_results').empty();
+                    if (filteredData.length === 0) {
+                        results.append('<div class="p-2 text-muted">Aucun article trouvé.</div>');
+                        return;
+                    }
+
+                    filteredData.forEach(item => {
+                        // Badge marque (affiché dans le résultat)
+                        let brandBadge = item.brand
+                            ? `<span class="badge text-bg-primary ms-1" style="font-size:0.7rem;">🏷 ${item.brand}</span>`
+                            : '';
+
+                        results.append(`
+                            <div class="p-2 border-b cursor-pointer hover:bg-gray-100"
+                                 data-code="${item.code}"
+                                 data-name="${item.name}"
+                                 data-price="${item.sale_price}"
+                                 data-cost-price="${item.cost_price}"
+                                 data-stock="${item.stock_quantity || 0}"
+                                 data-location="${item.location || ''}"
+                                 data-discount-rate="${item.discount_rate || 20}"
+                                 data-discount-rate-jobber="${item.discount_rate_jobber || 0}"
+                                 data-discount-rate-professionnel="${item.discount_rate_professionnel || 0}"
+                                 data-is-active="${item.is_active}"
+                                 data-supplier-id="${item.supplier_id || ''}">
+                                <span class="badge rounded-pill text-bg-light"><b>${item.code}</b>
+                                    <button class="btn btn-xs btn-outline-secondary copy-code px-1 py-0"
+                                        data-code="${item.code}" title="Copier la référence">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </span>
+                                ${brandBadge}
+                                &#8660; ${item.name} : ${item.sale_price} € HT
+                                ${item.stock_quantity > 0
+                                    ? `<br><button class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap" style="font-size: 0.75rem;" data-item='${JSON.stringify(item)}'><i class="fas fa-eye me-1"></i> Détails Article</button> 🟢 ${item.stock_quantity} En Stock`
+                                    : `<br><button class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap" style="font-size: 0.75rem;" data-item='${JSON.stringify(item)}'><i class="fas fa-eye me-1"></i> Détails Article</button> 🔴 Disponible auprès de <span class="badge text-bg-secondary">${item.supplier}</span> au prix de <span class="badge text-bg-success">${item.cost_price} € HT</span>`
+                                }
+                            </div>
+                            <hr class="my-1">
+                        `);
+                    });
+
+                    // Rebind copie
+                    $('.copy-code').off('click').on('click', function (e) {
+                        e.stopPropagation();
+                        let code = $(this).data('code');
+                        navigator.clipboard.writeText(code).then(() => {
+                            let btn = $(this);
+                            let originalHtml = btn.html();
+                            btn.html('<i class="fas fa-check text-success"></i>').prop('disabled', true);
+                            setTimeout(() => btn.html(originalHtml).prop('disabled', false), 1000);
+                        });
+                    });
                 }
             });
+        }, 300);
+
+    } else {
+        // Réinitialiser les deux filtres
+        $('#filter_supplier_brand').fadeOut(150).val('').find('option:not(:first)').remove();
+        $('#filter_brand').fadeOut(150).val('').find('option:not(:first)').remove();
+        $('#search_results').empty();
+    }
+});
+
+// Relancer si l'un ou l'autre filtre change
+$('#filter_supplier_brand, #filter_brand').on('change', function () {
+    $('#search_item').trigger('input');
+});
+
+
+
+
+
 
 
 
@@ -1765,8 +1808,15 @@ function initSupplierSelect($select, supplierId = null) {
 
     updateLineTotals($('#lines_body tr:last'), tvaRate);
     lineCount++;
+   
     $('#search_item').val('');
-    $('#search_results').empty();
+$('#search_results').empty();
+
+// Cacher et réinitialiser les deux filtres
+$('#filter_supplier_brand').fadeOut(150).val('').find('option:not(:first)').remove();
+$('#filter_brand').fadeOut(150).val('').find('option:not(:first)').remove();
+
+
     updateGlobalTotals();
 });
 

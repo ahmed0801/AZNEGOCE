@@ -136,7 +136,7 @@
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         #search_results {
-            background: #fff;
+            background: #eaf3fcff;
             border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             max-height: 180px;
@@ -237,6 +237,130 @@
             font-weight: bold;
             color: #007bff;
         }
+
+
+
+        #vehicle_id option[value=""] {
+    font-style: italic;
+    color: #6c757d !important;
+}
+
+
+
+
+
+
+.purchase-price-block {
+    font-size: 0.82rem;
+    line-height: 1.2;
+}
+
+.net-price {
+    min-width: 70px;
+    font-weight: 600;
+    color: #28a745 !important;
+}
+
+.margin-display {
+    font-weight: 600;
+}
+
+
+
+
+
+
+
+
+
+
+/* === FORCER LES CHAMPS NUMÉRIQUES À ÊTRE TRÈS COMPACTS === */
+#lines_table .quantity,
+#lines_table .unit_price_ht,
+#lines_table .unit_price_ttc,
+#lines_table .remise,
+#lines_table .cost-price-input,
+#lines_table .purchase-discount {
+    width: 62px !important;     /* Taille ultra-compacte */
+    min-width: 62px !important;
+    max-width: 62px !important;
+    padding: 0.25rem 0.35rem !important;
+    font-size: 0.80rem !important;
+    text-align: center;
+}
+
+/* Sur mobile : encore plus petit si besoin */
+@media (max-width: 768px) {
+    #lines_table .quantity,
+    #lines_table .unit_price_ht,
+    #lines_table .unit_price_ttc,
+    #lines_table .remise,
+    #lines_table .cost-price-input,
+    #lines_table .purchase-discount {
+        width: 55px !important;
+        min-width: 55px !important;
+        font-size: 0.75rem !important;
+        padding: 0.2rem 0.3rem !important;
+    }
+}
+
+/* Option bonus : centrer les colonnes numériques */
+#lines_table td.text-right,
+#lines_table th.text-center {
+    text-align: center !important;
+}
+
+/* Réduire légèrement les colonnes "Stock" et boutons */
+#lines_table th:nth-child(5),  /* Stock */
+#lines_table td:nth-child(5),
+#lines_table th:nth-child(12), /* Bouton supprimer */
+#lines_table td:nth-child(12) {
+    width: 70px;
+    min-width: 70px;
+}
+
+/* Réduire les colonnes Qté, PU HT, PU TTC, Remise */
+#lines_table th:nth-child(6), td:nth-child(6),  /* Qté */
+#lines_table th:nth-child(7), td:nth-child(7),  /* PU HT */
+#lines_table th:nth-child(8), td:nth-child(8),  /* PU TTC */
+#lines_table th:nth-child(9), td:nth-child(9) { /* Remise % */
+    width: 70px !important;
+    min-width: 70px !important;
+}
+
+
+
+
+
+
+
+
+/* === EN-TÊTE ULTRA-COMPACT === */
+#lines_table thead th {
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.80rem !important;
+    font-weight: 600;
+    vertical-align: middle;
+    line-height: 1.2;
+    height: 42px !important;
+}
+
+/* Supprime le padding inutile sur les petites colonnes */
+#lines_table th.py-1,
+#lines_table td.py-1 {
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+}
+
+/* Force la hauteur fixe de la ligne d'en-tête */
+#lines_table thead tr {
+    height: 42px !important;
+}
+
+/* Ligne de séparation plus fine */
+#lines_table thead {
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+}
     </style>
 </head>
 <body>
@@ -248,7 +372,7 @@
     <div class="sidebar-logo">
         <div class="logo-header" data-background-color="dark">
             <a href="/" class="logo">
-                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="40" />
+                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="70" />
             </a>
             <div class="nav-toggle">
                 <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
@@ -274,7 +398,8 @@
                     <div class="collapse" id="ventes">
                         <ul class="nav nav-collapse">
                             <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
-                            <li><a href="/sales"><span class="sub-item">Devis & Précommandes</span></a></li>
+                            <li><a href="/devislist"><span class="sub-item">Devis</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Commandes Ventes</span></a></li>
                             <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
                             <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
                             <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
@@ -589,11 +714,31 @@
                                 @csrf
                                 <div class="row mb-3">
                                     <div class="col-md-4 col-12 mb-2">
-<a href="/newcustomer"
-   onclick="window.open(this.href, 'popupWindow', 'width=1200,height=700,scrollbars=yes'); return false;"
-   class="btn btn-outline-success btn-round ms-2">
-  Créer ou Modifier des Clients <i class="fas fa-plus-circle ms-1"></i>
-</a>
+
+
+<!-- BOUTON DANS LA PAGE COMMANDE -->
+<div class="btn-group btn-group-sm ms-2 shadow-sm" role="group">
+
+    <button type="button"
+            id="openCreateCustomerModal"
+            class="btn btn-success btn-round">
+        <i class="fas fa-user-plus me-1"></i>
+        Nouveau Client
+    </button>
+
+    <a href="/newcustomer"
+       onclick="window.open(this.href, 'popupWindow', 'width=1200,height=700,scrollbars=yes'); return false;"
+       class="btn btn-outline-primary btn-round">
+        <i class="fas fa-users me-1"></i>
+        Liste des Clients
+    </a>
+
+    
+</div>
+
+
+
+
 <hr>
 
                                                                                     
@@ -609,43 +754,72 @@
                                     
 
 
-                                    <div class="col-md-5 col-12 mb-2" id="vehicle_group" style="display: none;">
-    <label class="form-label d-block">
-        Véhicule <small class="text-muted">(optionnel mais recommandé)</small>
+                                <div class="col-md-5 col-12 mb-3" id="vehicle_group" style="display: none;">
+    <label class="form-label fw-semibold text-dark">
+       Associer un véhicule 
+        <span class="text-muted fw-normal fs-sm">(Automatique via une plaque d'immat.)</span>
     </label>
-    <div class="input-group">
-        <select name="vehicle_id" id="vehicle_id" class="form-control select2" style="width: 70%;">
-            <option value="" disabled selected>Sélectionner ou créer un véhicule</option>
-        </select>
-        
-        <!-- Bouton pour ajouter un nouveau véhicule -->
-        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addVehicleInlineModal">
-            <i class="fas fa-plus"></i> Nouveau <i class="fas fa-car"></i>
-        </button>
 
-        <div class="input-group-append ms-2">
-            <a id="loadCatalogBtn" class="btn btn-primary btn-sm" disabled>
-                <i class="fas fa-list"></i> Catalogue
-            </a>
-            <a id="viewHistoryBtn" class="btn btn-secondary btn-sm" disabled>
-                <i class="fas fa-history"></i> Historique
-            </a>
-        </div>
+    <!-- === NOUVEAU : Recherche par plaque === -->
+    <div class="input-group input-group-sm mb-3">
+        <span class="input-group-text">
+            <i class="fas fa-search"></i>
+        </span>
+        <input type="text" id="plate_search" class="form-control" placeholder="Ex: AB-123-CD" autocomplete="off">
+        <button type="button" id="searchByPlateBtn" class="btn btn-outline-primary">
+            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+            Rechercher plaque
+        </button>
     </div>
+
+
+
+        <!-- <div class="form-text text-muted mt-2">
+        <small><i class="fas fa-info-circle"></i> Tapez une plaque française pour remplir automatiquement le véhicule</small>
+    </div> -->
+
+
+    <!-- Boutons classiques (Nouveau / Catalogue / Historique) -->
+    
+
+    <!-- Select existant -->
+<select name="vehicle_id" id="vehicle_id" class="form-select select2-vehicle" data-placeholder="Sélectionner un véhicule...">
+    <option value="">Aucun véhicule</option>
+</select>
+
+
+    <div class="btn-group mr-2" role="group" aria-label="First group">
+
+        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addVehicleInlineModal">
+            <i class="fas fa-plus fa-fw"></i> <span class="d-none d-md-inline">Nouveau (TECDOC)</span> <i class="fas fa-car"></i>
+        </button>
+        
+        <a href="javascript:void(0)" id="loadCatalogBtn" class="btn btn-primary btn-sm" disabled>
+            <i class="fas fa-book-open fa-fw"></i> <span class="d-none d-lg-inline">Catalogue</span>
+        </a>
+        <a href="javascript:void(0)" id="viewHistoryBtn" class="btn btn-secondary btn-sm" disabled>
+            <i class="fas fa-history fa-fw"></i> <span class="d-none d-lg-inline">Historique Vehicule</span>
+        </a>
+    </div>
+
+
+
+
+
 </div>
 
 
 
 
                                     <div class="col-md-3 col-12 mb-2">
-                                        <label class="form-label">Date de commande</label>
-                                        <input type="date" name="order_date" id="order_date" value="{{ now()->format('Y-m-d') }}" class="form-control order_date" required>
+                                        <!-- <label class="form-label">Date du document</label> -->
+                                        <input type="hidden" name="order_date" id="order_date" value="{{ now()->format('Y-m-d') }}" class="form-control order_date" required>
                                     </div>
                                 </div>
                                 <div class="mb-3" id="customer_details" style="display: none;">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <p><strong>Client:</strong> <span id="customer_code"></span> <span id="customer_name"></span> 	&#8594; <strong>TVA:</strong> <span id="customer_tva"></span>%</p>
+                                            <p><strong>Client:</strong> <span id="customer_code"></span> - <span id="customer_name"></span> </span> / <strong>Type:</strong> <span id="customer_type"></span> 	&#8594; <strong>TVA:</strong> <span id="customer_tva"></span>%</p>
                                             <!-- <p><strong>Taux TVA:</strong> <span id="customer_tva"></span>%</p> -->
                                             <p><strong>Email:</strong> <span id="customer_email"></span> &#8594; <strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span> </p>
                                             <!-- <p><strong>Téléphones :</strong> <span id="customer_phone1"></span> / <span id="customer_phone2"></span></p> -->
@@ -665,9 +839,60 @@
                                         </div>
                                     </div>
                                 </div>
+                                
                                 <div class="mb-3">
-                                    <label class="form-label">Rechercher un article</label>
-                                    <input type="text" id="search_item" class="form-control" placeholder="Par réference ou description, minimum 4 caratéres">
+ <label class="form-label">Rechercher un article </label>
+<div class="input-group mb-3">
+  <input type="text" id="search_item"  class="form-control ps-5 pe-3 py-2 shadow-sm border border-secondary-subtle rounded-pill" placeholder="Par réference ou description, minimum 4 caratéres" style="width: 100%; max-width: 430px; transition: all 0.3s ease; background: #e1f4faff;">
+  
+  <!-- NOUVEAU : filtre fournisseur/marque (caché par défaut) -->
+  <select id="filter_supplier_brand" class="form-control form-control-sm" 
+          style="display:none; max-width: 160px; font-size: 0.82rem; background: #fff8e1; border-left: 3px solid #ffc107;">
+    <option value="">🔍 Fourn./Marque</option>
+  </select>
+
+  &nbsp;
+  <div class="input-group-append">
+            <button type="button" id="add_divers_item" class="btn btn-primary btn-sm">
+            + Créer un article
+        </button>
+
+        <button type="button" id="add_divers_item" data-type="consigne" class="btn btn-dark btn-sm">
+            + Consigne
+        </button>
+        
+
+        <!-- NOUVEAU : Groupe de boutons fournisseurs -->
+        <!-- <span class="text-muted small">|</span> -->
+
+        <div class="btn-group btn-group-sm" role="group">
+        
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle  btn-sm" data-bs-toggle="dropdown">
+                    Recherche externe 
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="https://destockpiecesauto.autodata.fr/databox.php#vehicule/immat" target="_blank">DataBox</a></li>
+                    <li><a class="dropdown-item" href="https://aznegoce.inoshop.net/search" target="_blank">AZ</a></li>
+                    <li><a class="dropdown-item" href="https://apcat.eu/" target="_blank">AP</a></li>
+                    <li><a class="dropdown-item" href="https://ottogo.inoshop.net/search" target="_blank">OttoGo</a></li>
+
+                    <li><a class="dropdown-item" href="https://ksdistribpro.fr/index.php" target="_blank">KS Distrib</a></li>
+                    <li><a class="dropdown-item" href="https://mymga.fr/" target="_blank">MyMGA</a></li>
+                    <li><a class="dropdown-item" href="https://formule1.acrgroup.fr/CCDISP.HTM" target="_blank">Formule 1</a></li>
+                    <li><a class="dropdown-item" href="https://www.idlp.fr/" target="_blank">IDLP</a></li>
+                    <li><a class="dropdown-item" href="https://shopgroupeidlp.fr:5083/CCDISP.HTM" target="_blank">Shop IDLP</a></li>
+                    <li><a class="dropdown-item" href="http://siteweb.cal92.fr/" target="_blank">CAL92</a></li>
+                </ul>
+            </div>
+        </div>
+
+
+
+  </div>
+</div>
+
+
                                     <div id="search_results" class="mt-2"></div>
                                 </div>
 
@@ -695,36 +920,34 @@
 
 
 
-
+<!-- article divers -->
                                 <div class="mb-3">
-                                    <h6 class="font-weight-bold mb-2">Lignes de commande : 
-                                        <button type="button" id="add_divers_item" class="btn btn-outline-info btn-sm">
-            + Article Divers
-        </button>
-
-                                    </h6>
+                                    
 
                                     <!-- AJOUTE LE BOUTON ICI -->
 
 
                                     <div class="table-responsive">
                                         <table class="table table-striped table-bordered table-text-small" id="lines_table">
-                                            <thead class="table-dark">
-                                                <tr>
-                                                    <th>Réference</th>
-                                                    <th>Désignation</th>
-                                                    <th>Prix A.HT</th>
-                                                    <th>Prix V.HT</th>
-                                                    <th>Stock</th>
-                                                    <th>Qté</th>
-                                                    <th>PU HT</th>
-                                                    <th>PU TTC</th>
-                                                    <th>Remise %</th>
-                                                    <th>Total HT</th>
-                                                    <th>Total TTC</th>
-                                                    <th></th>
-                                                </tr>
-                                            </thead>
+                                           <thead class="table-dark text-white">
+    <tr style="height: 42px;">
+        <th class="py-1">Référence</th>
+        <th class="py-1">Désignation</th>
+        <th class="py-1 text-center">
+            <div class="small fw-bold">Prix Achat HT</div>
+            <div class="text-info" style="font-size: 0.63rem; line-height: 1;">Remise → Prix Net → Marge</div>
+        </th>
+        <!-- <th class="py-1 text-center">Prix V.HT</th> -->
+        <th class="py-1 text-center">Stock</th>
+        <th class="py-1 text-center">Qté</th>
+        <th class="py-1 text-center">PU HT</th>
+        <th class="py-1 text-center">PU TTC</th>
+        <th class="py-1 text-center">Rem %</th>
+        <th class="py-1 text-center">Total HT</th>
+        <th class="py-1 text-center">Total TTC</th>
+        <th class="py-1"></th>
+    </tr>
+</thead>
                                             <tbody id="lines_body"></tbody>
                                         </table>
                                     </div>
@@ -735,7 +958,7 @@
                                     <!-- <a href="/articles" target="_blank" type="button" class="btn btn-outline-secondary btn-sm mt-2">+ Aller a la Page Articles</a> -->
                                     <a href="/articles" 
                                     onclick="window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); return false;"
-                                     type="button" class="btn btn-outline-success btn-round ms-2">+ Créer ou Modifier des Articles</a>
+                                     type="button" class="btn btn-outline-success btn-sm btn-round ms-2">⟰ Liste des Articles</a>
 
                                 </div>
                                 <div class="mb-3">
@@ -743,10 +966,12 @@
                                     <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de livraison, etc."></textarea>
                                 </div>
                                 <div class="text-end">
-                                    <button type="button" id="generatePurchaseBtn" class="btn btn-danger px-3 ms-2">🛒 Générer Commande Achat</button>
-                                    <button type="submit" name="action" value="validate" class="btn btn-primary px-3 ms-2">✔️ Valider BL</button>
-                                    <button type="submit" name="action" value="validate_and_invoice" class="btn btn-success px-3 ms-2">📄 Valider et Facturer</button>
-                                    <button type="submit" name="action" value="save_draft" class="btn btn-warning px-3 ms-2">📝 Enregistrer Devis</button>
+                                    <!-- <button type="button" id="generatePurchaseBtn" class="btn btn-danger px-3 ms-2">🛒 Générer Commande Achat</button> -->
+                                    <button type="submit" name="action" id="validateBlBtn" value="validate" class="btn btn-primary px-3 ms-2">✔️ Valider BL (Clients En Compte)</button>
+                                                                        <button type="submit" name="action" value="save_commande" class="btn btn-danger px-3 ms-2">📝 Editer Commande Vente</button>
+                                    <button type="submit" name="action" value="save_draft" class="btn btn-warning px-3 ms-2">📝 Editer Devis</button>
+                                                                                                             <button type="submit" name="action" value="validate_and_invoice" class="btn btn-success px-3 ms-2">📄 Valider et Facturer</button>
+
                                 </div>
                             </form>
                         </div>
@@ -880,7 +1105,7 @@
                         © AZ NEGOCE. All Rights Reserved.
                     </div>
                     <div>
-                        by <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.
+                        by <a target="_blank" href="https://themewagon.com/">AZ NEGOCE</a>.
                     </div>
                 </div>
             </footer>
@@ -896,8 +1121,40 @@
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+
+
+
+
+
+
+<script>
+// Liste des fournisseurs (prête à l'emploi pour Select2)
+window.suppliersList = @json($suppliersForSelect2);
+
+// DEBUG : Vérifie dans la console que c'est bien chargé
+console.log('Fournisseurs chargés :', window.suppliersList);
+</script>
+
+
     <script>
         $(document).ready(function () {
+
+
+// === ARRONDISSEMENT & FORMATAGE (VERSION 2025 – ZÉRO BUG) ===
+function round(number, decimals = 2) {
+    const factor = Math.pow(10, decimals);
+    return Math.round((number * factor) + Number.EPSILON) / factor;
+}
+
+function formatFrench(number, decimals = 2) {
+    return round(number, decimals).toLocaleString('fr-FR', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+    });
+}
+
+
+
             // Initialize Select2 with AJAX for customer search
             $('#customer_id').select2({
                 width: '100%',
@@ -932,6 +1189,7 @@
                                     address_delivery: item.address_delivery,
                                     city: item.city,
                                     country: item.country,
+                                    type: item.type,
                                     blocked: item.blocked,
                                     disabled: item.disabled
                                 };
@@ -970,22 +1228,29 @@
             // Initialize vehicle select as hidden
             $('#vehicle_group').hide();
 
-            function updateGlobalTotals() {
-                let totalHtGlobal = 0;
-                let totalTtcGlobal = 0;
-                $('#lines_body tr').each(function () {
-                    // ✅ Remplace la virgule avant conversion
-        let totalHt = parseFloat($(this).find('.total_ht').text().replace(',', '.')) || 0;
-        let totalTtc = parseFloat($(this).find('.total_ttc').text().replace(',', '.')) || 0;
-                    // ✅ Arrondir à 2 décimales avant l'addition
-        totalHtGlobal += Math.round(totalHt * 100) / 100;
-        totalTtcGlobal += Math.round(totalTtc * 100) / 100;
+function updateGlobalTotals() {
+    let totalHtGlobal = 0;
+    let totalTtcGlobal = 0;
 
-                });
-                $('#total_ht_global').text(totalHtGlobal.toFixed(2).replace('.', ','));
-                $('#total_ttc_global').text(totalTtcGlobal.toFixed(2).replace('.', ','));
-                console.log('Global Totals - HT:', totalHtGlobal, 'TTC:', totalTtcGlobal);
-            }
+    $('#lines_body tr').each(function () {
+let htText  = $(this).find('.total_ht').text().replace(/[^\d,\.-]/g, '').replace(',', '.');
+        let ttcText = $(this).find('.total_ttc').text().replace(/[^\d,\.-]/g, '').replace(',', '.');
+        let ht  = parseFloat(htText)  || 0;
+        let ttc = parseFloat(ttcText) || 0;
+
+        totalHtGlobal += round(ht);
+        totalTtcGlobal += round(ttc);
+    });
+
+    // Arrondi final (par sécurité)
+    totalHtGlobal  = round(totalHtGlobal, 2);
+    totalTtcGlobal = round(totalTtcGlobal, 2);
+
+    $('#total_ht_global').text(formatFrench(totalHtGlobal));
+    $('#total_ttc_global').text(formatFrench(totalTtcGlobal));
+
+    console.log('Global Totals - HT:', totalHtGlobal, 'TTC:', totalTtcGlobal);
+}
 
             function updateCatalogButton() {
                 let customerId = $('#customer_id').val();
@@ -1031,6 +1296,40 @@
             $('#customer_id').on('change', function () {
                 let customerId = $(this).val();
                 let selectedData = $(this).select2('data')[0];
+
+
+
+
+                // essai interdit bl
+                let customerType = selectedData?.type?.toLowerCase().trim() || '';
+                const $validateBtn = $('#validateBlBtn');
+                if (customerType === 'particulier') {
+        $validateBtn
+            .prop('disabled', true)
+            .removeClass('btn-primary')
+            .addClass('btn btn-primary px-3 ms-2')
+            .attr('title', 'Non autorisé pour les clients Particuliers');
+        
+        // Optionnel : ajouter un petit tooltip visuel
+        $validateBtn.html('✔️ Valider BL <span class="badge bg-light text-dark ms-1">Interdit pour les Particuliers</span>');
+    } else {
+        $validateBtn
+            .prop('disabled', false)
+            .removeClass('btn-secondary')
+            .addClass('btn-primary')
+            .removeAttr('title');
+        
+        $validateBtn.html('✔️ Valider BL (Clients En Compte)');
+    }
+
+
+
+
+
+
+
+
+
                 
                 const $balanceBtn = $('#balanceBtn');
                 const $balanceSpan = $('#customer_balance');
@@ -1055,13 +1354,14 @@
                     $('#customer_address_delivery').text(selectedData.address_delivery || 'N/A');
                     $('#customer_city').text(selectedData.city || 'N/A');
                     $('#customer_country').text(selectedData.country || 'N/A');
+                    $('#customer_type').text(selectedData.type || 'N/A');
                     $('#customer_details').show();
                     $('#tva_rate').val(tvaRate);
 
                     $('#vehicle_group').show();
                     let $vehicleSelect = $('#vehicle_id');
                     $vehicleSelect.empty().append('<option value="" disabled selected>Aucun véhicule disponible</option>');
-                    $vehicleSelect.prop('disabled', true).addClass('vehicle-empty');
+                    $vehicleSelect.prop('disabled', false).addClass('vehicle-empty');
 
                     $.ajax({
                         url: '/customers/' + customerId + '/vehicles',
@@ -1069,18 +1369,29 @@
                         success: function (data) {
                             console.log('Vehicles fetched for Customer ID:', customerId, 'Data:', data);
                             $vehicleSelect.empty();
-                            if (data.length > 0) {
-                                $vehicleSelect.append('<option value="" disabled selected>Sélectionner un véhicule</option>');
-                                data.forEach((vehicle, index) => {
-                                    let vehicleText = `${vehicle.license_plate} (${vehicle.brand_name} ${vehicle.model_name} - ${vehicle.engine_description})`;
-                                    $vehicleSelect.append(`<option value="${vehicle.id}" ${index === 0 ? 'selected' : ''}>${vehicleText}</option>`);
-                                });
-                                $vehicleSelect.prop('disabled', false).removeClass('vehicle-empty');
-                            } else {
-                                $vehicleSelect.append('<option value="" disabled selected>Aucun véhicule disponible</option>');
-                                $vehicleSelect.addClass('vehicle-empty');
-                            }
-                            $vehicleSelect.select2({ width: '100%' });
+                            
+                            // Toujours proposer "Aucun véhicule" comme première option VALIDE
+$vehicleSelect.empty();
+$vehicleSelect.append('<option value="">Aucun véhicule</option>'); // ← value="" et PAS disabled !
+
+if (data.length > 0) {
+    data.forEach(vehicle => {
+        let vehicleText = `${vehicle.license_plate} (${vehicle.brand_name} ${vehicle.model_name} - ${vehicle.engine_description})`;
+        $vehicleSelect.append(`<option value="${vehicle.id}">${vehicleText}</option>`);
+    });
+    // Optionnel : pré-sélectionner le premier véhicule
+    // $vehicleSelect.val(data[0].id);
+} else {
+    $vehicleSelect.append('<option value="" disabled>(Aucun véhicule enregistré)</option>');
+}
+
+$vehicleSelect.prop('disabled', false).removeClass('vehicle-empty');
+
+                            $vehicleSelect.select2({
+    width: '100%',
+    placeholder: 'Aucun véhicule',
+    allowClear: true
+});
                             updateCatalogButton();
                             updateHistoryButton();
                         },
@@ -1110,16 +1421,18 @@
 
                     $('#vehicle_group').hide();
                     $('#vehicle_id').empty().append('<option value="" disabled selected>Aucun véhicule disponible</option>').addClass('vehicle-empty');
-                    $('#vehicle_id').select2({ width: '100%' });
+                    $('#vehicle_id').select2({
+    width: '100%',
+    placeholder: 'Aucun véhicule',
+    allowClear: true  // ← Permet de désélectionner
+});
+
                     updateCatalogButton();
                     updateHistoryButton();
                 }
 
                 $('#lines_body tr').each(function () {
-                    let unitPriceHt = parseFloat($(this).find('.unit_price_ht').val()) || 0;
-                    let quantity = parseFloat($(this).find('.quantity').val()) || 0;
-                    let remise = parseFloat($(this).find('.remise').val()) || 0;
-                    updateLineTotals($(this), unitPriceHt, quantity, remise, tvaRate);
+                    updateGlobalTotals();  // ← Ça suffit !
                 });
 
                 updateGlobalTotals();
@@ -1138,105 +1451,119 @@
                 updateHistoryButton();
             });
 
+            
+            
             let searchTimeout;
-            $('#search_item').on('input', function () {
-                clearTimeout(searchTimeout);
-                let query = $(this).val();
-                if (query.length > 3) {
-                    searchTimeout = setTimeout(() => {
-                    $.ajax({
-                        url: '{{ route("sales.items.search") }}',
-                        method: 'GET',
-                        data: { query: query },
-                        success: function (data) {
-                            let results = $('#search_results').empty();
-                            if (data.length === 0) {
-                                results.append('<div class="p-2 text-gray-500">Aucun article trouvé.</div>');
-                            } else {
-                                data.forEach(item => {
-                                    results.append(`
-                                        <div class="p-2 border-b cursor-pointer hover:bg-gray-100"
-                                             data-code="${item.code}"
-                                             data-name="${item.name}"
-                                             data-price="${item.sale_price}"
-                                             data-cost-price="${item.cost_price}"
-                                             data-stock="${item.stock_quantity || 0}"
-                                             data-location="${item.location || ''}"
-                                             data-is-active="${item.is_active}">
-                                            <span class="badge rounded-pill text-bg-light"><b> ${item.code}</b>
-                                             
-                                            <button class="btn btn-xs btn-outline-secondary copy-code px-1 py-0"
-                                                data-code="${item.code}"
-                                                title="Copier la référence">
+$('#search_item').on('input', function () {
+    clearTimeout(searchTimeout);
+    let query = $(this).val();
+
+    if (query.length > 3) {
+        // Afficher le filtre
+        $('#filter_supplier_brand').fadeIn(200);
+
+        searchTimeout = setTimeout(() => {
+            let filterVal = $('#filter_supplier_brand').val();
+
+            $.ajax({
+                url: '{{ route("sales.items.search") }}',
+                method: 'GET',
+                data: { query: query, supplier_brand: filterVal },
+                success: function (data) {
+                    // Mettre à jour les options du filtre (sans perdre la sélection)
+                    let currentFilter = $('#filter_supplier_brand').val();
+                    let existingOptions = new Set();
+                    $('#filter_supplier_brand option').each(function () {
+                        existingOptions.add($(this).val());
+                    });
+
+                    data.forEach(item => {
+                        let supplier = item.supplier || '';
+                        let brand = item.brand || '';
+                        [supplier, brand].forEach(val => {
+                            if (val && !existingOptions.has(val)) {
+                                $('#filter_supplier_brand').append(
+                                    `<option value="${val}">🏷 ${val}</option>`
+                                );
+                                existingOptions.add(val);
+                            }
+                        });
+                    });
+
+                    // Restaurer la sélection
+                    $('#filter_supplier_brand').val(currentFilter);
+
+                    // Filtrer les résultats affichés
+                    let filteredData = filterVal
+                        ? data.filter(item => item.supplier === filterVal || item.brand === filterVal)
+                        : data;
+
+                    let results = $('#search_results').empty();
+                    if (filteredData.length === 0) {
+                        results.append('<div class="p-2 text-gray-500">Aucun article trouvé.</div>');
+                    } else {
+                        filteredData.forEach(item => {
+                            results.append(`
+                                <div class="p-2 border-b cursor-pointer hover:bg-gray-100"
+                                     data-code="${item.code}"
+                                     data-name="${item.name}"
+                                     data-price="${item.sale_price}"
+                                     data-cost-price="${item.cost_price}"
+                                     data-stock="${item.stock_quantity || 0}"
+                                     data-location="${item.location || ''}"
+                                     data-discount-rate="${item.discount_rate || 20}"
+                                     data-discount-rate-jobber="${item.discount_rate_jobber || 0}"
+                                     data-discount-rate-professionnel="${item.discount_rate_professionnel || 0}"
+                                     data-is-active="${item.is_active}"
+                                     data-supplier-id="${item.supplier_id || ''}">
+                                    <span class="badge rounded-pill text-bg-light"><b>${item.code}</b>
+                                        <button class="btn btn-xs btn-outline-secondary copy-code px-1 py-0"
+                                            data-code="${item.code}" title="Copier la référence">
                                             <i class="fas fa-copy"></i>
                                         </button>
-                                        </span>
-                                         	&#8660;  ${item.name} : ${item.sale_price} € HT
+                                    </span>
+                                    &#8660; ${item.name} : ${item.sale_price} € HT
+                                    ${item.stock_quantity > 0
+                                        ? `<br><button class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap" style="font-size: 0.75rem;" data-item='${JSON.stringify(item)}'><i class="fas fa-eye me-1"></i> Détails Article</button> 🟢 ${item.stock_quantity} En Stock`
+                                        : `<br><button class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap" style="font-size: 0.75rem;" data-item='${JSON.stringify(item)}'><i class="fas fa-eye me-1"></i> Détails Article</button> 🔴 Disponible auprès de <span class="badge text-bg-secondary">${item.supplier}</span> au prix de <span class="badge text-bg-success">${item.cost_price} € HT</span>`
+                                    }
+                                </div>
+                                <hr class="my-1">
+                            `);
+                        });
 
-
-
-
-                                                ${item.stock_quantity> 0
-? `<br>                                             <button
-    class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap"
-    style="font-size: 0.75rem;"
-    data-item='${JSON.stringify(item)}'
->
-    <i class="fas fa-eye me-1"></i> Détails Article
-</button>
- 🟢 ${item.stock_quantity} En Stock`
-: `<br>                                             <button
-    class="btn btn-xs btn-outline-primary voir-details px-2 py-1 text-nowrap"
-    style="font-size: 0.75rem;"
-    data-item='${JSON.stringify(item)}'
->
-    <i class="fas fa-eye me-1"></i> Détails Article
-</button>
- 🔴 Disponible auprès de <span class="badge text-bg-secondary"> ${item.supplier} </span>  au prix de <span class="badge text-bg-success"> ${item.cost_price}  € HT </span>` }
-
-
-
-                                    
-                                        </div>
-                                                <hr class="my-1">
-
-                                    `);
-                                });
-
-
-
-                                // === Gestion du bouton "Copier" ===
+                        // Rebind copie
                         $('.copy-code').off('click').on('click', function (e) {
-                            e.stopPropagation(); // Empêche la sélection de l'article
+                            e.stopPropagation();
                             let code = $(this).data('code');
                             navigator.clipboard.writeText(code).then(() => {
                                 let btn = $(this);
                                 let originalHtml = btn.html();
                                 btn.html('<i class="fas fa-check text-success"></i>').prop('disabled', true);
-                                setTimeout(() => {
-                                    btn.html(originalHtml).prop('disabled', false);
-                                }, 1000);
-                            }).catch(err => {
-                                alert('Erreur copie : ' + err);
+                                setTimeout(() => btn.html(originalHtml).prop('disabled', false), 1000);
                             });
                         });
-
-
-                        
-
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.error('AJAX Error:', status, error, xhr.responseText);
-                            $('#search_results').empty().append('<div class="p-2 text-red-500">Erreur lors de la recherche.</div>');
-                        }
-                    });
-                            }, 300); // délai 300ms
-
-                } else {
-                    $('#search_results').empty();
+                    }
                 }
             });
+        }, 300);
+
+    } else {
+        // Cacher et réinitialiser le filtre si recherche trop courte
+        $('#filter_supplier_brand').fadeOut(150).val('').find('option:not(:first)').remove();
+        $('#search_results').empty();
+    }
+});
+
+// Relancer la recherche quand on change le filtre
+$('#filter_supplier_brand').on('change', function () {
+    $('#search_item').trigger('input');
+});
+
+
+
+
+
 
 
 
@@ -1270,6 +1597,22 @@ $(document).on('click', '.voir-details', function (e) {
 
 
 
+// === INITIALISATION SELECT2 FOURNISSEURS + PRÉ-SÉLECTION ===
+function initSupplierSelect($select, supplierId = null) {
+    $select.select2({
+        width: '100%',
+        placeholder: 'Fournisseur',
+        allowClear: true,
+        data: window.suppliersList
+    });
+
+    if (supplierId) {
+        $select.val(supplierId).trigger('change');
+    }
+}
+
+
+
 
 
            $(document).on('click', '#search_results div', function () {
@@ -1278,6 +1621,10 @@ $(document).on('click', '.voir-details', function (e) {
         Swal.fire('Erreur', 'Veuillez sélectionner un client valide avant d\'ajouter un article.', 'error');
         return;
     }
+
+
+    let selectedData = $('#customer_id').select2('data')[0];
+    let customerType = selectedData?.type?.toLowerCase() || ''; // "professionnel", "jobber", etc.
 
     let tvaRate = parseFloat($('#customer_id').select2('data')[0]?.tva || 0);
     if (tvaRate === 0 && $('#customer_id').select2('data')[0]?.tva == null) {
@@ -1294,6 +1641,24 @@ $(document).on('click', '.voir-details', function (e) {
     let isActive = $(this).data('is-active') ? 1 : 0;
     
 
+    // 🔹 RÉCUPÉRATION DES TAUX DE REMISE DE L'ARTICLE
+    let rateGeneral = parseFloat($(this).data('discount-rate')) || 0;
+    let rateJobber = parseFloat($(this).data('discount-rate-jobber')) || 0;
+    let ratePro = parseFloat($(this).data('discount-rate-professionnel')) || 0;
+
+    // 🔹 CHOIX DU BON TAUX SELON LE TYPE CLIENT
+    let appliedDiscount = rateGeneral; // par défaut
+    if (customerType.includes('professionnel')) {
+        appliedDiscount = ratePro;
+    } else if (customerType.includes('jobber')) {
+        appliedDiscount = rateJobber;
+    }
+
+
+
+
+
+
     // DÉFINIR LES VARIABLES AVANT LE TEMPLATE
     let unitPriceHt = price.toFixed(2);
     let unitPriceTtc = (price * (1 + tvaRate / 100)).toFixed(2);
@@ -1302,7 +1667,7 @@ $(document).on('click', '.voir-details', function (e) {
         <tr data-line-id="${lineCount}">
             <td>
                 <div class="d-flex align-items-center gap-1">
-                    <span class="font-weight-bold">${code}</span>
+                    <span class="font-weight-bold"><b>${code}</b></span>
                     <button type="button"
                             class="btn btn-xs btn-outline-secondary copy-line-code px-1 py-0"
                             data-code="${code}"
@@ -1314,15 +1679,39 @@ $(document).on('click', '.voir-details', function (e) {
                 <span class="badge bg-${isActive ? 'success' : 'danger'} badge-very-sm">${isActive ? 'actif' : 'bloqué'}</span>
                 <input type="hidden" name="lines[${lineCount}][article_code]" value="${code}">
             </td>
-            <td>${name}</td>
-            <td>${costPrice.toFixed(2)} €</td>
-            <td>
-                ${price.toFixed(2)} €<br>
-                <small class="${price >= costPrice ? 'text-success' : 'text-danger'} small-text">
-                    ${price >= costPrice ? '+' : ''}${(price - costPrice).toFixed(2)} €
-                    (${costPrice > 0 ? (((price - costPrice) / costPrice) * 100).toFixed(0) : 0}%)
-                </small>
-            </td>
+            <td><b>${name}</b></td>
+           
+           <td class="p-1">
+    <div class="purchase-price-block">
+        <div class="d-flex gap-1 align-items-center mb-1">
+            <div class="input-group input-group-sm flex-fill">
+                <span class="input-group-text">€</span>
+                <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
+                       value="${costPrice.toFixed(2)}" name="lines[${lineCount}][unit_coast]" placeholder="Prix achat HT">
+            </div>
+            <select class="form-select form-select-sm supplier-select" name="lines[${lineCount}][supplier_id]">
+                <option value="">Fournisseur</option>
+            </select>
+        </div>
+        <div class="d-flex gap-1 align-items-center justify-content-between">
+            <div class="input-group input-group-sm" style="width: 105px;">
+                <input type="number" min="0" max="100" step="0.1"
+                       class="form-control form-control-sm text-end purchase-discount"
+                       value="0" name="lines[${lineCount}][discount_coast]" placeholder="Rem%">
+                <span class="input-group-text">%</span>
+            </div>
+            <span class="text-muted small">→</span>
+            <span class="fw-bold text-success net-price">0,00 €</span>
+        </div>
+        <small class="text-muted d-block text-end mt-1">
+            Marge nette : <span class="margin-display text-primary fw-bold">0%</span>
+            (<span class="margin-euro text-primary">0,00 €</span>)
+        </small>
+    </div>
+</td>
+
+
+
             <td>
                 <button type="button" class="btn btn-outline-primary btn-sm stock-details-btn"
                         data-toggle="modal"
@@ -1336,21 +1725,45 @@ $(document).on('click', '.voir-details', function (e) {
             </td>
             <td><input type="number" name="lines[${lineCount}][ordered_quantity]" class="form-control quantity" value="1" min="0"></td>
             <td>
-                <input type="text" inputmode="decimal" name="lines[${lineCount}][unit_price_ht]"
+                <input type="number" inputmode="decimal" name="lines[${lineCount}][unit_price_ht]"
                        class="form-control unit_price_ht" value="${unitPriceHt}" step="0.01">
             </td>
+
+           
+
             <td>
-                <input type="text" inputmode="decimal" name="lines[${lineCount}][unit_price_ttc]"
+                <input type="number" inputmode="decimal" name="lines[${lineCount}][unit_price_ttc]"
                        class="form-control unit_price_ttc" value="${unitPriceTtc}" step="0.01">
             </td>
-            <td><input type="number" name="lines[${lineCount}][remise]" class="form-control remise" value="0" min="0" max="100" step="0.01"></td>
+
+             <td>
+                <input type="number" name="lines[${lineCount}][remise]" 
+                       class="form-control remise" 
+                       value="${appliedDiscount.toFixed(2)}" 
+                       min="0" max="100" step="0.01">
+            </td>
+
+
+            
             <td class="text-right total_ht">0,00</td>
             <td class="text-right total_ttc">0,00</td>
-            <td><button type="button" class="btn btn-outline-danger btn-sm remove_line">×</button></td>
+            <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"> <i class="fas fa-trash-alt"></i> </button></td>
         </tr>
     `;
 
+
+    let supplierId = $(this).data('supplier-id') || ''; // si tu as supplier_id dans la recherche AJAX
+
     $('#lines_body').append(row);
+    
+// Initialisation fournisseur
+    let $newRow = $('#lines_body tr:last');
+    let $supplierSelect = $newRow.find('.supplier-select');
+    initSupplierSelect($supplierSelect, supplierId);
+
+    // Calculs immédiats
+    updatePurchaseMargin($newRow);
+    updateLineTotals($newRow, tvaRate);
 
     // Gestion copie code
     $(document).on('click', '.copy-line-code', function (e) {
@@ -1392,47 +1805,180 @@ $(document).on('click', '.voir-details', function (e) {
     updateLineTotals(row, tvaRate);
 });
 
+
+
+
+ // Fonction unique de recalcul du bloc "prix d'achat → marge"
+// === DÉPLACÉE EN DEHORS DE TOUTE FONCTION ===
+// Une seule alerte à la fois pour tout le tableau
+// Variable globale pour gérer le toast + timeout
+let negativeMarginTimeout = null;
+let negativeMarginToastShown = null;
+
+function updatePurchaseMargin(row) {
+// Si c'est une consigne → on ne calcule rien
+    if (row.data('is-consigne') == '1') {
+        row.find('.net-price').text('—');
+        row.find('.margin-display').text('—');
+        row.find('.margin-euro').text('—');
+        return;
+    }
+    let costPrice = parseFloat(row.find('.cost-price-input').val().replace(',', '.')) || 0;
+    let purchaseDiscount = parseFloat(row.find('.purchase-discount').val().replace(',', '.')) || 0;
+    let saleDiscount = parseFloat(row.find('.remise').val().replace(',', '.')) || 0;
+    let salePriceHt = parseFloat(row.find('.unit_price_ht').val().replace(',', '.')) || 0;
+
+    let netCost = round(costPrice * (1 - purchaseDiscount / 100), 4);
+    let realSalePrice = round(salePriceHt * (1 - saleDiscount / 100), 4);
+
+    row.find('.net-price').text(netCost.toFixed(2).replace('.', ',') + ' €');
+
+    if (realSalePrice > 0 && netCost > 0) {
+        let marginPct = ((realSalePrice - netCost) / netCost) * 100;
+        let marginEur = realSalePrice - netCost;
+
+        row.find('.margin-display').text(marginPct.toFixed(1) + '%');
+        row.find('.margin-euro').text(marginEur.toFixed(2).replace('.', ',') + ' €');
+
+        let $m = row.find('.margin-display');
+        $m.removeClass('text-danger text-warning text-success');
+        if (marginPct >= 50) $m.addClass('text-success');
+        else if (marginPct >= 30) $m.addClass('text-warning');
+        else $m.addClass('text-danger');
+
+        // ALERTE TOAST UNIQUEMENT SI MARGE NÉGATIVE + DÉLAI DE 1.7s
+        if (marginPct < 0) {
+            // On annule tout ce qui est en cours
+            if (negativeMarginTimeout) clearTimeout(negativeMarginTimeout);
+            if (negativeMarginToastShown) negativeMarginToastShown.close();
+
+            negativeMarginTimeout = setTimeout(() => {
+                const code = row.find('td:nth-child(1) .font-weight-bold').text().trim() || '???';
+                const name = row.find('td:nth-child(2)').text().trim();
+                const shortName = name.length > 45 ? name.substring(0,42)+'...' : name;
+
+                negativeMarginToastShown = Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'warning',
+                    title: 'VENTE À PERTE !',
+                    html: `
+                        <div class="text-start small ms-3">
+                            <b>${code}</b> – ${shortName}<br>
+                            Achat net : <b>${netCost.toFixed(2)} €</b> → 
+                            Vente net HT : <b>${realSalePrice.toFixed(2)} €</b><br>
+                            <span class="text-danger fw-bold">
+                                Perte : ${Math.abs(marginEur).toFixed(2)} € (${marginPct.toFixed(1)}%)
+                            </span>
+                        </div>
+                    `,
+                    showConfirmButton: false,
+                    timer: 8000,
+                    timerProgressBar: true,
+                    padding: '0.9rem 1.2rem',
+                    background: '#fff8e1',
+                    customClass: {
+                        popup: 'animated fadeInDown faster',
+                        title: 'mb-1 fw-bold',
+                        htmlContainer: 'm-0'
+                    },
+                    didClose: () => {
+                        negativeMarginToastShown = null;
+                    }
+                });
+
+                negativeMarginTimeout = null;
+            }, 1700); // 1.7 seconde de délai
+
+        } else {
+            // Marge positive → on annule le toast en attente + on ferme celui affiché
+            if (negativeMarginTimeout) {
+                clearTimeout(negativeMarginTimeout);
+                negativeMarginTimeout = null;
+            }
+            if (negativeMarginToastShown) {
+                negativeMarginToastShown.close();
+                negativeMarginToastShown = null;
+            }
+        }
+    } else {
+        row.find('.margin-display').text('—');
+        row.find('.margin-euro').text('—');
+        if (negativeMarginTimeout) {
+            clearTimeout(negativeMarginTimeout);
+            negativeMarginTimeout = null;
+        }
+        if (negativeMarginToastShown) {
+            negativeMarginToastShown.close();
+            negativeMarginToastShown = null;
+        }
+    }
+}
+
+// Déclenchement sur TOUS les champs qui influencent la marge
+$(document).on('input change', '.remise, .cost-price-input, .purchase-discount, .unit_price_ht, .unit_price_ttc', function () {
+    const row = $(this).closest('tr');
+    updatePurchaseMargin(row);
+});
+
+
+
 function updateLineTotals(row, tvaRate) {
     tvaRate = parseFloat(tvaRate) || 0;
-    let quantity = parseFloat(row.find('.quantity').val()) || 0;
-    let remise = parseFloat(row.find('.remise').val()) || 0;
-
+    let quantity = parseFloat(row.find('.quantity').val().replace(',', '.')) || 0;
+    let remise = parseFloat(row.find('.remise').val().replace(',', '.')) || 0;
     let $puHt = row.find('.unit_price_ht');
     let $puTtc = row.find('.unit_price_ttc');
 
-let puHt = parseFloat(($puHt.val() || '0').replace(',', '.')) || 0;
-let puTtc = parseFloat(($puTtc.val() || '0').replace(',', '.')) || 0;
+    let puHt = parseFloat($puHt.val().replace(',', '.')) || 0;
+    let puTtc = parseFloat($puTtc.val().replace(',', '.')) || 0;
 
-    // --- SI PU TTC est modifié → recalcule PU HT ---
-    if (puTtc > 0 && puHt === 0) {
-        puHt = puTtc / (1 + tvaRate / 100);
+    // On récupère quel champ a été modifié en dernier
+    let lastModified = row.data('last-modified') || 'ht'; // par défaut HT
+
+    // Synchronisation intelligente
+    if (lastModified === 'ttc' && puTtc > 0) {
+        // L'utilisateur a tapé dans TTC → on recalcule le HT
+        puHt = round(puTtc / (1 + tvaRate / 100));
         $puHt.val(puHt.toFixed(2));
-    }
-    // --- SI PU HT est modifié → recalcule PU TTC ---
-    else if (puHt > 0 && puTtc === 0) {
-        puTtc = puHt * (1 + tvaRate / 100);
+    } else if (lastModified === 'ht' && puHt > 0) {
+        // L'utilisateur a tapé dans HT → on recalcule le TTC
+        puTtc = round(puHt * (1 + tvaRate / 100));
         $puTtc.val(puTtc.toFixed(2));
     }
-    // --- SI LES DEUX SONT REMPLIS → synchronise selon le dernier modifié ---
-    else if (puHt > 0 && puTtc > 0) {
-        // On suppose que l'utilisateur a modifié le champ le plus récemment
-        // → on garde la valeur du champ modifié, on recalcule l'autre
-        let lastModified = row.data('last-modified'); // sera mis à jour dans l'événement
-        if (lastModified === 'ht') {
-            puTtc = puHt * (1 + tvaRate / 100);
-            $puTtc.val(puTtc.toFixed(2));
-        } else {
-            puHt = puTtc / (1 + tvaRate / 100);
-            $puHt.val(puHt.toFixed(2));
-        }
-    }
+    // Si les deux sont à 0 → on ne touche à rien
 
-    // --- Calcul des totaux ---
-    let totalHt = puHt * quantity * (1 - remise / 100);
-    let totalTtc = totalHt * (1 + tvaRate / 100);
 
-    row.find('.total_ht').text(totalHt.toFixed(2).replace('.', ','));
-    row.find('.total_ttc').text(totalTtc.toFixed(2).replace('.', ','));
+
+
+    
+    
+
+
+
+
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+    // Calcul du total
+    let totalHtAvantRemise = round(puHt * quantity);
+    let remiseAmount = round(totalHtAvantRemise * (remise / 100));
+    let totalHt = round(totalHtAvantRemise - remiseAmount);
+    let totalTtc = round(totalHt * (1 + tvaRate / 100));
+
+row.find('.total_ht').text(formatFrench(round(totalHt, 2)));
+row.find('.total_ttc').text(formatFrench(round(totalTtc, 2)));
 
     updateGlobalTotals();
 }
@@ -1522,16 +2068,27 @@ let puTtc = parseFloat(($puTtc.val() || '0').replace(',', '.')) || 0;
             });
 
             $('#salesForm').on('submit', function (e) {
-                const actionValue = $(this).find('button[type="submit"]:focus').val();
-                if (actionValue === 'validate_and_invoice') {
-                    e.preventDefault();
-                    $(this).attr('action', '{{ route("sales.delivery.store_and_invoice") }}');
-                    this.submit();
-                } else if (actionValue === 'save_draft') {
-                    e.preventDefault();
-                    $(this).attr('action', '{{ route("devis.store") }}');
-                    this.submit();
-                }
+
+
+            // Force la resynchronisation des valeurs affichées → envoyées
+    $('#lines_body tr').each(function() {
+        let $row = $(this);
+        let puHt = parseFloat($row.find('.unit_price_ht').val().replace(',', '.')) || 0;
+        let puTtc = parseFloat($row.find('.unit_price_ttc').val().replace(',', '.')) || 0;
+        let qty = parseFloat($row.find('.quantity').val().replace(',', '.')) || 0;
+        let remise = parseFloat($row.find('.remise').val().replace(',', '.')) || 0;
+
+        // Réécrit proprement les valeurs avant envoi
+        $row.find('.unit_price_ht').val(puHt.toFixed(2));
+        $row.find('.unit_price_ttc').val(puTtc.toFixed(2));
+        $row.find('.quantity').val(qty.toFixed(2));
+        $row.find('.remise').val(remise.toFixed(2));
+    });
+
+
+    
+                
+
             });
 
             document.getElementById('salesForm').addEventListener('submit', function (e) {
@@ -1545,12 +2102,25 @@ let puTtc = parseFloat(($puTtc.val() || '0').replace(',', '.')) || 0;
                 } else if (actionValue === 'save_draft') {
                     confirmMessage = 'Vous êtes sûr d\'enregistrer ce devis ?';
                 }
+
+                 else if (actionValue === 'save_commande') {
+                    confirmMessage = 'Vous êtes sûr d\'enregistrer cette commande vente ?';
+                }
+
                 if (confirmMessage && confirm(confirmMessage)) {
                     if (actionValue === 'validate_and_invoice') {
                         this.action = '{{ route("sales.delivery.store_and_invoice") }}';
                     } else if (actionValue === 'save_draft') {
                         this.action = '{{ route("devis.store") }}';
                     }
+
+                     else if (actionValue === 'save_commande') {
+                        this.action = '{{ route("commande.store") }}';
+                    }
+                     else if (actionValue === 'validate') {
+                        this.action = '{{ route("sales.delivery.store") }}';
+                    }
+
                     this.submit();
                 }
             });
@@ -1726,35 +2296,84 @@ let tvaRate = parseFloat($('#tva_rate').val()) || 20;
         let i = lineCount;  // ← INDEX UNIQUE
         lineCount++;        // ← INCRÉMENTÉ ICI
 
+
+        const isConsigne = $(this).data('type') === 'consigne';
+
         let rowHtml = `
-            <tr class="divers-line" data-line-id="divers_${i}">
-                <td>
-                    <input type="text" name="lines[${i}][article_code]" class="form-control form-control-sm" placeholder="Réf (ex: DIV001)" required>
-                    <input type="hidden" name="lines[${i}][is_new_item]" value="1">
-                </td>
-                <td>
-                    <input type="text" name="lines[${i}][item_name]" class="form-control form-control-sm" placeholder="Désignation" required>
-                </td>
-                <td><span class="text-muted">-</span></td>
-                <td><span class="text-muted">-</span></td>
-                <td><span class="text-muted">-</span></td>
-                <td><input type="number" name="lines[${i}][ordered_quantity]" class="form-control quantity" value="1" min="1" required></td>
-<td>
-    <input type="text" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ht]"
-           class="form-control unit_price_ht" value="0.00" placeholder="0,00">
-</td>
-<td>
-    <input type="text" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ttc]"
-           class="form-control unit_price_ttc" value="0.00" placeholder="0,00">
-</td>
-                <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
-                <td class="text-right total_ht">0,00</td>
-                <td class="text-right total_ttc">0,00</td>
-                <td><button type="button" class="btn btn-outline-danger btn-sm remove_line">×</button></td>
-            </tr>
-        `;
+    <tr class="divers-line" data-line-id="divers_${i}" data-is-consigne="${isConsigne ? '1' : '0'}">
+        <td>
+            <input type="text"
+                   name="lines[${i}][article_code]"
+                   class="form-control form-control-sm bg-light"
+                   value="${isConsigne ? 'CONSIGNE' : ''}"
+                   placeholder="Réf (ex: DIV001)"
+                   ${isConsigne ? 'readonly' : 'required'}>
+            <input type="hidden" name="lines[${i}][is_new_item]" value="1">
+        </td>
+        <td>
+            <input type="text"
+                   name="lines[${i}][item_name]"
+                   class="form-control form-control-sm bg-light"
+                   value="${isConsigne ? 'CONSIGNE' : ''}"
+                   placeholder="Désignation"
+                   ${isConsigne ? 'readonly' : 'required'}>
+        </td>
+        <td class="p-1">
+            <div class="purchase-price-block ${isConsigne ? 'd-none' : ''}">
+                <div class="d-flex gap-1 align-items-center mb-1">
+                    <div class="input-group input-group-sm flex-fill">
+                        <span class="input-group-text">€</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
+                               value="0.00" name="lines[${i}][unit_coast]" placeholder="Prix achat HT">
+                    </div>
+                    <select class="form-select form-select-sm supplier-select" name="lines[${i}][supplier_id]" ${isConsigne ? 'disabled' : ''}>
+                        <option value="">Fournisseur</option>
+                    </select>
+                </div>
+                <div class="d-flex gap-1 align-items-center justify-content-between">
+                    <div class="input-group input-group-sm" style="width: 105px;">
+                        <input type="number" min="0" max="100" step="0.1"
+                               class="form-control form-control-sm text-end purchase-discount"
+                               value="0" name="lines[${i}][discount_coast]" placeholder="Rem%">
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <span class="text-muted small">→</span>
+                    <span class="fw-bold text-success net-price">0,00 €</span>
+                </div>
+                <small class="text-muted d-block text-end mt-1">
+                    Marge nette : <span class="margin-display text-primary fw-bold">0%</span>
+                    (<span class="margin-euro text-primary">0,00 €</span>)
+                </small>
+            </div>
+            ${isConsigne ? '<div class="text-center text-muted small">Consigne — Pas de marge</div>' : ''}
+        </td>
+        <td><span class="text-muted">-</span></td>
+        <td><input type="number" name="lines[${i}][ordered_quantity]" class="form-control quantity" value="1" min="1" required></td>
+        <td>
+            <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ht]"
+                   class="form-control unit_price_ht" value="0.00" placeholder="0,00">
+        </td>
+
+        <td>
+            <input type="number" inputmode="decimal" step="0.01" name="lines[${i}][unit_price_ttc]"
+                   class="form-control unit_price_ttc" value="0.00" placeholder="0,00">
+        </td>
+
+                        <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
+
+
+        <td class="text-right total_ht">0,00</td>
+        <td class="text-right total_ttc">0,00</td>
+        <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"><i class="fas fa-trash-alt"></i></button></td>
+    </tr>
+`;
 
         $('#lines_body').append(rowHtml);
+        let $newRow = $('#lines_body tr:last');
+        let $supplierSelect = $newRow.find('.supplier-select');
+
+initSupplierSelect($supplierSelect); // pas de fournisseur par défaut → vide
+
         lineCount++;
         updateGlobalTotals();
     });
@@ -1773,6 +2392,8 @@ $(document).on('focus click', '.unit_price_ht, .unit_price_ttc', function () {
 
 
     </script>
+
+
 
 
 
@@ -1844,62 +2465,94 @@ $(document).on('focus click', '.unit_price_ht, .unit_price_ttc', function () {
 </div>
 
 
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-// === INITIALISATION SELECT2 DANS LE MODAL RAPIDE ===
-function initQuickVehicleSelect2() {
-    $('.select2-brand, .select2-model, .select2-engine').select2({
-        width: '100%',
-        dropdownParent: $('#addVehicleInlineModal')
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+// ==================== PATCH 405 → TOUT MARCHE EN PROD ====================
+
+
+
+
+$(document).ready(function () {
+    const $modal = $('#addVehicleInlineModal');
+    const $form  = $('#quickVehicleForm');
+
+    // === INITIALISATION SELECT2 DANS LE MODAL (CRUCIAL) ===
+    function initTecdocSelect2() {
+        ['#quick_brand_id', '#quick_model_id', '#quick_engine_id'].forEach(selector => {
+            if ($(selector).hasClass('select2-hidden-accessible')) {
+                $(selector).select2('destroy');
+            }
+        });
+
+        $('#quick_brand_id').select2({
+            width: '100%',
+            placeholder: 'Rechercher une marque...',
+            dropdownParent: $modal
+        });
+        $('#quick_model_id').select2({
+            width: '100%',
+            placeholder: 'Choisir un modèle',
+            allowClear: true,
+            dropdownParent: $modal
+        });
+        $('#quick_engine_id').select2({
+            width: '100%',
+            placeholder: 'Choisir une motorisation',
+            allowClear: true,
+            dropdownParent: $modal
+        });
+    }
+
+    // === OUVERTURE MODAL → RESET + RÉINIT SELECT2 ===
+    $modal.on('shown.bs.modal', function () {
+        $form[0].reset();
+        $('#quick_brand_name, #quick_model_name, #quick_engine_description, #quick_linkage_target_id').val('');
+        $('#quick_model_id, #quick_engine_id')
+            .empty()
+            .append('<option value="">...</option>')
+            .prop('disabled', true);
+
+        initTecdocSelect2();
+        $('#quick_license_plate').focus();
     });
-}
 
-// Réinitialiser et ré-init Select2 à l'ouverture
-$('#addVehicleInlineModal').on('shown.bs.modal', function () {
-    initQuickVehicleSelect2();
+    // === MARQUE → MODÈLES ===
+    $(document).on('change', '#quick_brand_id', function () {
+        const brandId = $(this).val();
+        const brandName = $(this).find('option:selected').text();
+        $('#quick_brand_name').val(brandName);
 
-    // Réinitialiser les champs
-    $('#quickVehicleForm')[0].reset();
-    $('#quick_model_id, #quick_engine_id').empty().append('<option value="">...</option>').prop('disabled', true);
-    $('#quick_brand_id').val('').trigger('change');
-});
+        const $model = $('#quick_model_id').empty().append('<option value="">Chargement...</option>').prop('disabled', true);
+        $('#quick_engine_id').empty().append('<option value="">...</option>').prop('disabled', true);
 
-// Marque → Modèle
-$(document).on('change', '#quick_brand_id', function() {
-    const brandId = $(this).val();
-    const brandName = $(this).find('option:selected').data('name') || '';
-    $('#quick_brand_name').val(brandName);
+        if (!brandId) return;
 
-    const $model = $('#quick_model_id').empty().append('<option value="">Chargement...</option>').prop('disabled', true);
-    const $engine = $('#quick_engine_id').empty().append('<option value="">...</option>').prop('disabled', true);
-
-    if (brandId) {
-        fetch(`{{ route('getModels') }}?brand_id=${brandId}`)
-            .then(r => r.json())
-            .then(data => {
+        $.get('{{ route("getModels") }}', { brand_id: brandId })
+            .done(data => {
                 $model.empty().append('<option value="">Choisir un modèle</option>');
-                data.forEach(m => {
-                    $model.append(`<option value="${m.id}" data-name="${m.name}">${m.name}</option>`);
-                });
+                data.forEach(m => $model.append(`<option value="${m.id}" data-name="${m.name}">${m.name}</option>`));
                 $model.prop('disabled', false);
             });
-    }
-});
+    });
 
-// Modèle → Motorisation
-$(document).on('change', '#quick_model_id', function() {
-    const modelId = $(this).val();
-    const modelName = $(this).find('option:selected').data('name') || '';
-    $('#quick_model_name').val(modelName);
+    // === MODÈLE → MOTORISATIONS ===
+    $(document).on('change', '#quick_model_id', function () {
+        const modelId = $(this).val();
+        const modelName = $(this).find('option:selected').data('name') || $(this).find('option:selected').text();
+        $('#quick_model_name').val(modelName);
 
-    const $engine = $('#quick_engine_id').empty().append('<option value="">Chargement...</option>').prop('disabled', true);
+        const $engine = $('#quick_engine_id').empty().append('<option value="">Chargement...</option>').prop('disabled', true);
 
-    if (modelId) {
-        fetch(`{{ route('getEngines') }}?model_id=${modelId}`)
-            .then(r => r.json())
-            .then(data => {
+        if (!modelId) return;
+
+        $.get('{{ route("getEngines") }}', { model_id: modelId })
+            .done(data => {
                 $engine.empty().append('<option value="">Choisir une motorisation</option>');
-                data.forEach(e => {
+                 data.forEach(e => {
                     $engine.append(
                         `<option value="${e.id}"
                                  data-description="${e.description}"
@@ -1910,65 +2563,199 @@ $(document).on('change', '#quick_model_id', function() {
                 });
                 $engine.prop('disabled', false);
             });
-    }
-});
+    });
 
-// Motorisation → champs cachés
-$(document).on('change', '#quick_engine_id', function() {
-    const desc = $(this).find('option:selected').data('description') || '';
-    const link = $(this).find('option:selected').data('linking-target-id') || '';
-    $('#quick_engine_description').val(desc);
-    $('#quick_linkage_target_id').val(link);
-});
+    // === MOTORISATION → CHAMPS CACHÉS ===
+    $(document).on('change', '#quick_engine_id', function () {
+        const $opt = $(this).find('option:selected');
+        $('#quick_engine_description').val($opt.data('description') || $opt.text());
+        $('#quick_linkage_target_id').val($opt.data('linking-target-id') || $(this).val());
+    });
 
-// === SOUMISSION DU FORMULAIRE RAPIDE ===
-$('#quickVehicleForm').on('submit', function(e) {
+   // === SOUMISSION FORMULAIRE RAPIDE ===
+$form.on('submit', function (e) {
     e.preventDefault();
 
     const customerId = $('#customer_id').val();
     if (!customerId || customerId === '%%%') {
-        Swal.fire('Erreur', 'Veuillez d\'abord sélectionner un client', 'error');
+        Swal.fire('Erreur', 'Sélectionnez un client d\'abord', 'error');
         return;
     }
 
+    // --- ON CONSTRUIT MANUELLEMENT LES DONNÉES À ENVOYER ---
     const formData = {
-        license_plate: $('#quick_license_plate').val(),
+        _token: csrfToken,
+        license_plate: $.trim($('#quick_license_plate').val()).toUpperCase(),
         brand_id: $('#quick_brand_id').val(),
-        brand_name: $('#quick_brand_name').val(),
+        brand_name: $('#quick_brand_id').find('option:selected').text() || $('#quick_brand_name').val(),
         model_id: $('#quick_model_id').val(),
-        model_name: $('#quick_model_name').val(),
+        model_name: $('#quick_model_id').find('option:selected').data('name') || 
+                  $('#quick_model_id').find('option:selected').text() || 
+                  $('#quick_model_name').val(),
         engine_id: $('#quick_engine_id').val(),
-        engine_description: $('#quick_engine_description').val(),
-        linkage_target_id: $('#quick_linkage_target_id').val(),
-        _token: '{{ csrf_token() }}'
+        engine_description: $('#quick_engine_description').val() || 
+                           $('#quick_engine_id').find('option:selected').text(),
+        linkage_target_id: $('#quick_linkage_target_id').val() || $('#quick_engine_id').val(),
     };
 
-    $.post(`/customers/${customerId}/vehicles/quick-store`, formData)
-        .done(function(response) {
-            if (response.success) {
-                const veh = response.vehicle;
+    // Protection supplémentaire : si un champ requis est vide → on bloque
+    const required = ['license_plate', 'brand_id', 'brand_name', 'model_id', 'model_name', 'engine_id', 'engine_description', 'linkage_target_id'];
+    for (let field of required) {
+        if (!formData[field] || formData[field] === '') {
+            Swal.fire('Champ manquant', `Veuillez remplir correctement le champ : ${field.replace(/_/g, ' ')}`, 'warning');
+            return;
+        }
+    }
 
-                // Ajouter le nouveau véhicule dans le select
-                const optionText = `${veh.license_plate} (${veh.brand_name} ${veh.model_name} - ${veh.engine_description})`;
-                const newOption = new Option(optionText, veh.id, true, true);
-                $('#vehicle_id').append(newOption).trigger('change');
+    $.ajax({
+        url: `/customers/${customerId}/vehicles/quick-store`,
+        method: 'POST',
+        data: formData,
+        success: function (res) {
+            if (res.success) {
+                const text = `${formData.license_plate} (${formData.brand_name} ${formData.model_name} - ${formData.engine_description})`;
+                const opt = new Option(text, res.vehicle.id, true, true);
+                $('#vehicle_id').append(opt).trigger('change');
 
-                // Fermer le modal
-                $('#addVehicleInlineModal').modal('hide');
-
-                // Mettre à jour les boutons
+                $modal.modal('hide');
                 updateCatalogButton();
                 updateHistoryButton();
 
                 Swal.fire('Succès', 'Véhicule créé et sélectionné !', 'success');
+            } else {
+                Swal.fire('Erreur', res.message || 'Erreur inconnue', 'error');
             }
-        })
-        .fail(function(xhr) {
-            Swal.fire('Erreur', xhr.responseJSON?.message || 'Erreur lors de la création', 'error');
+        },
+        error: function (xhr) {
+            console.error('Erreur AJAX quick-store vehicle:', xhr.responseJSON);
+            let errors = xhr.responseJSON?.errors;
+            let msg = 'Erreur lors de la création du véhicule<br><ul>';
+            if (errors) {
+                for (let field in errors) {
+                    msg += `<li>${field} : ${errors[field].join(', ')}</li>`;
+                }
+                msg += '</ul>';
+            } else {
+                msg = xhr.responseJSON?.message || 'Erreur inconnue';
+            }
+            Swal.fire('Erreur validation', msg, 'error');
+        }
+    });
+});
+
+    // === RECHERCHE PAR PLAQUE (France) ===
+    $('#searchByPlateBtn').on('click', async function () {
+    const btn = $(this);
+    const input = $('#plate_search');
+    let plate = input.val().trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+    if (!plate || plate.length < 4) {
+        return Swal.fire('Plaque invalide', 'Veuillez entrer une plaque correcte', 'warning');
+    }
+
+    btn.prop('disabled', true).find('.spinner-border').removeClass('d-none');
+    input.prop('disabled', true);
+
+    try {
+        const customerId = $('#customer_id').val();
+        if (!customerId || customerId === '%%%') {
+            throw new Error('Veuillez d\'abord sélectionner un client');
+        }
+
+        // Appel API plaque (facultatif mais utile)
+        let brand = 'INCONNUE';
+        let model = '';
+        let engine = '';
+
+        try {
+            const resp = await fetch(`https://api.apiplaqueimmatriculation.com/plaque?immatriculation=${plate}&token=acce455746476e1d0679a0aa1c4ae93f&pays=FR`);
+            const json = await resp.json();
+            if (json?.data && !json.data.erreur) {
+                brand = json.data.marque || 'INCONNUE';
+                model = json.data.modele || '';
+                engine = json.data.sra_commercial || json.data.code_moteur || '';
+            }
+        } catch (e) {
+            console.log("API plaque indisponible, on continue sans");
+        }
+
+        // EN GET → PLUS JAMAIS DE 405
+        const query = new URLSearchParams({
+            license_plate: plate,
+            brand_name: brand,
+            model_name: model,
+            engine_description: engine
         });
+
+        const result = await $.ajax({
+            url: `/customers/${customerId}/vehicles/from-plate?${query}`,
+            method: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            }
+        });
+
+        if (result.success) {
+            const opt = new Option(result.vehicle.text, result.vehicle.id, true, true);
+            $('#vehicle_id').append(opt).trigger('change');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Véhicule ajouté !',
+                text: result.vehicle.text,
+                timer: 2500,
+                toast: true,
+                position: 'top-end'
+            });
+
+            input.val('');
+        }
+
+    } catch (err) {
+        console.error(err);
+        Swal.fire('Erreur', err.message || 'Impossible d\'ajouter le véhicule', 'error');
+    } finally {
+        btn.prop('disabled', false).find('.spinner-border').addClass('d-none');
+        input.prop('disabled', false);
+    }
+});
 });
 </script>
 
+
+
+
+
+
+
+
+
+<script>
+// Ouvre automatiquement le modal de création client dans la popup /newcustomer
+$(document).on('click', '#openCreateCustomerModal', function () {
+    const popup = window.open('/newcustomer', 'createCustomerPopup', 'width=1200,height=700,scrollbars=yes,resizable=yes');
+    
+    const checkPopup = setInterval(() => {
+        try {
+            if (popup.document && popup.document.body && popup.document.querySelector('#createItemModal')) {
+                clearInterval(checkPopup);
+                
+                const modalElement = popup.document.querySelector('#createItemModal');
+                const modal = new popup.bootstrap.Modal(modalElement);
+                modal.show();
+                
+                setTimeout(() => {
+                    const nameInput = popup.document.querySelector('input[name="name"]');
+                    if (nameInput) nameInput.focus();
+                }, 500);
+            }
+        } catch (e) {
+            // Popup bloquée ou non chargée
+        }
+    }, 100);
+});
+</script>
 
 
 
