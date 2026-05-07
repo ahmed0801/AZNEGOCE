@@ -473,7 +473,7 @@
                                     </li>
                                     <li class="mb-1">
                                         <i class="fas fa-check-circle text-success me-1"></i>
-                                        <strong>Envoi de bon de livraison par email</strong> — envoyez directement un bon de livraison à l'adresse email du client en un clic.
+                                        <strong>Envoi de bon de livraison et devis par email</strong> — envoyez directement un bon de livraison ou un devis à l'adresse email du client en un clic.
                                     </li>
                                     <li class="mb-1">
                                         <i class="fas fa-check-circle text-success me-1"></i>
@@ -504,7 +504,7 @@
 
 
 
-                    
+
 
                     <!-- Statistiques -->
                     <div class="row">
