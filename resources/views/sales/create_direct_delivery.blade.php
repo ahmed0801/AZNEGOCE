@@ -259,105 +259,152 @@
 
     <!-- ═══════════ SIDEBAR ORIGINALE (data-toggle Bootstrap 4) ═══════════ -->
     <div class="sidebar" data-background-color="dark">
-        <div class="sidebar-logo">
-            <div class="logo-header" data-background-color="dark">
-                <a href="/" class="logo">
-                    <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="70" />
-                </a>
-                <div class="nav-toggle">
-                    <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
-                    <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
-                </div>
-            </div>
-        </div>
-        <div class="sidebar-wrapper scrollbar scrollbar-inner">
-            <div class="sidebar-content">
-                <ul class="nav nav-secondary">
-                    <li class="nav-item"><a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a></li>
-                    <li class="nav-item">
-                        <a data-toggle="collapse" href="#ventes" aria-expanded="false"><i class="fas fa-shopping-cart"></i><p>Ventes</p><span class="caret"></span></a>
-                        <div class="collapse" id="ventes">
-                            <ul class="nav nav-collapse">
-                                <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
-                                <li><a href="/devislist"><span class="sub-item">Devis</span></a></li>
-                                <li><a href="/sales"><span class="sub-item">Commandes Ventes</span></a></li>
-                                <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
-                                <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
-                                <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
-                                <li><a href="/salesnotes/list"><span class="sub-item">Avoirs</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a data-toggle="collapse" href="#achats" aria-expanded="false"><i class="fas fa-shopping-bag"></i><p>Achats</p><span class="caret"></span></a>
-                        <div class="collapse" id="achats">
-                            <ul class="nav nav-collapse">
-                                <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
-                                <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d'Achat</span></a></li>
-                                <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
-                                <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
-                                <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a data-toggle="collapse" href="#compta" aria-expanded="false"><i class="fas fa-balance-scale"></i><p>Comptabilité</p><span class="caret"></span></a>
-                        <div class="collapse" id="compta">
-                            <ul class="nav nav-collapse">
-                                <li><a href="{{ route('generalaccounts.index') }}"><span class="sub-item">Plan Comptable</span></a></li>
-                                <li><a href="{{ route('payments.index') }}"><span class="sub-item">Règlements</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a data-toggle="collapse" href="#stock" aria-expanded="false"><i class="fas fa-warehouse"></i><p>Stock</p><span class="caret"></span></a>
-                        <div class="collapse" id="stock">
-                            <ul class="nav nav-collapse">
-                                <li><a href="/receptions"><span class="sub-item">Réceptions</span></a></li>
-                                <li><a href="/articles"><span class="sub-item">Articles</span></a></li>
-                                <li><a href="/planification-tournee"><span class="sub-item">Suivi Livraisons</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a data-toggle="collapse" href="#referentiel" aria-expanded="false"><i class="fas fa-users"></i><p>Référentiel</p><span class="caret"></span></a>
-                        <div class="collapse" id="referentiel">
-                            <ul class="nav nav-collapse">
-                                <li><a href="/customers"><span class="sub-item">Clients</span></a></li>
-                                <li><a href="/suppliers"><span class="sub-item">Fournisseurs</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a data-toggle="collapse" href="#parametres" aria-expanded="false"><i class="fas fa-cogs"></i><p>Paramètres</p><span class="caret"></span></a>
-                        <div class="collapse" id="parametres">
-                            <ul class="nav nav-collapse">
-                                <li><a href="/setting"><span class="sub-item">Configuration</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a data-toggle="collapse" href="#outils" aria-expanded="false"><i class="fab fa-skyatlas"></i><p>Outils</p><span class="caret"></span></a>
-                        <div class="collapse" id="outils">
-                            <ul class="nav nav-collapse">
-                                <li><a href="/analytics"><span class="sub-item">Analytics</span></a></li>
-                                <li><a href="/tecdoc"><span class="sub-item">TecDoc</span></a></li>
-                                <li><a href="/voice"><span class="sub-item">NEGOBOT</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li class="nav-item"><a href="/contact"><i class="fas fa-headset"></i><p>Assistance</p></a></li>
-                    <li class="nav-item">
-                        <a href="{{ route('logout.admin') }}" class="nav-link"
-                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                            <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
-                        </a>
-                        <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display:none;">@csrf</form>
-                    </li>
-                </ul>
+    <div class="sidebar-logo">
+        <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+                <img src="{{ asset('assets/img/logop.png') }}" alt="navbar brand" class="navbar-brand" height="70" />
+            </a>
+            <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
             </div>
         </div>
     </div>
+
+    <div class="sidebar-wrapper scrollbar scrollbar-inner">
+        <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a href="/dashboard"><i class="fas fa-home"></i><p>Dashboard</p></a>
+                </li>
+
+                <!-- Ventes -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#ventes" aria-expanded="false">
+                        <i class="fas fa-shopping-cart"></i><p>Ventes</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="ventes">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/sales/delivery/create"><span class="sub-item">Nouvelle Commande</span></a></li>
+                            <li><a href="/devislist"><span class="sub-item">Devis</span></a></li>
+                            <li><a href="/sales"><span class="sub-item">Commandes Ventes</span></a></li>
+                            <li><a href="/delivery_notes/list"><span class="sub-item">Bons de Livraison</span></a></li>
+                            <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
+                            <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="/salesnotes/list"><span class="sub-item">Avoirs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Achats -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#achats" aria-expanded="false">
+                        <i class="fas fa-shopping-bag"></i><p>Achats</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="achats">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Comptabilité -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#compta" aria-expanded="false">
+                        <i class="fas fa-balance-scale"></i><p>Comptabilité</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="compta">
+                        <ul class="nav nav-collapse">
+                            <li><a href="{{ route('generalaccounts.index') }}"><span class="sub-item">Plan Comptable</span></a></li>
+                            <li><a href="{{ route('payments.index') }}"><span class="sub-item">Règlements</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Stock -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#stock" aria-expanded="false">
+                        <i class="fas fa-warehouse"></i><p>Stock</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="stock">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/receptions"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="/articles"><span class="sub-item">Articles</span></a></li>
+                            <li><a href="/planification-tournee"><span class="sub-item">Suivi Livraisons</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Référentiel -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#referentiel" aria-expanded="false">
+                        <i class="fas fa-users"></i><p>Référentiel</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="referentiel">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/customers"><span class="sub-item">Clients</span></a></li>
+                            <li><a href="/suppliers"><span class="sub-item">Fournisseurs</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Paramètres -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#parametres" aria-expanded="false">
+                        <i class="fas fa-cogs"></i><p>Paramètres</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="parametres">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/setting"><span class="sub-item">Configuration</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Outils -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#outils" aria-expanded="false">
+                        <i class="fab fa-skyatlas"></i><p>Outils</p><span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="outils">
+                        <ul class="nav nav-collapse">
+                            <li><a href="/analytics"><span class="sub-item">Analytics</span></a></li>
+                            <li><a href="/tecdoc"><span class="sub-item">TecDoc</span></a></li>
+                            <li><a href="/voice"><span class="sub-item">NEGOBOT</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Assistance -->
+<li class="nav-item">
+    <a href="/contact">
+        <i class="fas fa-headset"></i>
+        <p>Assistance</p>
+    </a>
+</li>
+
+
+                <!-- Déconnexion -->
+                <li class="nav-item">
+                    <a href="{{ route('logout.admin') }}" class="nav-link"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="fas fa-sign-out-alt"></i><p>Déconnexion</p>
+                    </a>
+                    <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Sidebar -->
     <!-- End Sidebar -->
 
     <div class="main-panel">

@@ -548,6 +548,7 @@
                                                     <select name="customer_balance_action" id="customer_balance_action" class="form-select" required>
                                                         <option value="+" {{ old('customer_balance_action', '+') == '+' ? 'selected' : '' }}>+ (Augmenter)</option>
                                                         <option value="-" {{ old('customer_balance_action') == '-' ? 'selected' : '' }}>- (Diminuer)</option>
+                                                            <option value="" {{ old('customer_balance_action') == '' ? 'selected' : '' }}>Aucun</option>
                                                     </select>
                                                     @error('customer_balance_action')
                                                         <span class="text-danger">{{ $message }}</span>
@@ -559,6 +560,8 @@
                                                     <select name="supplier_balance_action" id="supplier_balance_action" class="form-select" required>
                                                         <option value="+" {{ old('supplier_balance_action', '-') == '+' ? 'selected' : '' }}>+ (Augmenter)</option>
                                                         <option value="-" {{ old('supplier_balance_action', '-') == '-' ? 'selected' : '' }}>- (Diminuer)</option>
+                                                            <option value="" {{ old('supplier_balance_action') == '' ? 'selected' : '' }}>Aucun</option>
+
                                                     </select>
                                                     @error('supplier_balance_action')
                                                         <span class="text-danger">{{ $message }}</span>
@@ -625,8 +628,8 @@
                                             <tr>
                                                 <td>{{ $paymentmode->name }}</td>
                                                 <td>{{ ucfirst($paymentmode->type) }}</td>
-                                                <td>{{ $paymentmode->customer_balance_action ?? '-' }}</td>
-                                                <td>{{ $paymentmode->supplier_balance_action ?? '-' }}</td>
+                                                <td>{{ $paymentmode->customer_balance_action ?? 'aucun' }}</td>
+                                                <td>{{ $paymentmode->supplier_balance_action ?? 'aucun' }}</td>
                                                 <td>{{ $paymentmode->debitAccount ? $paymentmode->debitAccount->name . ' (' . $paymentmode->debitAccount->account_number . ')' : '-' }}</td>
                                                 <td>{{ $paymentmode->creditAccount ? $paymentmode->creditAccount->name . ' (' . $paymentmode->creditAccount->account_number . ')' : '-' }}</td>
                                                 <td>
@@ -683,6 +686,7 @@
                                                                         <select name="customer_balance_action" id="customer_balance_action_{{ $paymentmode->id }}" class="form-select" required>
                                                                             <option value="+" {{ $paymentmode->customer_balance_action == '+' ? 'selected' : '' }}>+ (Augmenter)</option>
                                                                             <option value="-" {{ $paymentmode->customer_balance_action == '-' ? 'selected' : '' }}>- (Diminuer)</option>
+                                                                            <option value="" {{ $paymentmode->customer_balance_action == '' ? 'selected' : '' }}>Aucun</option>
                                                                         </select>
                                                                         @error('customer_balance_action')
                                                                             <span class="text-danger">{{ $message }}</span>
@@ -694,6 +698,7 @@
                                                                         <select name="supplier_balance_action" id="supplier_balance_action_{{ $paymentmode->id }}" class="form-select" required>
                                                                             <option value="+" {{ $paymentmode->supplier_balance_action == '+' ? 'selected' : '' }}>+ (Augmenter)</option>
                                                                             <option value="-" {{ $paymentmode->supplier_balance_action == '-' ? 'selected' : '' }}>- (Diminuer)</option>
+                                                                            <option value="" {{ $paymentmode->supplier_balance_action == '' ? 'selected' : '' }}>Aucun</option>
                                                                         </select>
                                                                         @error('supplier_balance_action')
                                                                             <span class="text-danger">{{ $message }}</span>

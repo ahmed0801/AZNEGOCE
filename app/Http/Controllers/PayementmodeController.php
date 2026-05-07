@@ -19,8 +19,8 @@ class PayementmodeController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:payment_modes,name',
-            'customer_balance_action' => 'required|in:+,-',
-            'supplier_balance_action' => 'required|in:+,-',
+            'customer_balance_action' => 'nullable|in:+,-',
+            'supplier_balance_action' => 'nullable|in:+,-',
             'type' => 'required|in:décaissement,encaissement',
             'debit_account_id' => 'nullable|exists:general_accounts,id',
             'credit_account_id' => 'nullable|exists:general_accounts,id',
@@ -46,8 +46,8 @@ class PayementmodeController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:payment_modes,name,' . $id,
-            'customer_balance_action' => 'required|in:+,-',
-            'supplier_balance_action' => 'required|in:+,-',
+            'customer_balance_action' => 'nullable|in:+,-',
+            'supplier_balance_action' => 'nullable|in:+,-',
             'type' => 'required|in:décaissement,encaissement',
             'debit_account_id' => 'nullable|exists:general_accounts,id',
             'credit_account_id' => 'nullable|exists:general_accounts,id',
