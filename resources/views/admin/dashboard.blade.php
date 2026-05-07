@@ -454,6 +454,58 @@
                         </div>
                     </div>
 
+
+
+
+                    <!-- Notification Mise à jour -->
+                    <div class="alert alert-info alert-dismissible fade show shadow-sm rounded-3 mb-4" role="alert" style="border-left: 5px solid #0d6efd; background: linear-gradient(135deg, #e8f4fd, #f0f8ff);">
+                        <div class="d-flex align-items-start gap-3">
+                            <div style="font-size: 2rem;">🚀</div>
+                            <div class="w-100">
+                                <h5 class="fw-bold mb-1" style="color: #0d6efd;">
+                                    Mise à jour du <span class="badge bg-primary">07/05/2026</span>
+                                </h5>
+                                <p class="mb-2 text-muted" style="font-size: 0.85rem;">Voici les nouveautés et améliorations de cette version :</p>
+                                <ul class="mb-2" style="font-size: 0.875rem; padding-left: 1.2rem;">
+                                    <li class="mb-1">
+                                        <i class="fas fa-check-circle text-success me-1"></i>
+                                        <strong>Nouveau mode de règlement "SOLDE AVOIR"</strong> — règle une facture à partir d'un avoir client avec calcul automatique sur le solde du client.
+                                    </li>
+                                    <li class="mb-1">
+                                        <i class="fas fa-check-circle text-success me-1"></i>
+                                        <strong>Envoi de bon de livraison par email</strong> — envoyez directement un bon de livraison à l'adresse email du client en un clic.
+                                    </li>
+                                    <li class="mb-1">
+                                        <i class="fas fa-check-circle text-success me-1"></i>
+                                        <strong>Nouveaux filtres "Fournisseur" et "Marque"</strong> — disponibles sur la page Nouvelle Commande pour une recherche d'articles plus rapide.
+                                    </li>
+                                    <li class="mb-1">
+                                        <i class="fas fa-check-circle text-success me-1"></i>
+                                        <strong>Optimisations esthétiques</strong> — améliorations visuelles sur la page Nouvelle Commande pour une meilleure expérience utilisateur.
+                                    </li>
+                                    <li class="mb-1">
+                                        <i class="fas fa-check-circle text-success me-1"></i>
+                                        <strong>Module d'intégration articles</strong> — importation et mise à jour d'articles (insertion/mise à jour) via un module moderne, personnalisé et intuitif.
+                                    </li>
+                                </ul>
+                                <hr class="my-2">
+                                <p class="mb-0" style="font-size: 0.82rem; color: #555;">
+                                    <i class="fas fa-info-circle me-1 text-primary"></i>
+                                    Un problème ou une remarque avec cette version ? Contactez-nous via
+                                    <a href="/contact" class="fw-bold text-decoration-none" style="color: #0d6efd;">
+                                        <i class="fas fa-headset me-1"></i>Assistance → Nouveau Ticket
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                    </div>
+                    <!-- Fin Notification Mise à jour -->
+
+
+
+                    
+
                     <!-- Statistiques -->
                     <div class="row">
                         <div class="col-sm-6 col-md-3">
