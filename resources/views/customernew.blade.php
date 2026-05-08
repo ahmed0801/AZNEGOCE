@@ -376,6 +376,9 @@
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
         <button type="submit" class="btn btn-success">Créer</button>
+        <button type="submit" name="action" value="create_and_close" class="btn btn-outline-success">
+        <i class="fas fa-check-double me-1"></i> Créer et Fermer
+    </button>
     </div>
 </form>
 

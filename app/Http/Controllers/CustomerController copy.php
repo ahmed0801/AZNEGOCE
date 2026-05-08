@@ -52,6 +52,26 @@ class CustomerController extends Controller
             $query->where('solde', '<=', $request->max_solde);
         }
 
+      $totalCustomers             = Customer::count();
+    $activeCustomers            = Customer::where('blocked', 0)->count();
+    $inactiveCustomers          = Customer::where('blocked', 1)->count();
+
+    // Clients non soldés = solde != 0
+    $clientsNonSoldes           = Customer::where('solde', '!=', 0)->count();
+    $clientsNousDoivent         = Customer::where('solde', '<', 0)->count();   // solde négatif = ils nous doivent
+    $clientsOnDoit              = Customer::where('solde', '>', 0)->count();   // solde positif = on leur doit (avoirs)
+
+    // Répartition par type
+    $particuliersCount          = Customer::where('type', 'particulier')->count();
+    $jobbersCount               = Customer::where('type', 'jobber')->count();
+    $prosCount                  = Customer::where('type', 'professionnel')->count();
+
+    // Autres KPI utiles
+    $totalSoldeClients          = Customer::sum('solde');
+    $clientsAvecVehicules       = Customer::has('vehicles')->count();
+    $clientsSansVehicules       = $totalCustomers - $clientsAvecVehicules;
+
+
         $customers = $query->orderBy('name')->paginate(20);
 
         $tvaGroups = TvaGroup::all();
@@ -89,7 +109,20 @@ class CustomerController extends Controller
             'paymentModes', 
             'paymentTerms', 
             'brands',
-            'cities'
+            'cities',
+// KPI
+        'totalCustomers',
+        'activeCustomers',
+        'inactiveCustomers',
+        'clientsNonSoldes',
+        'clientsNousDoivent',
+        'clientsOnDoit',
+        'particuliersCount',
+        'jobbersCount',
+        'prosCount',
+        'totalSoldeClients',
+        'clientsAvecVehicules',
+        'clientsSansVehicules'
         ));
     }
 

@@ -941,7 +941,7 @@
                         <th>Nom</th>
                         <th>Adresse & Ville</th>
                         <th>Contact</th>
-                        <th>B2B</th>
+                        <th>Plateforme</th>
                         <th>Solde</th>
                         <th>Statut</th>
                         <th>Actions</th>
@@ -1131,10 +1131,15 @@
         </div>
 
 <!-- === CHAMP B2B (édition) === -->
+<!-- === CHAMP B2B (édition) === -->
 <div class="mb-3 col-md-6">
     <label class="form-label d-block">
         Plateforme B2B (site marchand)
     </label>
+    
+    <!-- Champ caché qui envoie 0 par défaut -->
+    <input type="hidden" name="has_b2b" value="0">
+    
     <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" name="has_b2b" value="1"
                id="has_b2b_edit{{ $customer->id }}" {{ $customer->has_b2b ? 'checked' : '' }}>

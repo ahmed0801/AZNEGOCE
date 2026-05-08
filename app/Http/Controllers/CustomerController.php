@@ -179,6 +179,23 @@ class CustomerController extends Controller
         $souche->last_number += 1;
         $souche->save();
 
+
+        // === NOUVEAU : fermeture popup ===
+    if ($request->input('action') === 'create_and_close') {
+        return response('
+            <!DOCTYPE html><html><body>
+            <script>
+                if (window.opener) {
+                    window.opener.location.reload();
+                }
+                window.close();
+            </script>
+            </body></html>
+        ');
+    }
+
+    
+
         return redirect()->back()->with('success', 'Client créé avec succès');
     }
 

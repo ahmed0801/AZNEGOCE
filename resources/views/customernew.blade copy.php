@@ -265,7 +265,9 @@
             <select name="payment_term_id" class="form-control" required>
                 <!-- <option value="">-- Choisir --</option> -->
                 @foreach($paymentTerms as $term)
-                    <option value="{{ $term->id }}">{{ $term->label }} : {{ $term->days }} Jours</option>
+                    <option value="{{ $term->id }}">{{ $term->label }}
+                         <!-- : {{ $term->days }} Jours -->
+                        </option>
                 @endforeach
             </select>
         </div>
@@ -306,7 +308,7 @@
 
         <div class="mb-3 col-md-4">
             <label class="form-label">Ville</label>
-            <input type="text" name="city" class="form-control" value="Paris">
+            <input type="text" name="city" class="form-control" value="">
         </div>
 
         <div class="mb-3 col-md-2">
@@ -315,7 +317,7 @@
         </div>
 
         <div class="mb-3 col-md-6">
-            <label class="form-label">Adresse de livraison</label>
+            <label class="form-label">Code Postal</label>
             <input type="text" name="address_delivery" class="form-control">
         </div>
 
@@ -814,7 +816,7 @@
         </div>
 
         <div class="mb-3 col-md-6">
-            <label class="form-label">Adresse de livraison</label>
+            <label class="form-label">Code Postal</label>
             <input type="text" name="address_delivery" class="form-control" value="{{ $customer->address_delivery }}" disabled>
         </div>
 
@@ -900,7 +902,8 @@
                 <option value="">-- Choisir --</option>
                 @foreach($paymentTerms as $term)
                     <option value="{{ $term->id }}" {{ $customer->payment_term_id == $term->id ? 'selected' : '' }}>
-                        {{ $term->label }} : {{ $term->days }} Jours
+                        {{ $term->label }}
+                         <!-- : {{ $term->days }} Jours -->
                     </option>
                 @endforeach
             </select>
@@ -1112,11 +1115,11 @@ document.addEventListener("DOMContentLoaded", function() {
             </nav>
             <div class="copyright">
             © AZ NEGOCE. All Rights Reserved.
-              <!-- <a href="http://www.themekita.com">By Ahmed Arfaoui</a> -->
+              <!-- <a href="http://www.themekita.com">By AZ NEGOCE</a> -->
             </div>
             <div>
                by
-              <a target="_blank" href="https://themewagon.com/">Ahmed Arfaoui</a>.
+              <a target="_blank" href="https://themewagon.com/">AZ NEGOCE</a>.
             </div>
           </div>
         </footer>
