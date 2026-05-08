@@ -999,22 +999,74 @@
                 });
             });
 
-            $('#searchByPlateBtn').on('click', function () {
-                let plate = $('#plate_search').val().trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-                if (!plate || plate.length < 4) return Swal.fire('Erreur', 'Plaque invalide', 'warning');
-                let btn = $(this);
-                btn.prop('disabled', true).find('.spinner-border').removeClass('d-none');
-                let customerId = $('#customer_id').val();
-                if (!customerId) return;
-                $.get(`/customers/${customerId}/vehicles/from-plate?license_plate=${plate}`, res => {
-                    if (res.success) {
-                        $('#vehicle_id').append(new Option(res.vehicle.text, res.vehicle.id, true, true)).trigger('change');
-                        $('#plate_search').val('');
-                    }
-                }).always(() => {
-                    btn.prop('disabled', false).find('.spinner-border').addClass('d-none');
-                });
+            $('#searchByPlateBtn').on('click', async function () {
+    var btn = $(this);
+    var input = $('#plate_search');
+    var plate = input.val().trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+    if (!plate || plate.length < 4) {
+        return Swal.fire('Plaque invalide', 'Veuillez entrer une plaque correcte', 'warning');
+    }
+
+    btn.prop('disabled', true).find('.spinner-border').removeClass('d-none');
+    input.prop('disabled', true);
+
+    try {
+        var customerId = $('#customer_id').val();
+        if (!customerId) {
+            throw new Error('Veuillez d\'abord sélectionner un client');
+        }
+
+        // === APPEL API EXTERNE (identique à la page create) ===
+        var brand = 'INCONNUE', model = '', engine = '';
+        try {
+            var resp = await fetch('https://api.apiplaqueimmatriculation.com/plaque?immatriculation=' + plate + '&token=acce455746476e1d0679a0aa1c4ae93f&pays=FR');
+            var json = await resp.json();
+            if (json && json.data && !json.data.erreur) {
+                brand  = json.data.marque  || 'INCONNUE';
+                model  = json.data.modele  || '';
+                engine = json.data.sra_commercial || json.data.code_moteur || '';
+            }
+        } catch (e) {
+            console.warn('API plaque indisponible, on continue sans les données véhicule');
+        }
+
+        // === APPEL BACKEND ===
+        var query = new URLSearchParams({
+            license_plate:     plate,
+            brand_name:        brand,
+            model_name:        model,
+            engine_description: engine
+        });
+
+        var result = await $.ajax({
+            url:     '/customers/' + customerId + '/vehicles/from-plate?' + query,
+            method:  'GET',
+            headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+        });
+
+        if (result.success) {
+            // Ajout dans le select véhicule + sélection automatique
+            var option = new Option(result.vehicle.text, result.vehicle.id, true, true);
+            $('#vehicle_id').append(option).trigger('change');
+            updateCatalogButton();
+            updateHistoryButton();
+            Swal.fire({
+                icon: 'success', title: 'Véhicule ajouté !',
+                text: result.vehicle.text,
+                timer: 2500, toast: true, position: 'top-end',
+                showConfirmButton: false
             });
+            input.val('');
+        }
+
+    } catch (err) {
+        Swal.fire('Erreur', err.message || 'Impossible d\'ajouter le véhicule', 'error');
+    } finally {
+        btn.prop('disabled', false).find('.spinner-border').addClass('d-none');
+        input.prop('disabled', false);
+    }
+});
 
             $('#lines_body tr').each(function () {
                 updatePurchaseMargin($(this));
