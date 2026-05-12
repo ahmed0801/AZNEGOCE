@@ -1555,6 +1555,7 @@ public function validateOrder($id)
                 'supplier_id'   => $item->supplier->id ?? null,        // ← LIGNE À AJOUTER
                 'stock_quantity' => $item->getStockQuantityAttribute(),
                 'cost_price' => $item->cost_price,
+                'remise_achat' => $item->remise_achat, // ← AJOUTER ICI
                 'sale_price' => $item->sale_price,
 
 
