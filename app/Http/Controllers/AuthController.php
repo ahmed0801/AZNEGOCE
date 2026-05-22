@@ -269,33 +269,41 @@ $lateDeliveriesCount = DeliveryNote::whereIn('status', ['en_cours', 'Expédié']
 
 
 
-    public function lateDeliveries()
+   public function lateDeliveries()
 {
-    $lateDeliveries = DeliveryNote::with('customer')
-    ->whereIn('status', ['en_cours', 'Expédié'])
-    ->where(function($q) {
-        $q->whereNull('invoiced')->orWhere('invoiced', 0);
-    })
-    ->where('delivery_date', '<', Carbon::now()->startOfMonth())
-    ->get()
-    ->groupBy('customer_id') // ← attention, voir note ci-dessous
-    ->map(function ($items) {
-        return [
-            'customer_name' => $items->first()->customer->name ?? 'N/A',
-            'customer_id'   => $items->first()->customer_id ?? $items->first()->numclient,
-            'count'         => $items->count(),
-            'total_ht'      => $items->sum('total_ht'),
-            'total_ttc'     => $items->sum('total_ttc'),
-            'bons'          => $items->map(fn($d) => [
-                'id'            => $d->id,
-                'numdoc'        => $d->numdoc,
-                'delivery_date' => $d->delivery_date->format('d/m/Y'),
-                'total_ttc'     => $d->total_ttc,
-                'status'        => $d->status,
-            ])
-        ];
-    })
-    ->values();
+    $deliveries = DeliveryNote::whereIn('status', ['en_cours', 'Expédié'])
+        ->where(function($q) {
+            $q->whereNull('invoiced')->orWhere('invoiced', 0);
+        })
+        ->where('delivery_date', '<', Carbon::now()->startOfMonth())
+        ->get();
+
+    // Charger les clients manuellement par code
+    $customerCodes = $deliveries->pluck('numclient')->unique();
+    $customers = Customer::whereIn('code', $customerCodes)
+        ->get()
+        ->keyBy('code'); // indexé par code pour accès rapide
+
+    $lateDeliveries = $deliveries
+        ->groupBy('numclient')
+        ->map(function ($items, $numclient) use ($customers) {
+            $customer = $customers->get($numclient);
+            return [
+                'customer_name' => $customer ? $customer->name : ($numclient ?? 'Client inconnu'),
+                'customer_id'   => $numclient,
+                'count'         => $items->count(),
+                'total_ht'      => $items->sum('total_ht'),
+                'total_ttc'     => $items->sum('total_ttc'),
+                'bons'          => $items->map(fn($d) => [
+                    'id'            => $d->id,
+                    'numdoc'        => $d->numdoc,
+                    'delivery_date' => $d->delivery_date->format('d/m/Y'),
+                    'total_ttc'     => $d->total_ttc,
+                    'status'        => $d->status,
+                ])->values()
+            ];
+        })
+        ->values();
 
     return view('admin.late-deliveries', compact('lateDeliveries'));
 }
