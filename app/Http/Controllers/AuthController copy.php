@@ -271,6 +271,8 @@ $recentInvoices = Invoice::with('customer')
             'password' => Hash::make($request->password),
             'codevendeur' => $request->codevendeur,
             'role' => $request->role,
+                'allow_multi_session' => $request->has('allow_multi_session'),
+
         ]);
 
         $user->permissions()->sync($request->permissions ?? []);
@@ -296,6 +298,8 @@ public function update(Request $request, User $user)
         'name' => $data['name'],
         'email' => $data['email'],
         'role' => $data['role'],
+            'allow_multi_session' => $request->has('allow_multi_session'),
+
     ]);
 
     if ($data['password']) {

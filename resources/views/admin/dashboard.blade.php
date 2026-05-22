@@ -330,6 +330,71 @@
                         <!-- fin test quick action  -->
 
 
+
+
+
+
+
+
+                        <!-- fin test quick action  -->
+
+<!-- fin test quick action  -->
+
+{{-- Notification BL en retard --}}
+@if($lateDeliveriesCount > 0)
+<li class="nav-item hidden-caret me-2">
+    <a href="{{ route('dashboard.late-deliveries') }}"
+       style="position:relative; display:inline-flex; align-items:center; gap:8px;
+              background:linear-gradient(135deg, #dc3545, #c82333);
+              color:#fff; border-radius:20px; padding:6px 14px 6px 10px;
+              text-decoration:none; font-size:0.82rem; font-weight:600;
+              box-shadow:0 3px 12px rgba(220,53,69,0.45); transition:all 0.2s;
+              white-space:nowrap; max-width:280px;"
+       onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(220,53,69,0.55)'"
+       onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 12px rgba(220,53,69,0.45)'">
+
+        {{-- Icône cloche animée --}}
+        <span style="position:relative; flex-shrink:0; width:28px; height:28px;
+                     background:rgba(255,255,255,0.2); border-radius:50%;
+                     display:flex; align-items:center; justify-content:center;">
+            <i class="fas fa-bell" style="font-size:0.85rem; animation:ring 2s ease infinite;"></i>
+            <span style="position:absolute; top:-3px; right:-3px; background:#fff; color:#dc3545;
+                         border-radius:50%; min-width:16px; height:16px; font-size:0.60rem;
+                         font-weight:900; display:flex; align-items:center; justify-content:center;
+                         padding:0 2px; line-height:1;">
+                {{ $lateDeliveriesCount > 99 ? '99+' : $lateDeliveriesCount }}
+            </span>
+        </span>
+
+        {{-- Texte --}}
+        <span>
+            <span style="display:block; font-size:0.75rem; opacity:0.85; line-height:1.1;">⚠️ BL non facturés</span>
+            <span style="display:block; font-size:0.88rem; font-weight:700; line-height:1.2;">
+                {{ $lateDeliveriesCount }} bon{{ $lateDeliveriesCount > 1 ? 's' : '' }} en retard !
+            </span>
+        </span>
+    </a>
+</li>
+@endif
+
+<style>
+@keyframes ring {
+    0%,100% { transform:rotate(0deg); }
+    10%,30% { transform:rotate(-20deg); }
+    20%,40% { transform:rotate(20deg); }
+    50% { transform:rotate(0deg); }
+}
+</style>
+
+
+
+
+
+
+
+
+
+
                         
                             <li class="nav-item topbar-user dropdown hidden-caret">
                                 <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
@@ -445,6 +510,10 @@
     </button>
 
 
+
+
+
+    
 
 
 

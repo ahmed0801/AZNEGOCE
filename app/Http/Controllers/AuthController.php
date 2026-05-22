@@ -238,6 +238,18 @@ $recentInvoices = Invoice::with('customer')
             ->take(7)
             ->get();
 
+
+
+
+            // Juste un COUNT, ultra rapide
+$lateDeliveriesCount = DeliveryNote::whereIn('status', ['en_cours', 'Expédié'])
+    ->where(function($q) {
+        $q->whereNull('invoiced')->orWhere('invoiced', 0);
+    })
+    ->where('delivery_date', '<', Carbon::now()->startOfMonth())
+    ->count();
+
+
         return view('admin.dashboard', compact(
             'todayRevenue',
             'monthRevenue',
@@ -249,9 +261,46 @@ $recentInvoices = Invoice::with('customer')
             'topArticles',
             'topClients',
             'recentDeliveries',
-            'recentInvoices'
+            'recentInvoices',
+            'lateDeliveriesCount'
         ));
     }
+
+
+
+
+    public function lateDeliveries()
+{
+    $lateDeliveries = DeliveryNote::with('customer')
+    ->whereIn('status', ['en_cours', 'Expédié'])
+    ->where(function($q) {
+        $q->whereNull('invoiced')->orWhere('invoiced', 0);
+    })
+    ->where('delivery_date', '<', Carbon::now()->startOfMonth())
+    ->get()
+    ->groupBy('customer_id') // ← attention, voir note ci-dessous
+    ->map(function ($items) {
+        return [
+            'customer_name' => $items->first()->customer->name ?? 'N/A',
+            'customer_id'   => $items->first()->customer_id ?? $items->first()->numclient,
+            'count'         => $items->count(),
+            'total_ht'      => $items->sum('total_ht'),
+            'total_ttc'     => $items->sum('total_ttc'),
+            'bons'          => $items->map(fn($d) => [
+                'id'            => $d->id,
+                'numdoc'        => $d->numdoc,
+                'delivery_date' => $d->delivery_date->format('d/m/Y'),
+                'total_ttc'     => $d->total_ttc,
+                'status'        => $d->status,
+            ])
+        ];
+    })
+    ->values();
+
+    return view('admin.late-deliveries', compact('lateDeliveries'));
+}
+
+
 
 
    public function store(Request $request)

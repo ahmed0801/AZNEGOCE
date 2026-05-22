@@ -1053,7 +1053,8 @@ $('#search_item').on('input', function () {
                             ' data-discount-rate-jobber="' + (item.discount_rate_jobber || 0) + '"' +
                             ' data-discount-rate-professionnel="' + (item.discount_rate_professionnel || 0) + '"' +
                             ' data-is-active="' + item.is_active + '"' +
-                            ' data-supplier-id="' + (item.supplier_id || '') + '">' +
+                            ' data-supplier-id="' + (item.supplier_id || '') + '"' +
+' data-remise-achat="' + (item.remise_achat || 0) + '">' +
                             '<span class="badge rounded-pill text-bg-light"><b>' + item.code + '</b>' +
                             '<button class="btn btn-xs btn-outline-secondary copy-code px-1 py-0" data-code="' + item.code + '" title="Copier"><i class="fas fa-copy"></i></button></span>' +
                             ' ' + brandBadge + ' &#8660; ' + item.name + ' : ' + item.sale_price + ' € HT' +
@@ -1119,8 +1120,9 @@ $(document).on('click', '#search_results div', function () {
     var rateJobber  = parseFloat($(this).data('discount-rate-jobber'))        || 0;
     var ratePro     = parseFloat($(this).data('discount-rate-professionnel')) || 0;
     var appliedDiscount = rateGeneral;
-    if (customerType.indexOf('professionnel') !== -1) appliedDiscount = ratePro;
-    else if (customerType.indexOf('jobber') !== -1)   appliedDiscount = rateJobber;
+if (customerType.indexOf('professionnel') !== -1) appliedDiscount = ratePro;
+else if (customerType.indexOf('jobber') !== -1)   appliedDiscount = rateJobber;
+var purchaseDiscount = parseFloat($(this).data('remise-achat')) || 0;
 
     var unitPriceHt  = price.toFixed(2);
     var unitPriceTtc = (price * (1 + tvaRate / 100)).toFixed(2);
@@ -1149,7 +1151,7 @@ $(document).on('click', '#search_results div', function () {
                 '</div>' +
                 '<div class="d-flex gap-1 align-items-center justify-content-between">' +
                     '<div class="input-group input-group-sm" style="width:105px;">' +
-                        '<input type="number" min="0" max="100" step="0.1" class="form-control form-control-sm text-end purchase-discount" value="0" name="lines[' + lineCount + '][discount_coast]">' +
+'<input type="number" min="0" max="100" step="0.1" class="form-control form-control-sm text-end purchase-discount" value="' + purchaseDiscount.toFixed(2) + '" name="lines[' + lineCount + '][discount_coast]">' +
                         '<span class="input-group-text">%</span>' +
                     '</div>' +
                     '<span class="text-muted small">→</span>' +

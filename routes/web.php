@@ -831,6 +831,7 @@ Route::get('/', [AuthController::class, 'loginFormAdmin'])->name('login.form.adm
 Route::post('/admin/login', [AuthController::class, 'loginAdmin'])->name('login.admin');
 Route::get('/admin/dashboard', [AuthController::class, 'adminDashboard'])->name('admin.dashboard')->middleware('auth');
 Route::post('/admin/logout', [AuthController::class, 'logoutAdmin'])->name('logout.admin');
+Route::get('/dashboard/late-deliveries', [AuthController::class, 'lateDeliveries'])->name('dashboard.late-deliveries');
 
 
 
