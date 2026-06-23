@@ -454,6 +454,11 @@
                             <button type="submit" name="action" value="export" formaction="{{ route('salesnotes.export') }}" class="btn btn-outline-success btn-sm px-3">
                                 <i class="fas fa-file-excel me-1"></i> EXCEL
                             </button>
+                            <a href="{{ route('salesnotes.export.comptable', request()->query()) }}"
+   class="btn btn-outline-danger btn-sm px-3"
+   title="Export avec écritures comptables">
+    <i class="fas fa-file-invoice me-1"></i> EXPORT. COMPTABLE
+</a>
                             <a href="{{ route('salesnotes.list') }}" class="btn btn-outline-secondary btn-sm px-3">
                                 <i class="fas fa-undo me-1"></i> Réinitialiser
                             </a>

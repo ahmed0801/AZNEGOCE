@@ -398,6 +398,9 @@ Route::get('/salesinvoices/{id}/printsans2', [SalesInvoicesController::class, 'p
 
 Route::get('/salesinvoices/{id}/export', [SalesInvoicesController::class, 'exportSingleInvoice'])->name('salesinvoices.export_single');
 Route::get('/salesinvoices/export', [SalesInvoicesController::class, 'exportInvoices'])->name('salesinvoices.export');
+Route::get('/salesinvoices/export-comptable', [SalesInvoicesController::class, 'exportComptable'])
+    ->name('salesinvoices.export.comptable');
+
 Route::get('/sales/orders/search', [SalesInvoicesController::class, 'search'])->name('sales.orders.search');
 
 
@@ -560,7 +563,8 @@ Route::post('/delivery_notes/returns/free/store', [SalesReturnController::class,
     Route::get('/salesnotes/export', [SalesInvoicesController::class, 'exportNotes'])->name('salesnotes.export');
     Route::get('/salesnotes/export/{id}', [SalesInvoicesController::class, 'exportSingleNote'])->name('salesnotes.export_single');
     Route::get('/salesnotes/print/{id}', [SalesInvoicesController::class, 'printSingleNote'])->name('salesnotes.print_single');
-
+Route::get('/salesnotes/export-comptable', [SalesInvoicesController::class, 'exportNotesComptable'])
+    ->name('salesnotes.export.comptable');
 
     Route::get('/vehicles/{vehicle}/history', [VehicleController::class, 'index'])
      ->name('vehicles.history');

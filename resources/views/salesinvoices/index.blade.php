@@ -558,6 +558,13 @@
             <i class="fas fa-file-excel me-1"></i> EXCEL
         </button>
 
+
+        <a href="{{ route('salesinvoices.export.comptable', request()->query()) }}"
+   class="btn btn-outline-primary btn-sm px-3">
+    <i class="fas fa-file-invoice me-1"></i> EXPORTATION COMPTABLE
+</a>
+
+
     </form>
 </div>
 

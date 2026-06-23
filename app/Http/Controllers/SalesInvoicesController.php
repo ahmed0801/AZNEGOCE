@@ -34,6 +34,9 @@ use App\Mail\OrderReadyMail;
 use App\Models\EmailMessage;
 use App\Models\SalesOrder;
 use App\Models\User;
+use App\Exports\SalesInvoicesComptableExport;
+use App\Exports\SalesNotesComptableExport;
+
 
 class SalesInvoicesController extends Controller
 {
@@ -976,6 +979,16 @@ public function exportInvoices(Request $request)
         'factures_ventes_' . date('Y-m-d_H-i-s') . '.xlsx'
     );
 }
+
+
+public function exportComptable(Request $request)
+{
+    return Excel::download(
+        new SalesInvoicesComptableExport($request),
+        'ecritures_comptables_' . date('Y-m-d_H-i-s') . '.xlsx'
+    );
+}
+
 
     public function markAsPaid(Request $request, $id)
     {
@@ -2340,7 +2353,13 @@ public function markAsUninvoiced(Request $request, $id)
 
 
 
-
+public function exportNotesComptable(Request $request)
+{
+    return Excel::download(
+        new SalesNotesComptableExport($request),
+        'ecritures_comptables_avoirs_' . Carbon::now()->format('Y-m-d_H-i-s') . '.xlsx'
+    );
+}
 
 
 
