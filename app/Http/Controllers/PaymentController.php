@@ -400,13 +400,17 @@ public function cancelPayment(Request $request, $id)
         $grandTotal = $payments->sum('amount');
         $title = $request->type === 'encaissement' ? 'Journal des Encaissements' : 'Rapport des Règlements';
 
+        
+        // Après (fonctionne correctement)
+$avecDetails = $request->input('avec_details', '0') === '1';
+
         $company = CompanyInformation::first() ?? new CompanyInformation([
             'name' => 'AZ NEGOCE', 'address' => '123 Rue Fictive', 'phone' => 'XX XX XX XX XX', 'email' => 'contact@aznegoce.com'
         ]);
 
         // PDF avec options forcées
         $pdf = Pdf::loadView('pdf.payments_report', compact(
-            'paymentsByMode', 'grandTotal', 'company', 'request', 'title'
+            'paymentsByMode', 'grandTotal', 'company', 'request', 'title','avecDetails'
         ));
 
         $pdf->setPaper('a4', 'portrait');

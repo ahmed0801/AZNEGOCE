@@ -891,8 +891,6 @@
 
 
 
-
-
 <div class="modal fade" id="exportPdfModal" tabindex="-1" aria-labelledby="exportPdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -906,16 +904,29 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Date de début</label>
-                        <input type="date" name="date_from" class="form-control" 
+                        <input type="date" name="date_from" class="form-control"
                                value="{{ request('date_from', now()->format('Y-m-d')) }}" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Date de fin</label>
-                        <input type="date" name="date_to" class="form-control" 
+                        <input type="date" name="date_to" class="form-control"
                                value="{{ request('date_to', now()->format('Y-m-d')) }}" required>
                     </div>
 
-                    <!-- Garde les filtres actuels (client, fournisseur, mode, lettrage, etc.) -->
+                    {{-- Case à cocher avec détails --}}
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="hidden" name="avec_details" value="0">
+                            <input class="form-check-input" type="checkbox"
+                                   name="avec_details" id="avec_details_global"
+                                   value="1" checked>
+                            <label class="form-check-label" for="avec_details_global">
+                                <strong>Avec détails</strong>
+                                <small class="text-muted d-block">Décocher pour une synthèse uniquement</small>
+                            </label>
+                        </div>
+                    </div>
+
                     @foreach(request()->except(['date_from', 'date_to', 'page']) as $key => $value)
                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                     @endforeach
@@ -985,6 +996,24 @@
     @foreach($otherParams as $key => $value)
         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
     @endforeach
+
+    {{-- Dans le modal exportEncaissementsModal, juste avant </div> modal-body --}}
+<div class="mb-3">
+    <div class="form-check">
+        {{-- Hidden envoyé TOUJOURS, écrasé par la checkbox si cochée --}}
+        <input type="hidden" name="avec_details" value="0">
+        <input class="form-check-input" type="checkbox"
+               name="avec_details" id="avec_details"
+               value="1" checked>
+        <label class="form-check-label" for="avec_details">
+            <strong>Avec détails</strong>
+            <small class="text-muted d-block">Décocher pour une synthèse uniquement</small>
+        </label>
+    </div>
+</div>
+
+
+
 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>

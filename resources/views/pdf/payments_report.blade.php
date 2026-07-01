@@ -76,17 +76,21 @@
 
 <table>
     <thead>
-        <tr>
-            <th>Date</th>
-            <th>Client / Fournisseur</th>
-            <th>Document</th>
-            <th>Mode</th>
-            <th>Compte</th>
-            <th class="text-right">Montant</th>
-            <th>Lettrage</th>
-            <th>Réf.</th>
-        </tr>
-    </thead>
+    <tr>
+        @if($avecDetails)
+        <th>Date</th>
+        <th>Client / Fournisseur</th>
+        <th>Document</th>
+        <th>Mode</th>
+        <th>Compte</th>
+        @endif
+        <th class="text-right">Montant</th>
+        @if($avecDetails)
+        <th>Lettrage</th>
+        <th>Réf.</th>
+        @endif
+    </tr>
+</thead>
     <tbody>
 
         @forelse($paymentsByMode as $mode => $payments)
@@ -103,6 +107,7 @@
                 </td>
             </tr>
 
+            @if($avecDetails)
             @foreach($payments as $payment)
                 <tr>
                     <td class="text-center">{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
@@ -155,13 +160,20 @@
                     <td>{{ $payment->reference ?? '-' }}</td>
                 </tr>
             @endforeach
+            @endif
 
             <!-- Sous-total par mode -->
             <tr class="total-mode">
-                <td colspan="5" class="text-right"><strong>Total {{ $mode }}</strong></td>
-                <td class="text-right"><strong>{{ number_format($modeTotal, 2, ',', ' ') }} €</strong></td>
-                <td colspan="2"></td>
-            </tr>
+    <td colspan="{{ $avecDetails ? 5 : 1 }}" class="text-right">
+        <strong>Total {{ $mode }}</strong>
+    </td>
+    <td class="text-right">
+        <strong>{{ number_format($modeTotal, 2, ',', ' ') }} €</strong>
+    </td>
+    @if($avecDetails)
+    <td colspan="2"></td>
+    @endif
+</tr>
 
         @empty
             <tr><td colspan="8" class="text-center">Aucun règlement trouvé.</td></tr>
@@ -169,10 +181,16 @@
 
         <!-- TOTAL GÉNÉRAL -->
         <tr class="grand-total">
-            <td colspan="5" class="text-right"><strong>TOTAL GÉNÉRAL</strong></td>
-            <td class="text-right"><strong>{{ number_format($grandTotal, 2, ',', ' ') }} €</strong></td>
-            <td colspan="2"></td>
-        </tr>
+    <td colspan="{{ $avecDetails ? 5 : 1 }}" class="text-right">
+        <strong>TOTAL GÉNÉRAL</strong>
+    </td>
+    <td class="text-right">
+        <strong>{{ number_format($grandTotal, 2, ',', ' ') }} €</strong>
+    </td>
+    @if($avecDetails)
+    <td colspan="2"></td>
+    @endif
+</tr>
 
     </tbody>
 </table>
