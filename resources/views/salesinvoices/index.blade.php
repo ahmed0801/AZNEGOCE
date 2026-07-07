@@ -332,6 +332,14 @@
                                             &#x1F482;{{ $invoice->customer->name ?? 'N/A' }}
                                             <span class="text-muted small">({{ $invoice->numclient ?? 'N/A' }})</span>
                                             <span class="text-muted small">- 📆 <b>{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</b></span>
+                                            <a href="{{ config('services.tournee.url', 'http://127.0.0.1:8001') }}/suivi/{{ $invoice->numdoc }}"
+                                               target="_blank"
+                                               class="btn btn-sm"
+                                               title="Suivi tournée de cette facture"
+                                               style="background:#dcfce7;border:1px solid #86efac;color:#166534;font-weight:600;border-radius:6px;">
+                                                <i class="fas fa-truck-loading me-1"></i> Suivi
+                                                <i class="fas fa-external-link-alt ms-1" style="font-size:0.65rem;opacity:0.7;"></i>
+                                            </a>
                                             <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#smartViewModal{{ $invoice->id }}">
                                                 <i class="fas fa-brain me-1"></i> Smart View
                                             </button>
@@ -375,12 +383,7 @@
                                         <a href="{{ route('salesinvoices.print', $invoice->id) }}" class="btn btn-xs btn-outline-primary" title="Télécharger PDF" target="_blank">
                                             PDF <i class="fas fa-print"></i>
                                         </a>
-                                        <a href="{{ config('services.tournee.url', 'http://127.0.0.1:8001') }}/suivi/{{ $invoice->numdoc }}"
-                                           target="_blank"
-                                           class="btn btn-xs btn-outline-warning"
-                                           title="Suivi tournée de cette facture">
-                                            <i class="fas fa-route me-1"></i> Suivi
-                                        </a>
+
                                         @if($invoice->status === 'validée' && !$invoice->paid)
                                             <a href="#" data-toggle="modal" data-target="#makePaymentModal{{ $invoice->id }}" class="btn btn-xs btn-outline-danger">
                                                 Régler <i class="fas fa-credit-card"></i>

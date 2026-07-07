@@ -591,14 +591,21 @@
                             <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
                                 <div>
                                     <h6 class="mb-0">
-                                        <strong>BL N° : {{ $deliveryNote->numdoc }}</strong>
-                                        (&#x1F482;{{ $deliveryNote->numclient }} – {{ $deliveryNote->customer->name?? 'Client inconnu'}} )
-                                        <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($deliveryNote->delivery_date)->format('d/m/Y') }}</span>
-                                        
-<span class="badge badge-secondary ml-1" style="font-size: 0.75em;">
-        &#128338; créé le {{ $deliveryNote->created_at->format('d/m/Y H:i') }}
-    </span>
-                                    </h6>
+                <strong>BL N° : {{ $deliveryNote->numdoc }}</strong>
+                (&#x1F482;{{ $deliveryNote->numclient }} – {{ $deliveryNote->customer->name ?? 'Client inconnu' }})
+                <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($deliveryNote->delivery_date)->format('d/m/Y') }}</span>
+                <span class="badge badge-secondary ml-1" style="font-size:0.75em;">
+                    &#128338; créé le {{ $deliveryNote->created_at->format('d/m/Y H:i') }}
+                </span>
+                <a href="{{ config('services.tournee.url', 'http://127.0.0.1:8001') }}/suivi/{{ $deliveryNote->numdoc }}"
+                   target="_blank"
+                   class="btn btn-sm"
+                   title="Suivi tournée de ce BL"
+                   style="background:#dcfce7;border:1px solid #86efac;color:#166534;font-weight:600;border-radius:6px;">
+                    <i class="fas fa-truck-loading me-1"></i> Suivi
+                    <i class="fas fa-external-link-alt ms-1" style="font-size:0.65rem;opacity:0.7;"></i>
+                </a>
+            </h6>
      
  <span class="badge bg-{{ $deliveryNote->status === 'en_cours' ? 'warning' : ($deliveryNote->status === 'expédié' ? 'success' : 'danger') }}">
                                            BL {{ ucfirst($deliveryNote->status) }}
@@ -636,12 +643,7 @@
                                     <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $deliveryNote->id }})">
                                         ➕ Détails
                                     </button>
-                                    <a href="{{ config('services.tournee.url', 'http://127.0.0.1:8001') }}/suivi/{{ $deliveryNote->numdoc }}"
-                                       target="_blank"
-                                       class="btn btn-sm btn-outline-secondary"
-                                       title="Suivi tournée de ce BL">
-                                        <i class="fas fa-route me-1"></i> Suivi
-                                    </a>
+                                    
                                     <a href="{{ route('delivery_notes.export_single', $deliveryNote->id) }}" class="btn btn-xs btn-outline-success">
                                         EXCEL <i class="fas fa-file-excel"></i>
                                     </a>
