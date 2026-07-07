@@ -1004,7 +1004,7 @@ function addEmailField(id) {
                             <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">
                                 <i class="fas fa-industry me-1 text-warning"></i> Fournisseur <span class="text-danger">*</span>
                             </label>
-                            <select id="tbl-supplier" class="form-control form-control-sm" required>
+                            <select id="tbl-supplier" class="form-control form-control-sm select2-bl" required style="width:100%;">
                                 <option value="">-- Choisir le fournisseur --</option>
                                 @foreach(\App\Models\Supplier::orderBy('name')->get() as $supplier)
                                     <option value="{{ $supplier->id }}">{{ $supplier->name }}@if($supplier->city) — {{ $supplier->city }}@endif</option>
@@ -1107,6 +1107,23 @@ function addEmailField(id) {
             document.getElementById('tbl-supplier').value           = currentBLLine.supplierId || '';
 
             $('#tourneeBLModal').modal('show');
+
+            // Initialiser select2 après ouverture du modal
+            setTimeout(function() {
+                if ($('#tbl-supplier').hasClass('select2-hidden-accessible')) {
+                    $('#tbl-supplier').select2('destroy');
+                }
+                $('#tbl-supplier').select2({
+                    width: '100%',
+                    placeholder: 'Rechercher un fournisseur...',
+                    allowClear: true,
+                    dropdownParent: $('#tourneeBLModal'),
+                    language: { noResults: function() { return 'Aucun fournisseur trouvé'; } }
+                });
+                if (currentBLLine.supplierId) {
+                    $('#tbl-supplier').val(currentBLLine.supplierId).trigger('change');
+                }
+            }, 350);
         });
 
         // Soumettre

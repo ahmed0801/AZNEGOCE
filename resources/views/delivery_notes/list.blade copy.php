@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>AZ ERP - Liste des Bons de Livraison</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
@@ -242,6 +243,17 @@
 
 
                               <!-- test quick action  -->
+<!-- BOUTON TOURNÉE -->
+<li class="nav-item me-3">
+    <a href="{{ config('services.tournee.url', 'http://127.0.0.1:8001') }}/planning"
+       target="_blank"
+       class="btn btn-primary btn-round d-flex align-items-center gap-2 shadow-sm"
+       style="font-weight:600; padding:8px 18px; font-size:1rem;">
+        <i class="fas fa-truck-loading"></i>
+        <span>Consulter la Tournée</span>
+    </a>
+</li>
+
 <li class="nav-item topbar-icon dropdown hidden-caret">
                   <a
                     class="nav-link"
@@ -579,14 +591,21 @@
                             <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
                                 <div>
                                     <h6 class="mb-0">
-                                        <strong>BL N° : {{ $deliveryNote->numdoc }}</strong>
-                                        (&#x1F482;{{ $deliveryNote->numclient }} – {{ $deliveryNote->customer->name?? 'Client inconnu'}} )
-                                        <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($deliveryNote->delivery_date)->format('d/m/Y') }}</span>
-                                        
-<span class="badge badge-secondary ml-1" style="font-size: 0.75em;">
-        &#128338; créé le {{ $deliveryNote->created_at->format('d/m/Y H:i') }}
-    </span>
-                                    </h6>
+                <strong>BL N° : {{ $deliveryNote->numdoc }}</strong>
+                (&#x1F482;{{ $deliveryNote->numclient }} – {{ $deliveryNote->customer->name ?? 'Client inconnu' }})
+                <span class="text-muted small">- 📆{{ \Carbon\Carbon::parse($deliveryNote->delivery_date)->format('d/m/Y') }}</span>
+                <span class="badge badge-secondary ml-1" style="font-size:0.75em;">
+                    &#128338; créé le {{ $deliveryNote->created_at->format('d/m/Y H:i') }}
+                </span>
+                <a href="{{ config('services.tournee.url', 'http://127.0.0.1:8001') }}/suivi/{{ $deliveryNote->numdoc }}"
+                   target="_blank"
+                   class="btn btn-sm"
+                   title="Suivi tournée de ce BL"
+                   style="background:#dcfce7;border:1px solid #86efac;color:#166534;font-weight:600;border-radius:6px;">
+                    <i class="fas fa-truck-loading me-1"></i> Suivi
+                    <i class="fas fa-external-link-alt ms-1" style="font-size:0.65rem;opacity:0.7;"></i>
+                </a>
+            </h6>
      
  <span class="badge bg-{{ $deliveryNote->status === 'en_cours' ? 'warning' : ($deliveryNote->status === 'expédié' ? 'success' : 'danger') }}">
                                            BL {{ ucfirst($deliveryNote->status) }}
@@ -624,6 +643,7 @@
                                     <button class="btn btn-sm btn-outline-primary" onclick="toggleLines({{ $deliveryNote->id }})">
                                         ➕ Détails
                                     </button>
+                                    
                                     <a href="{{ route('delivery_notes.export_single', $deliveryNote->id) }}" class="btn btn-xs btn-outline-success">
                                         EXCEL <i class="fas fa-file-excel"></i>
                                     </a>
@@ -761,6 +781,7 @@
                                             <th>PU HT</th>
                                             <th>Remise (%)</th>
                                             <th>Total Ligne</th>
+                                            <th style="width:50px;" title="Tournée">🚚</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -772,6 +793,22 @@
                                                 <td class="text-end">{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
                                                 <td class="text-end">{{ $line->remise }}%</td>
                                                 <td class="text-end">{{ number_format($line->total_ligne_ht, 2, ',', ' ') }} €</td>
+                                                <td class="text-center p-1">
+                                                    <button type="button"
+                                                            class="btn btn-tournee btn-sm btn-outline-primary"
+                                                            style="min-width:38px;font-size:0.95rem;"
+                                                            data-bl-id="{{ $deliveryNote->id }}"
+                                                            data-bl-numdoc="{{ $deliveryNote->numdoc }}"
+                                                            data-line-id="{{ $line->id }}"
+                                                            data-article-code="{{ $line->article_code ?? '-' }}"
+                                                            data-article-name="{{ $line->item->name ?? $line->description ?? $line->article_code }}"
+                                                            data-quantity="{{ $line->delivered_quantity }}"
+                                                            data-supplier-id="{{ $line->supplier_id ?? '' }}"
+                                                            title="Ajouter à la tournée">
+                                                        <i class="fas fa-truck"></i>
+                                                    </button>
+                                                    <span id="tournee-statut-bl-{{ $line->id }}" style="font-size:0.6rem;display:block;margin-top:1px;"></span>
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -943,5 +980,199 @@ function addEmailField(id) {
 
         }
     </script>
+
+    {{-- ════ MODAL TOURNÉE BL ════ --}}
+    <div class="modal fade" id="tourneeBLModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content border-0 shadow-lg" style="border-radius:12px;overflow:hidden;">
+                <div class="modal-header text-white" style="background:linear-gradient(135deg,#1a2b4a,#2d4a8a);">
+                    <h5 class="modal-title mb-0" style="font-size:0.95rem;">
+                        <i class="fas fa-route me-2"></i> Ajouter à la tournée
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-light border mb-3 py-2 px-3">
+                        <strong id="tbl-article-code" style="font-family:monospace;font-size:1rem;color:#0040c0;background:#eef4ff;padding:2px 8px;border-radius:3px;border-left:3px solid #0040c0;"></strong>
+                        <div id="tbl-article-name" class="text-muted" style="font-size:0.82rem;margin-top:3px;"></div>
+                        <div style="font-size:0.78rem;margin-top:3px;">
+                            BL : <strong id="tbl-numdoc"></strong> &nbsp;|&nbsp; Qté : <strong id="tbl-qty"></strong>
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">
+                                <i class="fas fa-industry me-1 text-warning"></i> Fournisseur <span class="text-danger">*</span>
+                            </label>
+                            <select id="tbl-supplier" class="form-control form-control-sm" required>
+                                <option value="">-- Choisir le fournisseur --</option>
+                                @foreach(\App\Models\Supplier::orderBy('name')->get() as $supplier)
+                                    <option value="{{ $supplier->id }}">{{ $supplier->name }}@if($supplier->city) — {{ $supplier->city }}@endif</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">
+                                <i class="fas fa-user me-1 text-info"></i> Chauffeur <small class="text-muted">(optionnel)</small>
+                            </label>
+                            <select id="tbl-chauffeur" class="form-control form-control-sm">
+                                <option value="" selected>⏳ À affecter (dispatcher assignera)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">
+                                <i class="fas fa-calendar me-1 text-danger"></i> Date <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" id="tbl-date" class="form-control form-control-sm" value="{{ today()->format('Y-m-d') }}" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">
+                                <i class="fas fa-clock me-1 text-success"></i> Créneau <span class="text-danger">*</span>
+                            </label>
+                            <div class="d-flex gap-3 mt-1">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="tbl-slot" id="tbl-slot-matin" value="matin" checked>
+                                    <label class="form-check-label" for="tbl-slot-matin">🌅 Matin (8h–12h)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="tbl-slot" id="tbl-slot-apm" value="apres_midi">
+                                    <label class="form-check-label" for="tbl-slot-apm">🌇 Après-midi (13h–18h)</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">Quantité</label>
+                            <input type="number" id="tbl-quantity" class="form-control form-control-sm" min="1" value="1">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">Note (optionnel)</label>
+                            <textarea id="tbl-notes" class="form-control form-control-sm" rows="2" placeholder="Ex: demander au comptoir..."></textarea>
+                        </div>
+                    </div>
+                    <div id="tbl-error" class="alert alert-danger mt-2 py-2" style="display:none;font-size:0.82rem;"></div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Annuler</button>
+                    <button type="button" id="tbl-submit" class="btn btn-warning btn-sm px-4">
+                        <i class="fas fa-route me-1"></i> Ajouter à la tournée
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        var currentBLLine = {};
+
+        // Charger les chauffeurs
+        function loadChauffeursBL() {
+            fetch('{{ route("tournee.chauffeurs") }}')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var sel = document.getElementById('tbl-chauffeur');
+                    sel.innerHTML = '<option value="">⏳ À affecter (dispatcher assignera)</option>';
+                    data.forEach(function(c) {
+                        sel.innerHTML += '<option value="' + c.id + '">' + c.name + (c.phone ? ' — ' + c.phone : '') + '</option>';
+                    });
+                })
+                .catch(function() {
+                    document.getElementById('tbl-chauffeur').innerHTML = '<option value="">Serveur indisponible</option>';
+                });
+        }
+        loadChauffeursBL();
+
+        // Ouvrir le modal
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.btn-tournee');
+            if (!btn) return;
+
+            currentBLLine = {
+                blId:        btn.getAttribute('data-bl-id'),
+                numdoc:      btn.getAttribute('data-bl-numdoc'),
+                lineId:      btn.getAttribute('data-line-id'),
+                articleCode: btn.getAttribute('data-article-code'),
+                articleName: btn.getAttribute('data-article-name'),
+                quantity:    btn.getAttribute('data-quantity'),
+                supplierId:  btn.getAttribute('data-supplier-id') || '',
+            };
+
+            document.getElementById('tbl-article-code').textContent = currentBLLine.articleCode;
+            document.getElementById('tbl-article-name').textContent = currentBLLine.articleName;
+            document.getElementById('tbl-numdoc').textContent       = currentBLLine.numdoc;
+            document.getElementById('tbl-qty').textContent          = currentBLLine.quantity;
+            document.getElementById('tbl-quantity').value           = currentBLLine.quantity;
+            document.getElementById('tbl-error').style.display      = 'none';
+            document.getElementById('tbl-notes').value              = '';
+            document.getElementById('tbl-supplier').value           = currentBLLine.supplierId || '';
+
+            $('#tourneeBLModal').modal('show');
+        });
+
+        // Soumettre
+        document.getElementById('tbl-submit').addEventListener('click', function() {
+            var supplierId  = document.getElementById('tbl-supplier').value;
+            var chauffeurId = document.getElementById('tbl-chauffeur').value;
+            var date        = document.getElementById('tbl-date').value;
+            var slotEl      = document.querySelector('input[name="tbl-slot"]:checked');
+            var slot        = slotEl ? slotEl.value : 'matin';
+            var errorDiv    = document.getElementById('tbl-error');
+
+            errorDiv.style.display = 'none';
+            if (!supplierId) { errorDiv.textContent = 'Veuillez choisir un fournisseur.'; errorDiv.style.display = 'block'; return; }
+            if (!date)       { errorDiv.textContent = 'Veuillez choisir une date.';       errorDiv.style.display = 'block'; return; }
+
+            var btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Envoi...';
+
+            var csrfMeta = document.querySelector('meta[name="csrf-token"]') || document.querySelector('input[name="_token"]');
+            var csrf = csrfMeta ? (csrfMeta.getAttribute('content') || csrfMeta.value) : $('meta[name="csrf-token"]').attr('content') || '';
+
+            fetch('{{ route("tournee.store") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
+                body: JSON.stringify({
+                    invoice_id:      currentBLLine.blId,
+                    invoice_line_id: currentBLLine.lineId,
+                    article_code:    currentBLLine.articleCode,
+                    article_name:    currentBLLine.articleName,
+                    quantity:        document.getElementById('tbl-quantity').value,
+                    supplier_id:     supplierId,
+                    chauffeur_id:    (chauffeurId && chauffeurId !== '') ? chauffeurId : null,
+                    date_tournee:    date,
+                    slot:            slot,
+                    notes:           document.getElementById('tbl-notes').value,
+                    source_type:     'bl',
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.success) {
+                    var statut = document.getElementById('tournee-statut-bl-' + currentBLLine.lineId);
+                    if (statut) statut.innerHTML = '<span class="badge badge-warning" style="font-size:0.6rem;">🚚</span>';
+                    $('#tourneeBLModal').modal('hide');
+                    var toast = document.createElement('div');
+                    toast.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;min-width:280px;';
+                    toast.innerHTML = '<div class="alert alert-success shadow-lg d-flex align-items-center mb-0" style="border-radius:8px;"><i class="fas fa-check-circle me-2"></i>' + d.message + '</div>';
+                    document.body.appendChild(toast);
+                    setTimeout(function() { toast.remove(); }, 4000);
+                } else {
+                    errorDiv.textContent = d.error || "Erreur lors de l'ajout.";
+                    errorDiv.style.display = 'block';
+                }
+            })
+            .catch(function() {
+                errorDiv.textContent = 'Erreur réseau.';
+                errorDiv.style.display = 'block';
+            })
+            .finally(function() {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-route me-1"></i> Ajouter à la tournée';
+            });
+        });
+    })();
+    </script>
+
 </body>
 </html>
