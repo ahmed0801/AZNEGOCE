@@ -77,7 +77,8 @@ Route::post('/login', [AuthController::class, 'loginFormAdmin'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Routes protégées par le middleware personnalisé
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'single.session'])->group(function () {
+
 
 
 Route::get('/items/search', [ItemController::class, 'search'])->name('items.search');
@@ -397,9 +398,20 @@ Route::get('/salesinvoices/{id}/printsans2', [SalesInvoicesController::class, 'p
 
 Route::get('/salesinvoices/{id}/export', [SalesInvoicesController::class, 'exportSingleInvoice'])->name('salesinvoices.export_single');
 Route::get('/salesinvoices/export', [SalesInvoicesController::class, 'exportInvoices'])->name('salesinvoices.export');
+Route::get('/salesinvoices/export-comptable', [SalesInvoicesController::class, 'exportComptable'])
+    ->name('salesinvoices.export.comptable');
+
 Route::get('/sales/orders/search', [SalesInvoicesController::class, 'search'])->name('sales.orders.search');
 
 
+
+
+// Analyse comportement clients
+Route::get('/customers/behavior', [AnalyticsController::class, 'customerBehavior'])->name('customer.behavior');   // ou le middleware que tu utilises pour l'admin
+
+
+Route::post('/delivery-notes/{id}/mark-uninvoiced', [SalesInvoicesController::class, 'markAsUninvoiced'])
+    ->name('delivery_notes.mark_uninvoiced');
 
 
 // Payments reglement
@@ -430,9 +442,21 @@ Route::post('/salesinvoices/{id}/send-order-ready',
     [SalesInvoicesController::class, 'sendOrderReadyEmail'])
     ->name('salesinvoices.sendOrderReadyEmail');
 
+    Route::post('/salesorder/{id}/send-email', [SalesInvoicesController::class, 'sendEmailorder'])->name('salesorder.sendEmail');
+
+    Route::post('/salesorderwithoutref/{id}/send-email', [SalesInvoicesController::class, 'sendEmailorderwithoutref'])->name('salesorder.sendEmailwithoutref');
+
+    Route::post('/bl/{id}/send-email', [SalesInvoicesController::class, 'sendEmailbl'])->name('bl.sendEmail');
 
 
 
+
+    // routes/web.php
+Route::post('/articles/mass-update-discount', [ItemController::class, 'massUpdateDiscount'])
+    ->name('articles.mass-update-discount');
+
+
+    
  
 // General Accounts Routes
 Route::get('/generalaccounts', [GeneralAccountsController::class, 'index'])->name('generalaccounts.index');
@@ -522,13 +546,25 @@ Route::get('/salesnotes/create', [SalesInvoicesController::class, 'createSalesNo
 Route::post('/salesnotes/store', [SalesInvoicesController::class, 'storeSalesNote'])->name('salesnotes.store_sales_note');
 
 
+
+// Retour vente libre (non lié à un BL)
+Route::get('/delivery_notes/returns/free/create', [SalesReturnController::class, 'createFree'])
+    ->name('delivery_notes.returns.free.create');
+
+Route::post('/delivery_notes/returns/free/store', [SalesReturnController::class, 'storeFree'])
+    ->name('delivery_notes.returns.free.store');
+
+
+    
+
     Route::get('/salesnotes/list', [SalesInvoicesController::class, 'notesList'])->name('salesnotes.list');
     Route::get('/salesnotes/edit/{id}', [SalesInvoicesController::class, 'editSalesNote'])->name('salesnotes.edit');
     Route::put('/salesnotes/update/{id}', [SalesInvoicesController::class, 'updateSalesNote'])->name('salesnotes.update');
     Route::get('/salesnotes/export', [SalesInvoicesController::class, 'exportNotes'])->name('salesnotes.export');
     Route::get('/salesnotes/export/{id}', [SalesInvoicesController::class, 'exportSingleNote'])->name('salesnotes.export_single');
     Route::get('/salesnotes/print/{id}', [SalesInvoicesController::class, 'printSingleNote'])->name('salesnotes.print_single');
-
+Route::get('/salesnotes/export-comptable', [SalesInvoicesController::class, 'exportNotesComptable'])
+    ->name('salesnotes.export.comptable');
 
     Route::get('/vehicles/{vehicle}/history', [VehicleController::class, 'index'])
      ->name('vehicles.history');
@@ -581,7 +617,10 @@ Route::get('/analytics', [AnalyticsController::class, 'index'])
 
 
 
-
+// Conversion devis → commande vente
+Route::post('/sales/convert-devis/{id}', [SalesController::class, 'convertDevisToCommande'])
+     ->name('sales.convert-devis');
+     
 
 
 
@@ -796,6 +835,7 @@ Route::get('/', [AuthController::class, 'loginFormAdmin'])->name('login.form.adm
 Route::post('/admin/login', [AuthController::class, 'loginAdmin'])->name('login.admin');
 Route::get('/admin/dashboard', [AuthController::class, 'adminDashboard'])->name('admin.dashboard')->middleware('auth');
 Route::post('/admin/logout', [AuthController::class, 'logoutAdmin'])->name('logout.admin');
+Route::get('/dashboard/late-deliveries', [AuthController::class, 'lateDeliveries'])->name('dashboard.late-deliveries');
 
 
 

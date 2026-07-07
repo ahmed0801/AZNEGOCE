@@ -13,6 +13,15 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'paniers/synchronise',
+            '/api/articles/update-barcode',  // appelé par le hub tournée
+            'chauffeur/scan',
+        'chauffeur/scan/confirm',
+        'chauffeur/probleme',
+        'chauffeur/logout',
+ 
+        // Routes API (protégées par X-API-KEY)
+        'api/tournee/*',
+
 
     ];
 }

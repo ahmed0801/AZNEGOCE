@@ -207,6 +207,20 @@
                         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
 
 
+
+                         <!-- BOUTON CONSULTER LA TOURNÉE -->
+<li class="nav-item me-3">
+    <a href="https://tournee.destockpa.fr" 
+       target="_blank"
+       class="btn btn-primary btn-round d-flex align-items-center gap-2 shadow-sm"
+       style="font-weight: 600; padding: 8px 18px; font-size: 1rem;">
+        <i class="fas fa-truck-loading"></i>
+        <span>Consulter la Tournée</span>
+    </a>
+</li>
+
+
+
                               <!-- test quick action  -->
 <li class="nav-item topbar-icon dropdown hidden-caret">
                   <a

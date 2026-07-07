@@ -29,5 +29,10 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    
+    'tournee' => [
+    'url' => env('TOURNEE_API_URL', 'http://127.0.0.1:8001'),
+    'key' => env('TOURNEE_API_KEY', ''),
+],
 
 ];

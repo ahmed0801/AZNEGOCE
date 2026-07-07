@@ -650,6 +650,12 @@
                                             <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
                                         </button>
                                         <div class="dropdown-menu">
+
+                                                                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#sendEmailModal{{ $deliveryNote->id }}">
+        <i class="fas fa-envelope text-success"></i> Envoyer par mail
+</a>
+
+
                                             @if($deliveryNote->status === 'en_cours')
                                                 <a class="dropdown-item" href="{{ route('delivery_notes.edit', $deliveryNote->id) }}">
                                                     <i class="fas fa-edit"></i> Modifier
@@ -691,6 +697,7 @@
 
 
 @endif
+
 
 
 
@@ -778,8 +785,83 @@
                                 </div>
                             </div>
                         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        
+ <!-- test avec reference -->
+<div class="modal fade" id="sendEmailModal{{ $deliveryNote->id }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="{{ route('bl.sendEmail', $deliveryNote->id) }}" method="POST">
+        @csrf
+        <div class="modal-header">
+          <h5 class="modal-title">📧 Envoyer le bon de livraison :  {{ $deliveryNote->numdoc }}</h5>
+          <button type="button" class="btn-close" data-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Email principal -->
+          <div class="form-group mb-2">
+            <label>Email client</label>
+            <input type="email" name="emails[]" class="form-control" value="{{ $deliveryNote->customer->email ?? '' }}" required>
+          </div>
+
+          <!-- Autres destinataires -->
+          <div id="extraEmails{{ $deliveryNote->id }}"></div>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addEmailField({{ $deliveryNote->id }})">
+            + Ajouter un autre destinataire
+          </button>
+
+          <!-- Message -->
+          <div class="form-group mt-3">
+            <label>Message</label>
+            <textarea name="message" class="form-control" rows="4">{{ \App\Models\EmailMessage::first()->messagefacturevente ?? 'Veuillez trouver ci-joint votre bon de livraison.' }}</textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Envoyer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+ <!-- test avec reference -->
+<script>
+function addEmailField(id) {
+    let container = document.getElementById('extraEmails' + id);
+    let input = document.createElement('input');
+    input.type = 'email';
+    input.name = 'emails[]';
+    input.placeholder = 'Autre email';
+    input.classList.add('form-control','mt-2');
+    container.appendChild(input);
+}
+</script>
+<!-- end mail  -->
+
+
+
+
                     @endforeach
                 </div>
+
+
+
+
+
+
+
 
                                                                                 <!-- Pagination avec conservation des filtres -->
 <div class="d-flex justify-content-center mt-3">
