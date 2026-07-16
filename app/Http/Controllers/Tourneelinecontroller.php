@@ -28,6 +28,16 @@ class TourneeLineController extends Controller
 
     // ── GET /tournee/lines/{invoiceId} ────────────────────────
     // Retourne les lignes de tournée d'une facture
+    // ── GET /tournee/parametres ───────────────────────────────
+    // Appelée par le modal JS pour récupérer les créneaux du jour
+    public function getParametres(Request $request)
+    {
+        $date   = $request->input('date', today()->toDateString());
+        $result = $this->tournee->getParametres($date);
+        return response()->json($result);
+    }
+
+    // ── GET /tournee/lines/{id} ───────────────────────────────
     public function linesForInvoice(Request $request, $invoiceId)
     {
         $sourceType = $request->input('source_type', 'facture_vente');
@@ -48,7 +58,7 @@ class TourneeLineController extends Controller
             'supplier_id'     => 'nullable|integer|exists:suppliers,id',
             'chauffeur_id'    => 'nullable|integer',
             'date_tournee'    => 'required|date',
-            'slot'            => 'required|in:matin,apres_midi',
+            'slot' => 'required|string|max:50',
             'notes'           => 'nullable|string|max:500',
         ]);
 

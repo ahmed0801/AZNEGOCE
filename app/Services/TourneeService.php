@@ -107,6 +107,52 @@ class TourneeService
         }
     }
 
+    // ── Paramètres tournée du jour ───────────────────────────
+    // Retourne les créneaux disponibles, le créneau suggéré
+    // et si le site est ouvert ce jour
+    public function getParametres(string $date = null)
+    {
+        try {
+            $params = [];
+            if ($date) {
+                $params['date'] = $date;
+            }
+
+            $response = Http::timeout(5)
+                ->withHeaders($this->headers())
+                ->get($this->baseUrl . '/api/tournee/parametres', $params);
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            // Si l'API ne répond pas, retourner des paramètres par défaut
+            return $this->defaultParametres();
+
+        } catch (\Exception $e) {
+            Log::warning('TourneeService::getParametres: ' . $e->getMessage());
+            return $this->defaultParametres();
+        }
+    }
+
+    // Paramètres par défaut si le hub est inaccessible
+    private function defaultParametres(): array
+    {
+        return [
+            'is_open'         => true,
+            'message'         => null,
+            'creneaux'        => [
+                ['label' => '9h-11h',  'debut' => '09:00', 'fin' => '11:00'],
+                ['label' => '11h-12h', 'debut' => '11:00', 'fin' => '12:00'],
+                ['label' => '13h-14h', 'debut' => '13:00', 'fin' => '14:00'],
+                ['label' => '15h-16h', 'debut' => '15:00', 'fin' => '16:00'],
+                ['label' => '17h-18h', 'debut' => '17:00', 'fin' => '18:00'],
+            ],
+            'creneaux_dispo'  => [],
+            'creneau_suggere' => '9h-11h',
+        ];
+    }
+
     // ── Synchroniser les fournisseurs ─────────────────────────
     public function syncFournisseurs(array $fournisseurs)
     {

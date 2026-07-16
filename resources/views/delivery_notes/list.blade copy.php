@@ -1004,7 +1004,7 @@ function addEmailField(id) {
                             <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">
                                 <i class="fas fa-industry me-1 text-warning"></i> Fournisseur <span class="text-danger">*</span>
                             </label>
-                            <select id="tbl-supplier" class="form-control form-control-sm" required>
+                            <select id="tbl-supplier" class="form-control form-control-sm select2-bl" required style="width:100%;">
                                 <option value="">-- Choisir le fournisseur --</option>
                                 @foreach(\App\Models\Supplier::orderBy('name')->get() as $supplier)
                                     <option value="{{ $supplier->id }}">{{ $supplier->name }}@if($supplier->city) — {{ $supplier->city }}@endif</option>
@@ -1029,16 +1029,21 @@ function addEmailField(id) {
                             <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">
                                 <i class="fas fa-clock me-1 text-success"></i> Créneau <span class="text-danger">*</span>
                             </label>
-                            <div class="d-flex gap-3 mt-1">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="tbl-slot" id="tbl-slot-matin" value="matin" checked>
-                                    <label class="form-check-label" for="tbl-slot-matin">🌅 Matin (8h–12h)</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="tbl-slot" id="tbl-slot-apm" value="apres_midi">
-                                    <label class="form-check-label" for="tbl-slot-apm">🌇 Après-midi (13h–18h)</label>
-                                </div>
-                            </div>
+                            
+                            {{-- APRÈS --}}
+<div id="tbl-slot-loading" class="text-muted" style="font-size:0.8rem;">
+    <i class="fas fa-spinner fa-spin me-1"></i> Chargement des créneaux...
+</div>
+<div id="tbl-slot-closed" class="alert alert-danger py-2 px-3" style="display:none;font-size:0.82rem;">
+    <i class="fas fa-ban me-1"></i>
+    <strong id="tbl-slot-closed-msg"></strong>
+</div>
+<div id="tbl-slot-options" class="d-flex flex-wrap gap-2 mt-1" style="display:none;"></div>
+<div id="tbl-slot-warning" class="alert alert-warning py-1 px-2 mt-2" style="display:none;font-size:0.75rem;">
+    <i class="fas fa-exclamation-triangle me-1"></i>
+    <strong>Créneau modifié</strong> — vous prenez la responsabilité de ce changement.
+</div>
+
                         </div>
                         <div class="col-md-4">
                             <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">Quantité</label>
@@ -1082,6 +1087,86 @@ function addEmailField(id) {
         }
         loadChauffeursBL();
 
+
+        // ── Créneaux dynamiques BL ──────────────────────────────
+var autoSlotBL = null;
+
+function loadCreneauxBL(date) {
+    var url     = '/tournee/parametres' + (date ? '?date=' + date : '');
+    var loading = document.getElementById('tbl-slot-loading');
+    var closed  = document.getElementById('tbl-slot-closed');
+    var options = document.getElementById('tbl-slot-options');
+    var submit  = document.getElementById('tbl-submit');
+
+    loading.style.display = 'block';
+    closed.style.display  = 'none';
+    options.style.display = 'none';
+    submit.disabled       = false;
+
+    fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            loading.style.display = 'none';
+
+            if (!data.is_open) {
+                closed.style.display = 'block';
+                document.getElementById('tbl-slot-closed-msg').textContent = data.message || 'Fermé ce jour';
+                submit.disabled = true;
+                return;
+            }
+
+            var creneaux = (data.creneaux_dispo && data.creneaux_dispo.length)
+                ? data.creneaux_dispo : data.creneaux;
+
+            if (!creneaux || !creneaux.length) {
+                closed.style.display = 'block';
+                document.getElementById('tbl-slot-closed-msg').textContent = 'Plus de créneau disponible';
+                submit.disabled = true;
+                return;
+            }
+
+            autoSlotBL = data.creneau_suggere;
+            options.innerHTML = '';
+            var icons = {'9h-11h':'🌅','11h-12h':'🕚','13h-14h':'🌞','15h-16h':'🕒','17h-18h':'🌇'};
+
+            creneaux.forEach(function(c, i) {
+                var isDefault = (c.label === autoSlotBL);
+                var div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML =
+                    '<input class="form-check-input" type="radio" name="tbl-slot" id="tbl-slot-' + i + '" value="' + c.label + '"' + (isDefault ? ' checked' : '') + '>' +
+                    '<label class="form-check-label" for="tbl-slot-' + i + '" style="font-size:0.82rem;">' +
+                    (icons[c.label] || '🕐') + ' ' + c.label +
+                    (isDefault ? ' <span class="badge bg-success ms-1" style="font-size:0.6rem;">Suggéré</span>' : '') +
+                    '</label>';
+                options.appendChild(div);
+            });
+            options.style.display = 'flex';
+        })
+        .catch(function() {
+            loading.style.display = 'none';
+            options.style.display = 'flex';
+            var defaults = [{label:'9h-11h'},{label:'11h-12h'},{label:'13h-14h'},{label:'15h-16h'},{label:'17h-18h'}];
+            var icons = {'9h-11h':'🌅','11h-12h':'🕚','13h-14h':'🌞','15h-16h':'🕒','17h-18h':'🌇'};
+            defaults.forEach(function(c, i) {
+                var div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML = '<input class="form-check-input" type="radio" name="tbl-slot" id="tbl-slot-' + i + '" value="' + c.label + '"' + (i===0?' checked':'') + '>' +
+                    '<label class="form-check-label" for="tbl-slot-' + i + '" style="font-size:0.82rem;">' + icons[c.label] + ' ' + c.label + '</label>';
+                options.appendChild(div);
+            });
+        });
+}
+
+// Détecter changement manuel du créneau
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.name === 'tbl-slot') {
+        var warning = document.getElementById('tbl-slot-warning');
+        warning.style.display = (e.target.value !== autoSlotBL) ? 'block' : 'none';
+    }
+});
+
+
         // Ouvrir le modal
         document.addEventListener('click', function(e) {
             var btn = e.target.closest('.btn-tournee');
@@ -1106,7 +1191,31 @@ function addEmailField(id) {
             document.getElementById('tbl-notes').value              = '';
             document.getElementById('tbl-supplier').value           = currentBLLine.supplierId || '';
 
+
+
+            loadCreneauxBL(document.getElementById('tbl-date').value);
+document.getElementById('tbl-date').addEventListener('change', function() {
+    loadCreneauxBL(this.value);
+});
+
             $('#tourneeBLModal').modal('show');
+
+            // Initialiser select2 après ouverture du modal
+            setTimeout(function() {
+                if ($('#tbl-supplier').hasClass('select2-hidden-accessible')) {
+                    $('#tbl-supplier').select2('destroy');
+                }
+                $('#tbl-supplier').select2({
+                    width: '100%',
+                    placeholder: 'Rechercher un fournisseur...',
+                    allowClear: true,
+                    dropdownParent: $('#tourneeBLModal'),
+                    language: { noResults: function() { return 'Aucun fournisseur trouvé'; } }
+                });
+                if (currentBLLine.supplierId) {
+                    $('#tbl-supplier').val(currentBLLine.supplierId).trigger('change');
+                }
+            }, 350);
         });
 
         // Soumettre
@@ -1131,7 +1240,12 @@ function addEmailField(id) {
 
             fetch('{{ route("tournee.store") }}', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
+                credentials: 'same-origin',
+headers: { 
+    'Content-Type': 'application/json', 
+    'X-CSRF-TOKEN': csrf,
+    'X-Requested-With': 'XMLHttpRequest'
+},
                 body: JSON.stringify({
                     invoice_id:      currentBLLine.blId,
                     invoice_line_id: currentBLLine.lineId,

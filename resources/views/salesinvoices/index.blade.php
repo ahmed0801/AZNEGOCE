@@ -799,7 +799,7 @@
     </label>
     <select id="t-supplier" class="form-select form-select-sm select2" required style="width: 100%;">
         <option value="">-- Choisir le fournisseur --</option>
-        @foreach(\App\Models\Supplier::orderBy('name')->get() as $supplier)
+        @foreach(\App\Models\Supplier::where('has_b2b', true)->orderBy('name')->get() as $supplier)
             <option value="{{ $supplier->id }}">
                 {{ $supplier->name }}
                 @if($supplier->city) — {{ $supplier->city }} @endif
@@ -822,23 +822,29 @@
                                 Date <span class="text-danger">*</span>
                             </label>
                             <input type="date" id="t-date" class="form-control form-control-sm"
-                                   value="{{ today()->format('Y-m-d') }}" required>
+       value="{{ today()->format('Y-m-d') }}" required>
+
                         </div>
                         <div class="col-12">
                             <label class="form-label mb-1" style="font-size:0.82rem; font-weight:700;">
                                 <i class="fas fa-clock me-1 text-success"></i>
                                 Créneau <span class="text-danger">*</span>
                             </label>
-                            <div class="d-flex gap-3 mt-1">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="t-slot" id="t-slot-matin" value="matin" checked>
-                                    <label class="form-check-label" for="t-slot-matin" style="font-size:0.85rem;">🌅 Matin (8h–12h)</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="t-slot" id="t-slot-apm" value="apres_midi">
-                                    <label class="form-check-label" for="t-slot-apm" style="font-size:0.85rem;">🌇 Après-midi (13h–18h)</label>
-                                </div>
-                            </div>
+                            
+                            {{-- APRÈS --}}
+<div id="slot-loading" class="text-muted" style="font-size:0.8rem;">
+    <i class="fas fa-spinner fa-spin me-1"></i> Chargement des créneaux...
+</div>
+<div id="slot-closed" class="alert alert-danger py-2 px-3" style="display:none;font-size:0.82rem;">
+    <i class="fas fa-ban me-1"></i>
+    <strong id="slot-closed-msg"></strong>
+</div>
+<div id="slot-options" class="d-flex flex-wrap gap-2 mt-1" style="display:none;"></div>
+<div id="slot-warning" class="alert alert-warning py-1 px-2 mt-2" style="display:none;font-size:0.75rem;">
+    <i class="fas fa-exclamation-triangle me-1"></i>
+    <strong>Créneau modifié</strong> — vous prenez la responsabilité de ce changement.
+</div>
+
                         </div>
                         <div class="col-md-4">
                             <label class="form-label mb-1" style="font-size:0.82rem; font-weight:700;">Quantité</label>
@@ -846,8 +852,15 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label mb-1" style="font-size:0.82rem; font-weight:700;">Note (optionnel)</label>
+                            
                             <textarea id="t-notes" class="form-control form-control-sm" rows="2"
-                                      placeholder="Ex: demander au comptoir, pièce urgente..."></textarea>
+          placeholder="Ex: demander au comptoir, pièce urgente..."></textarea>
+<button type="button" onclick="document.getElementById('t-notes').value='🚪 Livraison directe au client'; this.style.background='#dcfce7'; this.style.borderColor='#86efac'; this.style.color='#166534'; this.innerHTML='✅ Noté — Livraison directe au client';"
+        style="background:#ede9fe;border:1px solid #a78bfa;color:#6f42c1;border-radius:6px;
+               padding:3px 10px;font-size:0.72rem;font-weight:600;cursor:pointer;margin-top:4px;">
+    🚪 Livraison directe au client
+</button>
+
                         </div>
                     </div>
 
@@ -893,6 +906,108 @@
                 });
         }
         loadChauffeurs();
+
+
+        // ── Créneaux dynamiques depuis l'API ─────────────────────
+var autoSlot = null;
+
+function loadCreneaux(date) {
+    var url     = '/tournee/parametres' + (date ? '?date=' + date : '');
+    var loading = document.getElementById('slot-loading');
+    var closed  = document.getElementById('slot-closed');
+    var options = document.getElementById('slot-options');
+    var submit  = document.getElementById('t-submit');
+
+    loading.style.display = 'block';
+    closed.style.display  = 'none';
+    options.style.display = 'none';
+    submit.disabled       = false;
+
+    fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            loading.style.display = 'none';
+
+            // Si plus de créneaux aujourd'hui → basculer sur demain automatiquement
+            // Si plus de créneaux aujourd'hui → basculer sur demain et recharger
+            if (data.pour_demain) {
+                document.getElementById('t-date').value = data.date;
+                if (data.message) {
+                    var info = document.createElement('div');
+                    info.className = 'alert alert-info py-1 px-2 mb-2';
+                    info.style.fontSize = '0.78rem';
+                    info.innerHTML = '<i class="fas fa-info-circle me-1"></i>' + data.message;
+                    document.getElementById('slot-loading').insertAdjacentElement('afterend', info);
+                    setTimeout(function() { if(info.parentNode) info.parentNode.removeChild(info); }, 5000);
+                }
+                loadCreneaux(data.date);
+                return;
+            }
+
+            if (!data.is_open) {
+                closed.style.display = 'block';
+                document.getElementById('slot-closed-msg').textContent = data.message || 'Fermé ce jour';
+                submit.disabled = true;
+                return;
+            }
+
+            var creneaux = (data.creneaux_dispo && data.creneaux_dispo.length)
+                ? data.creneaux_dispo : data.creneaux;
+
+            if (!creneaux || !creneaux.length) {
+                closed.style.display = 'block';
+                document.getElementById('slot-closed-msg').textContent = 'Plus de créneau disponible aujourd\'hui';
+                submit.disabled = true;
+                return;
+            }
+
+            autoSlot = data.creneau_suggere;
+            options.innerHTML = '';
+            var icons = {'9h-11h':'🌅','11h-12h':'🕚','13h-14h':'🌞','15h-16h':'🕒','17h-18h':'🌇'};
+
+            creneaux.forEach(function(c, i) {
+                var isDefault = (c.label === autoSlot);
+                var div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML =
+                    '<input class="form-check-input" type="radio" name="t-slot" id="t-slot-' + i + '" value="' + c.label + '"' + (isDefault ? ' checked' : '') + '>' +
+                    '<label class="form-check-label" for="t-slot-' + i + '" style="font-size:0.82rem;">' +
+                    (icons[c.label] || '🕐') + ' ' + c.label +
+                    (isDefault ? ' <span class="badge bg-success ms-1" style="font-size:0.6rem;">Suggéré</span>' : '') +
+                    '</label>';
+                options.appendChild(div);
+            });
+
+            options.style.display = 'flex';
+        })
+        .catch(function() {
+            loading.style.display = 'none';
+            options.style.display = 'flex';
+            var defaults = [
+                {label:'9h-11h'},{label:'11h-12h'},{label:'13h-14h'},
+                {label:'15h-16h'},{label:'17h-18h'}
+            ];
+            var icons = {'9h-11h':'🌅','11h-12h':'🕚','13h-14h':'🌞','15h-16h':'🕒','17h-18h':'🌇'};
+            defaults.forEach(function(c, i) {
+                var div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML =
+                    '<input class="form-check-input" type="radio" name="t-slot" id="t-slot-' + i + '" value="' + c.label + '"' + (i===0?' checked':'') + '>' +
+                    '<label class="form-check-label" for="t-slot-' + i + '" style="font-size:0.82rem;">' + icons[c.label] + ' ' + c.label + '</label>';
+                options.appendChild(div);
+            });
+        });
+}
+
+// Détecter si le vendeur change le créneau suggéré
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.name === 't-slot') {
+        var warning = document.getElementById('slot-warning');
+        warning.style.display = (e.target.value !== autoSlot) ? 'block' : 'none';
+    }
+});
+
+
 
         // ====================== INITIALISATION SELECT2 ======================
         function initSupplierSelect2() {
@@ -948,8 +1063,15 @@
             loadExistingLines(currentLine.invoiceId);
 
             // Ouvrir le modal
-            var modal = new bootstrap.Modal(document.getElementById('tourneeModal'));
-            modal.show();
+            // Charger les créneaux puis ouvrir le modal
+loadCreneaux(document.getElementById('t-date').value);
+document.getElementById('t-date').addEventListener('change', function() {
+    loadCreneaux(this.value);
+});
+
+// Ouvrir le modal
+var modal = new bootstrap.Modal(document.getElementById('tourneeModal'));
+modal.show();
 
             // Initialiser Select2 après l'ouverture du modal
             setTimeout(() => {
@@ -1047,6 +1169,7 @@
 
             fetch('{{ route("tournee.store") }}', {
                 method: 'POST',
+                    credentials: 'same-origin',   // ← ajouter cette ligne
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
                 body: JSON.stringify({
                     invoice_id:      currentLine.invoiceId,

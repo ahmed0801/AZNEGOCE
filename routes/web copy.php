@@ -41,6 +41,7 @@ use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupportController;
+use App\Http\Controllers\TourneeLineController;
 use App\Http\Controllers\TvaController;
 use App\Http\Controllers\TvaGroupController;
 use App\Http\Controllers\UnitController;
@@ -824,9 +825,46 @@ Route::post('/articles/preview', [ArticleImportController::class, 'preview'])->n
 
 
 
+
+
+// test tournee
+ // Chauffeurs disponibles (pour le select du modal)
+    Route::get('/tournee/chauffeurs', [TourneeLineController::class, 'chauffeurs'])
+        ->name('tournee.chauffeurs');
+ 
+    // Lignes de tournée d'une facture (pour afficher les statuts)
+    Route::get('/tournee/lines/{invoiceId}', [TourneeLineController::class, 'linesForInvoice'])
+        ->name('tournee.lines');
+ 
+    // Ajouter une ligne
+    Route::post('/tournee/lines', [TourneeLineController::class, 'store'])
+        ->name('tournee.store');
+ 
+    // Supprimer une ligne
+    Route::delete('/tournee/lines/{id}', [TourneeLineController::class, 'destroy'])
+        ->name('tournee.destroy');
+ 
+    // Synchroniser les fournisseurs vers le hub (appel admin)
+    Route::post('/tournee/sync-fournisseurs', [TourneeLineController::class, 'syncFournisseurs'])
+        ->name('tournee.sync.fournisseurs');
+ 
+
+
+
+
     
     // Autres routes protégées...
 });
+
+
+
+// tournee
+// Route API sans auth (protégée par X-API-KEY)
+// Le hub tournée appelle cette route pour mettre à jour les barcodes
+Route::post('/api/articles/update-barcode', [TourneeLineController::class, 'updateBarcode'])
+    ->name('articles.update.barcode');
+
+
 
 
 

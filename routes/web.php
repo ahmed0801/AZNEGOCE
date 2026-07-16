@@ -850,7 +850,7 @@ Route::post('/articles/preview', [ArticleImportController::class, 'preview'])->n
  
 
 
-
+Route::get('/tournee/parametres', [TourneeLineController::class, 'getParametres'])->name('tournee.parametres');
 
     
     // Autres routes protégées...

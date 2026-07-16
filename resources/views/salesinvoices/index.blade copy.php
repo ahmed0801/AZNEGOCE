@@ -332,6 +332,14 @@
                                             &#x1F482;{{ $invoice->customer->name ?? 'N/A' }}
                                             <span class="text-muted small">({{ $invoice->numclient ?? 'N/A' }})</span>
                                             <span class="text-muted small">- 📆 <b>{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</b></span>
+                                            <a href="{{ config('services.tournee.url', 'http://127.0.0.1:8001') }}/suivi/{{ $invoice->numdoc }}"
+                                               target="_blank"
+                                               class="btn btn-sm"
+                                               title="Suivi tournée de cette facture"
+                                               style="background:#dcfce7;border:1px solid #86efac;color:#166534;font-weight:600;border-radius:6px;">
+                                                <i class="fas fa-truck-loading me-1"></i> Suivi
+                                                <i class="fas fa-external-link-alt ms-1" style="font-size:0.65rem;opacity:0.7;"></i>
+                                            </a>
                                             <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#smartViewModal{{ $invoice->id }}">
                                                 <i class="fas fa-brain me-1"></i> Smart View
                                             </button>
@@ -375,6 +383,7 @@
                                         <a href="{{ route('salesinvoices.print', $invoice->id) }}" class="btn btn-xs btn-outline-primary" title="Télécharger PDF" target="_blank">
                                             PDF <i class="fas fa-print"></i>
                                         </a>
+
                                         @if($invoice->status === 'validée' && !$invoice->paid)
                                             <a href="#" data-toggle="modal" data-target="#makePaymentModal{{ $invoice->id }}" class="btn btn-xs btn-outline-danger">
                                                 Régler <i class="fas fa-credit-card"></i>
@@ -701,6 +710,36 @@
         function toggleLines(id) {
             var section = document.getElementById('lines-' + id);
             section.classList.toggle('d-none');
+            // Charger les statuts tournée si on ouvre
+            if (!section.classList.contains('d-none')) {
+                loadTourneeStatuts(id, 'facture_vente');
+            }
+        }
+
+        function loadTourneeStatuts(sourceId, sourceType) {
+            fetch('/tournee/lines/' + sourceId + '?source_type=' + sourceType)
+                .then(function(r) { return r.json(); })
+                .then(function(lines) {
+                    var colorMap = {
+                        'en_attente': 'secondary', 'assigné': 'primary',
+                        'en_route': 'info', 'recupere': 'success',
+                        'au_magasin': 'dark', 'probleme': 'danger'
+                    };
+                    lines.forEach(function(l) {
+                        var span = document.getElementById('tournee-statut-' + l.source_line_id);
+                        var btn  = span ? span.previousElementSibling : null;
+                        if (span) {
+                            span.innerHTML = '<span class="badge badge-' + (colorMap[l.statut] || 'secondary') + '">'
+                                + l.statut_label + '</span>';
+                        }
+                        if (btn && btn.classList.contains('btn-tournee')) {
+                            btn.classList.remove('btn-outline-primary');
+                            btn.classList.add('btn-warning');
+                            btn.title = 'Déjà en tournée — ' + l.statut_label + (l.chauffeur ? ' (' + l.chauffeur + ')' : '');
+                        }
+                    });
+                })
+                .catch(function() {}); // silencieux si tournée indisponible
         }
 
         function addEmailField(id) {
@@ -760,7 +799,7 @@
     </label>
     <select id="t-supplier" class="form-select form-select-sm select2" required style="width: 100%;">
         <option value="">-- Choisir le fournisseur --</option>
-        @foreach(\App\Models\Supplier::orderBy('name')->get() as $supplier)
+        @foreach(\App\Models\Supplier::where('has_b2b', true)->orderBy('name')->get() as $supplier)
             <option value="{{ $supplier->id }}">
                 {{ $supplier->name }}
                 @if($supplier->city) — {{ $supplier->city }} @endif
@@ -771,10 +810,10 @@
                         <div class="col-md-6">
                             <label class="form-label mb-1" style="font-size:0.82rem; font-weight:700;">
                                 <i class="fas fa-user me-1 text-info"></i>
-                                Chauffeur <span class="text-danger">*</span>
+                                Chauffeur <small class="text-muted">(optionnel)</small>
                             </label>
-                            <select id="t-chauffeur" class="form-select form-select-sm" required>
-                                <option value="">Chargement...</option>
+                            <select id="t-chauffeur" class="form-select form-select-sm">
+                                <option value="" selected>⏳ À affecter (dispatcher assignera)</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -783,23 +822,29 @@
                                 Date <span class="text-danger">*</span>
                             </label>
                             <input type="date" id="t-date" class="form-control form-control-sm"
-                                   value="{{ today()->format('Y-m-d') }}" required>
+       value="{{ today()->format('Y-m-d') }}" required>
+
                         </div>
                         <div class="col-12">
                             <label class="form-label mb-1" style="font-size:0.82rem; font-weight:700;">
                                 <i class="fas fa-clock me-1 text-success"></i>
                                 Créneau <span class="text-danger">*</span>
                             </label>
-                            <div class="d-flex gap-3 mt-1">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="t-slot" id="t-slot-matin" value="matin" checked>
-                                    <label class="form-check-label" for="t-slot-matin" style="font-size:0.85rem;">🌅 Matin (8h–12h)</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="t-slot" id="t-slot-apm" value="apres_midi">
-                                    <label class="form-check-label" for="t-slot-apm" style="font-size:0.85rem;">🌇 Après-midi (13h–18h)</label>
-                                </div>
-                            </div>
+                            
+                            {{-- APRÈS --}}
+<div id="slot-loading" class="text-muted" style="font-size:0.8rem;">
+    <i class="fas fa-spinner fa-spin me-1"></i> Chargement des créneaux...
+</div>
+<div id="slot-closed" class="alert alert-danger py-2 px-3" style="display:none;font-size:0.82rem;">
+    <i class="fas fa-ban me-1"></i>
+    <strong id="slot-closed-msg"></strong>
+</div>
+<div id="slot-options" class="d-flex flex-wrap gap-2 mt-1" style="display:none;"></div>
+<div id="slot-warning" class="alert alert-warning py-1 px-2 mt-2" style="display:none;font-size:0.75rem;">
+    <i class="fas fa-exclamation-triangle me-1"></i>
+    <strong>Créneau modifié</strong> — vous prenez la responsabilité de ce changement.
+</div>
+
                         </div>
                         <div class="col-md-4">
                             <label class="form-label mb-1" style="font-size:0.82rem; font-weight:700;">Quantité</label>
@@ -842,7 +887,7 @@
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     var sel = document.getElementById('t-chauffeur');
-                    sel.innerHTML = '<option value="">-- Choisir chauffeur --</option>';
+                    sel.innerHTML = '<option value="">⏳ À affecter (dispatcher assignera)</option>';
                     data.forEach(function (c) {
                         sel.innerHTML += '<option value="' + c.id + '">'
                             + c.name + (c.phone ? ' — ' + c.phone : '') + '</option>';
@@ -854,6 +899,108 @@
                 });
         }
         loadChauffeurs();
+
+
+        // ── Créneaux dynamiques depuis l'API ─────────────────────
+var autoSlot = null;
+
+function loadCreneaux(date) {
+    var url     = '/tournee/parametres' + (date ? '?date=' + date : '');
+    var loading = document.getElementById('slot-loading');
+    var closed  = document.getElementById('slot-closed');
+    var options = document.getElementById('slot-options');
+    var submit  = document.getElementById('t-submit');
+
+    loading.style.display = 'block';
+    closed.style.display  = 'none';
+    options.style.display = 'none';
+    submit.disabled       = false;
+
+    fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            loading.style.display = 'none';
+
+            // Si plus de créneaux aujourd'hui → basculer sur demain automatiquement
+            // Si plus de créneaux aujourd'hui → basculer sur demain et recharger
+            if (data.pour_demain) {
+                document.getElementById('t-date').value = data.date;
+                if (data.message) {
+                    var info = document.createElement('div');
+                    info.className = 'alert alert-info py-1 px-2 mb-2';
+                    info.style.fontSize = '0.78rem';
+                    info.innerHTML = '<i class="fas fa-info-circle me-1"></i>' + data.message;
+                    document.getElementById('slot-loading').insertAdjacentElement('afterend', info);
+                    setTimeout(function() { if(info.parentNode) info.parentNode.removeChild(info); }, 5000);
+                }
+                loadCreneaux(data.date);
+                return;
+            }
+
+            if (!data.is_open) {
+                closed.style.display = 'block';
+                document.getElementById('slot-closed-msg').textContent = data.message || 'Fermé ce jour';
+                submit.disabled = true;
+                return;
+            }
+
+            var creneaux = (data.creneaux_dispo && data.creneaux_dispo.length)
+                ? data.creneaux_dispo : data.creneaux;
+
+            if (!creneaux || !creneaux.length) {
+                closed.style.display = 'block';
+                document.getElementById('slot-closed-msg').textContent = 'Plus de créneau disponible aujourd\'hui';
+                submit.disabled = true;
+                return;
+            }
+
+            autoSlot = data.creneau_suggere;
+            options.innerHTML = '';
+            var icons = {'9h-11h':'🌅','11h-12h':'🕚','13h-14h':'🌞','15h-16h':'🕒','17h-18h':'🌇'};
+
+            creneaux.forEach(function(c, i) {
+                var isDefault = (c.label === autoSlot);
+                var div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML =
+                    '<input class="form-check-input" type="radio" name="t-slot" id="t-slot-' + i + '" value="' + c.label + '"' + (isDefault ? ' checked' : '') + '>' +
+                    '<label class="form-check-label" for="t-slot-' + i + '" style="font-size:0.82rem;">' +
+                    (icons[c.label] || '🕐') + ' ' + c.label +
+                    (isDefault ? ' <span class="badge bg-success ms-1" style="font-size:0.6rem;">Suggéré</span>' : '') +
+                    '</label>';
+                options.appendChild(div);
+            });
+
+            options.style.display = 'flex';
+        })
+        .catch(function() {
+            loading.style.display = 'none';
+            options.style.display = 'flex';
+            var defaults = [
+                {label:'9h-11h'},{label:'11h-12h'},{label:'13h-14h'},
+                {label:'15h-16h'},{label:'17h-18h'}
+            ];
+            var icons = {'9h-11h':'🌅','11h-12h':'🕚','13h-14h':'🌞','15h-16h':'🕒','17h-18h':'🌇'};
+            defaults.forEach(function(c, i) {
+                var div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML =
+                    '<input class="form-check-input" type="radio" name="t-slot" id="t-slot-' + i + '" value="' + c.label + '"' + (i===0?' checked':'') + '>' +
+                    '<label class="form-check-label" for="t-slot-' + i + '" style="font-size:0.82rem;">' + icons[c.label] + ' ' + c.label + '</label>';
+                options.appendChild(div);
+            });
+        });
+}
+
+// Détecter si le vendeur change le créneau suggéré
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.name === 't-slot') {
+        var warning = document.getElementById('slot-warning');
+        warning.style.display = (e.target.value !== autoSlot) ? 'block' : 'none';
+    }
+});
+
+
 
         // ====================== INITIALISATION SELECT2 ======================
         function initSupplierSelect2() {
@@ -909,8 +1056,15 @@
             loadExistingLines(currentLine.invoiceId);
 
             // Ouvrir le modal
-            var modal = new bootstrap.Modal(document.getElementById('tourneeModal'));
-            modal.show();
+            // Charger les créneaux puis ouvrir le modal
+loadCreneaux(document.getElementById('t-date').value);
+document.getElementById('t-date').addEventListener('change', function() {
+    loadCreneaux(this.value);
+});
+
+// Ouvrir le modal
+var modal = new bootstrap.Modal(document.getElementById('tourneeModal'));
+modal.show();
 
             // Initialiser Select2 après l'ouverture du modal
             setTimeout(() => {
@@ -992,11 +1146,7 @@
                 errorDiv.style.display = 'block'; 
                 return; 
             }
-            if (!chauffeurId) { 
-                errorDiv.textContent = 'Veuillez choisir un chauffeur.';    
-                errorDiv.style.display = 'block'; 
-                return; 
-            }
+            // chauffeur optionnel — le dispatcher peut l'assigner depuis le planning
             if (!date)        { 
                 errorDiv.textContent = 'Veuillez choisir une date.';        
                 errorDiv.style.display = 'block'; 
@@ -1012,6 +1162,7 @@
 
             fetch('{{ route("tournee.store") }}', {
                 method: 'POST',
+                    credentials: 'same-origin',   // ← ajouter cette ligne
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
                 body: JSON.stringify({
                     invoice_id:      currentLine.invoiceId,
@@ -1020,7 +1171,7 @@
                     article_name:    currentLine.articleName,
                     quantity:        document.getElementById('t-quantity').value,
                     supplier_id:     supplierId,
-                    chauffeur_id:    chauffeurId,
+                    chauffeur_id:    (chauffeurId && chauffeurId !== '') ? chauffeurId : null,
                     date_tournee:    date,
                     slot:            slot,
                     notes:           document.getElementById('t-notes').value,
