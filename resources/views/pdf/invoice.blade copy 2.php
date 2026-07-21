@@ -93,6 +93,11 @@ footer {
     text-align: center;
     padding: 6px 15px;
 }
+
+.no-print {
+    display: none !important;
+}
+
 footer p { margin: 2px 0; }
 footer .hours {
     color: #0056b3;
@@ -240,40 +245,80 @@ td {
 <body>
 
 <!-- === HEADER === -->
-<div class="header-box">
-    <table class="header-table">
+<div class="header-box" style="padding:0; overflow:hidden;">
+    <table style="width:100%; border-collapse:collapse; border:none;">
         <tr>
-            <td class="header-left">
-                <img src="{{ public_path($company->logo_path) }}" alt="Logo">
-                <p class="address">{{ $company->address }}</p>
-                <p>Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
-         style="height: 14px; vertical-align: middle; margin-right: 1px;">  {{ $company->phone ?? '-' }}</p>
-                <p>Email : {{ $company->email ?? '-' }}</p>
+            {{-- ── COLONNE 1 : Logo + Coordonnées société ── --}}
+            <td style="width:33%; vertical-align:top; padding:10px 12px;
+                        border-right:2px solid #007bff;">
+                <img src="{{ public_path($company->logo_path) }}" alt="Logo" style="height:80px;">
+                <div style="margin-top:5px; font-size:9px; color:#555; line-height:1.4;">
+                    {{ $company->address }}
+                </div>
+                <div style="font-size:9px; color:#555; margin-top:2px;">
+                    Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
+                          style="height:11px; vertical-align:middle; margin-right:1px;">
+                    {{ $company->phone ?? '-' }}
+                </div>
+                <div style="font-size:9px; color:#555;">
+                    {{ $company->email ?? '-' }}
+                </div>
             </td>
 
-            <td class="header-right">
-                <h2>Facture N° {{ $invoice->numdoc }}</h2>
-                <img src="{{ $barcode }}" alt="Code-barres">
-                <div class="details">
-                    <p><strong>Date :</strong> {{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</p>
-                    <p><strong>Client :</strong> {{ $invoice->customer->name ?? '-' }}</p>
-                    @if($invoice->customer->address)
-                    <p><strong>Adresse :</strong> {{ $invoice->customer->address ?? '-' }} , {{ $invoice->customer->address_delivery ?? '-' }}</p>
-                    @endif
-                    <!-- <p><strong>N° Client :</strong> {{ $invoice->numclient ?? '-' }}</p> -->
-                    <p><strong>Véhicule :</strong> {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}</p>
-                        
-                    @if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
-                                                   @php
-        $firstDeliveryNote = $invoice->deliveryNotes->first();
-    @endphp
-    @if($firstDeliveryNote)
-            <p><strong> Vendeur :</strong>   {{ $firstDeliveryNote->vendeur}}</p>
-
-    @endif
-    @endif
-
+            {{-- ── COLONNE 2 : Coordonnées CLIENT centrées ── --}}
+            <td style="width:34%; vertical-align:middle; padding:10px 12px;
+                        border-right:2px solid #007bff; text-align:center;">
+                <div style="font-size:7px; font-weight:bold; text-transform:uppercase;
+                            color:#007bff; letter-spacing:1px; margin-bottom:5px;">
+                    CLIENT
                 </div>
+                <div style="font-size:13px; font-weight:bold; color:#003f88;">
+                    {{ $invoice->customer->name ?? '-' }}
+                </div>
+                @if($invoice->customer->address)
+                <div style="font-size:9px; color:#555; margin-top:3px; line-height:1.4;">
+                    {{ $invoice->customer->address }}
+                </div>
+                @endif
+                @if(($invoice->customer->address_delivery ?? null) || ($invoice->customer->city ?? null))
+<div style="font-size:9px; color:#555;">
+    {{ $invoice->customer->address_delivery ?? '' }} {{ $invoice->customer->city ?? '' }}
+</div>
+@endif
+                @if($invoice->vehicle)
+                <div style="font-size:9px; color:#444; margin-top:4px;
+                            background:#eef4ff; border-radius:4px; padding:2px 6px;
+                            display:inline-block;">
+                    {{ $invoice->vehicle->license_plate }}
+                    ({{ $invoice->vehicle->brand_name }} {{ $invoice->vehicle->model_name }})
+                </div>
+                @endif
+            </td>
+
+            {{-- ── COLONNE 3 : Facture + Code-barres + Date + Vendeur ── --}}
+            <td style="width:33%; vertical-align:top; padding:10px 12px; text-align:right;">
+                <div style="font-size:15px; font-weight:bold; color:#0056b3;
+            text-transform:uppercase; margin-bottom:3px; text-align:right;">
+    FACTURE N°<br>{{ $invoice->numdoc }}
+</div>
+                <img src="{{ $barcode }}" alt="Code-barres" style="height:25px; margin-bottom:4px;">
+                <div style="font-size:10px; color:#333; margin-top:3px;">
+                    <strong>Date :</strong>
+                    {{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}
+                </div>
+                @if($invoice->due_date && $invoice->due_date != $invoice->invoice_date)
+                <div style="font-size:9px; color:#888;">
+                    Échéance : {{ \Carbon\Carbon::parse($invoice->due_date)->format('d/m/Y') }}
+                </div>
+                @endif
+                @if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
+                    @php $firstDeliveryNote = $invoice->deliveryNotes->first(); @endphp
+                    @if($firstDeliveryNote)
+                    <div style="font-size:9px; color:#333; margin-top:6px; text-align:right;">
+    Vendeur : <strong>{{ $firstDeliveryNote->vendeur }}</strong>
+</div>
+                    @endif
+                @endif
             </td>
         </tr>
     </table>
@@ -289,6 +334,7 @@ td {
     <table class="items-table">
         <thead>
             <tr>
+                <th style="width:12px; padding:2px;"></th>
                 <th>Code</th>
                 <th>Désignation</th>
                 <th>Qté</th>
@@ -364,6 +410,10 @@ td {
                 <!-- Lignes du groupe -->
                 @foreach($lines as $line)
                     <tr style="background-color: {{ str_starts_with($header, 'Retour') ? '#fffafa' : 'inherit' }};">
+                        <td style="width:12px; text-align:center; padding:2px;">
+                            <span style="display:inline-block;width:9px;height:9px;
+                                         border:1px solid #555;border-radius:1px;"></span>
+                        </td>
                         <td>{{ $line->article_code ?? '-' }}</td>
                         <td>
                             @if(str_starts_with($header, 'Retour'))
@@ -388,6 +438,31 @@ td {
                         </td>
                     </tr>
                 @endforeach
+
+                <!-- ──────────────────────────────────────────────── -->
+    <!-- AJOUT DU TOTAL PAR GROUPE (seulement si groupée) -->
+    <!-- ──────────────────────────────────────────────── -->
+    @if($invoice->type === "groupée")
+        @php
+            // Calcul du total TTC pour ce groupe uniquement
+            $groupTotalTTC = $lines->sum('total_ligne_ttc');
+        @endphp
+
+        <tr style="font-weight: bold; background-color: #f8f9fa;">
+            <td colspan="5" style="text-align: right; padding: 8px; border-top: 2px solid #ddd;">
+                Total {{ str_starts_with($header, 'Retour') ? 'retour' : 'bon de livraison' }} TTC :
+            </td>
+            <td colspan="2" style="text-align: right; padding: 8px; border-top: 2px solid #ddd; color: #1976d2;">
+                {{ number_format($groupTotalTTC, 2, ',', ' ') }} €
+            </td>
+        </tr>
+
+        <!-- Optionnel : petite ligne de séparation visuelle -->
+        <tr>
+            <td colspan="7" style="height: 8px; border: none; background: transparent;"></td>
+        </tr>
+    @endif
+    
             @endforeach
 
             @if($invoice->lines->isEmpty())
@@ -500,8 +575,8 @@ td {
 </main>
 
 <!-- === FOOTER === -->
-<footer>
-    <p><strong>{{ $company->name }}</strong> | Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
+<footer class="{{ $invoice->type === 'groupée' ? 'no-print' : '' }}">
+        <p><strong>{{ $company->name }}</strong> | Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
          style="height: 14px; vertical-align: middle; margin-right: 1px;"> {{ $company->phone ?? '-' }} | Email : {{ $company->email ?? '-' }}</p>
     <p>SIRET : {{ $company->matricule_fiscal }}</p>
     <p class="hours">🕒 Horaires : Lundi à Samedi de 9h à 19h — Fermé le Vendredi de 12h30 à 15h</p>
