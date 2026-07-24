@@ -70,9 +70,9 @@ class TourneeLineController extends Controller
             $doc = Invoice::find($request->invoice_id);
         }
 
-        if (!$doc && $request->invoice_id) {
-    return response()->json(['success' => false, 'error' => 'Document introuvable'], 404);
-}
+        if (!$doc) {
+            return response()->json(['success' => false, 'error' => 'Document introuvable'], 404);
+        }
 
         $supplier = $request->supplier_id
             ? Supplier::find($request->supplier_id)
@@ -83,8 +83,8 @@ class TourneeLineController extends Controller
 
         $result = $this->tournee->addLine([
             'source_type'           => $sourceType,
-            'source_id'             => $doc ? $doc->id : null,
-'source_numdoc'         => $doc ? $doc->numdoc : ('CS-' . date('YmdHis')),
+            'source_id'             => $doc->id,
+            'source_numdoc'         => $doc->numdoc,
             'source_line_id'        => $request->invoice_line_id,
             'article_code'          => $request->article_code,
             'article_name'          => $request->article_name,

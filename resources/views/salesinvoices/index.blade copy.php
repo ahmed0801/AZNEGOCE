@@ -852,8 +852,15 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label mb-1" style="font-size:0.82rem; font-weight:700;">Note (optionnel)</label>
+                            
                             <textarea id="t-notes" class="form-control form-control-sm" rows="2"
-                                      placeholder="Ex: demander au comptoir, pièce urgente..."></textarea>
+          placeholder="Ex: demander au comptoir, pièce urgente..."></textarea>
+<button type="button" onclick="document.getElementById('t-notes').value='🚪 Livraison directe au client'; this.style.background='#dcfce7'; this.style.borderColor='#86efac'; this.style.color='#166534'; this.innerHTML='✅ Noté — Livraison directe au client';"
+        style="background:#ede9fe;border:1px solid #a78bfa;color:#6f42c1;border-radius:6px;
+               padding:3px 10px;font-size:0.72rem;font-weight:600;cursor:pointer;margin-top:4px;">
+    🚪 Livraison directe au client
+</button>
+
                         </div>
                     </div>
 

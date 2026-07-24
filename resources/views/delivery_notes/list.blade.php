@@ -243,16 +243,34 @@
 
 
                               <!-- test quick action  -->
-<!-- BOUTON TOURNÉE -->
+
+                              
+
+                                        <!-- BOUTON CONSULTER LA TOURNÉE -->
 <li class="nav-item me-3">
-    <a href="{{ config('services.tournee.url', 'http://127.0.0.1:8001') }}/planning"
+    <a href="https://tournee.destockpa.fr" 
        target="_blank"
        class="btn btn-primary btn-round d-flex align-items-center gap-2 shadow-sm"
-       style="font-weight:600; padding:8px 18px; font-size:1rem;">
+       style="font-weight: 600; padding: 8px 18px; font-size: 1rem;">
         <i class="fas fa-truck-loading"></i>
-        <span>Consulter la Tournée</span>
+        <span>Suivi Tournée</span>
     </a>
 </li>
+
+
+
+<li class="nav-item me-2">
+    <button type="button"
+            class="btn btn-warning btn-round d-flex align-items-center gap-2 shadow-sm"
+            style="font-weight:600; padding:8px 16px; font-size:0.95rem;"
+            onclick="window.openStockModal()">
+        <i class="fas fa-box"></i>
+        <span>+ Stock Tournée</span>
+    </button>
+</li>
+
+
+
 
 <li class="nav-item topbar-icon dropdown hidden-caret">
                   <a
@@ -1338,6 +1356,368 @@ headers: {
         });
     })();
     </script>
+
+
+
+
+
+
+
+
+
+
+
+
+{{-- ════ MODAL COMMANDE STOCK TOURNÉE ════ --}}
+<div class="modal fade" id="stockTourneeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content border-0 shadow-lg" style="border-radius:12px;overflow:hidden;">
+            <div class="modal-header text-white" style="background:linear-gradient(135deg,#d97706,#b45309);">
+                <h5 class="modal-title mb-0" style="font-size:0.95rem;">
+                    <i class="fas fa-box me-2"></i> Commande Stock — Ajouter à la tournée
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-2">
+
+                    {{-- Article via Select2 AJAX --}}
+                    <div class="col-12">
+                        <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">
+                            <i class="fas fa-search me-1 text-warning"></i> Article <span class="text-danger">*</span>
+                        </label>
+                        <select id="st-article" class="form-control form-control-sm" style="width:100%;" required>
+                            <option value="">Taper la référence ou désignation...</option>
+                        </select>
+                        <input type="hidden" id="st-article-code" value="">
+                        <input type="hidden" id="st-article-name" value="">
+                    </div>
+
+                    <div class="col-6">
+                        <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">Quantité</label>
+                        <input type="number" id="st-quantity" class="form-control form-control-sm" min="1" value="1">
+                    </div>
+
+                    {{-- Fournisseur --}}
+                    <div class="col-12">
+                        <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">
+                            <i class="fas fa-industry me-1 text-warning"></i> Fournisseur <span class="text-danger">*</span>
+                        </label>
+                        <select id="st-supplier" class="form-control form-control-sm" required style="width:100%;">
+                            <option value="">-- Choisir le fournisseur --</option>
+                            @foreach(\App\Models\Supplier::where('has_b2b', true)->orderBy('name')->get() as $supplier)
+                                <option value="{{ $supplier->id }}">{{ $supplier->name }}@if($supplier->city) — {{ $supplier->city }}@endif</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Chauffeur + Date --}}
+                    <div class="col-6">
+                        <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">
+                            <i class="fas fa-user me-1 text-info"></i> Chauffeur <small class="text-muted">(optionnel)</small>
+                        </label>
+                        <select id="st-chauffeur" class="form-control form-control-sm">
+                            <option value="" selected>⏳ À affecter</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">
+                            <i class="fas fa-calendar me-1 text-danger"></i> Date <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" id="st-date" class="form-control form-control-sm"
+                               value="{{ today()->format('Y-m-d') }}" required
+                               onchange="window.loadCreneauxStock(this.value)">
+                    </div>
+
+                    {{-- Créneaux --}}
+                    <div class="col-12">
+                        <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">
+                            <i class="fas fa-clock me-1 text-success"></i> Créneau <span class="text-danger">*</span>
+                        </label>
+                        <div id="st-slot-loading" class="text-muted" style="font-size:0.8rem;">
+                            <i class="fas fa-spinner fa-spin me-1"></i> Chargement...
+                        </div>
+                        <div id="st-slot-closed" class="alert alert-danger py-2 px-3" style="display:none;font-size:0.82rem;">
+                            <i class="fas fa-ban me-1"></i> <strong id="st-slot-closed-msg"></strong>
+                        </div>
+                        <div id="st-slot-options" class="d-flex flex-wrap gap-2 mt-1" style="display:none;"></div>
+                        <div id="st-slot-warning" class="alert alert-warning py-1 px-2 mt-2" style="display:none;font-size:0.75rem;">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            <strong>Créneau modifié</strong> — vous prenez la responsabilité.
+                        </div>
+                    </div>
+
+                    {{-- Note --}}
+                    <div class="col-12">
+                        <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">Note (optionnel)</label>
+                        <textarea id="st-notes" class="form-control form-control-sm" rows="2"
+                                  placeholder="Ex: commande urgente..."></textarea>
+                        <button type="button"
+                                onclick="document.getElementById('st-notes').value='&#128682; Livraison directe au client'; this.style.background='#dcfce7'; this.style.color='#166534'; this.innerHTML='&#10003; Noté';"
+                                style="background:#ede9fe;border:1px solid #a78bfa;color:#6f42c1;border-radius:6px;
+                                       padding:3px 10px;font-size:0.72rem;font-weight:600;cursor:pointer;margin-top:4px;">
+                            &#128682; Livraison directe au client
+                        </button>
+                    </div>
+
+                </div>
+                <div id="st-error" class="alert alert-danger mt-2 py-2" style="display:none;font-size:0.82rem;"></div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Annuler</button>
+                <button type="button" id="st-submit" class="btn btn-warning btn-sm px-4 fw-bold">
+                    <i class="fas fa-box me-1"></i> Ajouter à la tournée
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var autoSlotStock = null;
+
+    // ── Ouvrir le modal ──────────────────────────────────────
+    window.openStockModal = function() {
+        document.getElementById('st-article-code').value = '';
+        document.getElementById('st-article-name').value = '';
+        document.getElementById('st-quantity').value     = '1';
+        document.getElementById('st-notes').value        = '';
+        document.getElementById('st-error').style.display = 'none';
+        document.getElementById('st-date').value         = '{{ today()->format("Y-m-d") }}';
+
+        // Init Select2 article
+        if ($('#st-article').hasClass('select2-hidden-accessible')) {
+            $('#st-article').select2('destroy');
+        }
+        $('#st-article').val(null).trigger('change');
+
+        // Init Select2 fournisseur
+        if ($('#st-supplier').hasClass('select2-hidden-accessible')) {
+            $('#st-supplier').select2('destroy');
+        }
+
+        window.loadCreneauxStock(document.getElementById('st-date').value);
+        loadChauffeursSt();
+
+        $('#stockTourneeModal').modal('show');
+
+        setTimeout(function() {
+            // Select2 Article AJAX
+            $('#st-article').select2({
+                width: '100%',
+                placeholder: 'Taper la référence ou désignation...',
+                minimumInputLength: 2,
+                dropdownParent: $('#stockTourneeModal'),
+                language: { inputTooShort: function() { return 'Tapez au moins 2 caractères'; } },
+                ajax: {
+                    url: '{{ route("items.search") }}',
+                    dataType: 'json',
+                    delay: 300,
+                    data: function(params) { return { term: params.term }; },
+                    processResults: function(data) { return { results: data }; }
+                }
+            });
+
+            $('#st-article').on('select2:select', function(e) {
+                var data = e.params.data;
+                document.getElementById('st-article-code').value = data.id;
+                document.getElementById('st-article-name').value = data.text.split(' - ')[1] || data.text;
+            });
+
+            // Select2 Fournisseur
+            $('#st-supplier').select2({
+                width: '100%',
+                placeholder: 'Rechercher un fournisseur...',
+                allowClear: true,
+                dropdownParent: $('#stockTourneeModal'),
+                language: { noResults: function() { return 'Aucun fournisseur trouvé'; } }
+            });
+
+        }, 350);
+    };
+
+    // ── Charger les chauffeurs ──────────────────────────────
+    function loadChauffeursSt() {
+        fetch('{{ route("tournee.chauffeurs") }}')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var sel = document.getElementById('st-chauffeur');
+                sel.innerHTML = '<option value="">⏳ À affecter</option>';
+                data.forEach(function(c) {
+                    sel.innerHTML += '<option value="' + c.id + '">' + c.name + '</option>';
+                });
+            });
+    }
+
+    // ── Charger les créneaux (globale) ──────────────────────
+    window.loadCreneauxStock = function(date) {
+        var url     = '/tournee/parametres' + (date ? '?date=' + date : '');
+        var loading = document.getElementById('st-slot-loading');
+        var closed  = document.getElementById('st-slot-closed');
+        var options = document.getElementById('st-slot-options');
+        var submit  = document.getElementById('st-submit');
+
+        loading.style.display = 'block';
+        closed.style.display  = 'none';
+        options.style.display = 'none';
+        submit.disabled       = false;
+
+        fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                loading.style.display = 'none';
+
+                if (data.pour_demain) {
+                    document.getElementById('st-date').value = data.date;
+                    window.loadCreneauxStock(data.date);
+                    return;
+                }
+
+                if (!data.is_open) {
+                    closed.style.display = 'block';
+                    document.getElementById('st-slot-closed-msg').textContent = data.message || 'Fermé ce jour';
+                    submit.disabled = true;
+                    return;
+                }
+
+                var creneaux = (data.creneaux_dispo && data.creneaux_dispo.length)
+                    ? data.creneaux_dispo : data.creneaux;
+
+                if (!creneaux || !creneaux.length) {
+                    closed.style.display = 'block';
+                    document.getElementById('st-slot-closed-msg').textContent = 'Plus de créneau disponible';
+                    submit.disabled = true;
+                    return;
+                }
+
+                autoSlotStock      = data.creneau_suggere;
+                options.innerHTML  = '';
+                var icons = { '9h-11h':'🌅','11h-12h':'🕚','13h-14h':'🌞','15h-16h':'🕒','17h-18h':'🌇' };
+
+                creneaux.forEach(function(c, i) {
+                    var isDefault = (c.label === autoSlotStock);
+                    var div = document.createElement('div');
+                    div.className = 'form-check';
+                    div.innerHTML =
+                        '<input class="form-check-input" type="radio" name="st-slot" id="st-slot-' + i + '" value="' + c.label + '"' + (isDefault ? ' checked' : '') + '>' +
+                        '<label class="form-check-label" for="st-slot-' + i + '" style="font-size:0.82rem;">' +
+                        (icons[c.label] || '🕐') + ' ' + c.label +
+                        (isDefault ? ' <span class="badge bg-success ms-1" style="font-size:0.6rem;">Suggéré</span>' : '') +
+                        '</label>';
+                    options.appendChild(div);
+                });
+
+                options.style.display   = 'flex';
+                options.style.flexWrap  = 'wrap';
+                options.style.gap       = '8px';
+            })
+            .catch(function() {
+                loading.style.display = 'none';
+                options.style.display = 'flex';
+                [{label:'9h-11h'},{label:'11h-12h'},{label:'13h-14h'},{label:'15h-16h'},{label:'17h-18h'}].forEach(function(c,i) {
+                    var div = document.createElement('div');
+                    div.className = 'form-check';
+                    div.innerHTML = '<input class="form-check-input" type="radio" name="st-slot" id="st-slot-' + i + '" value="' + c.label + '"' + (i===0?' checked':'') + '>' +
+                        '<label class="form-check-label" for="st-slot-' + i + '" style="font-size:0.82rem;">' + c.label + '</label>';
+                    options.appendChild(div);
+                });
+            });
+    };
+
+    // ── Détecter changement manuel créneau ──────────────────
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.name === 'st-slot') {
+            var warning = document.getElementById('st-slot-warning');
+            warning.style.display = (e.target.value !== autoSlotStock) ? 'block' : 'none';
+        }
+    });
+
+    // ── Soumettre ───────────────────────────────────────────
+    document.getElementById('st-submit').addEventListener('click', function() {
+        var articleCode = document.getElementById('st-article-code').value.trim();
+        var articleName = document.getElementById('st-article-name').value.trim() || articleCode;
+        var supplierId  = document.getElementById('st-supplier').value;
+        var chauffeurId = document.getElementById('st-chauffeur').value;
+        var date        = document.getElementById('st-date').value;
+        var slotEl      = document.querySelector('input[name="st-slot"]:checked');
+        var slot        = slotEl ? slotEl.value : null;
+        var errorDiv    = document.getElementById('st-error');
+
+        errorDiv.style.display = 'none';
+        if (!articleCode) { errorDiv.textContent = 'Choisir un article.';        errorDiv.style.display = 'block'; return; }
+        if (!supplierId)  { errorDiv.textContent = 'Choisir un fournisseur.';    errorDiv.style.display = 'block'; return; }
+        if (!slot)        { errorDiv.textContent = 'Choisir un créneau.';        errorDiv.style.display = 'block'; return; }
+
+        var btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Envoi...';
+
+        var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch('{{ route("tournee.store") }}', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                invoice_id:      null,
+                invoice_line_id: null,
+                article_code:    articleCode,
+                article_name:    articleName,
+                quantity:        document.getElementById('st-quantity').value,
+                supplier_id:     supplierId,
+                chauffeur_id:    (chauffeurId && chauffeurId !== '') ? chauffeurId : null,
+                date_tournee:    date,
+                slot:            slot,
+                slot_modified:   (slot !== autoSlotStock),
+                notes:           document.getElementById('st-notes').value,
+                source_type:     'commande_stock',
+            })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.success) {
+                $('#stockTourneeModal').modal('hide');
+                var toast = document.createElement('div');
+                toast.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;min-width:280px;';
+                toast.innerHTML = '<div class="alert alert-success shadow-lg d-flex align-items-center mb-0" style="border-radius:8px;">' +
+                    '<i class="fas fa-check-circle me-2"></i>' + (d.message || 'Ajouté à la tournée !') + '</div>';
+                document.body.appendChild(toast);
+                setTimeout(function() { toast.remove(); }, 4000);
+                document.getElementById('st-article-code').value = '';
+                document.getElementById('st-article-name').value = '';
+                document.getElementById('st-notes').value = '';
+                if ($('#st-article').hasClass('select2-hidden-accessible')) {
+                    $('#st-article').val(null).trigger('change');
+                }
+            } else {
+                errorDiv.textContent = d.error || "Erreur lors de l'ajout.";
+                errorDiv.style.display = 'block';
+            }
+        })
+        .catch(function() {
+            errorDiv.textContent = 'Erreur réseau.';
+            errorDiv.style.display = 'block';
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-box me-1"></i> Ajouter à la tournée';
+        });
+    });
+
+    // Charger les créneaux au démarrage
+    window.loadCreneauxStock('{{ today()->format("Y-m-d") }}');
+    loadChauffeursSt();
+
+})();
+</script>
+
+
+
 
 </body>
 </html>

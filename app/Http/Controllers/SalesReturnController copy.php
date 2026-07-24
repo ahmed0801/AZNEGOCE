@@ -254,4 +254,10 @@ class SalesReturnController extends Controller
         $filters = $request->only(['customer_id', 'delivery_note_id', 'type', 'date_from', 'date_to']);
         return Excel::download(new SalesReturnsExport($filters), 'retours_vente.xlsx');
     }
+
+
+
+
+
+    
 }

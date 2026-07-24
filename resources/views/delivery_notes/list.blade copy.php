@@ -972,6 +972,35 @@ function addEmailField(id) {
         function toggleLines(id) {
             const section = document.getElementById('lines-' + id);
             section.classList.toggle('d-none');
+            if (!section.classList.contains('d-none')) {
+                loadTourneeStatutsBL(id);
+            }
+        }
+
+        function loadTourneeStatutsBL(sourceId) {
+            fetch('/tournee/lines/' + sourceId + '?source_type=bl')
+                .then(function(r) { return r.json(); })
+                .then(function(lines) {
+                    var colorMap = {
+                        'en_attente': 'secondary', 'assigné': 'primary',
+                        'en_route': 'info', 'recupere': 'success',
+                        'au_magasin': 'dark', 'probleme': 'danger'
+                    };
+                    lines.forEach(function(l) {
+                        var span = document.getElementById('tournee-statut-bl-' + l.source_line_id);
+                        var btn  = span ? span.previousElementSibling : null;
+                        if (span) {
+                            span.innerHTML = '<span class="badge badge-' + (colorMap[l.statut] || 'secondary') + '">'
+                                + l.statut_label + '</span>';
+                        }
+                        if (btn && btn.classList.contains('btn-tournee')) {
+                            btn.classList.remove('btn-outline-primary');
+                            btn.classList.add('btn-warning');
+                            btn.title = 'Déjà en tournée — ' + l.statut_label + (l.chauffeur ? ' (' + l.chauffeur + ')' : '');
+                        }
+                    });
+                })
+                .catch(function() {});
         }
 
          function setCommentForm(url, id) {
@@ -1006,7 +1035,7 @@ function addEmailField(id) {
                             </label>
                             <select id="tbl-supplier" class="form-control form-control-sm select2-bl" required style="width:100%;">
                                 <option value="">-- Choisir le fournisseur --</option>
-                                @foreach(\App\Models\Supplier::orderBy('name')->get() as $supplier)
+                                @foreach(\App\Models\Supplier::where('has_b2b', true)->orderBy('name')->get() as $supplier)
                                     <option value="{{ $supplier->id }}">{{ $supplier->name }}@if($supplier->city) — {{ $supplier->city }}@endif</option>
                                 @endforeach
                             </select>
@@ -1051,7 +1080,14 @@ function addEmailField(id) {
                         </div>
                         <div class="col-12">
                             <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">Note (optionnel)</label>
-                            <textarea id="tbl-notes" class="form-control form-control-sm" rows="2" placeholder="Ex: demander au comptoir..."></textarea>
+                            <textarea id="tbl-notes" class="form-control form-control-sm" rows="2"
+          placeholder="Ex: demander au comptoir, pièce urgente..."></textarea>
+<button type="button" onclick="document.getElementById('tbl-notes').value='🚪 Livraison directe au client'; this.style.background='#dcfce7'; this.style.borderColor='#86efac'; this.style.color='#166534'; this.innerHTML='✅ Noté — Livraison directe au client';"
+        style="background:#ede9fe;border:1px solid #a78bfa;color:#6f42c1;border-radius:6px;
+               padding:3px 10px;font-size:0.72rem;font-weight:600;cursor:pointer;margin-top:4px;">
+    🚪 Livraison directe au client
+</button>
+
                         </div>
                     </div>
                     <div id="tbl-error" class="alert alert-danger mt-2 py-2" style="display:none;font-size:0.82rem;"></div>
@@ -1107,6 +1143,21 @@ function loadCreneauxBL(date) {
         .then(function(r) { return r.json(); })
         .then(function(data) {
             loading.style.display = 'none';
+
+            // Si plus de créneaux aujourd'hui → basculer sur demain
+           if (data.pour_demain) {
+                document.getElementById('tbl-date').value = data.date;
+                if (data.message) {
+                    var info = document.createElement('div');
+                    info.className = 'alert alert-info py-1 px-2 mb-2';
+                    info.style.fontSize = '0.78rem';
+                    info.innerHTML = '<i class="fas fa-info-circle me-1"></i>' + data.message;
+                    document.getElementById('tbl-slot-loading').insertAdjacentElement('afterend', info);
+                    setTimeout(function() { if(info.parentNode) info.parentNode.removeChild(info); }, 5000);
+                }
+                loadCreneauxBL(data.date);
+                return;
+            }
 
             if (!data.is_open) {
                 closed.style.display = 'block';
