@@ -1714,6 +1714,16 @@ public function exportSingle($id)
 
 
 
+    public function togglePointed($id)
+{
+    $line = InvoiceLine::findOrFail($id);
+    $line->pointed = !$line->pointed;
+    $line->save();
+    return response()->json(['success' => true, 'pointed' => $line->pointed]);
+}
+
+
+
 
 
 

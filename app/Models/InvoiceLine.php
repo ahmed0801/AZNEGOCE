@@ -11,7 +11,7 @@ class InvoiceLine extends Model
 
     protected $fillable = [
         'invoice_id', 'delivery_note_id', 'sales_return_id', 'article_code',
-        'quantity', 'unit_price_ht', 'remise', 'total_ligne_ht', 'total_ligne_ttc'
+        'quantity', 'unit_price_ht', 'remise', 'total_ligne_ht', 'total_ligne_ttc','pointed'
     ];
 
     public function invoice()

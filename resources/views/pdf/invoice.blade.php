@@ -381,8 +381,15 @@ td {
                     <tr style="background-color: {{ str_starts_with($header, 'Retour') ? '#fffafa' : 'inherit' }};">
                         
                         <td style="width:12px; text-align:center; padding:2px;">
+
+@if($line->pointed)
+    <span style="display:inline-block;width:9px;height:9px;border:1px solid #555;
+                 border-radius:1px;background:#000;text-align:center;line-height:9px;
+                 font-size:8px;color:white;">✓</span>
+@else
     <span style="display:inline-block;width:9px;height:9px;border:1px solid #555;border-radius:1px;"></span>
-</td>
+@endif
+                    </td>
 
                         <td>{{ $line->article_code ?? '-' }}</td>
                         <td>

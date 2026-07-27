@@ -931,5 +931,19 @@ public function shippingNote(Request $request, $id)
         ]);
     }
 
+
+
+
+
+    public function togglePointed($id)
+{
+    $line = DeliveryNoteLine::findOrFail($id);
+    $line->pointed = !$line->pointed;
+    $line->save();
+    return response()->json(['success' => true, 'pointed' => $line->pointed]);
+}
+
+
+
     
 }

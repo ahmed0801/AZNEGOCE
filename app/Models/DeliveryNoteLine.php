@@ -11,7 +11,7 @@ class DeliveryNoteLine extends Model
 
     protected $fillable = [
         'delivery_note_id', 'article_code', 'delivered_quantity', 'unit_price_ht', 'unit_price_ttc', 'remise', 'total_ligne_ht', 'total_ligne_ttc',
-        'supplier_id', 'unit_coast', 'discount_coast' // ← Nouveaux champs
+        'supplier_id', 'unit_coast', 'discount_coast', 'pointed'
     ];
 
     public function deliveryNote()

@@ -211,25 +211,48 @@ td {
     <table class="header-table">
         <tr>
             <td class="header-left">
-                <img src="{{ public_path($company->logo_path) }}" alt="Logo">
-                <p class="address">{{ $company->address }}</p>
-                <p>Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
-                              style="height: 14px; vertical-align: middle; margin-right: 1px;">  
-                         {{ $company->phone ?? '-' }}</p>
-                <p>Email : {{ $company->email ?? '-' }}</p>
+                <img src="{{ public_path($company->logo_path) }}" alt="Logo" style="height:75px;">
+                <p class="address" style="font-size:11px;">{{ $company->address }}</p>
+                <p style="font-size:11px;">Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
+                     style="height:11px; vertical-align:middle; margin-right:1px;">
+                     {{ $company->phone ?? '-' }}</p>
+                <p style="font-size:11px;">Email : {{ $company->email ?? '-' }}</p>
             </td>
 
             <td class="header-right">
-                <h2>Bon de Livraison N° {{ $deliveryNote->numdoc }}</h2>
+                <h2 style="text-align:right;">BON DE LIVRAISON N° {{ $deliveryNote->numdoc }}</h2>
                 <img src="{{ $barcode }}" alt="Code-barres">
                 <div class="details">
                     <p><strong>Date :</strong> {{ \Carbon\Carbon::parse($deliveryNote->delivery_date)->format('d/m/Y') }}</p>
-                    <p><strong>Client :</strong> {{ $deliveryNote->customer->name ?? '-' }}</p>
-                    @if($deliveryNote->customer->address)
-                    <p><strong>Adresse :</strong> {{ $deliveryNote->customer->address ?? '-' }} , {{ $deliveryNote->customer->address_delivery ?? '-' }}</p>
-                    @endif
-                    <p><strong>Véhicule :</strong> {{ $deliveryNote->vehicle ? ($deliveryNote->vehicle->license_plate . ' (' . $deliveryNote->vehicle->brand_name . ' ' . $deliveryNote->vehicle->model_name . ')') : '-' }}</p>
-                    <p><strong>Vendeur :</strong> {{ $deliveryNote->vendeur ?? '-' }}</p>
+
+                    {{-- Client centré dans un cadre --}}
+                    <div style="border:1px solid #007bff; border-radius:6px; padding:6px 10px;
+                                text-align:center; margin:6px 0; background:#f8fbff;">
+                        <div style="font-size:13px; font-weight:bold; color:#003f88;">
+                            {{ $deliveryNote->customer->name ?? '-' }}
+                        </div>
+                        @if($deliveryNote->customer->address)
+                        <div style="font-size:11px; color:#555; margin-top:2px;">
+                            {{ $deliveryNote->customer->address }}
+                        </div>
+                        @endif
+                        @if(($deliveryNote->customer->address_delivery ?? null) || ($deliveryNote->customer->city ?? null))
+                        <div style="font-size:11px; color:#555;">
+                            {{ $deliveryNote->customer->address_delivery ?? '' }} {{ $deliveryNote->customer->city ?? '' }}
+                        </div>
+                        @endif
+                        @if($deliveryNote->vehicle)
+                        <div style="font-size:10px; color:#444; margin-top:3px;
+                                    background:#e8f0fe; border-radius:3px; padding:1px 5px;
+                                    display:inline-block;">
+                            Véhicule: {{ $deliveryNote->vehicle->license_plate }}
+                            ({{ $deliveryNote->vehicle->brand_name }} {{ $deliveryNote->vehicle->model_name }})
+                        </div>
+                        @endif
+                    </div>
+                    <div style="font-size:8px; color:#333; text-align:right; margin-top:4px;">
+                        <!-- Vendeur : <strong>{{ $deliveryNote->vendeur ?? '-' }}</strong> -->
+                    </div>
                 </div>
             </td>
         </tr>
@@ -246,6 +269,7 @@ td {
     <table class="items-table">
         <thead>
             <tr>
+                <th style="width:12px; padding:2px;"></th>
                 <th>Code Article</th>
                 <th>Désignation</th>
                 <th>Qté Livrée</th>
@@ -258,6 +282,13 @@ td {
         <tbody>
             @foreach ($deliveryNote->lines as $line)
                 <tr>
+                    <td style="width:12px; text-align:center; padding:2px;">
+                        @if($line->pointed ?? false)
+                            <span style="display:inline-block;width:9px;height:9px;border:1px solid #555;border-radius:1px;background:#000;text-align:center;line-height:9px;font-size:8px;color:white;">✓</span>
+                        @else
+                            <span style="display:inline-block;width:9px;height:9px;border:1px solid #555;border-radius:1px;"></span>
+                        @endif
+                    </td>
                     <td>{{ $line->article_code ?? '-' }}</td>
                     <td>{{ $line->item->name ?? $line->description ?? '-' }}</td>
                     <td>{{ number_format($line->delivered_quantity ?? $line->quantity ?? 0, 0, ',', ' ') }}</td>
@@ -294,6 +325,13 @@ td {
     </div>
 
     <!-- CONDITIONS DE VENTE -->
+@if($deliveryNote->vendeur ?? null)
+<div style="text-align:center; margin:6px 0; font-size:9px; color:#555;
+            border-top:1px solid #e0e0e0; padding-top:4px; font-style:italic;">
+    Vous avez été servi par <strong>{{ $deliveryNote->vendeur }}</strong>
+</div>
+@endif
+
 <div class="conditions">
     <h3>Conditions Générales de Vente</h3>
     

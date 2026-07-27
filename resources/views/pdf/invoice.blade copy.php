@@ -37,7 +37,7 @@ body {
     width: 50%;
 }
 .header-left img {
-    height: 110px; /* Logo encore plus grand */
+    height: 95px; /* Logo encore plus grand */
 }
 .header-left p {
     margin: 3px 0 0 5px;
@@ -257,29 +257,38 @@ td {
             </td>
 
             <td class="header-right">
-                <h2>Facture N° {{ $invoice->numdoc }}</h2>
-                <img src="{{ $barcode }}" alt="Code-barres">
-                <div class="details">
-                    <p><strong>Date :</strong> {{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</p>
-                    <p><strong>Client :</strong> {{ $invoice->customer->name ?? '-' }}</p>
-                    @if($invoice->customer->address)
-                    <p><strong>Adresse :</strong> {{ $invoice->customer->address ?? '-' }} , {{ $invoice->customer->address_delivery ?? '-' }}</p>
-                    @endif
-                    <!-- <p><strong>N° Client :</strong> {{ $invoice->numclient ?? '-' }}</p> -->
-                    <p><strong>Véhicule :</strong> {{ $invoice->vehicle ? ($invoice->vehicle->license_plate . ' (' . $invoice->vehicle->brand_name . ' ' . $invoice->vehicle->model_name . ')') : '-' }}</p>
-                        
-                    @if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
-                                                   @php
-        $firstDeliveryNote = $invoice->deliveryNotes->first();
-    @endphp
-    @if($firstDeliveryNote)
-            <p><strong> Vendeur :</strong>   {{ $firstDeliveryNote->vendeur}}</p>
+    <h2 style="text-align:right;">FACTURE N° : {{ $invoice->numdoc }}</h2>
+    <img src="{{ $barcode }}" alt="Code-barres">
+    <div class="details">
+        <p><strong>Date :</strong> {{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</p>
 
-    @endif
-    @endif
-
-                </div>
-            </td>
+        {{-- Client centré dans un cadre --}}
+        <div style="border:1px solid #007bff; border-radius:6px; padding:6px 10px;
+                    text-align:center; margin:6px 0; background:#f8fbff;">
+            <div style="font-size:13px; font-weight:bold; color:#003f88;">
+                {{ $invoice->customer->name ?? '-' }}
+            </div>
+            @if($invoice->customer->address)
+            <div style="font-size:11px; color:#555; margin-top:2px;">
+                {{ $invoice->customer->address }}
+            </div>
+            @endif
+            @if(($invoice->customer->address_delivery ?? null) || ($invoice->customer->city ?? null))
+<div style="font-size:11px; color:#555;">
+    {{ $invoice->customer->address_delivery ?? '' }} {{ $invoice->customer->city ?? '' }}
+</div>
+@endif
+            @if($invoice->vehicle)
+            <div style="font-size:10px; color:#444; margin-top:3px;
+                        background:#e8f0fe; border-radius:3px; padding:1px 5px;
+                        display:inline-block;">
+                Véhicule: {{ $invoice->vehicle->license_plate }}
+                ({{ $invoice->vehicle->brand_name }} {{ $invoice->vehicle->model_name }})
+            </div>
+            @endif
+        </div>
+    </div>
+</td>
         </tr>
     </table>
 </div>
@@ -294,6 +303,7 @@ td {
     <table class="items-table">
         <thead>
             <tr>
+                <th style="width:12px; padding:2px;"></th>
                 <th>Code</th>
                 <th>Désignation</th>
                 <th>Qté</th>
@@ -369,6 +379,11 @@ td {
                 <!-- Lignes du groupe -->
                 @foreach($lines as $line)
                     <tr style="background-color: {{ str_starts_with($header, 'Retour') ? '#fffafa' : 'inherit' }};">
+                        
+                        <td style="width:12px; text-align:center; padding:2px;">
+    <span style="display:inline-block;width:9px;height:9px;border:1px solid #555;border-radius:1px;"></span>
+</td>
+
                         <td>{{ $line->article_code ?? '-' }}</td>
                         <td>
                             @if(str_starts_with($header, 'Retour'))
@@ -404,7 +419,7 @@ td {
         @endphp
 
         <tr style="font-weight: bold; background-color: #f8f9fa;">
-            <td colspan="5" style="text-align: right; padding: 8px; border-top: 2px solid #ddd;">
+            <td colspan="6" style="text-align: right; padding: 8px; border-top: 2px solid #ddd;">
                 Total {{ str_starts_with($header, 'Retour') ? 'retour' : 'bon de livraison' }} TTC :
             </td>
             <td colspan="2" style="text-align: right; padding: 8px; border-top: 2px solid #ddd; color: #1976d2;">
@@ -485,6 +500,16 @@ td {
         <p style="margin: 0; font-style: italic; color: #6c757d;">Aucun encaissement enregistré.</p>
     @endif
 </div>
+
+@if($invoice->type === 'direct' && $invoice->deliveryNotes()->exists())
+    @php $firstDeliveryNote = $invoice->deliveryNotes->first(); @endphp
+    @if($firstDeliveryNote)
+    <div style="text-align:center; margin:6px 0; font-size:9px; color:#555;
+            border-top:1px solid #e0e0e0; padding-top:4px; font-style:italic;">
+    Vous avez été servi par <strong>{{ $firstDeliveryNote->vendeur }}</strong>
+</div>
+    @endif
+@endif
 
 
 

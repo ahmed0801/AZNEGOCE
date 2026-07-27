@@ -87,6 +87,10 @@ Route::get('/items/search', [ItemController::class, 'search'])->name('items.sear
 Route::get('/dashboard', [AuthController::class, 'adminDashboard'])->name('dashboard');
 
 
+// pointer
+Route::post('/invoice-lines/{id}/toggle-pointed', [SalesController::class, 'togglePointed'])->name('invoice_lines.toggle_pointed');
+Route::post('/delivery-note-lines/{id}/toggle-pointed', [DeliveryNotesController::class, 'togglePointed'])->name('delivery_note_lines.toggle_pointed');
+
 
 
 Route::get('/articles', [ItemController::class, 'index'])->name('articles.index');

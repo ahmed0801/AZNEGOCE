@@ -37,11 +37,11 @@ body {
     width: 50%;
 }
 .header-left img {
-    height: 110px; /* Logo encore plus grand */
+    height: 75px;
 }
 .header-left p {
-    margin: 3px 0 0 5px;
-    font-size: 11px;
+    margin: 2px 0 0 5px;
+    font-size: 9px;
     color: #555;
 }
 .header-left .address {
@@ -240,36 +240,66 @@ td {
 <body>
 
 <!-- === HEADER === -->
+
+
+
 <div class="header-box">
     <table class="header-table">
         <tr>
             <td class="header-left">
-                <img src="{{ public_path($company->logo_path) }}" alt="Logo">
-                <p class="address">{{ $company->address }}</p>
-                <p>Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
-         style="height: 14px; vertical-align: middle; margin-right: 1px;">  {{ $company->phone ?? '-' }}</p>
-                <p>Email : {{ $company->email ?? '-' }}</p>
+                <img src="{{ public_path($company->logo_path) }}" alt="Logo" style="height:75px;">
+                <p class="address" style="font-size:11px;">{{ $company->address }}</p>
+                <p style="font-size:11px;">Tél : <img src="{{ public_path('assets/img/whatsapp.png') }}"
+                     style="height:11px; vertical-align:middle; margin-right:1px;">
+                     {{ $company->phone ?? '-' }}</p>
+                <p style="font-size:11px;">Email : {{ $company->email ?? '-' }}</p>
             </td>
 
             <td class="header-right">
-                <h2>@if($order->status == 'Devis') Devis N° @else Commande N° @endif {{ $order->numdoc }}</h2>
+                <h2 style="text-align:right;">
+                    @if($order->status == 'Devis') DEVIS N° @else COMMANDE N° @endif {{ $order->numdoc }}
+                </h2>
                 <img src="{{ $barcode }}" alt="Code-barres">
                 <div class="details">
                     <p><strong>Date :</strong> {{ \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') }}</p>
-                    <p><strong>Client :</strong> {{ $order->customer->name ?? '-' }}</p>
-                    @if($order->customer->address)
-                    <p><strong>Adresse :</strong> {{ $order->customer->address ?? '-' }} , {{ $order->customer->address_delivery ?? '-' }}</p>
-                    @endif
-                    <p><strong>Véhicule :</strong> {{ $order->vehicle ? ($order->vehicle->license_plate . ' (' . $order->vehicle->brand_name . ' ' . $order->vehicle->model_name . ')') : '-' }}</p>
-                    <!-- <p><strong>Statut :</strong> {{ ucfirst($order->status) }}</p> -->
-                                                      <p><strong> Vendeur :</strong>   {{ $order->vendeur}}</p>
 
+                    {{-- Client centré dans un cadre --}}
+                    <div style="border:1px solid #007bff; border-radius:6px; padding:6px 10px;
+                                text-align:center; margin:6px 0; background:#f8fbff;">
+                        <div style="font-size:13px; font-weight:bold; color:#003f88;">
+                            {{ $order->customer->name ?? '-' }}
+                        </div>
+                        @if($order->customer->address)
+                        <div style="font-size:11px; color:#555; margin-top:2px;">
+                            {{ $order->customer->address }}
+                        </div>
+                        @endif
+                        @if(($order->customer->address_delivery ?? null) || ($order->customer->city ?? null))
+                        <div style="font-size:11px; color:#555;">
+                            {{ $order->customer->address_delivery ?? '' }} {{ $order->customer->city ?? '' }}
+                        </div>
+                        @endif
+                        @if($order->vehicle)
+                        <div style="font-size:10px; color:#444; margin-top:3px;
+                                    background:#e8f0fe; border-radius:3px; padding:1px 5px;
+                                    display:inline-block;">
+                            {{ $order->vehicle->license_plate }}
+                            ({{ $order->vehicle->brand_name }} {{ $order->vehicle->model_name }})
+                        </div>
+                        @endif
+                    </div>
+                    <!-- <div style="font-size:8px; color:#333; text-align:right; margin-top:4px;">
+                        Vendeur : <strong>{{ $order->vendeur }}</strong>
+                    </div> -->
                 </div>
-                <p class="validite">Validité de l’offre : <strong>30 jours hors promotion</strong></p>
+                <p class="validite">Validité de l'offre : <strong>30 jours hors promotion</strong></p>
             </td>
         </tr>
     </table>
 </div>
+
+
+
 
 <!-- === CONTENU PRINCIPAL === -->
 <main>
@@ -328,6 +358,14 @@ td {
             </tr>
         </table>
     </div>
+
+
+
+<div style="text-align:center; margin:6px 0; font-size:9px; color:#555;
+            border-top:1px solid #e0e0e0; padding-top:4px; font-style:italic;">
+    Vous avez été servi par <strong>{{ $order->vendeur }}</strong>
+</div>
+
 
     <!-- === CONDITIONS === -->
    

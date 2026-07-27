@@ -513,6 +513,7 @@
                                     <table class="table table-sm table-bordered align-middle">
                                         <thead class="table-light text-center">
                                             <tr>
+                                                <th>✓</th>
                                                 <th>Code Article</th>
                                                 <th>Désignation</th>
                                                 <th>Qté</th>
@@ -527,6 +528,16 @@
                                         <tbody>
                                             @foreach ($invoice->lines as $line)
                                                 <tr>
+
+                                                <td class="text-center p-1">
+    <input type="checkbox"
+           class="pointed-checkbox"
+           data-line-id="{{ $line->id }}"
+           {{ $line->pointed ? 'checked' : '' }}
+           style="width:14px;height:14px;cursor:pointer;">
+</td>
+
+
                                                     <td>{{ $line->article_code ?? '-' }}</td>
                                                     <td>{{ $line->item->name ?? $line->description ?? '-' }}</td>
                                                     <td class="text-center">{{ number_format($line->quantity, 0, ',', ' ') }}</td>
@@ -1588,6 +1599,39 @@ modal.show();
     loadChauffeursSt();
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+// ── Pointage lignes facture ──────────────────────────────
+document.addEventListener('change', function(e) {
+    if (!e.target.classList.contains('pointed-checkbox')) return;
+    var lineId = e.target.getAttribute('data-line-id');
+    var csrf   = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch('/invoice-lines/' + lineId + '/toggle-pointed', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (!d.success) {
+            e.target.checked = !e.target.checked; // rollback si erreur
+        }
+    })
+    .catch(function() {
+        e.target.checked = !e.target.checked; // rollback réseau
+    });
+});
 </script>
 
 
