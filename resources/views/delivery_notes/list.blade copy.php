@@ -793,6 +793,7 @@
                                 <table class="table table-sm table-bordered align-middle">
                                     <thead class="table-light text-center">
                                         <tr>
+                                            <th>✓</th>
                                             <th>Code Article</th>
                                             <th>Désignation</th>
                                             <th>Qté Livrée</th>
@@ -805,6 +806,16 @@
                                     <tbody>
                                         @foreach ($deliveryNote->lines as $line)
                                             <tr>
+
+
+                                            <td class="text-center p-1">
+    <input type="checkbox"
+           class="pointed-checkbox-bl"
+           data-line-id="{{ $line->id }}"
+           {{ $line->pointed ? 'checked' : '' }}
+           style="width:14px;height:14px;cursor:pointer;">
+</td>
+
                                                 <td>{{ $line->article_code }}</td>
                                                 <td>{{ $line->item->name ?? '-' }}</td>
                                                 <td class="text-center">{{ $line->delivered_quantity }}</td>
@@ -1714,6 +1725,30 @@ headers: {
     loadChauffeursSt();
 
 })();
+
+
+
+
+
+
+
+// ── Pointage lignes BL ───────────────────────────────────
+document.addEventListener('change', function(e) {
+    if (!e.target.classList.contains('pointed-checkbox-bl')) return;
+    var lineId = e.target.getAttribute('data-line-id');
+    var csrf   = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch('/delivery-note-lines/' + lineId + '/toggle-pointed', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (!d.success) e.target.checked = !e.target.checked;
+    })
+    .catch(function() { e.target.checked = !e.target.checked; });
+});
 </script>
 
 
