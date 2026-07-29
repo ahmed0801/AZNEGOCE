@@ -66,6 +66,9 @@ class TourneeLineController extends Controller
 
         if ($sourceType === 'bl') {
             $doc = \App\Models\DeliveryNote::find($request->invoice_id);
+            } elseif ($sourceType === 'commande_vente') {
+    $doc = \App\Models\SalesOrder::find($request->invoice_id);
+
         } else {
             $doc = Invoice::find($request->invoice_id);
         }

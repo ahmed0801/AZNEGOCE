@@ -551,6 +551,9 @@
             class="btn btn-tournee btn-sm btn-outline-primary"
             style="min-width: 38px; font-size: 0.95rem;"
             data-invoice-id="{{ $invoice->id }}"
+
+            data-customer-name="{{ $invoice->customer->name ?? '' }}"
+
             data-invoice-numdoc="{{ $invoice->numdoc }}"
             data-line-id="{{ $line->id }}"
             data-article-code="{{ $line->article_code ?? '-' }}"
@@ -880,11 +883,15 @@
                             
                             <textarea id="t-notes" class="form-control form-control-sm" rows="2"
           placeholder="Ex: demander au comptoir, pièce urgente..."></textarea>
-<button type="button" onclick="document.getElementById('t-notes').value='🚪 Livraison directe au client'; this.style.background='#dcfce7'; this.style.borderColor='#86efac'; this.style.color='#166534'; this.innerHTML='✅ Noté — Livraison directe au client';"
+
+          <button type="button" onclick="document.getElementById('t-notes').value='🚪Livraison: ' + this.getAttribute('data-customer'); this.style.background='#dcfce7'; this.style.borderColor='#86efac'; this.style.color='#166534'; this.innerHTML='✅ Noté — Livraison directe au client';"
+        data-customer=""
+        id="btn-livraison-directe"
         style="background:#ede9fe;border:1px solid #a78bfa;color:#6f42c1;border-radius:6px;
                padding:3px 10px;font-size:0.72rem;font-weight:600;cursor:pointer;margin-top:4px;">
     🚪 Livraison directe au client
 </button>
+
 
                         </div>
                     </div>
@@ -1068,6 +1075,7 @@ document.addEventListener('change', function(e) {
                 articleName: btn.getAttribute('data-article-name'),
                 quantity:    btn.getAttribute('data-quantity'),
                 supplierId:  btn.getAttribute('data-supplier-id') || '',
+                customerName: btn.getAttribute('data-customer-name') || '',
             };
 
             // Mise à jour des champs
@@ -1078,6 +1086,8 @@ document.addEventListener('change', function(e) {
             document.getElementById('t-quantity').value           = currentLine.quantity;
             document.getElementById('t-error').style.display      = 'none';
             document.getElementById('t-notes').value              = '';
+            var btnLivraison = document.getElementById('btn-livraison-directe');
+if (btnLivraison) btnLivraison.setAttribute('data-customer', currentLine.customerName || '');
 
             if (currentLine.supplierId) {
                 document.getElementById('t-supplier').value = currentLine.supplierId;
@@ -1216,6 +1226,7 @@ modal.show();
                     if (statut) {
                         statut.innerHTML = '<span class="badge bg-warning text-dark" style="font-size:0.6rem;">🚗</span>';
                     }
+                    
                     $('#tourneeModal').modal('hide');
                     showToast(d.message, 'success');
                     loadExistingLines(currentLine.invoiceId);
