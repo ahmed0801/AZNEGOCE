@@ -21,6 +21,7 @@ class VerifyCsrfToken extends Middleware
  
         // Routes API (protégées par X-API-KEY)
         'api/tournee/*',
+        'tournee/lines/*',
 
 
     ];

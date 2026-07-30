@@ -829,6 +829,9 @@
                                                             data-bl-id="{{ $deliveryNote->id }}"
                                                             data-bl-numdoc="{{ $deliveryNote->numdoc }}"
                                                             data-line-id="{{ $line->id }}"
+
+                                                            data-customer-name="{{ $deliveryNote->customer->name ?? '' }}"
+                                                            
                                                             data-article-code="{{ $line->article_code ?? '-' }}"
                                                             data-article-name="{{ $line->item->name ?? $line->description ?? $line->article_code }}"
                                                             data-quantity="{{ $line->delivered_quantity }}"
@@ -1111,7 +1114,10 @@ function addEmailField(id) {
                             <label class="form-label mb-1" style="font-size:0.82rem;font-weight:700;">Note (optionnel)</label>
                             <textarea id="tbl-notes" class="form-control form-control-sm" rows="2"
           placeholder="Ex: demander au comptoir, pièce urgente..."></textarea>
-<button type="button" onclick="document.getElementById('tbl-notes').value='🚪 Livraison directe au client'; this.style.background='#dcfce7'; this.style.borderColor='#86efac'; this.style.color='#166534'; this.innerHTML='✅ Noté — Livraison directe au client';"
+<button type="button"
+        onclick="document.getElementById('tbl-notes').value='🚪 Livraison: ' + this.getAttribute('data-customer'); this.style.background='#dcfce7'; this.style.borderColor='#86efac'; this.style.color='#166534'; this.innerHTML='✅ Noté — Livraison directe au client';"
+        data-customer=""
+        id="btn-livraison-directe-bl"
         style="background:#ede9fe;border:1px solid #a78bfa;color:#6f42c1;border-radius:6px;
                padding:3px 10px;font-size:0.72rem;font-weight:600;cursor:pointer;margin-top:4px;">
     🚪 Livraison directe au client
@@ -1260,6 +1266,7 @@ document.addEventListener('change', function(e) {
                 articleName: btn.getAttribute('data-article-name'),
                 quantity:    btn.getAttribute('data-quantity'),
                 supplierId:  btn.getAttribute('data-supplier-id') || '',
+                customerName: btn.getAttribute('data-customer-name') || '',
             };
 
             document.getElementById('tbl-article-code').textContent = currentBLLine.articleCode;
@@ -1270,6 +1277,8 @@ document.addEventListener('change', function(e) {
             document.getElementById('tbl-error').style.display      = 'none';
             document.getElementById('tbl-notes').value              = '';
             document.getElementById('tbl-supplier').value           = currentBLLine.supplierId || '';
+            var btnLivraisonBL = document.getElementById('btn-livraison-directe-bl');
+if (btnLivraisonBL) btnLivraisonBL.setAttribute('data-customer', currentBLLine.customerName || '');
 
 
 
