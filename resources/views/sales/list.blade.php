@@ -379,6 +379,19 @@
                 </li>
                         <!-- fin test quick action  -->
 
+
+                                   <!-- BOUTON CONSULTER LA TOURNÉE -->
+<li class="nav-item me-3">
+    <a href="https://tournee.destockpa.fr/planning?site_id={{ config('services.tournee.site_id', 1) }}"
+       target="_blank"
+       class="btn btn-primary btn-round d-flex align-items-center gap-2 shadow-sm"
+       style="font-weight: 600; padding: 8px 18px; font-size: 1rem;">
+        <i class="fas fa-truck-loading"></i>
+        <span>Suivi Tournée</span>
+    </a>
+</li>
+
+                        
                         
                             <li class="nav-item topbar-user dropdown hidden-caret">
                                 <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
