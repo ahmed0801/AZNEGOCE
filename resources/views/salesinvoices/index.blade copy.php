@@ -173,7 +173,7 @@
             
            <!-- BOUTON CONSULTER LA TOURNÉE -->
 <li class="nav-item me-3">
-    <a href="https://tournee.destockpa.fr" 
+    <a href="https://tournee.destockpa.fr/planning?site_id={{ config('services.tournee.site_id', 1) }}"
        target="_blank"
        class="btn btn-primary btn-round d-flex align-items-center gap-2 shadow-sm"
        style="font-weight: 600; padding: 8px 18px; font-size: 1rem;">
@@ -1142,9 +1142,11 @@ modal.show();
                             + ' <span class="badge bg-' + l.statut_color + ' ms-1">' + l.statut_label + '</span>'
                             + (l.chauffeur ? ' 👤 ' + l.chauffeur : '')
                             + '</span>'
-                            + '<button class="btn btn-xs btn-outline-danger btn-remove-tournee ms-2"'
+                            + '<button class="btn btn-remove-tournee ms-2"'
                             + ' data-line-id="' + l.id + '"'
-                            + ' style="font-size:0.65rem; padding:1px 6px;">✕</button>'
+                            + ' style="background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:6px;'
++ 'font-size:0.7rem;font-weight:600;padding:3px 8px;cursor:pointer;">'
++ '🗑 Retirer</button>'
                             + '</div>';
                     });
                     content.innerHTML = html;
