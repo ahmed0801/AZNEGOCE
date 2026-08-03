@@ -958,8 +958,7 @@ function addEmailField(id) {
         </div>
     </div>
 
-    
-    <script>
+   <script>
 (function () {
     var currentCMDLine = {};
 
@@ -980,7 +979,6 @@ function addEmailField(id) {
     }
     loadChauffeursBL();
 
-    // ── Créneaux dynamiques ──────────────────────────────
     var autoSlotBL = null;
 
     function loadCreneauxBL(date) {
@@ -1064,7 +1062,6 @@ function addEmailField(id) {
             });
     }
 
-    // Détecter changement manuel du créneau
     document.addEventListener('change', function(e) {
         if (e.target && e.target.name === 'tcmd-slot') {
             var warning = document.getElementById('tcmd-slot-warning');
@@ -1072,7 +1069,7 @@ function addEmailField(id) {
         }
     });
 
-    // Ouvrir le modal
+    // ── Ouvrir le modal ──────────────────────────────────
     document.addEventListener('click', function(e) {
         var btn = e.target.closest('.btn-tournee-cmd');
         if (!btn) return;
@@ -1091,6 +1088,7 @@ function addEmailField(id) {
         document.getElementById('tcmd-article-code').textContent = currentCMDLine.articleCode;
         document.getElementById('tcmd-article-name').textContent = currentCMDLine.articleName;
         document.getElementById('tcmd-numdoc').textContent       = currentCMDLine.numdoc;
+        document.getElementById('tcmd-numdoc').setAttribute('data-order-id', currentCMDLine.blId);
         document.getElementById('tcmd-qty').textContent          = currentCMDLine.quantity;
         document.getElementById('tcmd-quantity').value           = currentCMDLine.quantity;
         document.getElementById('tcmd-error').style.display      = 'none';
@@ -1102,18 +1100,12 @@ function addEmailField(id) {
 
         loadCreneauxBL(document.getElementById('tcmd-date').value);
 
-        // Éviter d'ajouter plusieurs fois le même listener
         var dateInput = document.getElementById('tcmd-date');
-        dateInput.onchange = function() {
-            loadCreneauxBL(this.value);
-        };
+        dateInput.onchange = function() { loadCreneauxBL(this.value); };
 
         $('#tourneeCMDModal').modal('show');
         loadExistingLinesCMD(currentCMDLine.blId);
-document.getElementById('tcmd-numdoc').setAttribute('data-order-id', currentCMDLine.blId);
 
-
-        // Initialiser select2 après ouverture
         setTimeout(function() {
             if ($('#tcmd-supplier').hasClass('select2-hidden-accessible')) {
                 $('#tcmd-supplier').select2('destroy');
@@ -1131,7 +1123,7 @@ document.getElementById('tcmd-numdoc').setAttribute('data-order-id', currentCMDL
         }, 350);
     });
 
-    // Soumettre
+    // ── Soumettre ────────────────────────────────────────
     document.getElementById('tcmd-submit').addEventListener('click', function() {
         var supplierId  = document.getElementById('tcmd-supplier').value;
         var chauffeurId = document.getElementById('tcmd-chauffeur').value;
@@ -1154,8 +1146,8 @@ document.getElementById('tcmd-numdoc').setAttribute('data-order-id', currentCMDL
         fetch('{{ route("tournee.store") }}', {
             method: 'POST',
             credentials: 'same-origin',
-            headers: { 
-                'Content-Type': 'application/json', 
+            headers: {
+                'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': csrf,
                 'X-Requested-With': 'XMLHttpRequest'
             },
@@ -1178,13 +1170,8 @@ document.getElementById('tcmd-numdoc').setAttribute('data-order-id', currentCMDL
             if (d.success) {
                 var statut = document.getElementById('tournee-statut-bl-' + currentCMDLine.lineId);
                 if (statut) statut.innerHTML = '<span class="badge badge-warning" style="font-size:0.6rem;">🚚</span>';
-
-                // Optionnel : recharger tous les statuts de la commande
-        loadTourneeStatutsCMD(currentCMDLine.blId);
-
-
+                loadTourneeStatutsCMD(currentCMDLine.blId);
                 $('#tourneeCMDModal').modal('hide');
-                
                 var toast = document.createElement('div');
                 toast.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;min-width:280px;';
                 toast.innerHTML = '<div class="alert alert-success shadow-lg d-flex align-items-center mb-0" style="border-radius:8px;"><i class="fas fa-check-circle me-2"></i>' + d.message + '</div>';
@@ -1205,41 +1192,77 @@ document.getElementById('tcmd-numdoc').setAttribute('data-order-id', currentCMDL
         });
     });
 
+    // ── Charger les lignes existantes ────────────────────
+    function loadExistingLinesCMD(orderId) {
+        var container = document.getElementById('tcmd-existing-lines');
+        var content   = document.getElementById('tcmd-existing-content');
+        content.innerHTML = '<small class="text-muted">Chargement...</small>';
+        container.style.display = 'block';
 
+        fetch('/tournee/lines/' + orderId + '?source_type=commande_vente')
+            .then(function(r) { return r.json(); })
+            .then(function(lines) {
+                if (!lines.length) { container.style.display = 'none'; return; }
+                var html = '';
+                lines.forEach(function(l) {
+                    html += '<div class="d-flex justify-content-between align-items-center py-1 border-bottom">'
+                        + '<span style="font-size:0.75rem;">'
+                        + '<strong style="font-family:monospace;">' + l.article_code + '</strong>'
+                        + ' — ' + l.slot_label + ' ' + l.date_tournee
+                        + ' <span class="badge bg-' + l.statut_color + ' ms-1">' + l.statut_label + '</span>'
+                        + (l.chauffeur ? ' 👤 ' + l.chauffeur : '')
+                        + '</span>'
+                        + '<button class="btn btn-xs btn-outline-danger btn-remove-tournee-cmd ms-2"'
+                        + ' data-line-id="' + l.id + '"'
+                        + ' style="font-size:0.65rem; padding:1px 6px;">✕</button>'
+                        + '</div>';
+                });
+                content.innerHTML = html;
+            })
+            .catch(function() { container.style.display = 'none'; });
+    }
 
+ // ── Supprimer une ligne CMD de la tournée ────────────
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.btn-remove-tournee-cmd');
+    if (!btn) return;
+    var lineId  = btn.getAttribute('data-line-id');
+    var orderId = currentCMDLine.blId;
+    var csrf    = $('meta[name="csrf-token"]').attr('content');
 
+    if (!confirm('Retirer cette ligne de la tournée ?')) return;
 
-    
+    $.ajax({
+        url: '/tournee/lines/' + lineId,
+        method: 'DELETE',
+        headers: { 'X-CSRF-TOKEN': csrf },
+        success: function(d) {
+            if (d.success) {
+                if (orderId) loadExistingLinesCMD(orderId);
+                else btn.closest('.d-flex').remove();
+            }
+        }
+    });
+});
+
 })();
-
-
-
-
 
 function loadTourneeStatutsCMD(orderId) {
     fetch('/tournee/lines/' + orderId + '?source_type=commande_vente')
         .then(function(r) { return r.json(); })
         .then(function(lines) {
             var colorMap = {
-                'en_attente': 'secondary',
-                'assigné':    'primary',
-                'en_route':   'info',
-                'recupere':   'success',
-                'au_magasin': 'dark',
-                'livre_client': 'success',
-                'probleme':   'danger'
+                'en_attente': 'secondary', 'assigné': 'primary',
+                'en_route': 'info', 'recupere': 'success',
+                'au_magasin': 'dark', 'livre_client': 'success', 'probleme': 'danger'
             };
-
             lines.forEach(function(l) {
                 var span = document.getElementById('tournee-statut-bl-' + l.source_line_id);
                 var btn  = span ? span.previousElementSibling : null;
-
                 if (span) {
                     span.innerHTML = '<span class="badge badge-' + (colorMap[l.statut] || 'secondary') + '">'
                         + (l.statut_label || l.statut) + '</span>';
                 }
-
-                // Changer le bouton en jaune si déjà en tournée
                 if (btn && btn.classList.contains('btn-tournee-cmd')) {
                     btn.classList.remove('btn-outline-primary');
                     btn.classList.add('btn-warning');
@@ -1250,62 +1273,6 @@ function loadTourneeStatutsCMD(orderId) {
         })
         .catch(function() {});
 }
-
-
-
-
-
-function loadExistingLinesCMD(orderId) {
-    var container = document.getElementById('tcmd-existing-lines');
-    var content   = document.getElementById('tcmd-existing-content');
-    content.innerHTML = '<small class="text-muted">Chargement...</small>';
-    container.style.display = 'block';
-
-    fetch('/tournee/lines/' + orderId + '?source_type=commande_vente')
-        .then(function(r) { return r.json(); })
-        .then(function(lines) {
-            if (!lines.length) { container.style.display = 'none'; return; }
-            var html = '';
-            lines.forEach(function(l) {
-                html += '<div class="d-flex justify-content-between align-items-center py-1 border-bottom">'
-                    + '<span style="font-size:0.75rem;">'
-                    + '<strong style="font-family:monospace;">' + l.article_code + '</strong>'
-                    + ' — ' + l.slot_label + ' ' + l.date_tournee
-                    + ' <span class="badge bg-' + l.statut_color + ' ms-1">' + l.statut_label + '</span>'
-                    + (l.chauffeur ? ' 👤 ' + l.chauffeur : '')
-                    + '</span>'
-                    + '<button class="btn btn-xs btn-outline-danger btn-remove-tournee-cmd ms-2"'
-                    + ' data-line-id="' + l.id + '"'
-                    + ' style="font-size:0.65rem; padding:1px 6px;">✕</button>'
-                    + '</div>';
-            });
-            content.innerHTML = html;
-        })
-        .catch(function() { container.style.display = 'none'; });
-}
-
-// Supprimer une ligne CMD de la tournée
-document.addEventListener('click', function(e) {
-    var btn = e.target.closest('.btn-remove-tournee-cmd');
-    if (!btn) return;
-    if (!confirm('Retirer cette ligne de la tournée ?')) return;
-
-    var lineId  = btn.getAttribute('data-line-id');
-    var csrf    = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    var orderId = document.getElementById('tcmd-numdoc').getAttribute('data-order-id');
-
-    fetch('/tournee/lines/' + lineId, {
-        method: 'DELETE',
-        headers: { 'X-CSRF-TOKEN': csrf }
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-        if (d.success) {
-            if (orderId) loadExistingLinesCMD(orderId);
-            else btn.closest('.d-flex').remove();
-        }
-    });
-});
 </script>
 
 

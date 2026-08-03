@@ -1059,9 +1059,11 @@ function addEmailField(id) {
                     + ' <span class="badge bg-' + l.statut_color + ' ms-1">' + l.statut_label + '</span>'
                     + (l.chauffeur ? ' 👤 ' + l.chauffeur : '')
                     + '</span>'
-                    + '<button class="btn btn-xs btn-outline-danger btn-remove-tournee-bl ms-2"'
+                    + '<button class="btn btn-remove-tournee-bl ms-2"'
                     + ' data-line-id="' + l.id + '"'
-                    + ' style="font-size:0.65rem; padding:1px 6px;">✕</button>'
+                    + ' style="background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:6px;'
++ 'font-size:0.7rem;font-weight:600;padding:3px 8px;cursor:pointer;">'
++ '🗑 Retirer</button>'
                     + '</div>';
             });
             content.innerHTML = html;

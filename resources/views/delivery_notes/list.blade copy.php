@@ -1035,6 +1035,69 @@ function addEmailField(id) {
                 .catch(function() {});
         }
 
+
+
+        function loadExistingLinesBL(blId) {
+    var container = document.getElementById('tbl-existing-lines');
+    var content   = document.getElementById('tbl-existing-content');
+    content.innerHTML = '<small class="text-muted">Chargement...</small>';
+    container.style.display = 'block';
+
+    fetch('/tournee/lines/' + blId + '?source_type=bl')
+        .then(function(r) { return r.json(); })
+        .then(function(lines) {
+            if (!lines.length) {
+                container.style.display = 'none';
+                return;
+            }
+            var html = '';
+            lines.forEach(function(l) {
+                html += '<div class="d-flex justify-content-between align-items-center py-1 border-bottom">'
+                    + '<span style="font-size:0.75rem;">'
+                    + '<strong style="font-family:monospace;">' + l.article_code + '</strong>'
+                    + ' — ' + l.slot_label + ' ' + l.date_tournee
+                    + ' <span class="badge bg-' + l.statut_color + ' ms-1">' + l.statut_label + '</span>'
+                    + (l.chauffeur ? ' 👤 ' + l.chauffeur : '')
+                    + '</span>'
+                    + '<button class="btn btn-xs btn-outline-danger btn-remove-tournee-bl ms-2"'
+                    + ' data-line-id="' + l.id + '"'
+                    + ' style="font-size:0.65rem; padding:1px 6px;">✕</button>'
+                    + '</div>';
+            });
+            content.innerHTML = html;
+        })
+        .catch(function() { container.style.display = 'none'; });
+}
+
+// Supprimer une ligne BL de la tournée
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.btn-remove-tournee-bl');
+    if (!btn) return;
+    if (!confirm('Retirer cette ligne de la tournée ?')) return;
+
+    var lineId = btn.getAttribute('data-line-id');
+    var csrf   = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch('/tournee/lines/' + lineId, {
+        method: 'DELETE',
+        headers: { 'X-CSRF-TOKEN': csrf }
+    })
+    .then(function(r) { return r.json(); })
+    
+    .then(function(d) {
+    if (d.success) {
+        var blId = document.getElementById('tbl-numdoc') 
+            ? document.getElementById('tbl-numdoc').getAttribute('data-bl-id') 
+            : null;
+        if (blId) loadExistingLinesBL(blId);
+        else btn.closest('.d-flex').remove();
+    }
+});
+
+});
+
+
+
          function setCommentForm(url, id) {
             document.getElementById('commentForm').action = url;
                         document.getElementById('comment').value = ''; // Réinitialiser le champ de commentaire
@@ -1125,6 +1188,15 @@ function addEmailField(id) {
 
                         </div>
                     </div>
+
+                    <div id="tbl-existing-lines" class="mt-3" style="display:none;">
+    <hr class="my-2">
+    <small class="fw-bold text-muted" style="font-size:0.75rem;">
+        <i class="fas fa-list me-1"></i>Déjà en tournée pour ce BL :
+    </small>
+    <div id="tbl-existing-content" class="mt-1"></div>
+</div>
+
                     <div id="tbl-error" class="alert alert-danger mt-2 py-2" style="display:none;font-size:0.82rem;"></div>
                 </div>
                 <div class="modal-footer py-2">
@@ -1272,6 +1344,9 @@ document.addEventListener('change', function(e) {
             document.getElementById('tbl-article-code').textContent = currentBLLine.articleCode;
             document.getElementById('tbl-article-name').textContent = currentBLLine.articleName;
             document.getElementById('tbl-numdoc').textContent       = currentBLLine.numdoc;
+            
+            document.getElementById('tbl-numdoc').setAttribute('data-bl-id', currentBLLine.blId);
+
             document.getElementById('tbl-qty').textContent          = currentBLLine.quantity;
             document.getElementById('tbl-quantity').value           = currentBLLine.quantity;
             document.getElementById('tbl-error').style.display      = 'none';
@@ -1288,6 +1363,7 @@ document.getElementById('tbl-date').addEventListener('change', function() {
 });
 
             $('#tourneeBLModal').modal('show');
+            loadExistingLinesBL(currentBLLine.blId);
 
             // Initialiser select2 après ouverture du modal
             setTimeout(function() {
@@ -1354,6 +1430,8 @@ headers: {
                 if (d.success) {
                     var statut = document.getElementById('tournee-statut-bl-' + currentBLLine.lineId);
                     if (statut) statut.innerHTML = '<span class="badge badge-warning" style="font-size:0.6rem;">🚚</span>';
+                    
+                    
                     $('#tourneeBLModal').modal('hide');
                     var toast = document.createElement('div');
                     toast.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;min-width:280px;';

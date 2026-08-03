@@ -1220,21 +1220,39 @@ modal.show();
                 })
             })
             .then(function (r) { return r.json(); })
+           
             .then(function (d) {
-                if (d.success) {
-                    var statut = document.getElementById('tournee-statut-' + currentLine.lineId);
-                    if (statut) {
-                        statut.innerHTML = '<span class="badge bg-warning text-dark" style="font-size:0.6rem;">🚗</span>';
-                    }
-                    
-                    $('#tourneeModal').modal('hide');
-                    showToast(d.message, 'success');
-                    loadExistingLines(currentLine.invoiceId);
-                } else {
-                    errorDiv.textContent = d.error || "Erreur lors de l'ajout.";
-                    errorDiv.style.display = 'block';
-                }
-            })
+    if (d.success) {
+        // 1. Mise à jour immédiate du badge de la ligne
+        var statut = document.getElementById('tournee-statut-' + currentLine.lineId);
+        if (statut) {
+            statut.innerHTML = '<span class="badge badge-warning">En attente</span>';
+        }
+
+        // 2. Changer le style du bouton
+        var btn = statut ? statut.previousElementSibling : null;
+        if (btn && btn.classList.contains('btn-tournee')) {
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-warning');
+            btn.title = 'Déjà en tournée — En attente';
+        }
+
+        $('#tourneeModal').modal('hide');
+        showToast(d.message, 'success');
+
+        // 3. Recharger les vrais statuts depuis le serveur
+        loadTourneeStatuts(currentLine.invoiceId);
+
+        // (optionnel) garder aussi la mise à jour du modal
+        if (typeof loadExistingLines === 'function') {
+            loadExistingLines(currentLine.invoiceId);
+        }
+    } else {
+        errorDiv.textContent = d.error || "Erreur lors de l'ajout.";
+        errorDiv.style.display = 'block';
+    }
+})
+
             .catch(function () {
                 errorDiv.textContent = 'Erreur réseau. Vérifiez la connexion au serveur tournée.';
                 errorDiv.style.display = 'block';
