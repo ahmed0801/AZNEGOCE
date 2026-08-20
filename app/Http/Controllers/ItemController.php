@@ -284,6 +284,28 @@ public function search(Request $request)
 
 
 
+public function searchforstock(Request $request)
+{
+    $search = $request->input('term');
+
+    $items = Item::query()
+        ->where('code', 'like', "{$search}%")
+        ->orWhere('name', 'like', "{$search}%")
+        ->limit(30)
+        ->get();
+
+    return response()->json(
+        $items->map(fn($item) => [
+            'id' => $item->code,
+            'text' => "{$item->code} - {$item->name}",
+            'price' => $item->cost_price,
+            'sale_price' => $item->sale_price
+        ])
+    );
+}
+
+
+
 
 
 

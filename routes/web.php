@@ -83,6 +83,7 @@ Route::middleware(['auth', 'single.session'])->group(function () {
 
 
 Route::get('/items/search', [ItemController::class, 'search'])->name('items.search');
+Route::get('/items/searchforstock', [ItemController::class, 'searchforstock'])->name('items.searchforstock');
 
 Route::get('/dashboard', [AuthController::class, 'adminDashboard'])->name('dashboard');
 
