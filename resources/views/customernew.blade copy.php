@@ -306,7 +306,12 @@
             <input type="text" name="address" class="form-control">
         </div>
 
-        <div class="mb-3 col-md-4">
+        <div class="mb-3 col-md-3">
+            <label class="form-label">Code Postal</label>
+            <input type="text" name="address_delivery" class="form-control">
+        </div>
+
+        <div class="mb-3 col-md-3">
             <label class="form-label">Ville</label>
             <input type="text" name="city" class="form-control" value="">
         </div>
@@ -316,10 +321,6 @@
             <input type="text" name="country" class="form-control" value="France">
         </div>
 
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Code Postal</label>
-            <input type="text" name="address_delivery" class="form-control">
-        </div>
 
 
 
@@ -376,6 +377,9 @@
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
         <button type="submit" class="btn btn-success">Créer</button>
+        <button type="submit" name="action" value="create_and_close" class="btn btn-outline-success">
+        <i class="fas fa-check-double me-1"></i> Créer et Fermer
+    </button>
     </div>
 </form>
 
