@@ -937,112 +937,131 @@
 
 
 
-
-
-
- <!-- essai kpi -->
-
-<!-- KPI Clients – Vue direction -->
-<div class="row mb-4 g-3">
-    <!-- 1. Total Clients -->
-<!-- 5. Clients avec / sans véhicules -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-body text-center py-4">
-                <h6 class="display-5 fw-bold mb-0">TOTAL : {{ number_format($totalCustomers, 0, ',', ' ') }} CLIENTS</h6>
-
-                <i class="fas fa-car-side fa-3x mb-3 text-info"></i>
-                <h6 class="fw-bold mb-1">CLIENTS & VÉHICULES</h6>
-                <div class="d-flex justify-content-center gap-4 mb-3">
-                    <div>
-                        <h4 class="fw-bold text-info mb-0">{{ number_format($clientsAvecVehicules, 0, ',', ' ') }}</h4>
-                        <small>Avec véhicule</small>
-                    </div>
-                    <div class="vr mx-2"></div>
-                    <div>
-                        <h4 class="fw-bold text-secondary mb-0">{{ number_format($clientsSansVehicules, 0, ',', ' ') }}</h4>
-                        <small>Sans véhicule</small>
-                    </div>
-                </div>
-                <small class="text-muted">
-                    Taux équipés : <strong>{{ $totalCustomers > 0 ? round(($clientsAvecVehicules / $totalCustomers) * 100, 1) : 0 }}%</strong>
-                </small>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. Actifs / Inactifs -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-body text-center py-4">
-                <div class="d-flex justify-content-center gap-4 mb-3">
-                    <div>
-                        <i class="fas fa-check-circle fa-2x text-success"></i>
-                        <h6 class="small mb-1">Actifs</h6>
-                        <h4 class="fw-bold text-success mb-0">{{ number_format($activeCustomers, 0, ',', ' ') }}</h4>
-                    </div>
-                    <div class="vr mx-2"></div>
-                    <div>
-                        <i class="fas fa-ban fa-2x text-danger"></i>
-                        <h6 class="small mb-1">Inactifs</h6>
-                        <h4 class="fw-bold text-danger mb-0">{{ number_format($inactiveCustomers, 0, ',', ' ') }}</h4>
-                    </div>
-                </div>
-                <small class="text-muted">
-                    Taux d'activité : <strong>{{ $totalCustomers > 0 ? round(($activeCustomers / $totalCustomers) * 100, 1) : 0 }}%</strong>
-                </small>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. Répartition par type -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-body text-center py-4">
-                <i class="fas fa-layer-group fa-2x text-primary mb-3"></i>
-                <h6 class="fw-bold mb-2">RÉPARTITION PAR TYPE</h6>
-                <div class="progress mb-3" style="height: 12px; background: #e9ecef;">
-                    <div class="progress-bar bg-primary" role="progressbar" 
-                         style="width: {{ $totalCustomers > 0 ? ($particuliersCount / $totalCustomers * 100) : 0 }}%" 
-                         aria-valuenow="{{ $particuliersCount }}"></div>
-                    <div class="progress-bar bg-warning" role="progressbar" 
-                         style="width: {{ $totalCustomers > 0 ? ($jobbersCount / $totalCustomers * 100) : 0 }}%" 
-                         aria-valuenow="{{ $jobbersCount }}"></div>
-                    <div class="progress-bar bg-success" role="progressbar" 
-                         style="width: {{ $totalCustomers > 0 ? ($prosCount / $totalCustomers * 100) : 0 }}%" 
-                         aria-valuenow="{{ $prosCount }}"></div>
-                </div>
-                <div class="small fw-bold text-center">
-                    <span class="text-primary">{{ number_format($particuliersCount) }}</span> Part. • 
-                    <span class="text-warning">{{ number_format($jobbersCount) }}</span> Job. • 
-                    <span class="text-success">{{ number_format($prosCount) }}</span> Pros
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 4. Clients non soldés (solde ≠ 0) -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-body text-center py-4">
-                <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
-                <h6 class="fw-bold mb-1">CLIENTS NON SOLDÉS</h6>
-                <h2 class="display-5 fw-bold text-warning mb-2">{{ number_format($clientsNonSoldes, 0, ',', ' ') }}</h2>
-                <small class="d-block mb-2">
-                    <span class="text-danger fw-bold">{{ number_format($clientsNousDoivent) }}</span> nous doivent • 
-                    <span class="text-success fw-bold">{{ number_format($clientsOnDoit) }}</span> on doit
-                </small>
-                <h6 class="text-muted mb-1">Solde global</h6>
-                <h4 class="{{ $totalSoldeClients >= 0 ? 'text-success' : 'text-danger' }} fw-bold">
-                    {{ number_format($totalSoldeClients, 2, ',', ' ') }} €
-                </h4>
-            </div>
-        </div>
-    </div>
-
-    
+<!-- KPI Toggle -->
+<div class="mb-3">
+    <button type="button" id="toggleKpiBtn" onclick="toggleKpis()"
+        style="background: linear-gradient(135deg, #0056b3, #17a2b8); border: none; border-radius: 10px; padding: 10px 22px; color: #fff; font-size: 0.95rem; font-weight: 600; box-shadow: 0 4px 12px rgba(0,86,179,0.25); transition: all 0.3s ease; cursor: pointer;">
+        <i class="fas fa-chart-bar me-2"></i> Statistiques Clients
+        <i class="fas fa-chevron-down ms-2" id="kpiChevron"></i>
+    </button>
 </div>
-       <!-- fin essai kpi -->
+
+<div id="kpiSection" style="display:none;">
+    <div class="row mb-4 g-3">
+        <!-- 1. Clients & Véhicules -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center py-4">
+                    <h6 class="display-5 fw-bold mb-0">TOTAL : {{ number_format($totalCustomers, 0, ',', ' ') }} CLIENTS</h6>
+                    <i class="fas fa-car-side fa-3x mb-3 text-info"></i>
+                    <h6 class="fw-bold mb-1">CLIENTS & VÉHICULES</h6>
+                    <div class="d-flex justify-content-center gap-4 mb-3">
+                        <div>
+                            <h4 class="fw-bold text-info mb-0">{{ number_format($clientsAvecVehicules, 0, ',', ' ') }}</h4>
+                            <small>Avec véhicule</small>
+                        </div>
+                        <div class="vr mx-2"></div>
+                        <div>
+                            <h4 class="fw-bold text-secondary mb-0">{{ number_format($clientsSansVehicules, 0, ',', ' ') }}</h4>
+                            <small>Sans véhicule</small>
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        Taux équipés : <strong>{{ $totalCustomers > 0 ? round(($clientsAvecVehicules / $totalCustomers) * 100, 1) : 0 }}%</strong>
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Actifs / Inactifs -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center py-4">
+                    <div class="d-flex justify-content-center gap-4 mb-3">
+                        <div>
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                            <h6 class="small mb-1">Actifs</h6>
+                            <h4 class="fw-bold text-success mb-0">{{ number_format($activeCustomers, 0, ',', ' ') }}</h4>
+                        </div>
+                        <div class="vr mx-2"></div>
+                        <div>
+                            <i class="fas fa-ban fa-2x text-danger"></i>
+                            <h6 class="small mb-1">Inactifs</h6>
+                            <h4 class="fw-bold text-danger mb-0">{{ number_format($inactiveCustomers, 0, ',', ' ') }}</h4>
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        Taux d'activité : <strong>{{ $totalCustomers > 0 ? round(($activeCustomers / $totalCustomers) * 100, 1) : 0 }}%</strong>
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Répartition par type -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-layer-group fa-2x text-primary mb-3"></i>
+                    <h6 class="fw-bold mb-2">RÉPARTITION PAR TYPE</h6>
+                    <div class="progress mb-3" style="height: 12px; background: #e9ecef;">
+                        <div class="progress-bar bg-primary" role="progressbar"
+                             style="width: {{ $totalCustomers > 0 ? ($particuliersCount / $totalCustomers * 100) : 0 }}%"></div>
+                        <div class="progress-bar bg-warning" role="progressbar"
+                             style="width: {{ $totalCustomers > 0 ? ($jobbersCount / $totalCustomers * 100) : 0 }}%"></div>
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: {{ $totalCustomers > 0 ? ($prosCount / $totalCustomers * 100) : 0 }}%"></div>
+                    </div>
+                    <div class="small fw-bold text-center">
+                        <span class="text-primary">{{ number_format($particuliersCount) }}</span> Part. •
+                        <span class="text-warning">{{ number_format($jobbersCount) }}</span> Job. •
+                        <span class="text-success">{{ number_format($prosCount) }}</span> Pros
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Clients non soldés -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
+                    <h6 class="fw-bold mb-1">CLIENTS NON SOLDÉS</h6>
+                    <h2 class="display-5 fw-bold text-warning mb-2">{{ number_format($clientsNonSoldes, 0, ',', ' ') }}</h2>
+                    <small class="d-block mb-2">
+                        <span class="text-danger fw-bold">{{ number_format($clientsNousDoivent) }}</span> nous doivent •
+                        <span class="text-success fw-bold">{{ number_format($clientsOnDoit) }}</span> on doit
+                    </small>
+                    <h6 class="text-muted mb-1">Solde global</h6>
+                    <h4 class="{{ $totalSoldeClients >= 0 ? 'text-success' : 'text-danger' }} fw-bold">
+                        {{ number_format($totalSoldeClients, 2, ',', ' ') }} €
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleKpis() {
+    const section = document.getElementById('kpiSection');
+    const chevron = document.getElementById('kpiChevron');
+    const btn = document.getElementById('toggleKpiBtn');
+    const isHidden = section.style.display === 'none';
+
+    section.style.display = isHidden ? 'block' : 'none';
+    chevron.className = isHidden ? 'fas fa-chevron-up ms-2' : 'fas fa-chevron-down ms-2';
+    btn.innerHTML = `<i class="fas fa-chart-bar me-2"></i> ${isHidden ? 'Masquer' : 'Statistiques Clients'} <i class="${chevron.className}"></i>`;
+
+    localStorage.setItem('kpiVisible', isHidden ? '1' : '0');
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Par défaut toujours fermé, on ignore le localStorage
+});
+</script>
+
+
+
 
 
 

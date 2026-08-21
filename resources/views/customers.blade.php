@@ -180,10 +180,166 @@
     box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
 }
 
-
-
-
-
+/* ── AZ Modal Design (création + édition) ─────────────────── */
+:root {
+    --c-navy:   #1E2D4A;
+    --c-blue:   #3B82F6;
+    --c-mint:   #10B981;
+    --c-amber:  #F59E0B;
+    --c-red:    #EF4444;
+    --c-bg:     #F0F4FF;
+    --c-white:  #FFFFFF;
+    --c-text:   #1A2B4A;
+    --c-sub:    #6B7A99;
+    --c-border: #E2E8F0;
+    --shadow:   0 8px 32px rgba(30,45,74,0.12);
+}
+.az-modal .modal-content {
+    border:none; border-radius:20px;
+    overflow:hidden; box-shadow:var(--shadow);
+}
+.az-modal .modal-header {
+    background:linear-gradient(135deg, var(--c-navy) 0%, #2D4A8A 100%);
+    padding:20px 28px 16px; border:none; position:relative;
+}
+.az-modal .modal-header::after {
+    content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--c-blue), var(--c-mint), var(--c-amber));
+}
+.az-modal .modal-title { color:white; font-size:1.05rem; font-weight:700; letter-spacing:0.02em; }
+.az-modal .modal-subtitle { color:rgba(255,255,255,0.55); font-size:0.75rem; margin-top:2px; }
+.az-modal .btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); }
+.az-stepper {
+    display:flex; align-items:center;
+    padding:18px 28px 0; background:var(--c-bg); gap:0;
+}
+.az-step { display:flex; align-items:center; flex:1; position:relative; }
+.az-step-circle {
+    width:32px; height:32px; border-radius:50%;
+    background:white; border:2px solid var(--c-border);
+    color:var(--c-sub); font-size:0.78rem; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    transition:all 0.3s ease; flex-shrink:0; z-index:1;
+}
+.az-step.active .az-step-circle {
+    background:var(--c-blue); border-color:var(--c-blue); color:white;
+    box-shadow:0 0 0 4px rgba(59,130,246,0.2);
+}
+.az-step.done .az-step-circle { background:var(--c-mint); border-color:var(--c-mint); color:white; }
+.az-step-label { font-size:0.72rem; font-weight:600; color:var(--c-sub); margin-left:8px; white-space:nowrap; transition:color 0.3s; }
+.az-step.active .az-step-label { color:var(--c-blue); }
+.az-step.done .az-step-label   { color:var(--c-mint); }
+.az-step-line { flex:1; height:2px; background:var(--c-border); margin:0 10px; transition:background 0.4s; }
+.az-step-line.done { background:var(--c-mint); }
+.az-step-panel { display:none; animation:fadeSlide 0.3s ease; }
+.az-step-panel.active { display:block; }
+@keyframes fadeSlide {
+    from { opacity:0; transform:translateX(12px); }
+    to   { opacity:1; transform:translateX(0); }
+}
+.az-modal .modal-body { background:var(--c-bg); padding:20px 28px 8px; }
+.az-field-group { display:grid; gap:14px; }
+.az-field { display:flex; flex-direction:column; gap:5px; }
+.az-label { font-size:0.73rem; font-weight:700; color:var(--c-sub); text-transform:uppercase; letter-spacing:0.06em; }
+.az-label .required { color:var(--c-red); margin-left:2px; }
+.az-input {
+    border:1.5px solid var(--c-border); border-radius:8px;
+    padding:9px 13px; font-size:0.875rem; color:var(--c-text);
+    background:white; transition:border-color 0.2s, box-shadow 0.2s;
+    outline:none; width:100%;
+}
+.az-input:focus { border-color:var(--c-blue); box-shadow:0 0 0 3px rgba(59,130,246,0.12); }
+.az-input.is-invalid { border-color:var(--c-red); }
+.az-input:disabled { background:#f1f5f9; color:#64748b; cursor:not-allowed; }
+.az-select {
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7A99' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 12px center; padding-right:32px;
+}
+.az-section-title {
+    font-size:0.8rem; font-weight:700; color:var(--c-navy);
+    letter-spacing:0.08em; text-transform:uppercase;
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:12px; padding-bottom:8px; border-bottom:1.5px solid var(--c-border);
+}
+.az-section-title i { color:var(--c-blue); font-size:0.9rem; }
+.az-modal .modal-footer {
+    background:white; border-top:1.5px solid var(--c-border);
+    padding:14px 28px; display:flex; justify-content:space-between; align-items:center;
+}
+.az-btn-prev {
+    background:none; border:1.5px solid var(--c-border); color:var(--c-sub);
+    border-radius:8px; padding:8px 18px; font-size:0.82rem; font-weight:600;
+    cursor:pointer; transition:all 0.2s;
+}
+.az-btn-prev:hover { border-color:var(--c-blue); color:var(--c-blue); }
+.az-btn-next {
+    background:var(--c-blue); border:none; color:white; border-radius:8px;
+    padding:8px 22px; font-size:0.82rem; font-weight:700; cursor:pointer;
+    transition:all 0.2s; display:flex; align-items:center; gap:6px;
+}
+.az-btn-next:hover { background:#2563EB; transform:translateY(-1px); }
+.az-btn-submit {
+    background:linear-gradient(135deg, var(--c-mint), #059669);
+    border:none; color:white; border-radius:8px; padding:8px 22px;
+    font-size:0.82rem; font-weight:700; cursor:pointer; transition:all 0.2s;
+    display:none; align-items:center; gap:6px;
+}
+.az-btn-submit:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(16,185,129,0.3); }
+.az-step-counter { font-size:0.75rem; color:var(--c-sub); }
+/* Edit */
+.az-edit-header {
+    background:linear-gradient(135deg, #1a2b4a 0%, #2d4a8a 100%);
+    padding:16px 24px; display:flex; align-items:center; justify-content:space-between;
+    border-radius:20px 20px 0 0;
+}
+.az-edit-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+    border-radius:20px; padding:4px 12px; font-size:0.72rem; font-weight:700;
+    color:white; letter-spacing:0.05em;
+}
+.az-edit-title { color:white; font-weight:700; font-size:1rem; margin:0; }
+.az-edit-subtitle { color:rgba(255,255,255,0.6); font-size:0.78rem; margin:2px 0 0; }
+.az-lock-btn {
+    background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.3);
+    color:white; border-radius:8px; padding:6px 14px; font-size:0.78rem; font-weight:700;
+    cursor:pointer; transition:all 0.25s; display:flex; align-items:center; gap:6px;
+}
+.az-lock-btn:hover { background:rgba(255,255,255,0.25); }
+.az-lock-btn.editing { background:rgba(239,68,68,0.2); border-color:rgba(239,68,68,0.4); color:#FCA5A5; }
+.az-tabs {
+    display:flex; gap:2px; background:var(--c-bg);
+    padding:8px 24px 0; border-bottom:2px solid var(--c-border);
+}
+.az-tab {
+    padding:8px 16px; font-size:0.78rem; font-weight:600; color:var(--c-sub);
+    cursor:pointer; border-radius:8px 8px 0 0; border:none; background:none;
+    border-bottom:2px solid transparent; margin-bottom:-2px; transition:all 0.2s;
+}
+.az-tab.active { color:var(--c-blue); background:white; border-bottom-color:var(--c-blue); }
+.az-tab-panel { display:none; padding:20px 24px; background:var(--c-bg); }
+.az-tab-panel.active { display:block; animation:fadeSlide 0.25s ease; }
+.az-solde-card {
+    background:linear-gradient(135deg, var(--c-navy), #2D4A8A);
+    border-radius:12px; padding:16px 20px; color:white;
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;
+}
+.az-solde-amount { font-size:1.8rem; font-weight:800; }
+.az-solde-label  { font-size:0.72rem; opacity:0.7; text-transform:uppercase; letter-spacing:0.08em; }
+.az-status-pill {
+    display:inline-flex; align-items:center; gap:6px; padding:6px 14px;
+    border-radius:20px; font-size:0.78rem; font-weight:700; cursor:pointer; transition:all 0.2s;
+}
+.az-status-pill.active  { background:#D1FAE5; color:#065F46; }
+.az-status-pill.blocked { background:#FEE2E2; color:#991B1B; }
+.az-save-btn {
+    background:linear-gradient(135deg, var(--c-mint), #059669);
+    border:none; color:white; border-radius:8px; padding:8px 20px;
+    font-size:0.82rem; font-weight:700; cursor:pointer; transition:all 0.2s;
+    display:none; align-items:center; gap:6px;
+}
+.az-save-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(16,185,129,0.3); }
 
     </style>
 
@@ -640,138 +796,186 @@
 
 
 
-    <!-- Modal création -->
-    <div class="modal fade" id="createItemModal" tabindex="-1" aria-labelledby="createItemModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+    <!-- Modal création — 3 étapes -->
+    <div class="modal fade az-modal" id="createItemModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Créer un client</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    <div>
+                        <div class="modal-title">Nouveau Client</div>
+                        <div class="modal-subtitle">Identité → Coordonnées → Finances</div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('customer.store') }}" method="POST">
-    @csrf
-    <div class="modal-body row">
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Nom</label>
-            <input type="text" name="name" class="form-control" required>
-        </div>
 
-        <div class="mb-3 col-md-6">
-    <label class="form-label">Type de client</label>
-    <select name="type" class="form-control" required>
-        <option value="particulier" selected>Particulier</option>
-        <option value="jobber">Jobber</option>
-        <option value="professionnel">Professionnel</option>
-    </select>
-</div>
+                <div class="az-stepper">
+                    <div class="az-step active" data-step="1">
+                        <div class="az-step-circle">1</div>
+                        <div class="az-step-label">Identité</div>
+                    </div>
+                    <div class="az-step-line" id="line1"></div>
+                    <div class="az-step" data-step="2">
+                        <div class="az-step-circle">2</div>
+                        <div class="az-step-label">Coordonnées</div>
+                    </div>
+                    <div class="az-step-line" id="line2"></div>
+                    <div class="az-step" data-step="3">
+                        <div class="az-step-circle">3</div>
+                        <div class="az-step-label">Finances</div>
+                    </div>
+                </div>
 
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control">
-        </div>
+                <form action="{{ route('customer.store') }}" method="POST" id="createCustomerForm">
+                    @csrf
+                    <div class="modal-body">
 
-        <div class="mb-3 col-md-4">
-            <label class="form-label">Téléphone 1</label>
-            <input type="text" name="phone1" class="form-control">
-        </div>
+                        {{-- Étape 1 : Identité --}}
+                        <div class="az-step-panel active" id="panel-1">
+                            <div class="az-section-title"><i class="fas fa-user"></i> Identité</div>
+                            <div class="az-field-group" style="grid-template-columns:2fr 1fr;">
+                                <div class="az-field">
+                                    <label class="az-label">Nom complet <span class="required">*</span></label>
+                                    <input type="text" name="name" class="az-input" required placeholder="Ex: DUPONT Jean">
+                                </div>
+                                <div class="az-field">
+                                    <label class="az-label">Type <span class="required">*</span></label>
+                                    <select name="type" class="az-input az-select" required>
+                                        <option value="particulier">Particulier</option>
+                                        <option value="jobber">Jobber</option>
+                                        <option value="professionnel">Professionnel</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="az-field-group" style="grid-template-columns:2fr 1fr;margin-top:12px;">
+                                <div class="az-field">
+                                    <label class="az-label">SIRET / Matricule fiscal</label>
+                                    <input type="text" name="matfiscal" class="az-input" placeholder="12345678901234">
+                                </div>
+                                <div class="az-field">
+                                    <label class="az-label">Pays</label>
+                                    <input type="text" name="country" class="az-input" value="France">
+                                </div>
+                            </div>
+                        </div>
 
-        <div class="mb-3 col-md-4">
-            <label class="form-label">Téléphone 2</label>
-            <input type="text" name="phone2" class="form-control">
-        </div>
+                        {{-- Étape 2 : Coordonnées --}}
+                        <div class="az-step-panel" id="panel-2">
+                            <div class="az-section-title"><i class="fas fa-map-marker-alt"></i> Adresse</div>
+                            <div class="az-field-group" style="grid-template-columns:2fr 1fr 1fr;">
+                                <div class="az-field">
+                                    <label class="az-label">Adresse</label>
+                                    <input type="text" name="address" class="az-input" placeholder="Rue, numéro...">
+                                </div>
+                                <div class="az-field">
+                                    <label class="az-label">Code Postal</label>
+                                    <input type="text" name="address_delivery" class="az-input" placeholder="75001">
+                                </div>
+                                <div class="az-field">
+                                    <label class="az-label">Ville</label>
+                                    <input type="text" name="city" class="az-input" placeholder="Paris">
+                                </div>
+                            </div>
+                            <div class="az-section-title" style="margin-top:18px;"><i class="fas fa-address-card"></i> Contact</div>
+                            <div class="az-field-group" style="grid-template-columns:1fr 1fr;">
+                                <div class="az-field">
+                                    <label class="az-label">Email</label>
+                                    <input type="email" name="email" class="az-input" placeholder="contact@exemple.fr">
+                                </div>
+                                <div class="az-field">
+                                    <label class="az-label">IBAN</label>
+                                    <input type="text" name="bank_no" class="az-input" placeholder="FR76...">
+                                </div>
+                            </div>
+                            <div class="az-field-group" style="grid-template-columns:1fr 1fr;margin-top:12px;">
+                                <div class="az-field">
+                                    <label class="az-label">Téléphone principal</label>
+                                    <input type="text" name="phone1" class="az-input" placeholder="06 00 00 00 00">
+                                </div>
+                                <div class="az-field">
+                                    <label class="az-label">Téléphone secondaire</label>
+                                    <input type="text" name="phone2" class="az-input" placeholder="06 00 00 00 00">
+                                </div>
+                            </div>
+                        </div>
 
-        <div class="mb-3 col-md-4">
-            <label class="form-label">Ville</label>
-            <input type="text" name="city" class="form-control">
-        </div>
+                        {{-- Étape 3 : Finances --}}
+                        <div class="az-step-panel" id="panel-3">
+                            <div class="az-section-title"><i class="fas fa-euro-sign"></i> Paramètres financiers</div>
+                            <div class="az-field-group" style="grid-template-columns:1fr 1fr;">
+                                <div class="az-field">
+                                    <label class="az-label">Condition de paiement <span class="required">*</span></label>
+                                    <select name="payment_term_id" class="az-input az-select" required>
+                                        @foreach($paymentTerms as $term)
+                                            <option value="{{ $term->id }}">{{ $term->label }} : {{ $term->days }} Jours</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="az-field">
+                                    <label class="az-label">Mode de paiement <span class="required">*</span></label>
+                                    <select name="payment_mode_id" class="az-input az-select" required>
+                                        @foreach($paymentModes as $mode)
+                                            <option value="{{ $mode->id }}">{{ $mode->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="az-field-group" style="grid-template-columns:1fr 1fr 1fr;margin-top:12px;">
+                                <div class="az-field">
+                                    <label class="az-label">TVA <span class="required">*</span></label>
+                                    <select name="tva_group_id" class="az-input az-select" required>
+                                        @foreach($tvaGroups as $group)
+                                            <option value="{{ $group->id }}">{{ $group->name }} ({{ $group->rate }}%)</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="az-field">
+                                    <label class="az-label">Groupe remise <span class="required">*</span></label>
+                                    <select name="discount_group_id" class="az-input az-select" required>
+                                        @foreach($discountGroups as $group)
+                                            <option value="{{ $group->id }}">{{ $group->name }} ({{ $group->discount_rate }}%)</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="az-field">
+                                    <label class="az-label">Plafond (€)</label>
+                                    <input type="number" step="0.01" name="plafond" class="az-input" value="0">
+                                </div>
+                            </div>
+                            <div class="az-field-group" style="grid-template-columns:1fr 1fr;margin-top:12px;">
+                                <div class="az-field">
+                                    <label class="az-label">Risque</label>
+                                    <input type="number" name="risque" class="az-input" value="0">
+                                </div>
+                                <div class="az-field">
+                                    <label class="az-label">Solde initial (€)</label>
+                                    <input type="number" step="0.01" name="solde" class="az-input" value="0" readonly style="background:#f0f4ff;">
+                                </div>
+                            </div>
+                        </div>
 
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Adresse</label>
-            <input type="text" name="address" class="form-control">
-        </div>
+                    </div>
 
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Code Postal</label>
-            <input type="text" name="address_delivery" class="form-control">
-        </div>
-
-        <div class="mb-3 col-md-4">
-            <label class="form-label">Pays</label>
-            <input type="text" name="country" class="form-control" value="France" required>
-        </div>
-
-        <div class="mb-3 col-md-4">
-            <label class="form-label">SIRET</label>
-            <input type="text" name="matfiscal" class="form-control">
-        </div>
-
-        <div class="mb-3 col-md-4">
-            <label class="form-label">IBAN</label>
-            <input type="text" name="bank_no" class="form-control">
-        </div>
-
-        <div class="mb-3 col-md-4">
-            <label class="form-label">Solde</label>
-            <input type="number" step="0.01" name="solde" class="form-control" value="0" readonly>
-        </div>
-
-        <div class="mb-3 col-md-4">
-            <label class="form-label">Plafond</label>
-            <input type="number" step="0.01" name="plafond" class="form-control" value="0">
-        </div>
-
-        <div class="mb-3 col-md-4">
-            <label class="form-label">Risque</label>
-            <input type="number" name="risque" class="form-control">
-        </div>
-
-        <div class="mb-3 col-md-6">
-            <label class="form-label">TVA</label>
-            <select name="tva_group_id" class="form-control" required>
-                <!-- <option value="">-- Choisir --</option> -->
-                @foreach($tvaGroups as $group)
-                    <option value="{{ $group->id }}">{{ $group->name }} : {{ $group->rate }} %</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Groupe Remise</label>
-            <select name="discount_group_id" class="form-control" required>
-                <!-- <option value="">-- Choisir --</option> -->
-                @foreach($discountGroups as $group)
-                    <option value="{{ $group->id }}">{{ $group->name }} : {{ $group->discount_rate }} %</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Mode de paiement</label>
-            <select name="payment_mode_id" class="form-control" required>
-                <!-- <option value="">-- Choisir --</option> -->
-                @foreach($paymentModes as $mode)
-                    <option value="{{ $mode->id }}">{{ $mode->name }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Condition de paiement</label>
-            <select name="payment_term_id" class="form-control" required>
-                <!-- <option value="">-- Choisir --</option> -->
-                @foreach($paymentTerms as $term)
-                    <option value="{{ $term->id }}">{{ $term->label }} : {{ $term->days }} Jours</option>
-                @endforeach
-            </select>
-        </div>
-    </div>
-
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-        <button type="submit" class="btn btn-success">Créer</button>
-    </div>
-</form>
-
+                    <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;">
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="az-btn-prev" id="btnPrev" style="display:none;" onclick="stepNav(-1)">
+                                <i class="fas fa-arrow-left"></i> Précédent
+                            </button>
+                            <span class="az-step-counter" id="stepCounter">Étape 1 sur 3</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="az-btn-next" id="btnNext" onclick="stepNav(1)">
+                                Suivant <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <button type="submit" name="action" value="create" class="az-btn-submit" id="btnSubmit" style="display:none;">
+                                <i class="fas fa-check"></i> Créer
+                            </button>
+                            <button type="button" class="az-btn-submit" id="btnSubmitClose"
+                                    style="display:none;background:linear-gradient(135deg,#059669,#047857);">
+                                <i class="fas fa-check-double"></i> Créer et Fermer
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -1374,272 +1578,203 @@ document.addEventListener('DOMContentLoaded', function () {
                             </td>
                         </tr>
 
-                        <!-- Modal Modifier -->
-                        <div class="modal fade" id="editItemModal{{ $customer->id }}" tabindex="-1" aria-labelledby="editItemModalLabel{{ $customer->id }}" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
+                        <!-- Modal Modifier — design moderne onglets -->
+                        <div class="modal fade az-modal" id="editItemModal{{ $customer->id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
                                 <div class="modal-content">
+                                    <div class="az-edit-header">
+                                        <div>
+                                            <div class="az-edit-badge">{{ $customer->code }}</div>
+                                            <h5 class="az-edit-title mt-1">{{ $customer->name }}</h5>
+                                            <p class="az-edit-subtitle">{{ ucfirst($customer->type ?? 'particulier') }} · {{ $customer->city ?? '—' }}</p>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <button type="button" class="az-lock-btn" id="lockBtn{{ $customer->id }}" onclick="toggleEdit({{ $customer->id }})">
+                                                <i class="fas fa-lock"></i> Modifier
+                                            </button>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                    </div>
 
-                                           <div class="modal-header">
-                <h5 class="modal-title">Client :  {{ $customer->code }} - {{ $customer->name }}</h5>
-                <button type="button" class="btn btn-outline-primary btn-sm ms-2" id="editBtn{{ $customer->id }}">
-                <i class="fas fa-edit"></i> Modifier
-                </button>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-            </div>
+                                    <form action="{{ route('customer.update', $customer->id) }}" method="POST" id="editForm{{ $customer->id }}">
+                                        @csrf
+                                        @method('PUT')
 
+                                        <div class="az-tabs">
+                                            <button type="button" class="az-tab active" data-tab="identite-{{ $customer->id }}" onclick="switchTab(this, {{ $customer->id }})">Identité</button>
+                                            <button type="button" class="az-tab" data-tab="contact-{{ $customer->id }}" onclick="switchTab(this, {{ $customer->id }})">Contact</button>
+                                            <button type="button" class="az-tab" data-tab="finances-{{ $customer->id }}" onclick="switchTab(this, {{ $customer->id }})">Finances</button>
+                                            <button type="button" class="az-tab" data-tab="statut-{{ $customer->id }}" onclick="switchTab(this, {{ $customer->id }})">Statut</button>
+                                        </div>
 
-                                    <form action="{{ route('customer.update', $customer->id) }}" method="POST">
-    @csrf
-    @method('PUT')
-    <div id="editForm{{ $customer->id }}">
-    <div class="modal-body row">
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Nom</label>
-            <input type="text" name="name" class="form-control" value="{{ $customer->name }}" required disabled>
-        </div>
+                                        {{-- Tab Identité --}}
+                                        <div class="az-tab-panel active" id="tab-identite-{{ $customer->id }}">
+                                            <div class="az-section-title"><i class="fas fa-user"></i> Identité</div>
+                                            <div class="az-field-group" style="grid-template-columns:2fr 1fr;">
+                                                <div class="az-field">
+                                                    <label class="az-label">Nom complet</label>
+                                                    <input type="text" name="name" class="az-input ef-{{ $customer->id }}" value="{{ $customer->name }}" required disabled>
+                                                </div>
+                                                <div class="az-field">
+                                                    <label class="az-label">Type</label>
+                                                    <select name="type" class="az-input az-select ef-{{ $customer->id }}" disabled>
+                                                        <option value="particulier" {{ $customer->type == 'particulier' ? 'selected' : '' }}>Particulier</option>
+                                                        <option value="jobber" {{ $customer->type == 'jobber' ? 'selected' : '' }}>Jobber</option>
+                                                        <option value="professionnel" {{ $customer->type == 'professionnel' ? 'selected' : '' }}>Professionnel</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="az-field-group" style="grid-template-columns:2fr 1fr;margin-top:12px;">
+                                                <div class="az-field">
+                                                    <label class="az-label">SIRET</label>
+                                                    <input type="text" name="matfiscal" class="az-input ef-{{ $customer->id }}" value="{{ $customer->matfiscal }}" disabled>
+                                                </div>
+                                                <div class="az-field">
+                                                    <label class="az-label">Pays</label>
+                                                    <input type="text" name="country" class="az-input ef-{{ $customer->id }}" value="{{ $customer->country }}" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="az-field-group" style="grid-template-columns:2fr 1fr 1fr;margin-top:12px;">
+                                                <div class="az-field">
+                                                    <label class="az-label">Adresse</label>
+                                                    <input type="text" name="address" class="az-input ef-{{ $customer->id }}" value="{{ $customer->address }}" disabled>
+                                                </div>
+                                                <div class="az-field">
+                                                    <label class="az-label">Code Postal</label>
+                                                    <input type="text" name="address_delivery" class="az-input ef-{{ $customer->id }}" value="{{ $customer->address_delivery }}" disabled>
+                                                </div>
+                                                <div class="az-field">
+                                                    <label class="az-label">Ville</label>
+                                                    <input type="text" name="city" class="az-input ef-{{ $customer->id }}" value="{{ $customer->city }}" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
 
-        <div class="mb-3 col-md-6">
-    <label class="form-label">Type de client</label>
-    <select name="type" class="form-control" disabled>
-        <option value="particulier" {{ $customer->type == 'particulier' ? 'selected' : '' }}>Particulier</option>
-        <option value="jobber" {{ $customer->type == 'jobber' ? 'selected' : '' }}>Jobber</option>
-        <option value="professionnel" {{ $customer->type == 'professionnel' ? 'selected' : '' }}>Professionnel</option>
-    </select>
-</div>
+                                        {{-- Tab Contact --}}
+                                        <div class="az-tab-panel" id="tab-contact-{{ $customer->id }}">
+                                            <div class="az-section-title"><i class="fas fa-address-card"></i> Contact</div>
+                                            <div class="az-field-group" style="grid-template-columns:1fr 1fr;">
+                                                <div class="az-field">
+                                                    <label class="az-label">Email</label>
+                                                    <input type="email" name="email" class="az-input ef-{{ $customer->id }}" value="{{ $customer->email }}" disabled>
+                                                </div>
+                                                <div class="az-field">
+                                                    <label class="az-label">IBAN</label>
+                                                    <input type="text" name="bank_no" class="az-input ef-{{ $customer->id }}" value="{{ $customer->bank_no }}" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="az-field-group" style="grid-template-columns:1fr 1fr;margin-top:12px;">
+                                                <div class="az-field">
+                                                    <label class="az-label">Téléphone principal</label>
+                                                    <input type="text" name="phone1" class="az-input ef-{{ $customer->id }}" value="{{ $customer->phone1 }}" disabled>
+                                                </div>
+                                                <div class="az-field">
+                                                    <label class="az-label">Téléphone secondaire</label>
+                                                    <input type="text" name="phone2" class="az-input ef-{{ $customer->id }}" value="{{ $customer->phone2 }}" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
 
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control" value="{{ $customer->email }}" disabled>
-        </div>
+                                        {{-- Tab Finances --}}
+                                        <div class="az-tab-panel" id="tab-finances-{{ $customer->id }}">
+                                            <div class="az-solde-card">
+                                                <div>
+                                                    <div class="az-solde-label">Solde actuel</div>
+                                                    <div class="az-solde-amount">{{ number_format($customer->solde ?? 0, 2, ',', ' ') }} €</div>
+                                                </div>
+                                                <i class="fas fa-wallet" style="font-size:2rem;opacity:0.3;"></i>
+                                            </div>
+                                            <div class="az-section-title"><i class="fas fa-euro-sign"></i> Paramètres financiers</div>
+                                            <div class="az-field-group" style="grid-template-columns:1fr 1fr;">
+                                                <div class="az-field">
+                                                    <label class="az-label">Condition de paiement</label>
+                                                    <select name="payment_term_id" class="az-input az-select ef-{{ $customer->id }}" disabled>
+                                                        @foreach($paymentTerms as $term)
+                                                            <option value="{{ $term->id }}" {{ $customer->payment_term_id == $term->id ? 'selected' : '' }}>
+                                                                {{ $term->label }} : {{ $term->days }} Jours
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="az-field">
+                                                    <label class="az-label">Mode de paiement</label>
+                                                    <select name="payment_mode_id" class="az-input az-select ef-{{ $customer->id }}" disabled>
+                                                        @foreach($paymentModes as $mode)
+                                                            <option value="{{ $mode->id }}" {{ $customer->payment_mode_id == $mode->id ? 'selected' : '' }}>
+                                                                {{ $mode->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="az-field-group" style="grid-template-columns:1fr 1fr 1fr;margin-top:12px;">
+                                                <div class="az-field">
+                                                    <label class="az-label">TVA</label>
+                                                    <select name="tva_group_id" class="az-input az-select ef-{{ $customer->id }}" disabled>
+                                                        @foreach($tvaGroups as $group)
+                                                            <option value="{{ $group->id }}" {{ $customer->tva_group_id == $group->id ? 'selected' : '' }}>
+                                                                {{ $group->name }} ({{ $group->rate }}%)
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="az-field">
+                                                    <label class="az-label">Groupe remise</label>
+                                                    <select name="discount_group_id" class="az-input az-select ef-{{ $customer->id }}" disabled>
+                                                        @foreach($discountGroups as $group)
+                                                            <option value="{{ $group->id }}" {{ $customer->discount_group_id == $group->id ? 'selected' : '' }}>
+                                                                {{ $group->name }} ({{ $group->discount_rate }}%)
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="az-field">
+                                                    <label class="az-label">Plafond (€)</label>
+                                                    <input type="number" step="0.01" name="plafond" class="az-input ef-{{ $customer->id }}" value="{{ $customer->plafond ?? 0 }}" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="az-field-group" style="grid-template-columns:1fr;margin-top:12px;max-width:200px;">
+                                                <div class="az-field">
+                                                    <label class="az-label">Risque</label>
+                                                    <input type="number" name="risque" class="az-input ef-{{ $customer->id }}" value="{{ $customer->risque }}" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
 
-        <div class="mb-3 col-md-4">
-            <label class="form-label">Téléphone 1</label>
-            <input type="text" name="phone1" class="form-control" value="{{ $customer->phone1 }}" disabled>
-        </div>
+                                        {{-- Tab Statut --}}
+                                        <div class="az-tab-panel" id="tab-statut-{{ $customer->id }}">
+                                            <div class="az-section-title"><i class="fas fa-shield-alt"></i> Statut client</div>
+                                            <input type="hidden" name="blocked" value="0">
+                                            <div class="d-flex align-items-center gap-3 mb-3">
+                                                <label class="az-status-pill {{ $customer->blocked ? 'blocked' : 'active' }}" id="statusPill{{ $customer->id }}"
+                                                       style="cursor:default;">
+                                                    <input type="checkbox" name="blocked" value="1" class="ef-{{ $customer->id }}"
+                                                           id="blockedSwitch{{ $customer->id }}"
+                                                           {{ $customer->blocked ? 'checked' : '' }}
+                                                           disabled
+                                                           onchange="toggleStatusPill({{ $customer->id }})"
+                                                           style="margin-right:6px;">
+                                                    <span id="blockedLabel{{ $customer->id }}">
+                                                        {{ $customer->blocked ? 'Client Bloqué 🚫' : 'Client Actif ✅' }}
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <small class="text-muted">
+                                                ⚠️ Le blocage concerne uniquement l'expédition des ventes.<br>
+                                                La facturation reste possible même si le client est bloqué.
+                                            </small>
+                                        </div>
 
-        <div class="mb-3 col-md-4">
-            <label class="form-label">Téléphone 2</label>
-            <input type="text" name="phone2" class="form-control" value="{{ $customer->phone2 }}" disabled>
-        </div>
-
-        <div class="mb-3 col-md-4">
-            <label class="form-label">Ville</label>
-            <input type="text" name="city" class="form-control" value="{{ $customer->city }}" disabled>
-        </div>
-
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Adresse</label>
-            <input type="text" name="address" class="form-control" value="{{ $customer->address }}" disabled>
-        </div>
-
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Code Postal</label>
-            <input type="text" name="address_delivery" class="form-control" value="{{ $customer->address_delivery }}" disabled>
-        </div>
-
-        <div class="mb-3 col-md-4">
-            <label class="form-label">Pays</label>
-            <input type="text" name="country" class="form-control" value="{{ $customer->country }}" disabled>
-        </div>
-
-        <div class="mb-3 col-md-4">
-            <label class="form-label">SIRET</label>
-            <input type="text" name="matfiscal" class="form-control" value="{{ $customer->matfiscal }}" disabled>
-        </div>
-
-        <div class="mb-3 col-md-4">
-            <label class="form-label">IBAN</label>
-            <input type="text" name="bank_no" class="form-control" value="{{ $customer->bank_no }}" disabled>
-        </div>
-
-<div class="mb-3 col-md-4">
-    <label class="form-label">Solde :</label>
-    <!-- <input type="number" step="0.01" name="solde" class="form-control"
-           value="{{ old('solde', $customer->solde ?? 0) }}" readonly> -->
-           <h1><button type="button" class="btn btn-outline-dark">{{$customer->solde ?? 0 }} €</button></h1>
-</div>
-
-<div class="mb-3 col-md-4">
-    <label class="form-label">Plafond</label>
-    <input type="number" step="0.01" name="plafond" class="form-control"
-           value="{{ old('plafond', $customer->plafond ?? 0) }}" disabled>
-</div>
-
-
-        <div class="mb-3 col-md-4">
-            <label class="form-label">Risque</label>
-            <input type="number" name="risque" class="form-control" value="{{ $customer->risque }}" disabled>
-        </div>
-
-
-
-
-
-
-
-        <div class="mb-3 col-md-6">
-            <label class="form-label">TVA</label>
-            <select name="tva_group_id" class="form-control" disabled>
-                <option value="">-- Choisir --</option>
-                @foreach($tvaGroups as $group)
-                    <option value="{{ $group->id }}" {{ $customer->tva_group_id == $group->id ? 'selected' : '' }}>
-                        {{ $group->name }} : {{ $group->rate }} %
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Groupe Remise</label>
-            <select name="discount_group_id" class="form-control" disabled>
-                <option value="">-- Choisir --</option>
-                @foreach($discountGroups as $group)
-                    <option value="{{ $group->id }}" {{ $customer->discount_group_id == $group->id ? 'selected' : '' }}>
-                        {{ $group->name }} : {{ $group->discount_rate }} %
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Mode de paiement</label>
-            <select name="payment_mode_id" class="form-control" disabled>
-                <option value="">-- Choisir --</option>
-                @foreach($paymentModes as $mode)
-                    <option value="{{ $mode->id }}" {{ $customer->payment_mode_id == $mode->id ? 'selected' : '' }}>
-                        {{ $mode->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3 col-md-6">
-            <label class="form-label">Condition de paiement</label>
-            <select name="payment_term_id" class="form-control" disabled>
-                <option value="">-- Choisir --</option>
-                @foreach($paymentTerms as $term)
-                    <option value="{{ $term->id }}" {{ $customer->payment_term_id == $term->id ? 'selected' : '' }}>
-                        {{ $term->label }} : {{ $term->days }} Jours
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-
-        
-<div class="mb-3 col-md-6">
-    <label class="form-label d-block">Statut Client</label>
-
-    <!-- Hidden input toujours envoyé -->
-    <input type="hidden" name="blocked" value="0">
-
-    <!-- Switch visible -->
-    <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="blockedSwitch{{ $customer->id }}" name="blocked" value="1"
-               {{ $customer->blocked ? 'checked' : '' }} onchange="toggleBlockedLabel({{ $customer->id }})" disabled>
-        <label class="form-check-label fw-bold" id="blockedLabel{{ $customer->id }}" for="blockedSwitch{{ $customer->id }}">
-            {{ $customer->blocked ? 'Client Bloqué 🚫' : 'Client Actif ✅' }}
-        </label>
-    </div>
-
-    <small class="form-text text-muted">
-        ⚠️ Le blocage concerne uniquement l'expédition des ventes.<br>
-        La facturation reste possible même si le client est bloqué.
-    </small>
-</div>
-<script>
-function toggleBlockedLabel(customerId) {
-    const checkbox = document.getElementById('blockedSwitch' + customerId);
-    const label = document.getElementById('blockedLabel' + customerId);
-    if (checkbox.checked) {
-        label.innerText = 'Client Bloqué 🚫';
-    } else {
-        label.innerText = 'Client Actif ✅';
-    }
-}
-
-
-
-             
-
-                
-</script>
-
-
-
-
-
-
-    </div>
-
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-        <button type="submit" class="btn btn-success">Mettre à jour</button>
-    </div>
-    </div>
-</form>
-
+                                        <div class="modal-footer" style="justify-content:flex-end;background:white;border-top:1.5px solid var(--c-border);padding:14px 24px;">
+                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fermer</button>
+                                            <button type="submit" class="az-save-btn" id="saveBtn{{ $customer->id }}">
+                                                <i class="fas fa-save"></i> Enregistrer
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
-
-
-
-
-
-<!-- Script pour activer les champs -->
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("editForm{{ $customer->id }}");
-    const button = document.getElementById("editBtn{{ $customer->id }}");
-    let isEditable = false;
-
-    // Sauvegarde des valeurs initiales
-    const originalValues = {};
-    form.querySelectorAll("input, select, textarea").forEach(el => {
-        originalValues[el.name] = el.value;
-    });
-
-    button.addEventListener("click", function () {
-        const fields = form.querySelectorAll("input, select, textarea");
-
-        if (!isEditable) {
-            fields.forEach(el => el.removeAttribute("disabled"));
-            button.innerHTML = `<i class="fas fa-times-circle"></i> Annuler modification`;
-            button.classList.remove("btn-outline-primary");
-            button.classList.add("btn-outline-danger");
-            isEditable = true;
-        } else {
-            fields.forEach(el => {
-                el.setAttribute("disabled", true);
-                if (originalValues.hasOwnProperty(el.name)) {
-                    el.value = originalValues[el.name];
-                }
-            });
-            button.innerHTML = `<i class="fas fa-edit"></i> Modifier`;
-            button.classList.remove("btn-outline-danger");
-            button.classList.add("btn-outline-primary");
-            isEditable = false;
-        }
-    });
-});
-</script>
-
-
-<!-- Style optionnel pour champs désactivés -->
-<style>
-    .form-control[disabled], .form-select[disabled], textarea[disabled] {
-        background-color: #e9ecef;
-        cursor: not-allowed;
-    }
-        .badge-very-sm {
-    font-size: 0.7rem;
-    padding: 0.15em 0.3em;
-    vertical-align: middle;
-}
-</style>
-
-
 
 
                     @endforeach
@@ -2252,6 +2387,207 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+
+
+<script>
+// ════════════════════════════════════════════════════════
+// STEPPER — Création client (3 étapes)
+// ════════════════════════════════════════════════════════
+var currentStep = 1;
+var totalSteps  = 3;
+
+function stepNav(dir) {
+    var next = currentStep + dir;
+    if (next < 1 || next > totalSteps) return;
+
+    if (dir > 0) {
+        var panel = document.getElementById('panel-' + currentStep);
+        var required = panel.querySelectorAll('[required]');
+        var valid = true;
+        required.forEach(function(el) {
+            if (!el.value.trim()) {
+                el.classList.add('is-invalid');
+                el.style.borderColor = 'var(--c-red)';
+                valid = false;
+            } else {
+                el.style.borderColor = '';
+                el.classList.remove('is-invalid');
+            }
+        });
+        if (!valid) return;
+    }
+
+    document.getElementById('panel-' + currentStep).classList.remove('active');
+    currentStep = next;
+    document.getElementById('panel-' + currentStep).classList.add('active');
+
+    for (var i = 1; i <= totalSteps; i++) {
+        var step = document.querySelector('#createItemModal .az-stepper [data-step="' + i + '"]');
+        if (!step) continue;
+        step.classList.remove('active', 'done');
+        if (i < currentStep)        step.classList.add('done');
+        else if (i === currentStep) step.classList.add('active');
+        var circle = step.querySelector('.az-step-circle');
+        circle.innerHTML = i < currentStep ? '<i class="fas fa-check" style="font-size:0.7rem;"></i>' : i;
+    }
+    var line1 = document.getElementById('line1');
+    var line2 = document.getElementById('line2');
+    if (line1) line1.classList.toggle('done', currentStep > 1);
+    if (line2) line2.classList.toggle('done', currentStep > 2);
+
+    document.getElementById('btnPrev').style.display = currentStep > 1 ? 'flex' : 'none';
+    var btnNext        = document.getElementById('btnNext');
+    var btnSubmit      = document.getElementById('btnSubmit');
+    var btnSubmitClose = document.getElementById('btnSubmitClose');
+
+    if (currentStep === totalSteps) {
+        btnNext.style.display        = 'none';
+        btnSubmit.style.display      = 'flex';
+        btnSubmitClose.style.display = 'flex';
+    } else {
+        btnNext.style.display        = 'flex';
+        btnSubmit.style.display      = 'none';
+        btnSubmitClose.style.display = 'none';
+    }
+    document.getElementById('stepCounter').textContent = 'Étape ' + currentStep + ' sur ' + totalSteps;
+}
+
+document.getElementById('createItemModal').addEventListener('hidden.bs.modal', function() {
+    currentStep = 1;
+    for (var i = 1; i <= totalSteps; i++) {
+        var panel = document.getElementById('panel-' + i);
+        if (panel) panel.classList.toggle('active', i === 1);
+        var step = document.querySelector('#createItemModal .az-stepper [data-step="' + i + '"]');
+        if (!step) continue;
+        step.classList.remove('active', 'done');
+        if (i === 1) step.classList.add('active');
+        step.querySelector('.az-step-circle').textContent = i;
+    }
+    var line1 = document.getElementById('line1');
+    var line2 = document.getElementById('line2');
+    if (line1) line1.classList.remove('done');
+    if (line2) line2.classList.remove('done');
+    document.getElementById('btnPrev').style.display        = 'none';
+    document.getElementById('btnNext').style.display        = 'flex';
+    document.getElementById('btnSubmit').style.display      = 'none';
+    document.getElementById('btnSubmitClose').style.display = 'none';
+    document.getElementById('stepCounter').textContent = 'Étape 1 sur 3';
+    document.getElementById('createCustomerForm').reset();
+});
+
+// Créer et Fermer (AJAX + window.close)
+document.getElementById('btnSubmitClose').addEventListener('click', function () {
+    var form = document.getElementById('createCustomerForm');
+    var valid = true;
+    form.querySelectorAll('[required]').forEach(function (el) {
+        if (!el.value.trim()) {
+            el.classList.add('is-invalid');
+            el.style.borderColor = 'var(--c-red)';
+            valid = false;
+        } else {
+            el.style.borderColor = '';
+            el.classList.remove('is-invalid');
+        }
+    });
+    if (!valid) {
+        for (var s = 1; s <= totalSteps; s++) {
+            var p = document.getElementById('panel-' + s);
+            if (p && p.querySelector('.is-invalid')) {
+                while (currentStep !== s) stepNav(currentStep < s ? 1 : -1);
+                break;
+            }
+        }
+        return;
+    }
+
+    var btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création...';
+
+    var fd = new FormData(form);
+    fd.set('action', 'create_and_close');
+
+    fetch(form.action, {
+        method: 'POST',
+        body: fd,
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json, text/html, */*' },
+        credentials: 'same-origin'
+    })
+    .then(function (res) {
+        if (res.ok || res.redirected || res.status === 302) {
+            try { window.close(); } catch (e) {}
+            setTimeout(function () {
+                document.body.innerHTML =
+                    '<div style="font-family:system-ui,sans-serif;text-align:center;padding:60px 20px;">' +
+                    '<div style="font-size:3rem;margin-bottom:12px;">✅</div>' +
+                    '<h2 style="margin:0 0 8px;">Client créé avec succès</h2>' +
+                    '<p style="color:#64748b;">Vous pouvez fermer cette fenêtre.</p>' +
+                    '<button onclick="window.close()" style="margin-top:20px;padding:10px 24px;border:none;border-radius:8px;background:#059669;color:#fff;font-weight:600;cursor:pointer;">Fermer la fenêtre</button>' +
+                    '</div>';
+            }, 300);
+            return;
+        }
+        return res.json().then(function (data) { throw data; })
+            .catch(function () { throw { message: 'Erreur HTTP ' + res.status }; });
+    })
+    .catch(function (err) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check-double"></i> Créer et Fermer';
+        var msg = 'Erreur lors de la création du client.';
+        if (err && err.errors) msg = Object.values(err.errors).flat().join('\\n');
+        else if (err && err.message) msg = err.message;
+        alert(msg);
+    });
+});
+
+// ════════════════════════════════════════════════════════
+// EDIT — tabs + lock/unlock
+// ════════════════════════════════════════════════════════
+var editState = {};
+
+function switchTab(btn, id) {
+    var modal = document.getElementById('editItemModal' + id);
+    modal.querySelectorAll('.az-tab').forEach(function(t) { t.classList.remove('active'); });
+    modal.querySelectorAll('.az-tab-panel').forEach(function(p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    var tabId = btn.getAttribute('data-tab');
+    var panel = document.getElementById('tab-' + tabId);
+    if (panel) panel.classList.add('active');
+}
+
+function toggleEdit(id) {
+    var fields  = document.querySelectorAll('.ef-' + id);
+    var btn     = document.getElementById('lockBtn' + id);
+    var saveBtn = document.getElementById('saveBtn' + id);
+    var isEditing = editState[id] || false;
+
+    if (!isEditing) {
+        fields.forEach(function(el) { el.removeAttribute('disabled'); });
+        btn.innerHTML = '<i class="fas fa-times"></i> Annuler';
+        btn.classList.add('editing');
+        if (saveBtn) saveBtn.style.display = 'flex';
+        editState[id] = true;
+    } else {
+        // reload to restore original values
+        location.reload();
+    }
+}
+
+function toggleStatusPill(id) {
+    var cb = document.getElementById('blockedSwitch' + id);
+    var label = document.getElementById('blockedLabel' + id);
+    var pill = document.getElementById('statusPill' + id);
+    if (cb.checked) {
+        label.innerText = 'Client Bloqué 🚫';
+        pill.classList.remove('active');
+        pill.classList.add('blocked');
+    } else {
+        label.innerText = 'Client Actif ✅';
+        pill.classList.remove('blocked');
+        pill.classList.add('active');
+    }
+}
+</script>
 
   </body>
 </html>
