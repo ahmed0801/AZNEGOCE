@@ -1180,11 +1180,12 @@ document.addEventListener('click', function(e) {
                             <textarea id="tbl-notes" class="form-control form-control-sm" rows="2"
           placeholder="Ex: demander au comptoir, pièce urgente..."></textarea>
 <button type="button"
-        onclick="document.getElementById('tbl-notes').value='🚪 Livraison: ' + this.getAttribute('data-customer'); this.style.background='#dcfce7'; this.style.borderColor='#86efac'; this.style.color='#166534'; this.innerHTML='✅ Noté — Livraison directe au client';"
+        onclick="document.getElementById('tbl-notes').value='🚪 Livraison: ' + this.getAttribute('data-customer'); this.style.background='#dcfce7'; this.style.border='2px solid #86efac'; this.style.color='#166534'; this.style.boxShadow='none'; this.innerHTML='✅ Noté — Livraison directe au client';"
         data-customer=""
         id="btn-livraison-directe-bl"
-        style="background:#ede9fe;border:1px solid #a78bfa;color:#6f42c1;border-radius:6px;
-               padding:3px 10px;font-size:0.72rem;font-weight:600;cursor:pointer;margin-top:4px;">
+        style="background:#ef4444;border:2px solid #b91c1c;color:#fff;border-radius:8px;
+               padding:8px 14px;font-size:0.85rem;font-weight:700;cursor:pointer;margin-top:6px;
+               box-shadow:0 0 0 3px rgba(239,68,68,.35);letter-spacing:.02em;">
     🚪 Livraison directe au client
 </button>
 

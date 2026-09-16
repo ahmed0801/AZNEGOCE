@@ -394,7 +394,7 @@ protected function createDeliveryNoteFromOrder(SalesOrder $order, Request $reque
         $deliveryNote = DeliveryNote::create([
             'sales_order_id' => $order->id,
             'delivery_date' => $deliveryDate,
-            'status' => 'en_cours',
+            'status' => 'expédié',
             'total_delivered' => 0,
             'total_ht' => 0, // Initialize
             'total_ttc' => 0, // Initialize
