@@ -33,7 +33,7 @@ class ImportGoldaTarifs extends Command
         $ftp = Storage::createFtpDriver([
             'host' => 'golda.fr',
             'username' => 'tdlfg8223',
-            'password' => '1aX&&5fxCYHz',
+            'password' => 'B7w42bz!36',
             'root' => '/tarifs/',
             'passive' => true,
             'ssl' => false,

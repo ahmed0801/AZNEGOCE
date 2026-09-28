@@ -453,15 +453,15 @@
 
                     </h4>
 
-                         <div class="filter-box mb-2 p-2">
-    <form method="GET"
-          action="{{ route('sales.list') }}"
+                         
+                    
+
+                    <div class="filter-box mb-2 p-2">
+    <form method="GET" action="{{ route('sales.list') }}"
           class="d-flex flex-wrap align-items-end gap-2">
 
         {{-- Client --}}
-        <select name="customer_id"
-                class="form-select form-select-sm select2"
-                style="width: 140px;">
+        <select name="customer_id" class="form-select form-select-sm select2" style="width:140px;">
             <option value="">Client (Tous)</option>
             @foreach($customers as $customer)
                 <option value="{{ $customer->id }}"
@@ -471,10 +471,12 @@
             @endforeach
         </select>
 
+        {{-- N° Commande --}}
+        <input type="text" name="numdoc" class="form-control form-control-sm"
+               placeholder="N° Commande" value="{{ request('numdoc') }}" style="width:100px;">
+
         {{-- Vendeur --}}
-        <select name="vendeur"
-                class="form-select form-select-sm"
-                style="width: 120px;">
+        <select name="vendeur" class="form-select form-select-sm" style="width:105px;">
             <option value="">Vendeur (Tous)</option>
             @foreach($vendeurs as $vendeur)
                 <option value="{{ $vendeur }}"
@@ -484,60 +486,56 @@
             @endforeach
         </select>
 
-        {{-- Statut devis --}}
-        <select name="status"
-                class="form-select form-select-sm"
-                style="width: 90px;">
+        {{-- Véhicule --}}
+        <div class="col-md-1 col-sm-6">
+            <label class="form-label small fw-bold">Véhicule</label>
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="fas fa-car"></i></span>
+                <input type="text" name="search_vehicle" class="form-control"
+                       placeholder="Immat/Marque..." value="{{ request('search_vehicle') }}">
+            </div>
+        </div>
+
+        {{-- Article --}}
+        <div class="col-md-1 col-sm-6">
+            <label class="form-label small fw-bold">Article</label>
+            <input type="text" name="search_article" class="form-control form-control-sm"
+                   placeholder="Réf ou Desc" value="{{ request('search_article') }}">
+        </div>
+
+        {{-- Statut --}}
+        <select name="status" class="form-select form-select-sm" style="width:90px;">
             <option value="">Statut</option>
-            <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>
-                Brouillon
-            </option>
-            <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>
-                Validée
-            </option>
+            <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
+            <option value="validée"   {{ request('status') == 'validée'   ? 'selected' : '' }}>Validée</option>
         </select>
 
         {{-- Statut BL --}}
-        <select name="delivery_status"
-                class="form-select form-select-sm"
-                style="width: 100px;">
+        <select name="delivery_status" class="form-select form-select-sm" style="width:100px;">
             <option value="">BL (Tous)</option>
-            <option value="en_cours" {{ request('delivery_status') == 'en_cours' ? 'selected' : '' }}>
-                En cours
-            </option>
-            <option value="livré" {{ request('delivery_status') == 'livré' ? 'selected' : '' }}>
-                Livré
-            </option>
+            <option value="en_cours" {{ request('delivery_status') == 'en_cours' ? 'selected' : '' }}>En cours</option>
+            <option value="livré"    {{ request('delivery_status') == 'livré'    ? 'selected' : '' }}>Livré</option>
         </select>
 
         {{-- Dates --}}
-        <input type="date"
-               name="date_from"
-               class="form-control form-control-sm"
-               style="width: 97px;"
-               value="{{ request('date_from') }}">
-
+        <input type="date" name="date_from" class="form-control form-control-sm"
+               style="width:97px;" value="{{ request('date_from') }}">
         <span class="mx-0">à</span>
-
-        <input type="date"
-               name="date_to"
-               class="form-control form-control-sm"
-               style="width: 97px;"
-               value="{{ request('date_to') }}">
+        <input type="date" name="date_to" class="form-control form-control-sm"
+               style="width:97px;" value="{{ request('date_to') }}">
 
         {{-- Boutons --}}
-        <button type="submit"
-                class="btn btn-outline-primary btn-sm px-3">
+        <button type="submit" class="btn btn-outline-primary btn-sm px-3">
             <i class="fas fa-filter me-1"></i> Filtrer
         </button>
-
-        <a href="{{ route('sales.devislist') }}"
-           class="btn btn-outline-secondary btn-sm px-3">
+        <a href="{{ route('sales.list') }}" class="btn btn-outline-secondary btn-sm px-3">
             <i class="fas fa-undo me-1"></i> Réinitialiser
         </a>
 
     </form>
-</div>   
+</div>
+
+
 
                                                                 <!-- Pagination avec conservation des filtres -->
 <div class="d-flex justify-content-center mt-3">

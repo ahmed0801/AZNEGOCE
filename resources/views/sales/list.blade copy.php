@@ -379,6 +379,19 @@
                 </li>
                         <!-- fin test quick action  -->
 
+
+                                   <!-- BOUTON CONSULTER LA TOURNÉE -->
+<li class="nav-item me-3">
+    <a href="https://tournee.destockpa.fr/planning?site_id={{ config('services.tournee.site_id', 1) }}"
+       target="_blank"
+       class="btn btn-primary btn-round d-flex align-items-center gap-2 shadow-sm"
+       style="font-weight: 600; padding: 8px 18px; font-size: 1rem;">
+        <i class="fas fa-truck-loading"></i>
+        <span>Suivi Tournée</span>
+    </a>
+</li>
+
+                        
                         
                             <li class="nav-item topbar-user dropdown hidden-caret">
                                 <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
@@ -929,8 +942,9 @@ function addEmailField(id) {
         onclick="document.getElementById('tcmd-notes').value='🚪 Livraison: ' + this.getAttribute('data-customer'); this.style.background='#dcfce7'; this.style.borderColor='#86efac'; this.style.color='#166534'; this.innerHTML='✅ Noté — Livraison directe au client';"
         data-customer=""
         id="btn-livraison-directe-bl"
-        style="background:#ede9fe;border:1px solid #a78bfa;color:#6f42c1;border-radius:6px;
-               padding:3px 10px;font-size:0.72rem;font-weight:600;cursor:pointer;margin-top:4px;">
+        style="background:#ef4444;border:2px solid #b91c1c;color:#fff;border-radius:8px;
+               padding:8px 14px;font-size:0.85rem;font-weight:700;cursor:pointer;margin-top:6px;
+               box-shadow:0 0 0 3px rgba(239,68,68,.35);letter-spacing:.02em;">
     🚪 Livraison directe au client
 </button>
 
@@ -1212,9 +1226,13 @@ function addEmailField(id) {
                         + ' <span class="badge bg-' + l.statut_color + ' ms-1">' + l.statut_label + '</span>'
                         + (l.chauffeur ? ' 👤 ' + l.chauffeur : '')
                         + '</span>'
-                        + '<button class="btn btn-xs btn-outline-danger btn-remove-tournee-cmd ms-2"'
-                        + ' data-line-id="' + l.id + '"'
-                        + ' style="font-size:0.65rem; padding:1px 6px;">✕</button>'
+                        
+                        + '<button class="btn btn-remove-tournee-cmd ms-2"'
++ ' data-line-id="' + l.id + '"'
++ ' style="background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:6px;'
++ 'font-size:0.7rem;font-weight:600;padding:3px 8px;cursor:pointer;">'
++ '🗑 Retirer</button>'
+
                         + '</div>';
                 });
                 content.innerHTML = html;

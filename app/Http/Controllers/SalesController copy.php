@@ -394,7 +394,7 @@ protected function createDeliveryNoteFromOrder(SalesOrder $order, Request $reque
         $deliveryNote = DeliveryNote::create([
             'sales_order_id' => $order->id,
             'delivery_date' => $deliveryDate,
-            'status' => 'en_cours',
+            'status' => 'expédié',
             'total_delivered' => 0,
             'total_ht' => 0, // Initialize
             'total_ttc' => 0, // Initialize
@@ -1555,6 +1555,7 @@ public function validateOrder($id)
                 'supplier_id'   => $item->supplier->id ?? null,        // ← LIGNE À AJOUTER
                 'stock_quantity' => $item->getStockQuantityAttribute(),
                 'cost_price' => $item->cost_price,
+                'remise_achat' => $item->remise_achat, // ← AJOUTER ICI
                 'sale_price' => $item->sale_price,
 
 
@@ -1710,6 +1711,16 @@ public function exportSingle($id)
 
 
 
+
+
+
+    public function togglePointed($id)
+{
+    $line = InvoiceLine::findOrFail($id);
+    $line->pointed = !$line->pointed;
+    $line->save();
+    return response()->json(['success' => true, 'pointed' => $line->pointed]);
+}
 
 
 
