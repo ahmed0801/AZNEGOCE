@@ -303,6 +303,7 @@
                     <div class="collapse" id="parametres">
                         <ul class="nav nav-collapse">
                             <li><a href="/setting"><span class="sub-item">Configuration</span></a></li>
+                            <li><a href="{{ route('admin.golda.index') }}"><span class="sub-item">Import GOLDA</span></a></li>
                         </ul>
                     </div>
                 </li>

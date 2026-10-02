@@ -23,6 +23,7 @@ use App\Http\Controllers\TecdocController;
 use App\Http\Controllers\DevisController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\GeneralAccountsController;
+use App\Http\Controllers\GoldaController;
 use App\Http\Controllers\ImmatController;
 use App\Http\Controllers\PayementmodeController;
 use App\Http\Controllers\PayementtermController;
@@ -879,6 +880,21 @@ Route::post('/admin/login', [AuthController::class, 'loginAdmin'])->name('login.
 Route::get('/admin/dashboard', [AuthController::class, 'adminDashboard'])->name('admin.dashboard')->middleware('auth');
 Route::post('/admin/logout', [AuthController::class, 'logoutAdmin'])->name('logout.admin');
 Route::get('/dashboard/late-deliveries', [AuthController::class, 'lateDeliveries'])->name('dashboard.late-deliveries');
+
+
+
+
+
+
+
+
+
+Route::get('/admin/golda', [GoldaController::class, 'index'])->name('admin.golda.index');
+Route::post('/admin/golda/sync', [GoldaController::class, 'syncMarques'])->name('admin.golda.sync');
+Route::post('/admin/golda/settings', [GoldaController::class, 'saveSettings'])->name('admin.golda.settings');
+Route::post('/admin/golda/run', [GoldaController::class, 'runImport'])->name('admin.golda.run');
+
+
 
 
 

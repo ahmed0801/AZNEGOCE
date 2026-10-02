@@ -1276,20 +1276,65 @@
 
         setTimeout(function() {
             // Select2 Article AJAX
+            
             $('#st-article').select2({
-                width: '100%',
-                placeholder: 'Taper la référence ou désignation...',
-                minimumInputLength: 2,
-                dropdownParent: $('#stockTourneeModal'),
-                language: { inputTooShort: function() { return 'Tapez au moins 2 caractères'; } },
-                ajax: {
-                    url: '{{ route("items.search") }}',
-                    dataType: 'json',
-                    delay: 300,
-                    data: function(params) { return { term: params.term }; },
-                    processResults: function(data) { return { results: data }; }
-                }
-            });
+    width: '100%',
+    placeholder: 'Taper la référence ou désignation...',
+    minimumInputLength: 2,
+    dropdownParent: $('#stockTourneeModal'),
+    language: { inputTooShort: function() { return 'Tapez au moins 2 caractères'; } },
+    ajax: {
+        url: '{{ route("items.searchforstock") }}',
+        dataType: 'json',
+        delay: 300,
+        data: function(params) { return { term: params.term }; },
+        processResults: function(data, params) {
+            if (!data.length) {
+                return {
+                    results: [{
+                        id: params.term,
+                        text: params.term,
+                        manual: true
+                    }]
+                };
+            }
+            return { results: data };
+        }
+    },
+    templateResult: function(item) {
+        if (!item.id) return item.text;
+        if (item.manual) {
+            return $(
+                '<div style="border:2px dashed #f59e0b;border-radius:8px;padding:8px 12px;background:#fffbeb;">' +
+                '  <div style="color:#92400e;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">' +
+                '    ⚠️ Article inexistant dans la base' +
+                '  </div>' +
+                '  <div style="margin-top:4px;display:flex;align-items:center;gap:8px;">' +
+                '    <span style="background:#f59e0b;color:white;border-radius:6px;padding:3px 10px;font-weight:700;font-size:0.85rem;font-family:monospace;">' + item.id + '</span>' +
+                '    <span style="color:#78350f;font-size:0.78rem;">Cliquer pour utiliser comme référence manuelle</span>' +
+                '  </div>' +
+                '</div>'
+            );
+        }
+        return item.text;
+    },
+    templateSelection: function(item) {
+        if (item.manual) return '✏️ Manuel : ' + item.id;
+        return item.text || item.id;
+    }
+});
+
+$('#st-article').on('select2:select', function(e) {
+    var data = e.params.data;
+    document.getElementById('st-article-code').value = data.id;
+    if (data.manual) {
+        document.getElementById('st-article-name').value = data.id;
+    } else {
+        document.getElementById('st-article-name').value = data.text.split(' - ')[1] || data.text;
+    }
+});
+
+
 
             $('#st-article').on('select2:select', function(e) {
                 var data = e.params.data;
