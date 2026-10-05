@@ -428,133 +428,147 @@
 
                 
 
+                
+
 
 
                 {{-- ══════════════════════════════════════════════════════════════
-     BLOC EXPORT ANALYTICS — coller dans analytics.blade.php
-     juste APRÈS les boutons de filtre de période et AVANT les cartes KPI
+     BLOC EXPORT ANALYTICS FINAL
+     À coller dans analytics.blade.php juste avant les cartes KPI
 ══════════════════════════════════════════════════════════════ --}}
 
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-0" style="border-radius:14px;box-shadow:0 2px 16px rgba(30,45,74,.08);border:1.5px solid #E8EFF8!important;">
-            <div class="card-body py-3 px-4">
+@php
+    $startFmt = ($start ? $start->format('Y-m-d') : '');
+    $endFmt   = ($end   ? $end->format('Y-m-d')   : '');
+    $annee    = now()->year;
+    $anneePrecedente = $annee - 1;
+@endphp
 
-                <div class="row align-items-center">
+<div class="card border-0 mb-4" style="border-radius:14px;box-shadow:0 2px 14px rgba(30,45,74,.08);border:1.5px solid #E8EFF8!important;">
+    <div class="card-body py-3 px-4">
 
-                    {{-- Titre + période active --}}
-                    <div class="col-md-4 mb-2 mb-md-0">
-                        <div style="font-size:.82rem;font-weight:700;color:#1E2D4A;">
-                            <i class="fas fa-file-export me-2" style="color:#3B82F6;"></i>
-                            Exporter le rapport
-                        </div>
-                        <div style="font-size:.72rem;color:#6B7A99;margin-top:3px;">
-                            Période :
-                            <strong style="color:#1E2D4A;">
-                                @if(request('start_date') && request('end_date'))
-                                    {{ \Carbon\Carbon::parse(request('start_date'))->format('d/m/Y') }}
-                                    → {{ \Carbon\Carbon::parse(request('end_date'))->format('d/m/Y') }}
-                                @elseif($period === 'today')    Aujourd'hui
-                                @elseif($period === 'thisMonth') {{ now()->format('F Y') }}
-                                @elseif($period === 'thisYear')  Année {{ now()->format('Y') }}
-                                @else 30 derniers jours
-                                @endif
-                            </strong>
-                        </div>
-                    </div>
+        <div class="row align-items-end g-3">
 
-                    {{-- Sélecteur type --}}
-                    <div class="col-md-3 mb-2 mb-md-0">
-                        <label style="font-size:.65rem;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">
-                            Type de rapport
-                        </label>
-                        <select id="export-type" class="form-select form-select-sm"
-                                style="border-radius:8px;font-size:.78rem;border:1.5px solid #E2E8F0;">
-                            <option value="recap">📊 Récapitulatif général</option>
-                            <option value="vendeurs">👤 Classement vendeurs</option>
-                            <option value="clients">🏪 Classement clients</option>
-                            <option value="details">📄 Détail des BL</option>
-                        </select>
-                    </div>
-
-                    {{-- Boutons export --}}
-                    <div class="col-md-5">
-                        <label style="font-size:.65rem;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">
-                            Format
-                        </label>
-                        <div class="d-flex gap-2">
-                            <button onclick="lancerExport('excel')"
-                                    class="btn btn-sm btn-round flex-fill"
-                                    style="background:#ECFDF5;color:#065F46;border:1.5px solid #A7F3D0;font-weight:700;font-size:.78rem;">
-                                <i class="fas fa-file-excel me-1"></i> Excel / CSV
-                            </button>
-                            <button onclick="lancerExport('pdf')"
-                                    class="btn btn-sm btn-round flex-fill"
-                                    style="background:#FFF1F2;color:#DC2626;border:1.5px solid #FECACA;font-weight:700;font-size:.78rem;">
-                                <i class="fas fa-file-pdf me-1"></i> PDF
-                            </button>
-                        </div>
-                    </div>
-
+            {{-- Titre --}}
+            <div class="col-12">
+                <div style="font-size:.82rem;font-weight:700;color:#1E2D4A;">
+                    <i class="fas fa-file-export me-2" style="color:#3B82F6;"></i>
+                    Exporter les données
+                    <span style="font-size:.72rem;font-weight:400;color:#6B7A99;margin-left:8px;">
+                        Période active :
+                        <strong style="color:#1E2D4A;">
+                            @if($startFmt && $endFmt)
+                                {{ \Carbon\Carbon::parse($startFmt)->format('d/m/Y') }} → {{ \Carbon\Carbon::parse($endFmt)->format('d/m/Y') }}
+                            @elseif($period === 'today')     Aujourd'hui
+                            @elseif($period === 'thisMonth') {{ now()->format('F Y') }}
+                            @elseif($period === 'lastMonth') {{ now()->subMonth()->format('F Y') }}
+                            @elseif($period === 'lastYear')  Année {{ $anneePrecedente }}
+                            @else Année {{ $annee }}
+                            @endif
+                        </strong>
+                    </span>
                 </div>
+            </div>
 
-                {{-- Raccourcis rapides --}}
-                <div class="d-flex gap-2 mt-3 flex-wrap align-items-center">
-                    <span style="font-size:.68rem;color:#9CA3AF;font-weight:600;">Raccourcis :</span>
+            {{-- Sélecteur rapport --}}
+            <div class="col-md-3">
+                <label style="font-size:.65rem;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">
+                    Type de rapport
+                </label>
+                <select id="export-type" class="form-select form-select-sm"
+                        style="border-radius:8px;font-size:.78rem;border:1.5px solid #E2E8F0;">
+                    <option value="vendeurs">👤 Vendeurs — résumé</option>
+                    <option value="vendeurs_mois">📆 Vendeurs — par mois (Jan→Déc)</option>
+                    <option value="clients">🏪 Clients — résumé (Top 100)</option>
+                    <option value="clients_mois">📆 Clients — par mois (Top 20)</option>
+                    <option value="recap">📊 Récapitulatif mensuel</option>
+                    <option value="details">📄 Détail des BL</option>
+                </select>
+            </div>
 
-                    @php
-                        $startFmt = ($start ? $start->format('Y-m-d') : '');
-                        $endFmt   = ($end   ? $end->format('Y-m-d')   : '');
-                    @endphp
+            {{-- Période --}}
+            <div class="col-md-3">
+                <label style="font-size:.65rem;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">
+                    Période d'export
+                </label>
+                <select id="export-period" class="form-select form-select-sm"
+                        style="border-radius:8px;font-size:.78rem;border:1.5px solid #E2E8F0;">
+                    <option value="current" {{ ($startFmt && $endFmt) || in_array($period, ['thisMonth','lastMonth','today']) ? '' : '' }}>
+                        ✅ Utiliser les filtres actuels
+                    </option>
+                    <option value="today">📅 Aujourd'hui</option>
+                    <option value="thisMonth">📆 Ce mois ({{ now()->format('F Y') }})</option>
+                    <option value="lastMonth">📆 Mois précédent ({{ now()->subMonth()->format('F Y') }})</option>
+                    <option value="thisYear">🗓 Cette année ({{ $annee }})</option>
+                    <option value="lastYear">🗓 Année précédente ({{ $anneePrecedente }})</option>
+                </select>
+            </div>
 
-                    <a href="{{ route('analytics.export', ['format'=>'excel','type'=>'recap','period'=>'today']) }}"
-                       style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;font-size:.68rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;">
-                        📅 Aujourd'hui
+            {{-- Boutons export --}}
+            <div class="col-md-3">
+                <label style="font-size:.65rem;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">
+                    Format
+                </label>
+                <div class="d-flex gap-2">
+                    <button onclick="lancerExport('excel')"
+                            class="btn btn-sm btn-round flex-fill"
+                            style="background:#ECFDF5;color:#065F46;border:1.5px solid #A7F3D0;font-weight:700;font-size:.78rem;">
+                        <i class="fas fa-file-excel me-1"></i> Excel
+                    </button>
+                    <button onclick="lancerExport('pdf')"
+                            class="btn btn-sm btn-round flex-fill"
+                            style="background:#FFF1F2;color:#DC2626;border:1.5px solid #FECACA;font-weight:700;font-size:.78rem;">
+                        <i class="fas fa-file-pdf me-1"></i> PDF
+                    </button>
+                </div>
+            </div>
+
+            {{-- Raccourcis directs --}}
+            <div class="col-md-3">
+                <label style="font-size:.65rem;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">
+                    Raccourcis
+                </label>
+                <div class="d-flex gap-1 flex-wrap">
+                    <a href="{{ route('analytics.export', ['format'=>'excel','type'=>'vendeurs_mois','period'=>'thisYear']) }}"
+                       style="background:#F5F3FF;color:#5B21B6;border:1px solid #DDD6FE;font-size:.68rem;padding:4px 9px;border-radius:6px;text-decoration:none;font-weight:600;white-space:nowrap;">
+                        📆 Vendeurs {{ $annee }}
                     </a>
-                    <a href="{{ route('analytics.export', ['format'=>'excel','type'=>'recap','period'=>'thisMonth']) }}"
-                       style="background:#F5F3FF;color:#5B21B6;border:1px solid #DDD6FE;font-size:.68rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;">
-                        📆 Ce mois
+                    <a href="{{ route('analytics.export', ['format'=>'excel','type'=>'vendeurs_mois','period'=>'lastYear']) }}"
+                       style="background:#F0F9FF;color:#0369A1;border:1px solid #BAE6FD;font-size:.68rem;padding:4px 9px;border-radius:6px;text-decoration:none;font-weight:600;white-space:nowrap;">
+                        📆 Vendeurs {{ $anneePrecedente }}
                     </a>
-                    <a href="{{ route('analytics.export', ['format'=>'excel','type'=>'recap','period'=>'thisYear']) }}"
-                       style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;font-size:.68rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;">
-                        🗓 Cette année
-                    </a>
-                    <a href="{{ route('analytics.export', ['format'=>'excel','type'=>'vendeurs','period'=>$period,'start_date'=>$startFmt,'end_date'=>$endFmt]) }}"
-                       style="background:#FFF7ED;color:#9A3412;border:1px solid #FED7AA;font-size:.68rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;">
-                        👤 Vendeurs (période)
-                    </a>
-                    <a href="{{ route('analytics.export', ['format'=>'excel','type'=>'clients','period'=>$period,'start_date'=>$startFmt,'end_date'=>$endFmt]) }}"
-                       style="background:#FDF4FF;color:#7E22CE;border:1px solid #E9D5FF;font-size:.68rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;">
-                        🏪 Clients (période)
-                    </a>
-                    <a href="{{ route('analytics.export', ['format'=>'pdf','type'=>'vendeurs','period'=>$period,'start_date'=>$startFmt,'end_date'=>$endFmt]) }}"
-                       style="background:#FFF1F2;color:#DC2626;border:1px solid #FECACA;font-size:.68rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;">
+                    <a href="{{ route('analytics.export', ['format'=>'pdf','type'=>'vendeurs','period'=>'thisYear']) }}"
+                       style="background:#FFF1F2;color:#DC2626;border:1px solid #FECACA;font-size:.68rem;padding:4px 9px;border-radius:6px;text-decoration:none;font-weight:600;white-space:nowrap;">
                         📊 PDF Vendeurs
                     </a>
                 </div>
-
             </div>
+
         </div>
     </div>
 </div>
 
-{{-- Script export --}}
 <script>
 function lancerExport(format) {
-    var type   = document.getElementById('export-type').value;
-    var period = '{{ $period }}';
-    var start  = '{{ $start ? $start->format("Y-m-d") : "" }}';
-    var end    = '{{ $end   ? $end->format("Y-m-d")   : "" }}';
+    var type       = document.getElementById('export-type').value;
+    var periodSel  = document.getElementById('export-period').value;
 
     var url = '{{ route("analytics.export") }}'
         + '?format=' + format
-        + '&type='   + type
-        + '&period=' + period;
+        + '&type='   + type;
 
-    if (start) url += '&start_date=' + start;
-    if (end)   url += '&end_date='   + end;
+    if (periodSel === 'current') {
+        // Utiliser les filtres actifs de la page
+        var period = '{{ $period }}';
+        var start  = '{{ $startFmt }}';
+        var end    = '{{ $endFmt }}';
+        url += '&period=' + period;
+        if (start) url += '&start_date=' + start;
+        if (end)   url += '&end_date='   + end;
+    } else {
+        url += '&period=' + periodSel;
+    }
 
-    // Excel = téléchargement direct, PDF = nouvel onglet (dompdf génère le fichier)
     if (format === 'pdf') {
         window.open(url, '_blank');
     } else {
@@ -562,6 +576,8 @@ function lancerExport(format) {
     }
 }
 </script>
+
+
 
 
 
