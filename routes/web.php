@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\AnalyticsExportController;
 use App\Http\Controllers\ArticleImportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AvoirController;
@@ -885,7 +886,7 @@ Route::get('/dashboard/late-deliveries', [AuthController::class, 'lateDeliveries
 
 
 
-
+Route::get('/analytics/export', [AnalyticsExportController::class, 'export'])->name('analytics.export');
 
 
 

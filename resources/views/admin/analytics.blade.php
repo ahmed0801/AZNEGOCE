@@ -421,6 +421,151 @@
                     </div>
                 </div>
 
+
+
+
+
+
+                
+
+
+
+                {{-- ══════════════════════════════════════════════════════════════
+     BLOC EXPORT ANALYTICS — coller dans analytics.blade.php
+     juste APRÈS les boutons de filtre de période et AVANT les cartes KPI
+══════════════════════════════════════════════════════════════ --}}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0" style="border-radius:14px;box-shadow:0 2px 16px rgba(30,45,74,.08);border:1.5px solid #E8EFF8!important;">
+            <div class="card-body py-3 px-4">
+
+                <div class="row align-items-center">
+
+                    {{-- Titre + période active --}}
+                    <div class="col-md-4 mb-2 mb-md-0">
+                        <div style="font-size:.82rem;font-weight:700;color:#1E2D4A;">
+                            <i class="fas fa-file-export me-2" style="color:#3B82F6;"></i>
+                            Exporter le rapport
+                        </div>
+                        <div style="font-size:.72rem;color:#6B7A99;margin-top:3px;">
+                            Période :
+                            <strong style="color:#1E2D4A;">
+                                @if(request('start_date') && request('end_date'))
+                                    {{ \Carbon\Carbon::parse(request('start_date'))->format('d/m/Y') }}
+                                    → {{ \Carbon\Carbon::parse(request('end_date'))->format('d/m/Y') }}
+                                @elseif($period === 'today')    Aujourd'hui
+                                @elseif($period === 'thisMonth') {{ now()->format('F Y') }}
+                                @elseif($period === 'thisYear')  Année {{ now()->format('Y') }}
+                                @else 30 derniers jours
+                                @endif
+                            </strong>
+                        </div>
+                    </div>
+
+                    {{-- Sélecteur type --}}
+                    <div class="col-md-3 mb-2 mb-md-0">
+                        <label style="font-size:.65rem;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">
+                            Type de rapport
+                        </label>
+                        <select id="export-type" class="form-select form-select-sm"
+                                style="border-radius:8px;font-size:.78rem;border:1.5px solid #E2E8F0;">
+                            <option value="recap">📊 Récapitulatif général</option>
+                            <option value="vendeurs">👤 Classement vendeurs</option>
+                            <option value="clients">🏪 Classement clients</option>
+                            <option value="details">📄 Détail des BL</option>
+                        </select>
+                    </div>
+
+                    {{-- Boutons export --}}
+                    <div class="col-md-5">
+                        <label style="font-size:.65rem;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">
+                            Format
+                        </label>
+                        <div class="d-flex gap-2">
+                            <button onclick="lancerExport('excel')"
+                                    class="btn btn-sm btn-round flex-fill"
+                                    style="background:#ECFDF5;color:#065F46;border:1.5px solid #A7F3D0;font-weight:700;font-size:.78rem;">
+                                <i class="fas fa-file-excel me-1"></i> Excel / CSV
+                            </button>
+                            <button onclick="lancerExport('pdf')"
+                                    class="btn btn-sm btn-round flex-fill"
+                                    style="background:#FFF1F2;color:#DC2626;border:1.5px solid #FECACA;font-weight:700;font-size:.78rem;">
+                                <i class="fas fa-file-pdf me-1"></i> PDF
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                {{-- Raccourcis rapides --}}
+                <div class="d-flex gap-2 mt-3 flex-wrap align-items-center">
+                    <span style="font-size:.68rem;color:#9CA3AF;font-weight:600;">Raccourcis :</span>
+
+                    @php
+                        $startFmt = ($start ? $start->format('Y-m-d') : '');
+                        $endFmt   = ($end   ? $end->format('Y-m-d')   : '');
+                    @endphp
+
+                    <a href="{{ route('analytics.export', ['format'=>'excel','type'=>'recap','period'=>'today']) }}"
+                       style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;font-size:.68rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;">
+                        📅 Aujourd'hui
+                    </a>
+                    <a href="{{ route('analytics.export', ['format'=>'excel','type'=>'recap','period'=>'thisMonth']) }}"
+                       style="background:#F5F3FF;color:#5B21B6;border:1px solid #DDD6FE;font-size:.68rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;">
+                        📆 Ce mois
+                    </a>
+                    <a href="{{ route('analytics.export', ['format'=>'excel','type'=>'recap','period'=>'thisYear']) }}"
+                       style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;font-size:.68rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;">
+                        🗓 Cette année
+                    </a>
+                    <a href="{{ route('analytics.export', ['format'=>'excel','type'=>'vendeurs','period'=>$period,'start_date'=>$startFmt,'end_date'=>$endFmt]) }}"
+                       style="background:#FFF7ED;color:#9A3412;border:1px solid #FED7AA;font-size:.68rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;">
+                        👤 Vendeurs (période)
+                    </a>
+                    <a href="{{ route('analytics.export', ['format'=>'excel','type'=>'clients','period'=>$period,'start_date'=>$startFmt,'end_date'=>$endFmt]) }}"
+                       style="background:#FDF4FF;color:#7E22CE;border:1px solid #E9D5FF;font-size:.68rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;">
+                        🏪 Clients (période)
+                    </a>
+                    <a href="{{ route('analytics.export', ['format'=>'pdf','type'=>'vendeurs','period'=>$period,'start_date'=>$startFmt,'end_date'=>$endFmt]) }}"
+                       style="background:#FFF1F2;color:#DC2626;border:1px solid #FECACA;font-size:.68rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;">
+                        📊 PDF Vendeurs
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Script export --}}
+<script>
+function lancerExport(format) {
+    var type   = document.getElementById('export-type').value;
+    var period = '{{ $period }}';
+    var start  = '{{ $start ? $start->format("Y-m-d") : "" }}';
+    var end    = '{{ $end   ? $end->format("Y-m-d")   : "" }}';
+
+    var url = '{{ route("analytics.export") }}'
+        + '?format=' + format
+        + '&type='   + type
+        + '&period=' + period;
+
+    if (start) url += '&start_date=' + start;
+    if (end)   url += '&end_date='   + end;
+
+    // Excel = téléchargement direct, PDF = nouvel onglet (dompdf génère le fichier)
+    if (format === 'pdf') {
+        window.open(url, '_blank');
+    } else {
+        window.location.href = url;
+    }
+}
+</script>
+
+
+
+
                 <!-- ONGLETS -->
                 <ul class="nav nav-tabs mb-4" id="periodTabs">
                     @php $active = !$start || $period === 'last30' ? 'active' : '' @endphp
