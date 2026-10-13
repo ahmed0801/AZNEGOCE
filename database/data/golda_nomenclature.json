@@ -1,0 +1,2099 @@
+{
+ "families": {
+  "NU01": "ACCESSOIRES AUTO",
+  "NU02": "ALIMENTATION DIESEL",
+  "NU03": "ALIMENTATION ESSENCE",
+  "NU04": "CARROSSERIE",
+  "NU05": "CHRONOTACHYGRAPHE",
+  "NU06": "CONSOMMABLES D'ATELIER",
+  "NU07": "DOCUMENTATION & PUBLICITE",
+  "NU08": "ECHAPPEMENT",
+  "NU09": "ECLAIRAGE & SIGNALISATION",
+  "NU10": "ELECTRICITE",
+  "NU11": "EMBRAYAGE",
+  "NU12": "EQUIPEMENTS D'ATELIER",
+  "NU13": "ESSUYAGE",
+  "NU14": "FILTRATION",
+  "NU15": "FREINAGE",
+  "NU16": "HYGIENE SECURITE",
+  "NU17": "LIAISON AU SOL",
+  "NU18": "LIQUIDES ET LUBRIFIANTS",
+  "NU19": "MOTEURS ET DISTRIBUTION",
+  "NU20": "NETTOYAGE ET ENTRETIEN",
+  "NU21": "OUTILLAGE",
+  "NU22": "PEINTURE",
+  "NU23": "PNEUMATIQUE",
+  "NU24": "SECURITE HABITACLE",
+  "NU25": "THERMIQUE ET CLIMATISATION",
+  "NU26": "INDUSTRIE",
+  "NU27": "PIECES DE REEMPLOI - ECLAIRAGE & SIGNALISATION",
+  "NU28": "PIECES DE REMPLOI - CARROSSERIE",
+  "NU29": "CAPTEURS"
+ },
+ "subfamilies": {
+  "0100": {
+   "family": "NU01",
+   "name": "Accessoires auto sans sous famille"
+  },
+  "0101": {
+   "family": "NU01",
+   "name": "Confort habitacle"
+  },
+  "0102": {
+   "family": "NU01",
+   "name": "Électronique embarquée"
+  },
+  "0103": {
+   "family": "NU01",
+   "name": "Entretien"
+  },
+  "0104": {
+   "family": "NU01",
+   "name": "Plaques"
+  },
+  "0105": {
+   "family": "NU01",
+   "name": "Portage"
+  },
+  "0106": {
+   "family": "NU01",
+   "name": "Attelage"
+  },
+  "0107": {
+   "family": "NU01",
+   "name": "Autres pièces d'attelage"
+  },
+  "0200": {
+   "family": "NU02",
+   "name": "Alimentation diesel sans sous famille"
+  },
+  "0201": {
+   "family": "NU02",
+   "name": "Bougies"
+  },
+  "0202": {
+   "family": "NU02",
+   "name": "Capteurs"
+  },
+  "0203": {
+   "family": "NU02",
+   "name": "Débitmètre"
+  },
+  "0204": {
+   "family": "NU02",
+   "name": "Durites"
+  },
+  "0205": {
+   "family": "NU02",
+   "name": "Injecteurs common rail échange standard"
+  },
+  "0205C": {
+   "family": "NU02",
+   "name": "Consigne - injecteurs common rail échange standard"
+  },
+  "0206": {
+   "family": "NU02",
+   "name": "Injecteurs common rail neufs"
+  },
+  "0207": {
+   "family": "NU02",
+   "name": "Injecteurs échange standard"
+  },
+  "0207C": {
+   "family": "NU02",
+   "name": "Consigne - injecteurs échange standard"
+  },
+  "0208": {
+   "family": "NU02",
+   "name": "Injecteurs neufs"
+  },
+  "0209": {
+   "family": "NU02",
+   "name": "Injecteurs pompes échange standard"
+  },
+  "0209C": {
+   "family": "NU02",
+   "name": "Consigne - injecteurs pompes échange standard"
+  },
+  "0210": {
+   "family": "NU02",
+   "name": "Injecteurs pompes neufs"
+  },
+  "0211": {
+   "family": "NU02",
+   "name": "Pièces de réparation autres"
+  },
+  "0212": {
+   "family": "NU02",
+   "name": "Pièces de réparation common rail"
+  },
+  "0213": {
+   "family": "NU02",
+   "name": "Pièces de réparation traditionnelle"
+  },
+  "0214": {
+   "family": "NU02",
+   "name": "Pompes à carburant"
+  },
+  "0215": {
+   "family": "NU02",
+   "name": "Pompes d'injection common rail échange standard"
+  },
+  "0215C": {
+   "family": "NU02",
+   "name": "Consigne - pompes d'injection common rail échange standard"
+  },
+  "0216": {
+   "family": "NU02",
+   "name": "Pompes d'injection common rail neuves"
+  },
+  "0217": {
+   "family": "NU02",
+   "name": "Pompes d'injection échange standard"
+  },
+  "0217C": {
+   "family": "NU02",
+   "name": "Consigne - pompes d'injection échange standard"
+  },
+  "0218": {
+   "family": "NU02",
+   "name": "Pompes d'injection neuves"
+  },
+  "0219": {
+   "family": "NU02",
+   "name": "Relais"
+  },
+  "0220": {
+   "family": "NU02",
+   "name": "Vannes EGR"
+  },
+  "0221": {
+   "family": "NU02",
+   "name": "Vannes EGR échange standard"
+  },
+  "0221C": {
+   "family": "NU02",
+   "name": "Consigne - vannes EGR échange standard"
+  },
+  "0222": {
+   "family": "NU02",
+   "name": "Injecteurs common rail rénovés"
+  },
+  "0223": {
+   "family": "NU02",
+   "name": "Injecteurs rénovés"
+  },
+  "0224": {
+   "family": "NU02",
+   "name": "Injecteurs pompes rénovés"
+  },
+  "0225": {
+   "family": "NU02",
+   "name": "Pompes d'injection common rail rénovées"
+  },
+  "0226": {
+   "family": "NU02",
+   "name": "Pompes d'injection rénovées"
+  },
+  "0227": {
+   "family": "NU02",
+   "name": "Vannes EGR rénovées"
+  },
+  "0228": {
+   "family": "NU02",
+   "name": "Radiateurs de vanne EGR"
+  },
+  "0300": {
+   "family": "NU03",
+   "name": "Alimentation essence sans sous famille"
+  },
+  "0301": {
+   "family": "NU03",
+   "name": "Bobines"
+  },
+  "0302": {
+   "family": "NU03",
+   "name": "Bougies"
+  },
+  "0303": {
+   "family": "NU03",
+   "name": "Capteurs"
+  },
+  "0304": {
+   "family": "NU03",
+   "name": "Débitmètre"
+  },
+  "0305": {
+   "family": "NU03",
+   "name": "Durites"
+  },
+  "0306": {
+   "family": "NU03",
+   "name": "Faisceaux"
+  },
+  "0307": {
+   "family": "NU03",
+   "name": "Injecteurs neufs"
+  },
+  "0308": {
+   "family": "NU03",
+   "name": "Injecteurs pompes"
+  },
+  "0309": {
+   "family": "NU03",
+   "name": "Pièces d'allumage"
+  },
+  "0310": {
+   "family": "NU03",
+   "name": "Pièces de réparation"
+  },
+  "0311": {
+   "family": "NU03",
+   "name": "Pièces de réparation autres"
+  },
+  "0312": {
+   "family": "NU03",
+   "name": "Pompes à carburant"
+  },
+  "0313": {
+   "family": "NU03",
+   "name": "Pompes d'alimentation"
+  },
+  "0314": {
+   "family": "NU03",
+   "name": "Pompes d'injection"
+  },
+  "0315": {
+   "family": "NU03",
+   "name": "Relais"
+  },
+  "0316": {
+   "family": "NU03",
+   "name": "Injecteurs échange standard"
+  },
+  "0316C": {
+   "family": "NU03",
+   "name": "Consigne - injecteurs échange standard"
+  },
+  "0317": {
+   "family": "NU03",
+   "name": "Injecteurs pompes échange standard"
+  },
+  "0317C": {
+   "family": "NU03",
+   "name": "Consigne - injecteurs pompes échange standard"
+  },
+  "0318": {
+   "family": "NU03",
+   "name": "Pompes à carburant échange standard"
+  },
+  "0318C": {
+   "family": "NU03",
+   "name": "Consigne - pompes à carburant échange standard"
+  },
+  "0319": {
+   "family": "NU03",
+   "name": "Pompes d'injection échange standard"
+  },
+  "0319C": {
+   "family": "NU03",
+   "name": "Consigne - pompes d'injection échange standard"
+  },
+  "0320": {
+   "family": "NU03",
+   "name": "Injecteurs rénovés"
+  },
+  "0321": {
+   "family": "NU03",
+   "name": "Injecteurs pompes rénovés"
+  },
+  "0322": {
+   "family": "NU03",
+   "name": "Pompes à carburant rénovées"
+  },
+  "0323": {
+   "family": "NU03",
+   "name": "Pompes d'injection rénovées"
+  },
+  "0400": {
+   "family": "NU04",
+   "name": "Carrosserie sans sous famille"
+  },
+  "0401": {
+   "family": "NU04",
+   "name": "Ailes"
+  },
+  "0402": {
+   "family": "NU04",
+   "name": "Bas caisse"
+  },
+  "0403": {
+   "family": "NU04",
+   "name": "Capots"
+  },
+  "0404": {
+   "family": "NU04",
+   "name": "Coffres et hayons"
+  },
+  "0405": {
+   "family": "NU04",
+   "name": "Garnitures"
+  },
+  "0406": {
+   "family": "NU04",
+   "name": "Lunettes"
+  },
+  "0407": {
+   "family": "NU04",
+   "name": "Pare-brise"
+  },
+  "0408": {
+   "family": "NU04",
+   "name": "Pare-chocs"
+  },
+  "0409": {
+   "family": "NU04",
+   "name": "Pièces d'attache"
+  },
+  "0410": {
+   "family": "NU04",
+   "name": "Portières"
+  },
+  "0411": {
+   "family": "NU04",
+   "name": "Rétroviseurs"
+  },
+  "0412": {
+   "family": "NU04",
+   "name": "Tôlerie"
+  },
+  "0413": {
+   "family": "NU04",
+   "name": "Vérins"
+  },
+  "0414": {
+   "family": "NU04",
+   "name": "Vitrage latéral"
+  },
+  "0500": {
+   "family": "NU05",
+   "name": "Chronotachygraphe sans sous famille"
+  },
+  "0501": {
+   "family": "NU05",
+   "name": "Consommables"
+  },
+  "0502": {
+   "family": "NU05",
+   "name": "Gestion de flottes"
+  },
+  "0503": {
+   "family": "NU05",
+   "name": "Tachy analogique échange standard"
+  },
+  "0503C": {
+   "family": "NU05",
+   "name": "Consigne - tachy analogique échange standard"
+  },
+  "0504": {
+   "family": "NU05",
+   "name": "Tachy analogique neuf"
+  },
+  "0505": {
+   "family": "NU05",
+   "name": "Tachy numérique"
+  },
+  "0506": {
+   "family": "NU05",
+   "name": "Volucompteur"
+  },
+  "0507": {
+   "family": "NU05",
+   "name": "Tachy analogique rénové"
+  },
+  "0600": {
+   "family": "NU06",
+   "name": "Consommables sans sous famille"
+  },
+  "0601": {
+   "family": "NU06",
+   "name": "Absorbants"
+  },
+  "0602": {
+   "family": "NU06",
+   "name": "Essuyage"
+  },
+  "0603": {
+   "family": "NU06",
+   "name": "Nettoyage"
+  },
+  "0604": {
+   "family": "NU06",
+   "name": "Quincaillerie"
+  },
+  "0605": {
+   "family": "NU06",
+   "name": "Nettoyants / dégraissants / lubrifiants"
+  },
+  "0606": {
+   "family": "NU06",
+   "name": "Produits de maintenance"
+  },
+  "0607": {
+   "family": "NU06",
+   "name": "Métal d'apport soudure"
+  },
+  "0608": {
+   "family": "NU06",
+   "name": "Gaz"
+  },
+  "0700": {
+   "family": "NU07",
+   "name": "Documentation sans sous famille"
+  },
+  "0701": {
+   "family": "NU07",
+   "name": "Numérique"
+  },
+  "0702": {
+   "family": "NU07",
+   "name": "Papier"
+  },
+  "0703": {
+   "family": "NU07",
+   "name": "Publicité"
+  },
+  "0704": {
+   "family": "NU07",
+   "name": "Merchandising"
+  },
+  "0800": {
+   "family": "NU08",
+   "name": "Échappement sans sous famille"
+  },
+  "0801": {
+   "family": "NU08",
+   "name": "Catalyseurs"
+  },
+  "0802": {
+   "family": "NU08",
+   "name": "FAP échange standard"
+  },
+  "0802C": {
+   "family": "NU08",
+   "name": "Consigne - FAP échange standard"
+  },
+  "0803": {
+   "family": "NU08",
+   "name": "FAP neuf"
+  },
+  "0804": {
+   "family": "NU08",
+   "name": "Flexibles"
+  },
+  "0805": {
+   "family": "NU08",
+   "name": "Nécessaire de montage"
+  },
+  "0806": {
+   "family": "NU08",
+   "name": "Silencieux"
+  },
+  "0807": {
+   "family": "NU08",
+   "name": "Sondes lambda"
+  },
+  "0808": {
+   "family": "NU08",
+   "name": "Tubes"
+  },
+  "0809": {
+   "family": "NU08",
+   "name": "FAP rénové"
+  },
+  "0810": {
+   "family": "NU08",
+   "name": "Réservoir adblue"
+  },
+  "0811": {
+   "family": "NU08",
+   "name": "Réservoir cérine"
+  },
+  "0812": {
+   "family": "NU08",
+   "name": "Injecteurs adblue / FAP"
+  },
+  "0813": {
+   "family": "NU08",
+   "name": "Sondes NOx"
+  },
+  "0900": {
+   "family": "NU09",
+   "name": "Éclairage & signalisation sans sous famille"
+  },
+  "0901": {
+   "family": "NU09",
+   "name": "Éclairage"
+  },
+  "0902": {
+   "family": "NU09",
+   "name": "Éclairage intérieur"
+  },
+  "0903": {
+   "family": "NU09",
+   "name": "Feux additionnels"
+  },
+  "0904": {
+   "family": "NU09",
+   "name": "Lampes"
+  },
+  "0905": {
+   "family": "NU09",
+   "name": "Projecteurs de complément"
+  },
+  "0906": {
+   "family": "NU09",
+   "name": "Signalisation"
+  },
+  "0907": {
+   "family": "NU09",
+   "name": "Électronique d'éclairage"
+  },
+  "0908": {
+   "family": "NU09",
+   "name": "Capteur de hauteur de caisse"
+  },
+  "1000": {
+   "family": "NU10",
+   "name": "Électricité sans sous famille"
+  },
+  "1001": {
+   "family": "NU10",
+   "name": "Alternateurs échange standard"
+  },
+  "1001C": {
+   "family": "NU10",
+   "name": "Consigne - alternateurs échange standard"
+  },
+  "1002": {
+   "family": "NU10",
+   "name": "Alternateurs neufs"
+  },
+  "1003": {
+   "family": "NU10",
+   "name": "Batteries"
+  },
+  "1004": {
+   "family": "NU10",
+   "name": "Composants électriques"
+  },
+  "1005": {
+   "family": "NU10",
+   "name": "Démarreurs échange standard"
+  },
+  "1005C": {
+   "family": "NU10",
+   "name": "Consigne - démarreurs échange standard"
+  },
+  "1006": {
+   "family": "NU10",
+   "name": "Démarreurs neufs"
+  },
+  "1007": {
+   "family": "NU10",
+   "name": "Moteurs électriques"
+  },
+  "1008": {
+   "family": "NU10",
+   "name": "Pièces de réparation"
+  },
+  "1009": {
+   "family": "NU10",
+   "name": "Régulateur"
+  },
+  "1010": {
+   "family": "NU10",
+   "name": "Piles et accumulateurs"
+  },
+  "1011": {
+   "family": "NU10",
+   "name": "Faisceaux d'attelage"
+  },
+  "1012": {
+   "family": "NU10",
+   "name": "Stations et câbles de charge électrique"
+  },
+  "1013": {
+   "family": "NU10",
+   "name": "Alternateurs rénovés"
+  },
+  "1014": {
+   "family": "NU10",
+   "name": "Démarreurs rénovés"
+  },
+  "1015": {
+   "family": "NU10",
+   "name": "Alterno démarreur"
+  },
+  "1100": {
+   "family": "NU11",
+   "name": "Embrayage sans sous famille"
+  },
+  "1101": {
+   "family": "NU11",
+   "name": "Butées"
+  },
+  "1102": {
+   "family": "NU11",
+   "name": "Câbles"
+  },
+  "1103": {
+   "family": "NU11",
+   "name": "Disques"
+  },
+  "1104": {
+   "family": "NU11",
+   "name": "Émetteurs / récepteurs"
+  },
+  "1105": {
+   "family": "NU11",
+   "name": "Kits d'embrayage"
+  },
+  "1106": {
+   "family": "NU11",
+   "name": "Kits d'embrayage échange standard"
+  },
+  "1106C": {
+   "family": "NU11",
+   "name": "Consigne - kits d'embrayage échange standard"
+  },
+  "1107": {
+   "family": "NU11",
+   "name": "Mécanisme"
+  },
+  "1108": {
+   "family": "NU11",
+   "name": "Pièces d'embrayage"
+  },
+  "1109": {
+   "family": "NU11",
+   "name": "Volant bi masse"
+  },
+  "1110": {
+   "family": "NU11",
+   "name": "Volant bi masse échange standard"
+  },
+  "1110C": {
+   "family": "NU11",
+   "name": "Consigne - volant bi masse échange standard"
+  },
+  "1111": {
+   "family": "NU11",
+   "name": "Kits d'embrayage 4 pièces"
+  },
+  "1112": {
+   "family": "NU11",
+   "name": "Kits d'embrayage rénovés"
+  },
+  "1113": {
+   "family": "NU11",
+   "name": "Volant bi masse rénové"
+  },
+  "1200": {
+   "family": "NU12",
+   "name": "Équipement atelier sans sous famille"
+  },
+  "1201": {
+   "family": "NU12",
+   "name": "Analyseurs de gaz"
+  },
+  "1202": {
+   "family": "NU12",
+   "name": "Appareil de diagnostique"
+  },
+  "1203": {
+   "family": "NU12",
+   "name": "Aspirateurs"
+  },
+  "1204": {
+   "family": "NU12",
+   "name": "Balayeuses"
+  },
+  "1205": {
+   "family": "NU12",
+   "name": "Bancs de contrôle et de mesure"
+  },
+  "1206": {
+   "family": "NU12",
+   "name": "Cabine peinture"
+  },
+  "1207": {
+   "family": "NU12",
+   "name": "Chargeur de climatisation"
+  },
+  "1208": {
+   "family": "NU12",
+   "name": "Compresseurs"
+  },
+  "1209": {
+   "family": "NU12",
+   "name": "Équilibreuses démonte pneus"
+  },
+  "1210": {
+   "family": "NU12",
+   "name": "Labo peinture"
+  },
+  "1211": {
+   "family": "NU12",
+   "name": "Levage"
+  },
+  "1212": {
+   "family": "NU12",
+   "name": "Marbre"
+  },
+  "1213": {
+   "family": "NU12",
+   "name": "Nettoyeurs haute pression"
+  },
+  "1214": {
+   "family": "NU12",
+   "name": "Outillage peinture"
+  },
+  "1215": {
+   "family": "NU12",
+   "name": "Ponts"
+  },
+  "1216": {
+   "family": "NU12",
+   "name": "Soudure"
+  },
+  "1217": {
+   "family": "NU12",
+   "name": "Équipements de nettoyage"
+  },
+  "1218": {
+   "family": "NU12",
+   "name": "Pièces détachées d'équipements d'atelier"
+  },
+  "1219": {
+   "family": "NU12",
+   "name": "Sécheur d'air"
+  },
+  "1220": {
+   "family": "NU12",
+   "name": "Extraction"
+  },
+  "1221": {
+   "family": "NU12",
+   "name": "Chauffage atelier"
+  },
+  "1222": {
+   "family": "NU12",
+   "name": "Station vidange BVA"
+  },
+  "1223": {
+   "family": "NU12",
+   "name": "Dépollution moteurs"
+  },
+  "1224": {
+   "family": "NU12",
+   "name": "Coupage"
+  },
+  "1225": {
+   "family": "NU12",
+   "name": "Chauffage"
+  },
+  "1226": {
+   "family": "NU12",
+   "name": "Rivetage"
+  },
+  "1227": {
+   "family": "NU12",
+   "name": "Accessoires d'équipements d'atelier"
+  },
+  "1228": {
+   "family": "NU12",
+   "name": "Mobilier"
+  },
+  "1300": {
+   "family": "NU13",
+   "name": "Essuyage sans sous famille"
+  },
+  "1301": {
+   "family": "NU13",
+   "name": "Balais"
+  },
+  "1302": {
+   "family": "NU13",
+   "name": "Moteurs"
+  },
+  "1303": {
+   "family": "NU13",
+   "name": "Pièces détachées"
+  },
+  "1304": {
+   "family": "NU13",
+   "name": "Pompes"
+  },
+  "1400": {
+   "family": "NU14",
+   "name": "Filtration sans sous famille"
+  },
+  "1401": {
+   "family": "NU14",
+   "name": "Filtre à huile"
+  },
+  "1402": {
+   "family": "NU14",
+   "name": "Filtre adblue"
+  },
+  "1403": {
+   "family": "NU14",
+   "name": "Filtre boite de vitesse"
+  },
+  "1404": {
+   "family": "NU14",
+   "name": "Filtre d'habitacle"
+  },
+  "1405": {
+   "family": "NU14",
+   "name": "Filtre dessiccateur"
+  },
+  "1406": {
+   "family": "NU14",
+   "name": "Filtre hydraulique"
+  },
+  "1407": {
+   "family": "NU14",
+   "name": "Filtres à air"
+  },
+  "1408": {
+   "family": "NU14",
+   "name": "Filtres à carburants"
+  },
+  "1409": {
+   "family": "NU14",
+   "name": "Kit filtres de moteurs"
+  },
+  "1410": {
+   "family": "NU14",
+   "name": "Pièces détachées"
+  },
+  "1500": {
+   "family": "NU15",
+   "name": "Freinage sans sous famille"
+  },
+  "1501": {
+   "family": "NU15",
+   "name": "ABS & EBS"
+  },
+  "1502": {
+   "family": "NU15",
+   "name": "Câbles"
+  },
+  "1503": {
+   "family": "NU15",
+   "name": "Connexion air"
+  },
+  "1504": {
+   "family": "NU15",
+   "name": "Disque"
+  },
+  "1505": {
+   "family": "NU15",
+   "name": "Disque arrière"
+  },
+  "1506": {
+   "family": "NU15",
+   "name": "Étrier échange standard"
+  },
+  "1506C": {
+   "family": "NU15",
+   "name": "Consigne - étrier échange standard"
+  },
+  "1507": {
+   "family": "NU15",
+   "name": "Étrier neuf"
+  },
+  "1508": {
+   "family": "NU15",
+   "name": "Flexible hydraulique"
+  },
+  "1509": {
+   "family": "NU15",
+   "name": "Garniture"
+  },
+  "1510": {
+   "family": "NU15",
+   "name": "Hydraulique"
+  },
+  "1511": {
+   "family": "NU15",
+   "name": "Kit de frein"
+  },
+  "1512": {
+   "family": "NU15",
+   "name": "Pièces détachées"
+  },
+  "1513": {
+   "family": "NU15",
+   "name": "Plaquette"
+  },
+  "1514": {
+   "family": "NU15",
+   "name": "Pompe à vide"
+  },
+  "1515": {
+   "family": "NU15",
+   "name": "Production régulation d'air"
+  },
+  "1516": {
+   "family": "NU15",
+   "name": "Ralentisseurs"
+  },
+  "1517": {
+   "family": "NU15",
+   "name": "Tambour"
+  },
+  "1518": {
+   "family": "NU15",
+   "name": "Témoin d'usure"
+  },
+  "1519": {
+   "family": "NU15",
+   "name": "Disque bimétallique"
+  },
+  "1520": {
+   "family": "NU15",
+   "name": "Étrier rénové"
+  },
+  "1521": {
+   "family": "NU15",
+   "name": "Freins de stationnement"
+  },
+  "1522": {
+   "family": "NU15",
+   "name": "Cible ABS"
+  },
+  "1600": {
+   "family": "NU16",
+   "name": "Hygiène sécurité sans sous famille"
+  },
+  "1601": {
+   "family": "NU16",
+   "name": "Anti chute"
+  },
+  "1602": {
+   "family": "NU16",
+   "name": "EPI"
+  },
+  "1603": {
+   "family": "NU16",
+   "name": "Intervention incendie"
+  },
+  "1604": {
+   "family": "NU16",
+   "name": "Signalisation"
+  },
+  "1605": {
+   "family": "NU16",
+   "name": "Savons à mains"
+  },
+  "1606": {
+   "family": "NU16",
+   "name": "Autres équipements de protection"
+  },
+  "1607": {
+   "family": "NU16",
+   "name": "Pièces détachées équipements de protection"
+  },
+  "1700": {
+   "family": "NU17",
+   "name": "Liaison au sol sans sous famille"
+  },
+  "1701": {
+   "family": "NU17",
+   "name": "Accumulateurs et sphères NEUFS"
+  },
+  "1702": {
+   "family": "NU17",
+   "name": "Amortisseurs"
+  },
+  "1703": {
+   "family": "NU17",
+   "name": "Autres pièces suspension mécanique"
+  },
+  "1704": {
+   "family": "NU17",
+   "name": "Barres de direction"
+  },
+  "1705": {
+   "family": "NU17",
+   "name": "Barres stabilisatrices"
+  },
+  "1706": {
+   "family": "NU17",
+   "name": "Biellettes de direction"
+  },
+  "1707": {
+   "family": "NU17",
+   "name": "Biellettes de suspension"
+  },
+  "1708": {
+   "family": "NU17",
+   "name": "Boite de vitesse"
+  },
+  "1709": {
+   "family": "NU17",
+   "name": "Boitier de direction"
+  },
+  "1710": {
+   "family": "NU17",
+   "name": "Transmission échange standard"
+  },
+  "1710C": {
+   "family": "NU17",
+   "name": "Consigne - transmission échange standard"
+  },
+  "1711": {
+   "family": "NU17",
+   "name": "Transmission neuve"
+  },
+  "1712": {
+   "family": "NU17",
+   "name": "Coussins d'air"
+  },
+  "1713": {
+   "family": "NU17",
+   "name": "Crémaillères de direction échange standard"
+  },
+  "1713C": {
+   "family": "NU17",
+   "name": "Consigne - crémaillères de direction échange standard"
+  },
+  "1714": {
+   "family": "NU17",
+   "name": "Crémaillères de direction neuves"
+  },
+  "1715": {
+   "family": "NU17",
+   "name": "Essieu complet"
+  },
+  "1716": {
+   "family": "NU17",
+   "name": "Kit de suspension"
+  },
+  "1717": {
+   "family": "NU17",
+   "name": "Kits de protection"
+  },
+  "1718": {
+   "family": "NU17",
+   "name": "Moyeux"
+  },
+  "1719": {
+   "family": "NU17",
+   "name": "Pièces de suspension"
+  },
+  "1720": {
+   "family": "NU17",
+   "name": "Pompes d'assistance échange standard"
+  },
+  "1720C": {
+   "family": "NU17",
+   "name": "Consigne - pompes d'assistance échange standard"
+  },
+  "1721": {
+   "family": "NU17",
+   "name": "Pompes d'assistance neuves"
+  },
+  "1722": {
+   "family": "NU17",
+   "name": "Ressorts"
+  },
+  "1723": {
+   "family": "NU17",
+   "name": "Rotules de suspension"
+  },
+  "1724": {
+   "family": "NU17",
+   "name": "Roulements de roue"
+  },
+  "1725": {
+   "family": "NU17",
+   "name": "Soufflets"
+  },
+  "1726": {
+   "family": "NU17",
+   "name": "Supports groupe motopropulseur"
+  },
+  "1727": {
+   "family": "NU17",
+   "name": "Triangles"
+  },
+  "1728": {
+   "family": "NU17",
+   "name": "Vérin d'assistance"
+  },
+  "1729": {
+   "family": "NU17",
+   "name": "Colonnes de direction"
+  },
+  "1730": {
+   "family": "NU17",
+   "name": "Pompes électriques échange standard"
+  },
+  "1730C": {
+   "family": "NU17",
+   "name": "Consigne - pompes électriques échange standard"
+  },
+  "1731": {
+   "family": "NU17",
+   "name": "Pompes électriques neuves"
+  },
+  "1732": {
+   "family": "NU17",
+   "name": "Pompes hydrauliques échange standard"
+  },
+  "1732C": {
+   "family": "NU17",
+   "name": "Consigne - pompes hydrauliques échange standard"
+  },
+  "1733": {
+   "family": "NU17",
+   "name": "Pompes hydrauliques neuves"
+  },
+  "1734": {
+   "family": "NU17",
+   "name": "Crémaillères de direction électrique échange standard"
+  },
+  "1734C": {
+   "family": "NU17",
+   "name": "Consigne - crémaillères de direction électrique échange standard"
+  },
+  "1735": {
+   "family": "NU17",
+   "name": "Crémaillères de direction électrique neuves"
+  },
+  "1736": {
+   "family": "NU17",
+   "name": "Crémaillères de direction hydraulique échange standard"
+  },
+  "1736C": {
+   "family": "NU17",
+   "name": "Consigne - crémaillères de direction hydraulique échange standard"
+  },
+  "1737": {
+   "family": "NU17",
+   "name": "Crémaillères de direction hydraulique neuves"
+  },
+  "1738": {
+   "family": "NU17",
+   "name": "Crémaillères de direction mécanique échange standard"
+  },
+  "1738C": {
+   "family": "NU17",
+   "name": "Consigne - crémaillères de direction mécanique échange standard"
+  },
+  "1739": {
+   "family": "NU17",
+   "name": "Crémaillères de direction mécanique neuves"
+  },
+  "1740": {
+   "family": "NU17",
+   "name": "Accumulateurs et sphères échange standard"
+  },
+  "1740C": {
+   "family": "NU17",
+   "name": "Consigne - accumulateurs et sphères échange standard"
+  },
+  "1741": {
+   "family": "NU17",
+   "name": "Joint homocinétique échange standard"
+  },
+  "1741C": {
+   "family": "NU17",
+   "name": "Consigne - joint homocinétique échange standard"
+  },
+  "1742": {
+   "family": "NU17",
+   "name": "Joint homocinétique neuf"
+  },
+  "1743": {
+   "family": "NU17",
+   "name": "Joints élastiques et pièces de transmission"
+  },
+  "1744": {
+   "family": "NU17",
+   "name": "Boite de vitesse échange standard"
+  },
+  "1744C": {
+   "family": "NU17",
+   "name": "Consigne - boite de vitesse échange standard"
+  },
+  "1745": {
+   "family": "NU17",
+   "name": "Essieu complet échange standard"
+  },
+  "1745C": {
+   "family": "NU17",
+   "name": "Consigne - essieu complet échange standard"
+  },
+  "1746": {
+   "family": "NU17",
+   "name": "Flexibles de direction"
+  },
+  "1747": {
+   "family": "NU17",
+   "name": "Commande boite de vitesse"
+  },
+  "1748": {
+   "family": "NU17",
+   "name": "Arbre de transmission longitudinal"
+  },
+  "1749": {
+   "family": "NU17",
+   "name": "Transmission rénovée"
+  },
+  "1750": {
+   "family": "NU17",
+   "name": "Crémaillères de direction rénovée"
+  },
+  "1751": {
+   "family": "NU17",
+   "name": "Pompes d'assistance rénovées"
+  },
+  "1752": {
+   "family": "NU17",
+   "name": "Pompes électriques rénovées"
+  },
+  "1753": {
+   "family": "NU17",
+   "name": "Pompes hydrauliques rénovées"
+  },
+  "1754": {
+   "family": "NU17",
+   "name": "Crémaillères de direction électrique rénovée"
+  },
+  "1755": {
+   "family": "NU17",
+   "name": "Crémaillères de direction hydraulique rénovée"
+  },
+  "1756": {
+   "family": "NU17",
+   "name": "Crémaillères de direction mécanique rénovée"
+  },
+  "1757": {
+   "family": "NU17",
+   "name": "Accumulateurs et sphères rénovés"
+  },
+  "1758": {
+   "family": "NU17",
+   "name": "Joint homocinétique rénové"
+  },
+  "1759": {
+   "family": "NU17",
+   "name": "Boite de vitesse rénovée"
+  },
+  "1760": {
+   "family": "NU17",
+   "name": "Essieu complet rénové"
+  },
+  "1800": {
+   "family": "NU18",
+   "name": "Liquides & lubrifiants sans sous famille"
+  },
+  "1801": {
+   "family": "NU18",
+   "name": "Adblue / cérine"
+  },
+  "1802": {
+   "family": "NU18",
+   "name": "Additifs"
+  },
+  "1803": {
+   "family": "NU18",
+   "name": "Antigel"
+  },
+  "1804": {
+   "family": "NU18",
+   "name": "Fluide de bancs d'essai"
+  },
+  "1805": {
+   "family": "NU18",
+   "name": "Gaz de climatisation"
+  },
+  "1806": {
+   "family": "NU18",
+   "name": "Graissage"
+  },
+  "1807": {
+   "family": "NU18",
+   "name": "Huile de boîte"
+  },
+  "1808": {
+   "family": "NU18",
+   "name": "Huile de climatisation"
+  },
+  "1809": {
+   "family": "NU18",
+   "name": "Huile de compresseur"
+  },
+  "1810": {
+   "family": "NU18",
+   "name": "Huile moteur"
+  },
+  "1811": {
+   "family": "NU18",
+   "name": "Huiles hydrauliques"
+  },
+  "1812": {
+   "family": "NU18",
+   "name": "Lave glace"
+  },
+  "1813": {
+   "family": "NU18",
+   "name": "Liquide de frein"
+  },
+  "1814": {
+   "family": "NU18",
+   "name": "Liquide de refroidissement"
+  },
+  "1815": {
+   "family": "NU18",
+   "name": "Solvants"
+  },
+  "1900": {
+   "family": "NU19",
+   "name": "Moteur et distribution sans sous famille"
+  },
+  "1901": {
+   "family": "NU19",
+   "name": "Chaines"
+  },
+  "1902": {
+   "family": "NU19",
+   "name": "Courroies"
+  },
+  "1903": {
+   "family": "NU19",
+   "name": "Culasse échange standard"
+  },
+  "1903C": {
+   "family": "NU19",
+   "name": "Consigne - culasse échange standard"
+  },
+  "1904": {
+   "family": "NU19",
+   "name": "Culasse neuve"
+  },
+  "1905": {
+   "family": "NU19",
+   "name": "Galets"
+  },
+  "1906": {
+   "family": "NU19",
+   "name": "Joints"
+  },
+  "1907": {
+   "family": "NU19",
+   "name": "Kits distribution par courroie"
+  },
+  "1908": {
+   "family": "NU19",
+   "name": "Moteur échange standard"
+  },
+  "1908C": {
+   "family": "NU19",
+   "name": "Consigne - cylinder head standard exchange"
+  },
+  "1909": {
+   "family": "NU19",
+   "name": "Moteur neuf"
+  },
+  "1910": {
+   "family": "NU19",
+   "name": "Moteur propulsion électrique"
+  },
+  "1911": {
+   "family": "NU19",
+   "name": "Pièces bas moteur"
+  },
+  "1912": {
+   "family": "NU19",
+   "name": "Pièces haut moteur"
+  },
+  "1913": {
+   "family": "NU19",
+   "name": "Poulie damper"
+  },
+  "1914": {
+   "family": "NU19",
+   "name": "Turbo échange standard"
+  },
+  "1914C": {
+   "family": "NU19",
+   "name": "Consigne - turbo échange standard"
+  },
+  "1915": {
+   "family": "NU19",
+   "name": "Turbo neuf"
+  },
+  "1916": {
+   "family": "NU19",
+   "name": "Volant moteur"
+  },
+  "1917": {
+   "family": "NU19",
+   "name": "Visserie"
+  },
+  "1918": {
+   "family": "NU19",
+   "name": "Pièces turbos"
+  },
+  "1919": {
+   "family": "NU19",
+   "name": "Gestion électronique moteurs"
+  },
+  "1920": {
+   "family": "NU19",
+   "name": "Corps papillons"
+  },
+  "1921": {
+   "family": "NU19",
+   "name": "Moteur propulsion électrique échange standard"
+  },
+  "1921C": {
+   "family": "NU19",
+   "name": "Consigne - moteur propulsion électrique échange standard"
+  },
+  "1922": {
+   "family": "NU19",
+   "name": "Kits distribution par chaine"
+  },
+  "1923": {
+   "family": "NU19",
+   "name": "Poulie alternateur"
+  },
+  "1924": {
+   "family": "NU19",
+   "name": "Kits de distribution + pompe"
+  },
+  "1925": {
+   "family": "NU19",
+   "name": "Kit de courroie accessoire"
+  },
+  "1926": {
+   "family": "NU19",
+   "name": "Kit de courroie accessoire + pompe à eau"
+  },
+  "1927": {
+   "family": "NU19",
+   "name": "Pompe huile"
+  },
+  "1928": {
+   "family": "NU19",
+   "name": "Culasse rénovée"
+  },
+  "1929": {
+   "family": "NU19",
+   "name": "Moteur rénové"
+  },
+  "1930": {
+   "family": "NU19",
+   "name": "Turbo rénové"
+  },
+  "1931": {
+   "family": "NU19",
+   "name": "Moteur propulsion électrique rénové"
+  },
+  "1932": {
+   "family": "NU19",
+   "name": "Capteurs d'arbre à came"
+  },
+  "1933": {
+   "family": "NU19",
+   "name": "Capteur EGTS"
+  },
+  "1934": {
+   "family": "NU19",
+   "name": "Capteur de pédale d'accélérateur"
+  },
+  "1935": {
+   "family": "NU19",
+   "name": "Capteur de position de boitier papillon"
+  },
+  "1936": {
+   "family": "NU19",
+   "name": "Capteur MAP"
+  },
+  "1937": {
+   "family": "NU19",
+   "name": "Capteur de pression carburant"
+  },
+  "1938": {
+   "family": "NU19",
+   "name": "Capteur de pression d'huile"
+  },
+  "1939": {
+   "family": "NU19",
+   "name": "Capteur niveau d'huile moteur"
+  },
+  "1940": {
+   "family": "NU19",
+   "name": "Capteur de vilebrequin"
+  },
+  "1941": {
+   "family": "NU19",
+   "name": "Capteurs de batteries IGS"
+  },
+  "1942": {
+   "family": "NU19",
+   "name": "Support moteur"
+  },
+  "1943": {
+   "family": "NU19",
+   "name": "Outils de calage moteur"
+  },
+  "1944": {
+   "family": "NU19",
+   "name": "Capteur de pression turbo"
+  },
+  "2000": {
+   "family": "NU20",
+   "name": "Nettoyage et entretien sans sous famille"
+  },
+  "2001": {
+   "family": "NU20",
+   "name": "Nettoyage intérieur"
+  },
+  "2002": {
+   "family": "NU20",
+   "name": "Nettoyage extérieur"
+  },
+  "2100": {
+   "family": "NU21",
+   "name": "Outillage sans sous famille"
+  },
+  "2101": {
+   "family": "NU21",
+   "name": "Chargeur de batterie"
+  },
+  "2102": {
+   "family": "NU21",
+   "name": "Divers outillage"
+  },
+  "2103": {
+   "family": "NU21",
+   "name": "Métrologie"
+  },
+  "2104": {
+   "family": "NU21",
+   "name": "Outillage à main"
+  },
+  "2105": {
+   "family": "NU21",
+   "name": "Outillage électro portatif"
+  },
+  "2106": {
+   "family": "NU21",
+   "name": "Outillage pneumatique"
+  },
+  "2107": {
+   "family": "NU21",
+   "name": "Pièces diverses"
+  },
+  "2108": {
+   "family": "NU21",
+   "name": "Outillage de carrosserie"
+  },
+  "2109": {
+   "family": "NU21",
+   "name": "Servante"
+  },
+  "2110": {
+   "family": "NU21",
+   "name": "Outils de levage hydraulique"
+  },
+  "2111": {
+   "family": "NU21",
+   "name": "Outillage spécifique peinture"
+  },
+  "2112": {
+   "family": "NU21",
+   "name": "Consommables de carrosserie"
+  },
+  "2113": {
+   "family": "NU21",
+   "name": "Démarrage de batterie"
+  },
+  "2114": {
+   "family": "NU21",
+   "name": "Eclairage"
+  },
+  "2115": {
+   "family": "NU21",
+   "name": "Consommables & accessoires d'outillage"
+  },
+  "2200": {
+   "family": "NU22",
+   "name": "Peinture sans sous famille"
+  },
+  "2201": {
+   "family": "NU22",
+   "name": "Additifs"
+  },
+  "2202": {
+   "family": "NU22",
+   "name": "Aérosol"
+  },
+  "2203": {
+   "family": "NU22",
+   "name": "Apprêts, primaires et sous couches"
+  },
+  "2204": {
+   "family": "NU22",
+   "name": "Diluant"
+  },
+  "2205": {
+   "family": "NU22",
+   "name": "Durcisseurs"
+  },
+  "2206": {
+   "family": "NU22",
+   "name": "Fournitures carrosserie"
+  },
+  "2207": {
+   "family": "NU22",
+   "name": "Solvants"
+  },
+  "2208": {
+   "family": "NU22",
+   "name": "Teintes de base"
+  },
+  "2209": {
+   "family": "NU22",
+   "name": "Vernis 2K"
+  },
+  "2210": {
+   "family": "NU22",
+   "name": "Base 1K à revenir aqua et solvantée"
+  },
+  "2211": {
+   "family": "NU22",
+   "name": "Base 2K brillant direct"
+  },
+  "2212": {
+   "family": "NU22",
+   "name": "Mastics et joints"
+  },
+  "2213": {
+   "family": "NU22",
+   "name": "Abrasifs"
+  },
+  "2214": {
+   "family": "NU22",
+   "name": "Consommables peinture"
+  },
+  "2215": {
+   "family": "NU22",
+   "name": "Consommables carrosserie"
+  },
+  "2216": {
+   "family": "NU22",
+   "name": "Collage"
+  },
+  "2217": {
+   "family": "NU22",
+   "name": "Car care"
+  },
+  "2218": {
+   "family": "NU22",
+   "name": "Bases pigmentaires industrie"
+  },
+  "2219": {
+   "family": "NU22",
+   "name": "Liants industrie"
+  },
+  "2220": {
+   "family": "NU22",
+   "name": "Autres produits spécifiques Industrie"
+  },
+  "2221": {
+   "family": "NU22",
+   "name": "Stylo retouche à la teinte"
+  },
+  "2222": {
+   "family": "NU22",
+   "name": "Aérosol peinture à la teinte"
+  },
+  "2223": {
+   "family": "NU22",
+   "name": "Peinture solvant bi-couche à la teinte"
+  },
+  "2224": {
+   "family": "NU22",
+   "name": "Peinture hydrodiluable à la teinte"
+  },
+  "2225": {
+   "family": "NU22",
+   "name": "Peinture 2K VOC420 à la teinte"
+  },
+  "2226": {
+   "family": "NU22",
+   "name": "Peinture industrielle à la teinte"
+  },
+  "2300": {
+   "family": "NU23",
+   "name": "Pneumatique sans sous famille"
+  },
+  "2301": {
+   "family": "NU23",
+   "name": "Chaines"
+  },
+  "2302": {
+   "family": "NU23",
+   "name": "Chambres à air"
+  },
+  "2303": {
+   "family": "NU23",
+   "name": "Consommables pneus"
+  },
+  "2304": {
+   "family": "NU23",
+   "name": "Été"
+  },
+  "2305": {
+   "family": "NU23",
+   "name": "Hiver"
+  },
+  "2306": {
+   "family": "NU23",
+   "name": "Roue"
+  },
+  "2307": {
+   "family": "NU23",
+   "name": "Capteurs de pression des pneus"
+  },
+  "2400": {
+   "family": "NU24",
+   "name": "Sécurité habitacle sans sous famille"
+  },
+  "2401": {
+   "family": "NU24",
+   "name": "Airbag"
+  },
+  "2402": {
+   "family": "NU24",
+   "name": "Commodos"
+  },
+  "2403": {
+   "family": "NU24",
+   "name": "Lève-vitres"
+  },
+  "2404": {
+   "family": "NU24",
+   "name": "Serrures"
+  },
+  "2405": {
+   "family": "NU24",
+   "name": "Clés"
+  },
+  "2406": {
+   "family": "NU24",
+   "name": "Ethylotest Anti Démarrage (EAD)"
+  },
+  "2500": {
+   "family": "NU25",
+   "name": "Thermique & climatisation sans sous famille"
+  },
+  "2501": {
+   "family": "NU25",
+   "name": "Bouteille déshydratante"
+  },
+  "2502": {
+   "family": "NU25",
+   "name": "Chauffage"
+  },
+  "2503": {
+   "family": "NU25",
+   "name": "Compresseur de climatisation neuf"
+  },
+  "2504": {
+   "family": "NU25",
+   "name": "Condenseur"
+  },
+  "2505": {
+   "family": "NU25",
+   "name": "Durites"
+  },
+  "2506": {
+   "family": "NU25",
+   "name": "Échangeur de chaleur"
+  },
+  "2507": {
+   "family": "NU25",
+   "name": "Évaporateur"
+  },
+  "2508": {
+   "family": "NU25",
+   "name": "Groupe moto ventilateur"
+  },
+  "2509": {
+   "family": "NU25",
+   "name": "Intercooler"
+  },
+  "2510": {
+   "family": "NU25",
+   "name": "Pompe à eau"
+  },
+  "2511": {
+   "family": "NU25",
+   "name": "Pulseurs"
+  },
+  "2512": {
+   "family": "NU25",
+   "name": "Radiateur"
+  },
+  "2513": {
+   "family": "NU25",
+   "name": "Radiateur d'huile"
+  },
+  "2514": {
+   "family": "NU25",
+   "name": "Radiateur de chauffage"
+  },
+  "2515": {
+   "family": "NU25",
+   "name": "Thermo-contacts"
+  },
+  "2516": {
+   "family": "NU25",
+   "name": "Thermostats"
+  },
+  "2517": {
+   "family": "NU25",
+   "name": "Pièces de réparation"
+  },
+  "2518": {
+   "family": "NU25",
+   "name": "Détendeurs de climatisation"
+  },
+  "2519": {
+   "family": "NU25",
+   "name": "Compresseur de climatisation échange standard"
+  },
+  "2519C": {
+   "family": "NU25",
+   "name": "Consigne - compresseur de climatisation échange standard"
+  },
+  "2520": {
+   "family": "NU25",
+   "name": "Consommables de climatisation"
+  },
+  "2521": {
+   "family": "NU25",
+   "name": "Intercooler échange standard"
+  },
+  "2521C": {
+   "family": "NU25",
+   "name": "Consigne - intercooler échange standard"
+  },
+  "2522": {
+   "family": "NU25",
+   "name": "Radiateur échange standard"
+  },
+  "2522C": {
+   "family": "NU25",
+   "name": "Consigne - radiateur échange standard"
+  },
+  "2523": {
+   "family": "NU25",
+   "name": "Pressostat"
+  },
+  "2524": {
+   "family": "NU25",
+   "name": "Compresseur de climatisation rénové"
+  },
+  "2525": {
+   "family": "NU25",
+   "name": "Intercooler rénové"
+  },
+  "2526": {
+   "family": "NU25",
+   "name": "Radiateur rénové"
+  },
+  "2527": {
+   "family": "NU25",
+   "name": "Vase d'expansion"
+  },
+  "2528": {
+   "family": "NU25",
+   "name": "Bouchons de radiateur"
+  },
+  "2529": {
+   "family": "NU25",
+   "name": "Résistance de pulseur d'air habitacle"
+  },
+  "2600": {
+   "family": "NU26",
+   "name": "Industrie sans sous famille"
+  },
+  "2601": {
+   "family": "NU26",
+   "name": "Roulements"
+  },
+  "2700": {
+   "family": "NU27",
+   "name": "Éclairage & signalisation sans sous famille PRE"
+  },
+  "2701": {
+   "family": "NU27",
+   "name": "Éclairage PRE"
+  },
+  "2702": {
+   "family": "NU27",
+   "name": "Éclairage intérieur PRE"
+  },
+  "2703": {
+   "family": "NU27",
+   "name": "Feux additionnels PRE"
+  },
+  "2704": {
+   "family": "NU27",
+   "name": "Projecteurs de complément PRE"
+  },
+  "2705": {
+   "family": "NU27",
+   "name": "Signalisation PRE"
+  },
+  "2800": {
+   "family": "NU28",
+   "name": "Éléments de carrosserie sans sous famille PRE"
+  },
+  "2801": {
+   "family": "NU28",
+   "name": "Tôlerie PRE"
+  },
+  "2802": {
+   "family": "NU28",
+   "name": "Rétroviseurs PRE"
+  },
+  "2803": {
+   "family": "NU28",
+   "name": "Vitrage PRE"
+  },
+  "2900": {
+   "family": "NU29",
+   "name": "Capteurs sans sous famille"
+  },
+  "2901": {
+   "family": "NU29",
+   "name": "Capteurs et régulateurs de pression diesel"
+  },
+  "2902": {
+   "family": "NU29",
+   "name": "Capteurs FAP"
+  },
+  "2903": {
+   "family": "NU29",
+   "name": "Sondes lambda"
+  },
+  "2904": {
+   "family": "NU29",
+   "name": "Sondes NOx"
+  },
+  "2905": {
+   "family": "NU29",
+   "name": "Capteurs déclairage"
+  },
+  "2906": {
+   "family": "NU29",
+   "name": "Capteurs ABS"
+  },
+  "2907": {
+   "family": "NU29",
+   "name": "Capteurs de température d'air"
+  },
+  "2908": {
+   "family": "NU29",
+   "name": "Capteurs de pression d'air"
+  },
+  "2909": {
+   "family": "NU29",
+   "name": "Capteurs de moteur pas à pas"
+  },
+  "2910": {
+   "family": "NU29",
+   "name": "Capteurs de cliquetis / de cognement"
+  },
+  "2911": {
+   "family": "NU29",
+   "name": "Capteurs de pluie"
+  },
+  "2912": {
+   "family": "NU29",
+   "name": "Capteurs d'arbre à came"
+  },
+  "2913": {
+   "family": "NU29",
+   "name": "Capteurs EGTS"
+  },
+  "2914": {
+   "family": "NU29",
+   "name": "Capteurs de pédale"
+  },
+  "2915": {
+   "family": "NU29",
+   "name": "Capteurs de position de boitier papillon"
+  },
+  "2916": {
+   "family": "NU29",
+   "name": "Capteurs MAP"
+  },
+  "2917": {
+   "family": "NU29",
+   "name": "Capteurs de pression carburant"
+  },
+  "2918": {
+   "family": "NU29",
+   "name": "Capteurs de pression d'huile"
+  },
+  "2919": {
+   "family": "NU29",
+   "name": "Capteurs de niveau d'huile moteur"
+  },
+  "2920": {
+   "family": "NU29",
+   "name": "Capteurs de niveau de carburant"
+  },
+  "2921": {
+   "family": "NU29",
+   "name": "Capteurs de vilebrequin"
+  },
+  "2922": {
+   "family": "NU29",
+   "name": "Capteurs de batteries IGS"
+  },
+  "2923": {
+   "family": "NU29",
+   "name": "Capteurs de pression turbo"
+  },
+  "2924": {
+   "family": "NU29",
+   "name": "Capteurs de pression des pneus"
+  },
+  "2925": {
+   "family": "NU29",
+   "name": "Capteurs de température dhuile"
+  },
+  "2926": {
+   "family": "NU29",
+   "name": "Capteurs de température de refroidissement"
+  },
+  "2927": {
+   "family": "NU29",
+   "name": "Pressostat"
+  }
+ }
+}

@@ -18,4 +18,9 @@ class ItemCategory extends Model
     {
         return $this->hasMany(Item::class, 'category_id');
     }
+
+    public function subcategories()
+    {
+        return $this->hasMany(ItemSubcategory::class, 'category_id')->orderBy('code');
+    }
 }

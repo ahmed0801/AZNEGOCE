@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Models\Brand;
 use App\Models\Item;
 use App\Models\ItemCategory;
+use App\Services\GoldaNomenclature;
 use App\Models\GoldaImportSetting;
 use App\Mail\GoldaImportReport;
 use League\Csv\Reader;
@@ -24,6 +25,8 @@ class ImportGoldaTarifs extends Command
 
     // PHP 7.4 : pas de typed properties
     private $dryRun = false;
+    private $subcatCache = []; // code => ItemSubcategory|null
+    private $subcatCreated = 0;
 
     public function handle()
     {
@@ -39,14 +42,19 @@ class ImportGoldaTarifs extends Command
         $report = ['marques' => [], 'totalImported' => 0, 'totalDeactivated' => 0, 'errors' => []];
 
         // ── Connexion FTP ────────────────────────────────────────
+        if (!config('golda.ftp.username') || !config('golda.ftp.password')) {
+            $this->error("❌ GOLDA_FTP_USER / GOLDA_FTP_PASS manquants dans .env");
+            return 1;
+        }
         try {
             $ftp = Storage::createFtpDriver([
-                'host'     => env('GOLDA_FTP_HOST', 'golda.fr'),
-                'username' => env('GOLDA_FTP_USER', 'tdlfg8223'),
-                'password' => env('GOLDA_FTP_PASS', 'B7w42bz!36'),
+                'host'     => config('golda.ftp.host'),
+                'username' => config('golda.ftp.username'),
+                'password' => config('golda.ftp.password'),
                 'root'     => '/tarifs/',
                 'passive'  => true,
-                'ssl'      => false,
+                'ssl'      => config('golda.ftp.ssl'),
+                'port'     => config('golda.ftp.port'),
             ]);
         } catch (\Exception $e) {
             $this->error("❌ Connexion FTP impossible : " . $e->getMessage());
@@ -207,10 +215,16 @@ class ImportGoldaTarifs extends Command
                     $largeur    = $this->parseFloat($i['Largeur']   ?? null);
 
                     // ── Calcul marge & prix vente ────────────────
-                    $category  = $categoryId ? ItemCategory::find($categoryId) : null;
-                    $margin    = $setting->margin_override !== null
-                        ? (float) $setting->margin_override
-                        : ($category ? (float) $category->default_sale_margin : 30.00);
+                    $category  = GoldaNomenclature::ensureCategory($categoryId);
+                    $subcat    = $this->resolveSubcategory(trim($i['Code_sousfamille_NU'] ?? ''), $category);
+                    // Priorité marge : override marque > sous-famille > famille > 30 %
+                    if ($setting->margin_override !== null) {
+                        $margin = (float) $setting->margin_override;
+                    } elseif ($subcat && $subcat->default_sale_margin !== null) {
+                        $margin = (float) $subcat->default_sale_margin;
+                    } else {
+                        $margin = $category ? (float) $category->default_sale_margin : 30.00;
+                    }
 
                     // Prix vente toujours calculé (même si 0)
                     $salePrice = $price > 0
@@ -240,6 +254,11 @@ class ImportGoldaTarifs extends Command
                             if ($hauteur)  $updateData['Hauteur']  = $hauteur;
                             if ($longueur) $updateData['Longueur'] = $longueur;
                             if ($largeur)  $updateData['Largeur']  = $largeur;
+                        }
+                        // Synchroniser la sous-famille GOLDA
+                        if ($subcat && (int) $item->subcategory_id !== (int) $subcat->id) {
+                            $updateData['subcategory_id'] = $subcat->id;
+                            $updateData['category_id']    = $subcat->category_id;
                         }
                         // Lier brand si pas encore liée
                         if ($brand && !$item->brand_id) {
@@ -274,7 +293,8 @@ class ImportGoldaTarifs extends Command
                                 'Ref_TecDoc'      => $refTecDoc,
                                 'Code_pays'       => $codePays,
                                 'Code_douane'     => $codeDouane,
-                                'category_id'     => $categoryId ?: null,
+                                'category_id'     => $category ? $category->id : null,
+                                'subcategory_id'  => $subcat ? $subcat->id : null,
                                 'is_active'       => true,
                                 'unit_id'         => 1,
                                 'tva_group_id'    => 1,
@@ -359,6 +379,7 @@ class ImportGoldaTarifs extends Command
             }
         }
 
+        $this->info("🧩 {$this->subcatCreated} nouvelle(s) sous-famille(s)");
         $this->info("🎉 Import terminé — {$report['totalImported']} articles traités · {$report['totalDeactivated']} désactivés");
         return 0;
     }
@@ -366,6 +387,27 @@ class ImportGoldaTarifs extends Command
     // ══════════════════════════════════════════════════════════
     // HELPERS
     // ══════════════════════════════════════════════════════════
+    /**
+     * Sous-famille GOLDA (créée avec son libellé officiel de la nomenclature).
+     */
+    private function resolveSubcategory($code, $category)
+    {
+        if ($code === '') return null;
+        if (array_key_exists($code, $this->subcatCache)) return $this->subcatCache[$code];
+
+        if ($this->dryRun) {
+            $exists = \App\Models\ItemSubcategory::where('code', $code)->first();
+            if (!$exists) $this->subcatCreated++;
+            return $this->subcatCache[$code] = $exists;
+        }
+
+        $existed = \App\Models\ItemSubcategory::where('code', $code)->exists();
+        $sub = GoldaNomenclature::ensureSubcategory($code, $category);
+        if ($sub && !$existed) $this->subcatCreated++;
+
+        return $this->subcatCache[$code] = $sub;
+    }
+
     private function cleanCsvFile(string $path): void
     {
         $content = file_get_contents($path);

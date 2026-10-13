@@ -480,6 +480,27 @@
                     <i class="fas fa-check-circle"></i> {{ session('success') }}
                 </div>
             @endif
+            @if(session('import_stats'))
+                @php $st = session('import_stats'); @endphp
+                @if(!empty($st['errors']))
+                    <div class="az-alert error">
+                        <strong><i class="fas fa-times-circle"></i> {{ count($st['errors']) }} ligne(s) en erreur :</strong>
+                        <ul style="margin:.4rem 0 0; padding-left:1.2rem;">
+                            @foreach(array_slice($st['errors'], 0, 15) as $e)<li>{{ $e }}</li>@endforeach
+                            @if(count($st['errors']) > 15)<li>… et {{ count($st['errors']) - 15 }} autre(s)</li>@endif
+                        </ul>
+                    </div>
+                @endif
+                @if(!empty($st['warnings']))
+                    <div class="az-alert" style="background:#fff8e1;border-color:#c07a10;color:#5a3a00;">
+                        <strong><i class="fas fa-exclamation-triangle"></i> {{ count($st['warnings']) }} avertissement(s) :</strong>
+                        <ul style="margin:.4rem 0 0; padding-left:1.2rem;">
+                            @foreach(array_slice($st['warnings'], 0, 15) as $w)<li>{{ $w }}</li>@endforeach
+                            @if(count($st['warnings']) > 15)<li>… et {{ count($st['warnings']) - 15 }} autre(s)</li>@endif
+                        </ul>
+                    </div>
+                @endif
+            @endif
             @if(session('error'))
                 <div class="az-alert error">
                     <i class="fas fa-times-circle"></i> {{ session('error') }}
@@ -586,7 +607,8 @@
                                         ['col'=>'code',           'label'=>'Code article (r&eacute;f&eacute;rence interne)',     'ex'=>'57044',             'req'=>true],
                                         ['col'=>'name',           'label'=>'Nom / d&eacute;signation de l\'article',             'ex'=>'SUPPORT MOTEUR',    'req'=>'&agrave; la cr&eacute;ation'],
                                         ['col'=>'description',    'label'=>'Description d&eacute;taill&eacute;e (optionnelle)',   'ex'=>'Support avant gauche', 'req'=>false],
-                                        ['col'=>'category',       'label'=>'Cat&eacute;gorie de l\'article',                     'ex'=>'LIAISON AU SOL',    'req'=>false],
+                                        ['col'=>'category',       'label'=>'Famille (code ex: NU17, ou nom exact)',              'ex'=>'LIAISON AU SOL',    'req'=>false],
+                                        ['col'=>'subcategory',    'label'=>'<strong>Sous-famille</strong> (code GOLDA ou libell&eacute;) &mdash; cr&eacute;&eacute;e si absente', 'ex'=>'1702 ou Amortisseurs', 'req'=>false],
                                         ['col'=>'brand',          'label'=>'Marque / fabricant',                                 'ex'=>'MULTIMARQUES',      'req'=>false],
                                         ['col'=>'unit',           'label'=>'Unit&eacute; de vente',                              'ex'=>'PIECE',             'req'=>false],
                                         ['col'=>'barcode',        'label'=>'Code-barres EAN',                                   'ex'=>'8435108604300',     'req'=>false],
@@ -693,7 +715,8 @@
                                 $generalCols = [
                                     ['key'=>'name',          'label'=>'Nom',           'icon'=>'fa-tag'],
                                     ['key'=>'description',   'label'=>'Description',   'icon'=>'fa-align-left'],
-                                    ['key'=>'category',      'label'=>'Catégorie',     'icon'=>'fa-folder'],
+                                    ['key'=>'category',      'label'=>'Famille',       'icon'=>'fa-folder'],
+                                    ['key'=>'subcategory',   'label'=>'Sous-famille',  'icon'=>'fa-sitemap'],
                                     ['key'=>'brand',         'label'=>'Marque',        'icon'=>'fa-bookmark'],
                                     ['key'=>'unit',          'label'=>'Unité',         'icon'=>'fa-ruler'],
                                     ['key'=>'barcode',       'label'=>'Code-barre',    'icon'=>'fa-barcode'],

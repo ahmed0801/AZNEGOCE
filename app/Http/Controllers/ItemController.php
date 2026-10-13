@@ -32,7 +32,7 @@ class ItemController extends Controller
 
 public function index(Request $request)
 {
-$query = Item::with(['category', 'brand', 'tvaGroup', 'store', 'supplier','stocks']);
+$query = Item::with(['category', 'subcategory', 'brand', 'tvaGroup', 'store', 'supplier','stocks']);
 
     // Recherche globale
     if ($request->filled('search')) {
@@ -50,6 +50,10 @@ $query = Item::with(['category', 'brand', 'tvaGroup', 'store', 'supplier','stock
 
     if ($request->filled('category_id')) {
         $query->where('category_id', $request->category_id);
+    }
+
+    if ($request->filled('subcategory_id')) {
+        $query->where('subcategory_id', $request->subcategory_id);
     }
 
     if ($request->filled('store_id')) {
@@ -70,6 +74,7 @@ if ($request->has('is_active') && $request->is_active !== null && $request->is_a
     return view('articles', [
         'items' => $items,
         'categories' => ItemCategory::all(),
+        'subcategories' => \App\Models\ItemSubcategory::orderBy('code')->get(['id','category_id','code','name']),
         'brands' => Brand::all(),
         'units' => Unit::all(),
         'stores' => Store::all(),
@@ -82,6 +87,15 @@ if ($request->has('is_active') && $request->is_active !== null && $request->is_a
     ]);
 }
 
+
+/** Sous-famille valide uniquement si elle appartient à la famille choisie. */
+private function resolveSubcategoryId(array $validated)
+{
+    if (empty($validated['subcategory_id']) || empty($validated['category_id'])) return null;
+    $ok = \App\Models\ItemSubcategory::where('id', $validated['subcategory_id'])
+        ->where('category_id', $validated['category_id'])->exists();
+    return $ok ? $validated['subcategory_id'] : null;
+}
 
 public function export(Request $request)
 {
@@ -133,6 +147,7 @@ public function store(Request $request)
         'name'           => 'required|string|max:255',
         'description'    => 'nullable|string',
         'category_id'    => 'nullable|exists:item_categories,id',
+        'subcategory_id' => 'nullable|exists:item_subcategories,id',
         'brand_id'       => 'nullable|exists:brands,id',
         'unit_id'        => 'nullable|exists:units,id',
         'tva_group_id'   => 'nullable|exists:tva_groups,id',
@@ -174,6 +189,7 @@ public function store(Request $request)
         'name'            => $validated['name'],
         'description'     => $validated['description'] ?? null,
         'category_id'     => $validated['category_id'] ?? null,
+        'subcategory_id'  => $this->resolveSubcategoryId($validated),
         'brand_id'        => $validated['brand_id'] ?? null,
         'unit_id'         => $validated['unit_id'] ?? null,
         'tva_group_id'    => $validated['tva_group_id'] ?? null,
@@ -227,6 +243,7 @@ public function update(Request $request, $id)
         'name'         => 'required|string|max:255',
         'description'  => 'nullable|string',
         'category_id'  => 'nullable|exists:item_categories,id',
+        'subcategory_id' => 'nullable|exists:item_subcategories,id',
         'brand_id'     => 'nullable|exists:brands,id',
         'unit_id'      => 'nullable|exists:units,id',
         'tva_group_id' => 'nullable|exists:tva_groups,id',
@@ -252,6 +269,10 @@ public function update(Request $request, $id)
         
 
     ]);
+
+    if (array_key_exists('category_id', $validated)) {
+        $validated['subcategory_id'] = $this->resolveSubcategoryId($validated);
+    }
 
     $item->update($validated);
 
@@ -760,6 +781,7 @@ public function massUpdateDiscount(Request $request)
 
     if ($request->filled('brand_id'))    $query->where('brand_id', $request->brand_id);
     if ($request->filled('category_id')) $query->where('category_id', $request->category_id);
+    if ($request->filled('subcategory_id')) $query->where('subcategory_id', $request->subcategory_id);
     if ($request->filled('store_id'))    $query->where('store_id', $request->store_id);
     if ($request->filled('codefournisseur')) {
         $query->where('codefournisseur', $request->codefournisseur);

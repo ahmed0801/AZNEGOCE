@@ -69,6 +69,33 @@
 
 
 
+
+
+
+
+/* ===== En-tête liste : boutons + filtres ===== */
+.lh-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+.lh-title{margin:0;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.lh-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.lh-btns .btn,.lh-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
+.lh-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem}
+.lh-filters .lh-field{flex:1 1 150px;min-width:130px;position:relative}
+.lh-filters .lh-field.lh-wide{flex:2 1 220px}
+.lh-filters .lh-field.lh-narrow{flex:0 1 130px;min-width:120px}
+.lh-filters .lh-field i.lh-ico{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.8rem;pointer-events:none}
+.lh-filters .lh-field i.lh-ico + input{padding-left:2.1rem}
+.lh-filters .form-control,.lh-filters .form-select{height:38px;border-radius:8px;font-size:.88rem}
+.lh-filters .lh-dates{display:flex;align-items:center;gap:.4rem;flex:1 1 280px}
+.lh-filters .lh-dates span{color:#6b7280;font-size:.8rem;white-space:nowrap}
+.lh-filters .lh-spacer{flex:1 1 auto}
+.lh-filters .select2-container{width:100%!important}
+.lh-filters .select2-container--default .select2-selection--single{height:38px!important;min-height:38px!important;border-radius:8px!important;display:flex;align-items:center;font-size:.88rem!important;padding:0 .4rem!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px!important}
+
+
+
+
     </style>
 </head>
 <body>
@@ -442,160 +469,107 @@
                         <div class="alert alert-danger">{{ session('error') }}</div>
                     @endif
 
-                    <h4>📋 Liste des bons de livraison :
-                        <a href="{{ route('sales.delivery.create') }}" class="btn btn-outline-success btn-round ms-2">
-                            Nouvelle Commande <i class="fas fa-plus-circle ms-2"></i>
-                        </a>
-                        
-<a href="{{ route('salesinvoices.create_grouped') }}"
-   class="btn btn-outline-success btn-round ms-2">
-
-
-    <!-- Icône d’information -->
-<span 
-    style="cursor: pointer;"
-    data-bs-toggle="popover"
-    data-bs-trigger="hover focus"
-    data-bs-placement="right"
-    title="À quoi sert cette fonction ?"
-    data-bs-content="Ce bouton permet de collecter tous les BL et retours non facturés d’un client afin de générer une seule facture groupée. Très utile pour les factures de fin de mois des garages, professionnels ou clients réguliers.">
-
-    Nouvelle Facture Groupée <i class="fas fa-plus-circle ms-2"></i>
-
-</span>
-
-
-</a>
-
-
-<a href="{{ route('delivery_notes.returns.free.create') }}" class="btn btn-outline-danger btn-round ms-2">
-                            Créer Retour Libre <i class="fas fa-plus-circle ms-2"></i>
-                        </a>
-
-
-                    </h4>
-
-
+                   
                     
 
-                    <div class="filter-box mb-2 p-2">
-    <form method="GET"
-          action="{{ route('delivery_notes.list') }}"
-          class="d-flex flex-wrap align-items-end gap-2">
+                    <div class="lh-bar">
+    <h4 class="lh-title"><i class="fas fa-truck text-primary"></i> Bons de livraison</h4>
+    <div class="lh-btns">
+        <a href="{{ route('sales.delivery.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Nouvelle commande
+        </a>
+        <a href="{{ route('salesinvoices.create_grouped') }}" class="btn btn-outline-primary"
+           title="Collecte tous les BL et retours non facturés d'un client pour générer une seule facture groupée. Très utile pour les factures de fin de mois des garages, professionnels ou clients réguliers.">
+            <i class="fas fa-layer-group"></i> Facture groupée
+        </a>
 
-        {{-- Client --}}
-        <select name="numclient"
-                class="form-select form-select-sm select2"
-                style="width: 140px;">
-            <option value="">Client (Tous)</option>
-            @foreach($customers as $customer)
-                <option value="{{ $customer->code }}"
-                    {{ request('numclient') == $customer->code ? 'selected' : '' }}>
-                    {{ $customer->name }}
-                </option>
-            @endforeach
-        </select>
-        
-
-        {{-- Vendeur --}}
-        <select name="vendeur"
-                class="form-select form-select-sm"
-                style="width: 90px;">
-            <option value="">Vendeurs (Tous)</option>
-            @foreach($vendeurs as $vendeur)
-                <option value="{{ $vendeur }}"
-                    {{ request('vendeur') == $vendeur ? 'selected' : '' }}>
-                    {{ $vendeur }}
-                </option>
-            @endforeach
-        </select>
+        <a href="/devislist" class="btn btn-outline-secondary">
+            <i class="fas fa-file-alt"></i> Devis
+        </a>
+        <a href="{{ route('sales.list') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-shopping-cart"></i> Commandes vente
+        </a>
+        <a href="{{ route('salesinvoices.index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-file-invoice-dollar"></i> Factures
+        </a>
 
 
-
-        <!-- Facturé / Non facturé -->
-        <div class="col-md-1 col-sm-6">
-            <label class="form-label small fw-bold">Facturation</label>
-            <select name="facture_status" class="form-select form-select-sm">
-                <option value="">Tous</option>
-                <option value="facture"     {{ request('facture_status') == 'facture'     ? 'selected' : '' }}>Facturés</option>
-                <option value="non_facture" {{ request('facture_status') == 'non_facture' ? 'selected' : '' }}>Non facturés</option>
-            </select>
-        </div>
-
-        <!-- Numéro BL -->
-        <div class="col-md-1 col-sm-6">
-            <label class="form-label small fw-bold">N° BL</label>
-            <input type="text" name="search_bl" class="form-control form-control-sm"
-                   placeholder="Ex: BL-2026-..." value="{{ request('search_bl') }}">
-        </div>
-
-
-
-        <!-- Dans la row g-2 du formulaire filtre -->
-<div class="col-md-1 col-sm-6">
-    <label class="form-label small fw-bold">Véhicule</label>
-<div class="input-group input-group-sm">
-                <span class="input-group-text"><i class="fas fa-car"></i></span>
-                <input type="text" name="search_vehicle" class="form-control"
-                       placeholder="Immat/Marque..." value="{{ request('search_vehicle') }}">
-            </div>
+        <a href="{{ route('delivery_notes.returns.free.create') }}" class="btn btn-outline-danger">
+            <i class="fas fa-undo-alt"></i> Retour libre
+        </a>
+    </div>
 </div>
 
 
+<hr>
 
+<form method="GET" action="{{ route('delivery_notes.list') }}" class="lh-filters">
+    <div class="lh-field lh-wide">
+        <select name="numclient" class="form-select select2-filter">
+            <option value="">Clients (Tous)</option>
+            @foreach($customers as $customer)
+                <option value="{{ $customer->code }}" {{ request('numclient') == $customer->code ? 'selected' : '' }}>{{ $customer->name }}</option>
+            @endforeach
+        </select>
+    </div>
 
+    <div class="lh-field lh-narrow">
+        <i class="fas fa-hashtag lh-ico"></i>
+        <input type="text" name="search_bl" class="form-control" placeholder="N° BL" value="{{ request('search_bl') }}">
+    </div>
 
+    <div class="lh-field">
+        <select name="vendeur" class="form-select select2-filter">
+            <option value="">Vendeurs (Tous)</option>
+            @foreach($vendeurs as $vendeur)
+                <option value="{{ $vendeur }}" {{ request('vendeur') == $vendeur ? 'selected' : '' }}>{{ $vendeur }}</option>
+            @endforeach
+        </select>
+    </div>
 
-        <!-- Article (code ou nom) -->
-        <div class="col-md-1 col-sm-6">
-            <label class="form-label small fw-bold">Article</label>
-            <input type="text" name="search_article" class="form-control form-control-sm"
-                   placeholder="Réf ou Desc..." value="{{ request('search_article') }}">
-        </div>
+    <div class="lh-field">
+        <i class="fas fa-car lh-ico"></i>
+        <input type="text" name="search_vehicle" class="form-control" placeholder="Immat / marque…" value="{{ request('search_vehicle') }}">
+    </div>
 
+    <div class="lh-field">
+        <i class="fas fa-box lh-ico"></i>
+        <input type="text" name="search_article" class="form-control" placeholder="Réf ou description article" value="{{ request('search_article') }}">
+    </div>
 
+    <div class="lh-field lh-narrow">
+        <select name="facture_status" class="form-select select2-filter">
+            <option value="">Facturation (Tous)</option>
+            <option value="facture" {{ request('facture_status') == 'facture' ? 'selected' : '' }}>Facturés</option>
+            <option value="non_facture" {{ request('facture_status') == 'non_facture' ? 'selected' : '' }}>Non facturés</option>
+        </select>
+    </div>
 
-        {{-- Statut BL --}}
-        <select name="status"
-                class="form-select form-select-sm"
-                style="width: 75px;">
-            <option value="">Statut BL</option>
+    <div class="lh-field lh-narrow">
+        <select name="status" class="form-select select2-filter">
+            <option value="">Statut BL (Tous)</option>
             <option value="en_cours" {{ request('status') == 'en_cours' ? 'selected' : '' }}>En cours</option>
             <option value="expédié" {{ request('status') == 'expédié' ? 'selected' : '' }}>Expédié</option>
             <option value="annulé" {{ request('status') == 'annulé' ? 'selected' : '' }}>Annulé</option>
         </select>
+    </div>
 
-        {{-- Dates --}}
-        <input type="date"
-               name="date_from"
-               class="form-control form-control-sm"
-               style="width: 87px;"
-               value="{{ request('date_from') }}">
+    <div class="lh-dates">
+        <span>Du</span>
+        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+        <span>au</span>
+        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+    </div>
 
-        <span class="mx-0">à</span>
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-filter"></i> Filtrer
+    </button>
+    <a href="{{ route('delivery_notes.list') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-undo"></i> Réinitialiser
+    </a>
+</form>
 
-        <input type="date"
-               name="date_to"
-               class="form-control form-control-sm"
-               style="width: 87px;"
-               value="{{ request('date_to') }}">
 
-
-               
-
-        {{-- Boutons --}}
-        <button type="submit"
-                class="btn btn-outline-primary btn-sm px-3">
-            <i class="fas fa-filter me-1"></i> Filtrer
-        </button>
-
-        <a href="{{ route('delivery_notes.list') }}"
-           class="btn btn-outline-secondary btn-sm px-3">
-            <i class="fas fa-undo me-1"></i> Réinitialiser
-        </a>
-
-    </form>
-</div>
 
 
 
@@ -999,7 +973,16 @@ function addEmailField(id) {
 
     <script>
         $(document).ready(function () {
-            $('.select2').select2({ width: '15%' });
+            $('.lh-filters select.select2-filter').each(function () {
+    var $s = $(this);
+    if ($s.data('select2')) return;
+    $s.select2({
+        width: '100%',
+        placeholder: $s.find('option:first-child').text(),
+        allowClear: true,
+        language: { noResults: function () { return 'Aucun résultat trouvé'; } }
+    });
+});
         });
 
         function toggleLines(id) {

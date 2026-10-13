@@ -91,6 +91,21 @@
             font-size: 0.85rem;
             color: #dc3545;
         }
+
+
+
+        #returnType {
+    font-size: 1.1rem;
+    font-weight: 500;
+    border: 2px solid #007bff;
+}
+#returnType:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 0 0.25rem rgba(0,123,255,.25);
+}
+#typeHelp {
+    transition: all 0.3s ease;
+}
     </style>
 </head>
 <body>
@@ -200,6 +215,7 @@
                     <div class="collapse" id="parametres">
                         <ul class="nav nav-collapse">
                             <li><a href="/setting"><span class="sub-item">Configuration</span></a></li>
+                            <li><a href="{{ route('admin.golda.index') }}"><span class="sub-item">Import GOLDA</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -442,7 +458,34 @@
                                             <input type="hidden" name="customer_id" value="{{ $deliveryNote->customer->id }}">
                                         </div>
                                     </div>
+                                    
                                     <div class="col-md-3">
+    <div class="form-group">
+        <label class="fw-bold fs-5 mb-2 d-block text-primary">
+            <i class="fas fa-undo-alt me-2"></i>Type de retour
+        </label>
+
+        <select name="type" class="form-control form-control-lg select2 shadow @error('type') is-invalid @enderror" id="returnType" required>
+            <option value="total" {{ old('type') == 'total' ? 'selected' : '' }}>
+                🔄 Retour TOTAL
+            </option>
+            <option value="partiel" {{ old('type') == 'partiel' ? 'selected' : '' }}>
+                ✂️ Retour PARTIEL
+            </option>
+        </select>
+
+        @error('type')
+            <span class="error d-block mt-1">{{ $message }}</span>
+        @enderror
+
+        <!-- Message explicatif dynamique -->
+        <div id="typeHelp" class="mt-2 small fw-medium alert alert-light border p-2" style="min-height: 60px;">
+            Sélectionnez le type de retour ci-dessus pour voir les options correspondantes.
+        </div>
+    </div>
+</div>
+
+<div class="col-md-3">
                                         <div class="form-group">
                                             <label>Date du retour</label>
                                             <input type="date" name="return_date" class="form-control @error('return_date') is-invalid @enderror" value="{{ old('return_date', now()->format('Y-m-d')) }}" required>
@@ -451,23 +494,10 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label>Type de retour</label>
-                                            <select name="type" class="form-control select2 @error('type') is-invalid @enderror" id="returnType" required>
-                                                <option value="total" {{ old('type') == 'total' ? 'selected' : '' }}>Total</option>
-                                                <option value="partiel" {{ old('type') == 'partiel' ? 'selected' : '' }}>Partiel</option>
-                                            </select>
-                                            @error('type')
-                                                <span class="error">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
+
+                                    
                                 </div>
-                                <div class="form-group">
-                                    <label>Notes</label>
-                                    <textarea name="notes" class="form-control">{{ old('notes') }}</textarea>
-                                </div>
+                                
                                 <div id="partialReturnSection" class="mt-4" style="{{ old('type', 'total') == 'total' ? 'display: none;' : '' }}">
                                     <h6 class="fw-bold mb-3">🧾 Lignes du retour</h6>
                                     <table class="table table-sm table-bordered table-striped align-middle">
@@ -513,6 +543,56 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+
+
+
+                                <!-- NOUVELLE SECTION : RÉCAP TOTAL quand type = total -->
+                                <div id="totalReturnPreview" class="mt-4" style="{{ old('type', 'total') == 'total' ? '' : 'display: none;' }}">
+                                    <h6 class="fw-bold mb-3">📑 Récapitulatif du retour TOTAL</h6>
+                                    <div class="alert alert-info small mb-3">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Toutes les lignes du bon de livraison seront retournées en totalité.
+                                    </div>
+                                    <table class="table table-sm table-bordered table-striped align-middle">
+                                        <thead class="table-light text-center">
+                                            <tr>
+                                                <th>Code Article</th>
+                                                <th>Désignation</th>
+                                                <th>Qté Livrée</th>
+                                                <th>PU HT</th>
+                                                <th>Remise (%)</th>
+                                                <th>Total Ligne HT</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($deliveryNote->lines as $line)
+                                                <tr>
+                                                    <td>{{ $line->article_code }}</td>
+                                                    <td>{{ $line->item->name ?? '-' }}</td>
+                                                    <td class="text-center">{{ $line->delivered_quantity }}</td>
+                                                    <td class="text-end">{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
+                                                    <td class="text-end">{{ $line->remise }}%</td>
+                                                    <td class="text-end fw-bold">{{ number_format($line->total_ligne_ht, 2, ',', ' ') }} €</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                        <tfoot class="table-light fw-bold">
+                                            <tr>
+                                                <td colspan="5" class="text-end">TOTAL HT :</td>
+                                                <td class="text-end">{{ number_format($deliveryNote->lines->sum('total_ligne_ht'), 2, ',', ' ') }} €</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label>Notes</label>
+                                    <textarea name="notes" class="form-control">{{ old('notes') }}</textarea>
+                                </div>
+
+
                                 <div class="text-end mt-3">
                                     <button type="submit" class="btn btn-primary">Créer le retour</button>
                                     <a href="{{ route('delivery_notes.list') }}" class="btn btn-secondary">Annuler</a>
@@ -563,42 +643,107 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-            $('.select2').select2({ width: '100%' });
+    $(document).ready(function () {
+        $('.select2').select2({ width: '100%' });
 
-            $('#returnType').on('change', function () {
-                if ($(this).val() === 'partiel') {
-                    $('#partialReturnSection').show();
-                    $('.select-line').prop('disabled', false);
-                    $('.quantity-input').each(function () {
-                        if ($(this).closest('tr').find('.select-line').is(':checked')) {
-                            $(this).prop('disabled', false);
-                        }
-                    });
-                } else {
-                    $('#partialReturnSection').hide();
-                    $('.select-line').prop('disabled', true);
-                    $('.quantity-input').prop('disabled', true);
-                }
-            });
+        // Gestion affichage/masquage
+        function toggleSections() {
+            const isTotal = $('#returnType').val() === 'total';
+            $('#partialReturnSection').toggle(!isTotal);
+            $('#totalReturnPreview').toggle(isTotal);
 
-            $('.select-line').on('change', function () {
-                const quantityInput = $(this).closest('tr').find('.quantity-input');
-                quantityInput.prop('disabled', !this.checked);
-                if (!this.checked) {
-                    quantityInput.val(0);
-                }
-            });
+            if (isTotal) {
+                $('.select-line, .quantity-input').prop('disabled', true);
+            } else {
+                $('.select-line').prop('disabled', false);
+                syncQuantityFields();
+            }
+        }
 
-            $('.quantity-input').on('input', function () {
-                const max = parseFloat($(this).attr('max')) || 0;
-                const value = parseFloat($(this).val()) || 0;
-                if (value > max) {
-                    $(this).val(max);
-                    alert('La quantité à retourner ne peut pas dépasser la quantité livrée restante.');
-                }
-            });
+        $('#returnType').on('change', toggleSections);
+
+        // Sync quantités
+        $('.select-line').on('change', function () {
+            const $qty = $(this).closest('tr').find('.quantity-input');
+            $qty.prop('disabled', !this.checked);
+            if (!this.checked) $qty.val(0);
         });
+
+        function syncQuantityFields() {
+            $('.select-line').each(function () {
+                const $qty = $(this).closest('tr').find('.quantity-input');
+                $qty.prop('disabled', !$(this).is(':checked'));
+            });
+        }
+
+        // Contrôle quantité
+        $('.quantity-input').on('input', function () {
+            let val = parseFloat($(this).val()) || 0;
+            const max = parseFloat($(this).attr('max')) || 0;
+            if (val > max) $(this).val(max);
+            if (val < 0) $(this).val(0);
+        });
+
+        // Validation finale
+        $('form').on('submit', function (e) {
+            if ($('#returnType').val() === 'total') return true;
+
+            let hasError = false;
+            let msg = '';
+
+            $('.select-line:checked').each(function () {
+                const $qty = $(this).closest('tr').find('.quantity-input');
+                const qty = parseFloat($qty.val()) || 0;
+                const article = $(this).closest('tr').find('td:nth-child(2)').text().trim();
+
+                if (qty <= 0) {
+                    hasError = true;
+                    msg += `• ${article} : quantité retournée = ${qty}\n`;
+                    $qty.addClass('is-invalid');
+                } else {
+                    $qty.removeClass('is-invalid');
+                }
+            });
+
+            if ($('.select-line:checked').length === 0) {
+                hasError = true;
+                msg = 'Pour un retour partiel, sélectionnez au moins une ligne avec quantité > 0.';
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                alert('Erreur de validation :\n\n' + msg);
+                return false;
+            }
+        });
+
+        // Initialisation
+        toggleSections();
+    });
+
+
+
+
+
+
+    // Mise à jour du message explicatif en fonction du choix type de retour
+$('#returnType').on('change', function () {
+    const val = $(this).val();
+    let helpText = '';
+
+    if (val === 'total') {
+        helpText = '<strong class="text-success">Retour TOTAL :</strong> Toutes les lignes du bon de livraison seront retournées automatiquement. Vous verrez juste un récapitulatif.';
+    } else if (val === 'partiel') {
+        helpText = '<strong class="text-warning">Retour PARTIEL :</strong> Cochez les lignes concernées et indiquez la quantité à retourner pour chacune.';
+    } else {
+        helpText = 'Sélectionnez le type de retour ci-dessus pour voir les options correspondantes.';
+    }
+
+    $('#typeHelp').html(helpText);
+});
+
+// Déclencher au chargement (si valeur déjà pré-sélectionnée via old())
+$('#returnType').trigger('change');
     </script>
 </body>
 </html>

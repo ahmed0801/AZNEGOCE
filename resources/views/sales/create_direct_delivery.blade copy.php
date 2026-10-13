@@ -362,6 +362,7 @@
                     <div class="collapse" id="parametres">
                         <ul class="nav nav-collapse">
                             <li><a href="/setting"><span class="sub-item">Configuration</span></a></li>
+                            <li><a href="{{ route('admin.golda.index') }}"><span class="sub-item">Import GOLDA</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -861,11 +862,11 @@ $('#customer_id').select2({
     },
     templateResult: function (data) {
         if (!data.id) return data.text;
-        return $('<span' + (data.disabled ? ' class="select2-results__option--disabled"' : '') + (data.id === '%%%' ? ' class="select2-results__option--all-customers"' : '') + '>' + data.text + (data.blocked && data.id !== '%%%' ? ' <span class="badge bg-danger badge-very-sm">&#x1F512;</span>' : '') + '</span>');
+        return $('<span' + (data.disabled ? ' class="select2-results__option--disabled"' : '') + (data.id === '%%%' ? ' class="select2-results__option--all-customers"' : '') + '>' + (data.text ? data.text.toUpperCase() : '') + (data.blocked && data.id !== '%%%' ? ' <span class="badge bg-danger badge-very-sm">&#x1F512;</span>' : '') + '</span>');
     },
     templateSelection: function (data) {
         if (!data.id) return data.text || 'Sélectionner un client';
-        return $('<span>' + (data.text || data.name) + (data.blocked && data.id !== '%%%' ? ' <span class="badge bg-danger badge-very-sm">&#x1F512;</span>' : '') + '</span>');
+        return $('<span>' + (data.text || data.name ? (data.text || data.name).toUpperCase() : '') + (data.blocked && data.id !== '%%%' ? ' <span class="badge bg-danger badge-very-sm">&#x1F512;</span>' : '') + '</span>');
     }
 });
 
@@ -933,7 +934,7 @@ $('#customer_id').on('change', function () {
         var solde   = parseFloat(selectedData.solde || 0);
 
         // ── PATCH 1 : alimentation du bandeau compact ──
-        $('#cb_name').text(selectedData.name  || selectedData.text || '—');
+        $('#cb_name').text((selectedData.name || selectedData.text || '—').toUpperCase());
         $('#cb_type').text(selectedData.type  || '—');
         $('#cb_tva').text(tvaRate.toFixed(2));
         $('#cb_email').text(selectedData.email  || '—');

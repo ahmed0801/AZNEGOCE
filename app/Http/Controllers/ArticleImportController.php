@@ -25,8 +25,8 @@ class ArticleImportController extends Controller
         if (file_exists($filePath)) unlink($filePath);
 
         $columns = [
-            'code', 'name', 'description', 'category', 'brand', 'unit', 'barcode',
-            'cost_price', 'remise_achat', 'sale_price', 'tva_group', 'stock_min', 'stock_max', 'store',
+            'code', 'name', 'description', 'category', 'subcategory', 'brand', 'unit', 'barcode',
+            'cost_price', 'sale_price', 'tva_group', 'stock_min', 'stock_max', 'store',
             'location', 'is_active',
             'supplier',   'remise_achat',
             'supplier_2', 'cost_price_2', 'remise_achat_2',
@@ -39,18 +39,33 @@ class ArticleImportController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->fromArray($columns, NULL, 'A1');
 
+        // Une valeur par colonne, dans l'ordre exact de $columns
         $example = [
-            '57044', 'SUPPORT MOTEUR LA PIECE', '', 'LIAISON AU SOL', 'MULTIMARQUES',
-            'PIECE', '8435108604300',
-            '141.35', '0',                          // cost_price, remise_achat (fourn. 1)
-            '183.76', 'ASSUJ (20.00%)',
-            '2', '0', 'MAGASIN CENTRALE', 'A-12-3', '1',
-            'Exa - EXADIS', '5.00',                  // supplier, remise_achat
-            '', '', '',                              // supplier_2, cost_price_2, remise_achat_2
-            '', '', '',                              // supplier_3, cost_price_3, remise_achat_3
-            '', '', '', '',                          // Poids, Hauteur, Longueur, Largeur
-            '', '', '', 'R0'                         // Ref_TecDoc, Code_pays, Code_douane, discount_group
+            '57044',                    // code
+            'SUPPORT MOTEUR LA PIECE',  // name
+            '',                         // description
+            'LIAISON AU SOL',           // category (code NU17 ou nom)
+            '1702',                     // subcategory (code GOLDA ou libellé, ex: Amortisseurs)
+            'MULTIMARQUES',             // brand
+            'PIECE',                    // unit
+            '8435108604300',            // barcode
+            '141.35',                   // cost_price
+            '183.76',                   // sale_price
+            'ASSUJ (20.00%)',           // tva_group
+            '2', '0',                   // stock_min, stock_max
+            'MAGASIN CENTRALE',         // store
+            'A-12-3',                   // location
+            '1',                        // is_active
+            'Exa - EXADIS', '5.00',     // supplier, remise_achat
+            '', '', '',                 // supplier_2, cost_price_2, remise_achat_2
+            '', '', '',                 // supplier_3, cost_price_3, remise_achat_3
+            '', '', '', '',             // Poids, Hauteur, Longueur, Largeur
+            '', '', '',                 // Ref_TecDoc, Code_pays, Code_douane
+            'R0',                       // discount_group
         ];
+        if (count($example) !== count($columns)) {
+            throw new \RuntimeException('Modèle Excel : la ligne exemple ne correspond pas aux colonnes.');
+        }
 
         $nbCols  = count($columns);
         $lastCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($nbCols);
@@ -111,6 +126,9 @@ class ArticleImportController extends Controller
             $msg = "Importation réussie ! {$stats['created']} créé(s), {$stats['updated']} mis à jour, {$stats['skipped']} ignoré(s).";
             if (!empty($stats['errors'])) {
                 $msg .= ' ' . count($stats['errors']) . ' erreur(s).';
+            }
+            if (!empty($stats['warnings'])) {
+                $msg .= ' ' . count($stats['warnings']) . ' avertissement(s).';
             }
 
             return redirect()->back()->with('success', $msg)->with('import_stats', $stats);

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Item extends Model
 {
     protected $fillable = [
-        'code', 'name', 'description', 'category_id',
+        'code', 'name', 'description', 'category_id', 'subcategory_id',
         'brand_id', 'unit_id', 'barcode',
         'cost_price', 'remise_achat',
     'codefournisseur_2', 'cost_price_2', 'remise_achat_2',
@@ -20,6 +20,11 @@ class Item extends Model
     public function category()
     {
         return $this->belongsTo(ItemCategory::class);
+    }
+
+    public function subcategory()
+    {
+        return $this->belongsTo(ItemSubcategory::class, 'subcategory_id');
     }
 
     public function brand()

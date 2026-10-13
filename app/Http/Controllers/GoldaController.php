@@ -159,13 +159,17 @@ class GoldaController extends Controller
     // ══════════════════════════════════════════════════════════
     private function fetchMarquesFromFtp(): array
     {
+        if (!config('golda.ftp.username') || !config('golda.ftp.password')) {
+            throw new \RuntimeException('GOLDA_FTP_USER / GOLDA_FTP_PASS manquants dans .env');
+        }
         $ftp = Storage::createFtpDriver([
-            'host'     => env('GOLDA_FTP_HOST', 'golda.fr'),
-            'username' => env('GOLDA_FTP_USER', 'tdlfg8223'),
-            'password' => env('GOLDA_FTP_PASS', 'B7w42bz!36'),
+            'host'     => config('golda.ftp.host'),
+            'username' => config('golda.ftp.username'),
+            'password' => config('golda.ftp.password'),
             'root'     => '/tarifs/',
             'passive'  => true,
-            'ssl'      => false,
+            'ssl'      => config('golda.ftp.ssl'),
+                'port'     => config('golda.ftp.port'),
         ]);
 
         Storage::disk('local')->makeDirectory('golda');

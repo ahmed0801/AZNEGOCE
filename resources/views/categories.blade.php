@@ -716,6 +716,7 @@
                     <th>Nom</th>
                     <th>Description</th>
                     <th>Marge par défaut (%)</th>
+                    <th>Sous-familles</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -726,6 +727,11 @@
                         <td>{{ $category->name }}</td>
                         <td>{{ $category->description }}</td>
                         <td>{{ $category->default_sale_margin }}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#subModal{{ $category->id }}">
+                                <i class="fas fa-sitemap"></i> {{ $category->subcategories_count }}
+                            </button>
+                        </td>
                         <td>
                             <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ $category->id }}">
                                 <i class="fas fa-edit"></i>
@@ -739,6 +745,59 @@
                             </form>
                         </td>
                     </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    {{-- Modales hors du tableau (un <table> imbriqué dans <tbody> casse le DOM) --}}
+    @foreach ($categories as $category)
+                    <!-- Modal Sous-familles -->
+                    <div class="modal fade" id="subModal{{ $category->id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Sous-familles de {{ $category->id }} — {{ $category->name }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table table-sm align-middle">
+                                        <thead><tr><th style="width:110px">Code</th><th>Nom</th><th style="width:110px">Marge %</th><th style="width:110px"></th></tr></thead>
+                                        <tbody>
+                                        @forelse($category->subcategories as $sub)
+                                            <tr>
+                                                <td><input type="text" name="code" form="updSub{{ $sub->id }}" class="form-control form-control-sm" value="{{ $sub->code }}" required></td>
+                                                <td><input type="text" name="name" form="updSub{{ $sub->id }}" class="form-control form-control-sm" value="{{ $sub->name }}" required></td>
+                                                <td><input type="number" step="0.01" min="0" name="default_sale_margin" form="updSub{{ $sub->id }}" class="form-control form-control-sm" value="{{ $sub->default_sale_margin }}" placeholder="{{ $category->default_sale_margin }}"></td>
+                                                <td class="text-nowrap">
+                                                    <button type="submit" form="updSub{{ $sub->id }}" class="btn btn-sm btn-success" title="Enregistrer"><i class="fas fa-save"></i></button>
+                                                    <button type="submit" form="delSub{{ $sub->id }}" class="btn btn-sm btn-danger" title="Supprimer" onclick="return confirm('Supprimer cette sous-famille ? Les articles seront conservés sans sous-famille.')"><i class="fas fa-trash-alt"></i></button>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="4" class="text-muted text-center">Aucune sous-famille. Elles sont créées automatiquement par l'import GOLDA, ou manuellement ci-dessous.</td></tr>
+                                        @endforelse
+                                        </tbody>
+                                    </table>
+                                    @foreach($category->subcategories as $sub)
+                                        <form id="updSub{{ $sub->id }}" action="{{ route('subcategory.update', $sub->id) }}" method="POST" class="d-none">@csrf @method('PUT')<input type="hidden" name="category_id" value="{{ $category->id }}"></form>
+                                        <form id="delSub{{ $sub->id }}" action="{{ route('subcategory.destroy', $sub->id) }}" method="POST" class="d-none">@csrf @method('DELETE')</form>
+                                    @endforeach
+                                    <hr>
+                                    <h6>Ajouter une sous-famille</h6>
+                                    <form action="{{ route('subcategory.store') }}" method="POST" class="row g-2">
+                                        @csrf
+                                        <input type="hidden" name="category_id" value="{{ $category->id }}">
+                                        <div class="col-md-3"><input type="text" name="code" class="form-control" placeholder="Code (ex: 0220)" required></div>
+                                        <div class="col-md-5"><input type="text" name="name" class="form-control" placeholder="Nom" required></div>
+                                        <div class="col-md-2"><input type="number" step="0.01" min="0" name="default_sale_margin" class="form-control" placeholder="Marge %"></div>
+                                        <div class="col-md-2"><button class="btn btn-primary w-100">Ajouter</button></div>
+                                    </form>
+                                    <small class="text-muted">Marge vide = marge de la famille ({{ $category->default_sale_margin }} %).</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <!-- Modal for Editing Category -->
                     <div class="modal fade" id="editItemModal{{ $category->id }}" tabindex="-1" aria-labelledby="editItemModalLabel{{ $category->id }}" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
@@ -778,10 +837,7 @@
                             </div>
                         </div>
                     </div>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
+    @endforeach
 @else
     <p class="text-center text-muted">Aucun article trouvé.</p>
 @endif

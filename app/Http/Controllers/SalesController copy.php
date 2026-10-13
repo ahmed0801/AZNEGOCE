@@ -75,6 +75,44 @@ class SalesController extends Controller
         }
 
 
+
+        // Filtre par véhicule
+if ($request->filled('search_vehicle')) {
+    $search = trim($request->search_vehicle);
+    $query->where(function ($q) use ($search) {
+        $q->whereHas('vehicle', function ($sub) use ($search) {
+            $sub->where('license_plate', 'like', "%{$search}%")
+                ->orWhere('brand_name', 'like', "%{$search}%")
+                ->orWhere('model_name', 'like', "%{$search}%")
+                ->orWhereRaw("CONCAT(brand_name, ' ', model_name) LIKE ?", ["%{$search}%"]);
+        })
+        ->orWhere('notes', 'like', "%{$search}%");
+    });
+}
+
+// Filtre par article
+if ($request->filled('search_article')) {
+    $search = trim($request->search_article);
+    $query->whereHas('lines', function ($q) use ($search) {
+        $q->where('article_code', 'like', "%{$search}%")
+          ->orWhereHas('item', function ($sub) use ($search) {
+              $sub->where('name', 'like', "%{$search}%");
+          });
+    });
+}
+
+// Filtre par numdoc
+if ($request->filled('numdoc')) {
+    $query->where('numdoc', 'like', '%' . trim($request->numdoc) . '%');
+}
+
+
+
+
+
+
+
+
                         // On récupère aussi la liste des vendeurs uniques pour le select
     $vendeurs = User::where('role', 'vendeur')
         ->orderBy('name')
@@ -504,7 +542,7 @@ $paymentTerms = PaymentTerm::all();
     private function getTecdocBrands()
 {
     $response = Http::withHeaders([
-        'X-Api-Key' => env('TECDOC_API_KEY', '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg')
+        'X-Api-Key' => config('tecdoc.api_key')
     ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
         "getLinkageTargets" => [
             "provider" => env('TECDOC_PROVIDER_ID', 23454),

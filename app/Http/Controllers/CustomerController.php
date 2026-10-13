@@ -85,7 +85,7 @@ class CustomerController extends Controller
 
         // Fetch TecDoc brands
         $response = Http::withHeaders([
-            'X-Api-Key' => env('TECDOC_API_KEY', '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg')
+            'X-Api-Key' => config('tecdoc.api_key')
         ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
             "getLinkageTargets" => [
                 "provider" => env('TECDOC_PROVIDER_ID', 23454),
@@ -616,7 +616,7 @@ public function getAllAccountingEntriesHT()
 
         // Fetch TecDoc brands
         $response = Http::withHeaders([
-            'X-Api-Key' => env('TECDOC_API_KEY', '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg')
+            'X-Api-Key' => config('tecdoc.api_key')
         ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
             "getLinkageTargets" => [
                 "provider" => env('TECDOC_PROVIDER_ID', 23454),

@@ -10,6 +10,8 @@ use App\Models\Store;
 use App\Models\TvaGroup;
 use App\Models\DiscountGroup;
 use App\Models\Supplier;
+use App\Models\ItemSubcategory;
+use App\Services\GoldaNomenclature;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Support\Collection;
@@ -18,7 +20,8 @@ class ItemsImport implements ToCollection, WithHeadingRow
 {
     protected array $selectedColumns;
     protected string $updateMode;
-    protected array $stats = ['created' => 0, 'updated' => 0, 'skipped' => 0, 'errors' => []];
+    protected int $currentLine = 0;
+    protected array $stats = ['created' => 0, 'updated' => 0, 'skipped' => 0, 'errors' => [], 'warnings' => []];
 
     /**
      * @param array  $selectedColumns Colonnes à traiter. Vide = toutes.
@@ -60,11 +63,12 @@ class ItemsImport implements ToCollection, WithHeadingRow
             }
 
             try {
+                $this->currentLine = $index + 2;
                 $data = $this->buildData($row, $item, $isUpdate);
                 Item::updateOrCreate(['code' => $code], $data);
                 $isUpdate ? $this->stats['updated']++ : $this->stats['created']++;
             } catch (\Exception $e) {
-                $this->stats['errors'][] = "Code {$code} : " . $e->getMessage();
+                $this->stats['errors'][] = "Ligne " . ($index + 2) . " (code {$code}) : " . $this->shortError($e);
             }
         }
     }
@@ -104,16 +108,37 @@ class ItemsImport implements ToCollection, WithHeadingRow
             $data['barcode'] = $row['barcode'] !== '' ? $row['barcode'] : ($isUpdate ? $item->barcode : null);
         }
 
-        // ── category ──
+        // ── category (code famille ou nom ; ne crée plus de famille sans code) ──
         if ($col('category')) {
             $catName = trim($row['category'] ?? '');
             if ($catName !== '') {
-                $cat = \App\Models\ItemCategory::firstOrCreate(['name' => $catName]);
-                $data['category_id'] = $cat->id;
-            } elseif ($isUpdate) {
-                // ne pas écraser
-            } else {
+                $cat = \App\Models\ItemCategory::where('id', $catName)->orWhere('name', $catName)->first();
+                if ($cat) {
+                    $data['category_id'] = $cat->id;
+                } else {
+                    $this->stats['warnings'][] = "Ligne {$this->currentLine} : famille « {$catName} » introuvable (code ou nom exact attendu).";
+                    if (!$isUpdate) $data['category_id'] = null;
+                }
+            } elseif (!$isUpdate) {
                 $data['category_id'] = null;
+            }
+        }
+
+        // ── subcategory (code GOLDA ex: 0220 / 213, ou libellé ex: Garnitures) ──
+        if ($col('subcategory')) {
+            $subName = trim((string)($row['subcategory'] ?? ''));
+            if ($subName !== '') {
+                $catId = !empty($data['category_id']) ? $data['category_id'] : ($isUpdate ? $item->category_id : null);
+                $sub   = $this->resolveSubcategory($subName, $catId);
+                if ($sub) {
+                    $data['subcategory_id'] = $sub->id;
+                    $data['category_id']    = $sub->category_id;
+                } else {
+                    $this->stats['warnings'][] = "Ligne {$this->currentLine} : sous-famille « {$subName} » introuvable"
+                        . ($catId ? '' : ' (renseignez aussi la famille pour la créer)') . ' — ignorée.';
+                }
+            } elseif (!$isUpdate) {
+                $data['subcategory_id'] = null;
             }
         }
 
@@ -129,12 +154,11 @@ class ItemsImport implements ToCollection, WithHeadingRow
             // si update + champ vide → on ne touche pas brand_id
         }
 
-        // ── unit ──
+        // ── unit (libellé ou code ; crée l'unité si absente) ──
         if ($col('unit')) {
-            $unitLabel = trim($row['unit'] ?? '');
+            $unitLabel = trim((string)($row['unit'] ?? ''));
             if ($unitLabel !== '') {
-                $unit = \App\Models\Unit::firstOrCreate(['label' => $unitLabel]);
-                $data['unit_id'] = $unit->id;
+                $data['unit_id'] = $this->resolveUnit($unitLabel)->id;
             } elseif (!$isUpdate) {
                 $data['unit_id'] = null;
             }
@@ -174,10 +198,7 @@ class ItemsImport implements ToCollection, WithHeadingRow
         if ($col('supplier')) {
             $supplierName = trim($row['supplier'] ?? '');
             if ($supplierName !== '') {
-                $supplier = \App\Models\Supplier::firstOrCreate(
-                    ['name' => $supplierName],
-                    ['code' => strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $supplierName), 0, 6)) ?: 'SUP000']
-                );
+                $supplier = $this->resolveSupplier($supplierName);
                 $data['codefournisseur'] = $supplier->code;
             } elseif (!$isUpdate) {
                 $data['codefournisseur'] = null;
@@ -195,10 +216,7 @@ class ItemsImport implements ToCollection, WithHeadingRow
         if ($col('supplier_2')) {
             $sup2Name = trim($row['supplier_2'] ?? '');
             if ($sup2Name !== '') {
-                $sup2 = \App\Models\Supplier::firstOrCreate(
-                    ['name' => $sup2Name],
-                    ['code' => strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $sup2Name), 0, 6)) ?: 'SUP000']
-                );
+                $sup2 = $this->resolveSupplier($sup2Name);
                 $data['codefournisseur_2'] = $sup2->code;
             } elseif (!$isUpdate) {
                 $data['codefournisseur_2'] = null;
@@ -221,10 +239,7 @@ class ItemsImport implements ToCollection, WithHeadingRow
         if ($col('supplier_3')) {
             $sup3Name = trim($row['supplier_3'] ?? '');
             if ($sup3Name !== '') {
-                $sup3 = \App\Models\Supplier::firstOrCreate(
-                    ['name' => $sup3Name],
-                    ['code' => strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $sup3Name), 0, 6)) ?: 'SUP000']
-                );
+                $sup3 = $this->resolveSupplier($sup3Name);
                 $data['codefournisseur_3'] = $sup3->code;
             } elseif (!$isUpdate) {
                 $data['codefournisseur_3'] = null;
@@ -304,5 +319,107 @@ class ItemsImport implements ToCollection, WithHeadingRow
         }
 
         return $data;
+    }
+
+    // ════════════════ Helpers ════════════════
+
+    protected function shortError(\Exception $e): string
+    {
+        $m = $e->getMessage();
+        if (stripos($m, 'SQLSTATE') !== false) {
+            // garde la partie lisible du message SQL
+            if (preg_match("/(Field '[^']+' doesn't have a default value|Duplicate entry '[^']*' for key '[^']*'|Data too long for column '[^']*'|Incorrect [a-z]+ value: '[^']*' for column '[^']*')/i", $m, $x)) {
+                return $x[1];
+            }
+            return substr($m, 0, 160);
+        }
+        return $m;
+    }
+
+    protected function resolveUnit(string $label)
+    {
+        $unit = Unit::where('label', $label)->orWhere('code', $label)->first();
+        if ($unit) return $unit;
+
+        $base = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $label), 0, 10)) ?: 'UN';
+        $code = $base;
+        $i = 1;
+        while (Unit::where('code', $code)->exists()) {
+            $code = substr($base, 0, 8) . $i++;
+        }
+        return Unit::create(['code' => $code, 'label' => $label]);
+    }
+
+    protected function resolveSupplier(string $name)
+    {
+        // "Exa - EXADIS" -> essaie le nom complet, puis le code avant " - "
+        $supplier = Supplier::where('name', $name)->first();
+        if (!$supplier && strpos($name, ' - ') !== false) {
+            $parts = explode(' - ', $name, 2);
+            $supplier = Supplier::where('code', trim($parts[0]))->first()
+                     ?: Supplier::where('name', trim($parts[1]))->first();
+        }
+        if (!$supplier) $supplier = Supplier::where('code', $name)->first();
+        if ($supplier) return $supplier;
+
+        $base = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $name), 0, 6)) ?: 'SUP000';
+        $code = $base;
+        $i = 1;
+        while (Supplier::where('code', $code)->exists()) {
+            $code = substr($base, 0, 5) . $i++;
+        }
+        return Supplier::create(['code' => $code, 'name' => $name]);
+    }
+
+    /**
+     * Sous-famille par code GOLDA (213 -> 0213 : Excel supprime les zéros), sinon par libellé.
+     * Si elle n'existe pas : créée depuis la nomenclature GOLDA, ou sous la famille donnée.
+     */
+    protected function resolveSubcategory(string $value, $categoryId)
+    {
+        // Excel renvoie parfois 1702.0 (nombre) et supprime les zéros de tête (213 au lieu de 0213)
+        if (preg_match('/^\d+\.0+$/', $value)) $value = substr($value, 0, strpos($value, '.'));
+        $code = $value;
+        if (ctype_digit($value) && strlen($value) < 4) $code = str_pad($value, 4, '0', STR_PAD_LEFT);
+
+        $q = ItemSubcategory::query();
+        $sub = (clone $q)->where('code', $code)->first();
+
+        if (!$sub) {
+            $byName = (clone $q)->whereRaw('LOWER(name) = ?', [mb_strtolower($value)]);
+            if ($categoryId) $byName->where('category_id', $categoryId);
+            $sub = $byName->first();
+        }
+        if ($sub) return $sub;
+
+        // libellé présent dans la nomenclature GOLDA (même famille) -> on crée avec le bon code
+        foreach (GoldaNomenclature::allSubfamilies() as $ncode => $ref) {
+            if (mb_strtolower($ref['name']) === mb_strtolower($value) && (!$categoryId || $ref['family'] === $categoryId)) {
+                return GoldaNomenclature::ensureSubcategory($ncode, $categoryId ? ItemCategory::find($categoryId) : null);
+            }
+        }
+
+        // code GOLDA connu de la nomenclature
+        if (GoldaNomenclature::subfamily($code)) {
+            return GoldaNomenclature::ensureSubcategory($code, $categoryId ? ItemCategory::find($categoryId) : null);
+        }
+
+        // nouveau libellé libre : on le crée sous la famille indiquée
+        if ($categoryId) {
+            $base = strtoupper(substr(preg_replace('/[^A-Za-z0-9]+/', '_', $this->stripAccents($value)), 0, 24)) ?: 'SF';
+            $newCode = $base;
+            $i = 1;
+            while (ItemSubcategory::where('code', $newCode)->exists()) {
+                $newCode = substr($base, 0, 20) . '_' . $i++;
+            }
+            return ItemSubcategory::create(['category_id' => $categoryId, 'code' => $newCode, 'name' => $value]);
+        }
+        return null;
+    }
+
+    protected function stripAccents(string $t): string
+    {
+        $r = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $t);
+        return $r !== false ? $r : $t;
     }
 }

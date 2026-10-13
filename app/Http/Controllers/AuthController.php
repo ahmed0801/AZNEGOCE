@@ -82,7 +82,7 @@ class AuthController extends Controller
         try {
             $response = Http::timeout(3) // ⏱ max 3 secondes d'attente
                 ->withHeaders([
-                    'X-Api-Key' => '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg'
+                    'X-Api-Key' => config('tecdoc.api_key')
                 ])
                 ->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
                     "getLinkageTargets" => [

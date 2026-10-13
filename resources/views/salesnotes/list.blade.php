@@ -72,6 +72,33 @@
         }
         .form-select-sm { width: auto; display: inline-block; }
         .badge { font-size: 0.85rem; }
+
+
+
+
+
+
+
+
+        /* ===== En-tête liste : boutons + filtres ===== */
+.lh-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+.lh-title{margin:0;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.lh-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.lh-btns .btn,.lh-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
+.lh-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem}
+.lh-filters .lh-field{flex:1 1 150px;min-width:130px;position:relative}
+.lh-filters .lh-field.lh-wide{flex:2 1 220px}
+.lh-filters .lh-field.lh-narrow{flex:0 1 130px;min-width:120px}
+.lh-filters .lh-field i.lh-ico{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.8rem;pointer-events:none}
+.lh-filters .lh-field i.lh-ico + input{padding-left:2.1rem}
+.lh-filters .form-control,.lh-filters .form-select{height:38px;border-radius:8px;font-size:.88rem}
+.lh-filters .lh-dates{display:flex;align-items:center;gap:.4rem;flex:1 1 280px}
+.lh-filters .lh-dates span{color:#6b7280;font-size:.8rem;white-space:nowrap}
+.lh-filters .lh-spacer{flex:1 1 auto}
+.lh-filters .select2-container{width:100%!important}
+.lh-filters .select2-container--default .select2-selection--single{height:38px!important;min-height:38px!important;border-radius:8px!important;display:flex;align-items:center;font-size:.88rem!important;padding:0 .4rem!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px!important}
     </style>
 </head>
 <body>
@@ -415,55 +442,72 @@
                     @endif
 
                     <div class="container mt-4">
-                        <h4>📋 Liste des avoirs de vente :
-                            <!-- <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Nouvel avoir <i class="fas fa-plus-circle ms-2"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="{{ route('salesnotes.create') }}">Créer un avoir</a>
-                                </div>
-                            </div> -->
+                        
+                    
 
-                                                        <a href="{{ route('salesnotes.create') }}" class="btn btn-outline-success btn-round ms-2">
-                            Nouvel avoir <i class="fas fa-plus-circle ms-2"></i>
-                        </a>
+                    <div class="lh-bar">
+    <h4 class="lh-title"><i class="fas fa-file-invoice text-danger"></i> Avoirs de vente</h4>
+    <div class="lh-btns">
+        <a href="{{ route('salesnotes.create') }}" class="btn btn-danger">
+            <i class="fas fa-plus-circle"></i> Nouvel avoir
+        </a>
+        <a href="{{ route('delivery_notes.returns.free.create') }}" class="btn btn-outline-danger">
+            <i class="fas fa-undo-alt"></i> Créer Retour libre
+        </a>
+        <a href="/delivery_notes/returns/list" class="btn btn-outline-secondary">
+            <i class="fas fa-undo"></i> Retours vente
+        </a>
+        <a href="{{ route('salesinvoices.index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-file-invoice-dollar"></i> Factures
+        </a>
+    </div>
+</div>
+
+<hr>
+
+<form method="GET" action="{{ route('salesnotes.list') }}" class="lh-filters">
+    <div class="lh-field lh-wide">
+        <select name="customer_id" class="form-select select2-filter">
+            <option value="">Clients (Tous)</option>
+            @foreach($customers as $customer)
+                <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="lh-field lh-narrow">
+        <select name="status" class="form-select select2-filter">
+            <option value="">Statut (Tous)</option>
+            <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
+            <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
+        </select>
+    </div>
+
+    <div class="lh-dates">
+        <span>Du</span>
+        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+        <span>au</span>
+        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+    </div>
+
+    <button type="submit" name="action" value="filter" class="btn btn-primary">
+        <i class="fas fa-filter"></i> Filtrer
+    </button>
+    <a href="{{ route('salesnotes.list') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-undo"></i> Réinitialiser
+    </a>
+    <span class="lh-spacer"></span>
+    <button type="submit" name="action" value="export" formaction="{{ route('salesnotes.export') }}" class="btn btn-outline-success">
+        <i class="fas fa-file-excel"></i> Excel
+    </button>
+    <a href="{{ route('salesnotes.export.comptable', request()->query()) }}" class="btn btn-outline-success"
+       title="Export avec écritures comptables">
+        <i class="fas fa-file-invoice"></i> Export comptable
+    </a>
+</form>
 
 
-                        </h4>
 
-                        <form method="GET" action="{{ route('salesnotes.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-                            <select name="customer_id" class="form-select form-select-sm select2" style="width: 150px;">
-                                <option value="">Client (Tous)</option>
-                                @foreach($customers as $customer)
-                                    <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
-                                        {{ $customer->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <select name="status" class="form-select form-select-sm" style="width: 170px;">
-                                <option value="">Statut avoir (Tous)</option>
-                                <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
-                                <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
-                            </select>
-                            <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début" value="{{ request('date_from') }}">
-                            <span class="mx-1">à</span>
-                            <input type="date" name="date_to" class="form-control form-control-sm" style="width: 120px;" placeholder="Date fin" value="{{ request('date_to') }}">
-                            <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                                <i class="fas fa-filter me-1"></i> Filtrer
-                            </button>
-                            <button type="submit" name="action" value="export" formaction="{{ route('salesnotes.export') }}" class="btn btn-outline-success btn-sm px-3">
-                                <i class="fas fa-file-excel me-1"></i> EXCEL
-                            </button>
-                            <a href="{{ route('salesnotes.export.comptable', request()->query()) }}"
-   class="btn btn-outline-danger btn-sm px-3"
-   title="Export avec écritures comptables">
-    <i class="fas fa-file-invoice me-1"></i> EXPORT. COMPTABLE
-</a>
-                            <a href="{{ route('salesnotes.list') }}" class="btn btn-outline-secondary btn-sm px-3">
-                                <i class="fas fa-undo me-1"></i> Réinitialiser
-                            </a>
-                        </form>
 
 
                                             <!-- Pagination avec conservation des filtres -->
@@ -691,8 +735,17 @@
 
 <script>
     $(document).ready(function () {
-        // Initialize Select2
-        $('.select2').select2({ width: '30%' });
+       // Initialize Select2 (filtres de l'en-tête)
+$('.lh-filters select.select2-filter').each(function () {
+    var $s = $(this);
+    if ($s.data('select2')) return;
+    $s.select2({
+        width: '100%',
+        placeholder: $s.find('option:first-child').text(),
+        allowClear: true,
+        language: { noResults: function () { return 'Aucun résultat trouvé'; } }
+    });
+});
 
         // Prevent double form submission
         $('.payment-form').on('submit', function (e) {

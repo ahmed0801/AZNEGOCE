@@ -64,7 +64,7 @@ class ImmatController extends Controller
 
 
 $tecdocUrl = 'https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint';  
-    $apiKey = env('TECDOC_API_KEY', '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg');
+    $apiKey = config('tecdoc.api_key');
     $provider = env('TECDOC_PROVIDER_ID', 23454);
     $country = env('TECDOC_COUNTRY', 'TN');
     $lang = env('TECDOC_LANG', 'fr');

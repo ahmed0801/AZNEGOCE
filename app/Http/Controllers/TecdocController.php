@@ -40,7 +40,7 @@ class TecdocController extends Controller
 
 
     $response = Http::withHeaders([
-        'X-Api-Key' => '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg'
+        'X-Api-Key' => config('tecdoc.api_key')
     ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
         "getLinkageTargets" => [
             "provider" => env('TECDOC_PROVIDER_ID'),
@@ -170,7 +170,7 @@ dd($vehicles);
     public function getVehicleByVin($vin)
     {
         // Récupérer les variables d'environnement
-        $apiKey = env('TECDOC_API_KEY', '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg');
+        $apiKey = config('tecdoc.api_key');
         $providerId = env('TECDOC_PROVIDER_ID', 23454);
         $country = env('TECDOC_COUNTRY', 'TN');
         $lang = env('TECDOC_LANG', 'fr');
@@ -212,7 +212,7 @@ dd($vehicles);
 public function getArticle($articleNumber)
 {
     // Récupérer les variables d'environnement
-    $apiKey = '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg';
+    $apiKey = config('tecdoc.api_key');
     $providerId = 23454;
     $country = env('TECDOC_COUNTRY', 'TN');
     $lang = env('TECDOC_LANG', 'fr');
@@ -277,7 +277,7 @@ public function getArticle($articleNumber)
 public function getBrands()
 {
     $response = Http::withHeaders([
-        'X-Api-Key' => '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg'
+        'X-Api-Key' => config('tecdoc.api_key')
     ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
         "getLinkageTargets" => [
             "provider" => env('TECDOC_PROVIDER_ID'),
@@ -311,7 +311,7 @@ public function getModels(Request $request)
     // $brandId = '111';
 
     $response = Http::withHeaders([
-        'X-Api-Key' => '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg'
+        'X-Api-Key' => config('tecdoc.api_key')
     ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
         "getLinkageTargets" => [
             "provider" => env('TECDOC_PROVIDER_ID'),
@@ -344,7 +344,7 @@ public function getEngines(Request $request)
     $modelId = $request->input('model_id');
     
     $response = Http::withHeaders([
-        'X-Api-Key' => '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg'
+        'X-Api-Key' => config('tecdoc.api_key')
     ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
         "getLinkageTargets" => [
             "provider" => env('TECDOC_PROVIDER_ID'),
@@ -388,7 +388,7 @@ public function getCategories(Request $request)
 
     // Appel à l'API pour récupérer les données
     $response = Http::withHeaders([
-        'X-Api-Key' => '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg'
+        'X-Api-Key' => config('tecdoc.api_key')
     ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
         "getArticles" => [
             "articleCountry" => "TN",
@@ -425,7 +425,7 @@ public function getParts(Request $request)
     $categoryId = $request->input('category_id');
     
     $response = Http::withHeaders([
-        'X-Api-Key' => '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg'
+        'X-Api-Key' => config('tecdoc.api_key')
     ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
         "getArticles" => [
             "articleCountry" => "TN",

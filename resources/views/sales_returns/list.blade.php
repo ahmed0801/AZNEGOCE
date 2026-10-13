@@ -82,6 +82,32 @@
             background-color: #0056b3;
             box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
         }
+
+
+
+
+
+        /* ===== En-tête liste : boutons + filtres ===== */
+.lh-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+.lh-title{margin:0;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.lh-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.lh-btns .btn,.lh-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
+.lh-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem}
+.lh-filters .lh-field{flex:1 1 150px;min-width:130px;position:relative}
+.lh-filters .lh-field.lh-wide{flex:2 1 220px}
+.lh-filters .lh-field.lh-narrow{flex:0 1 130px;min-width:120px}
+.lh-filters .lh-field i.lh-ico{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.8rem;pointer-events:none}
+.lh-filters .lh-field i.lh-ico + input{padding-left:2.1rem}
+.lh-filters .form-control,.lh-filters .form-select{height:38px;border-radius:8px;font-size:.88rem}
+.lh-filters .lh-dates{display:flex;align-items:center;gap:.4rem;flex:1 1 280px}
+.lh-filters .lh-dates span{color:#6b7280;font-size:.8rem;white-space:nowrap}
+.lh-filters .lh-spacer{flex:1 1 auto}
+.lh-filters .select2-container{width:100%!important}
+.lh-filters .select2-container--default .select2-selection--single{height:38px!important;min-height:38px!important;border-radius:8px!important;display:flex;align-items:center;font-size:.88rem!important;padding:0 .4rem!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px!important}
+
+
     </style>
 </head>
 <body>
@@ -418,58 +444,80 @@
 
             <div class="container">
                 <div class="page-inner">
-                    <h4>📋 Liste des retours de vente :
+                    
+                
+
+                <div class="lh-bar">
+    <h4 class="lh-title"><i class="fas fa-undo text-danger"></i> Retours de vente</h4>
+    <div class="lh-btns">
+        <a href="{{ route('delivery_notes.returns.free.create') }}" class="btn btn-danger">
+            <i class="fas fa-plus-circle"></i> Retour libre
+        </a>
+        <a href="{{ route('delivery_notes.list') }}" class="btn btn-outline-secondary"
+           title="Un retour se crée à partir d'un bon de livraison, ou est généré automatiquement depuis un avoir">
+            <i class="fas fa-truck"></i> Bons de livraison
+        </a>
+        <a href="/devislist" class="btn btn-outline-secondary">
+            <i class="fas fa-file-alt"></i> Devis
+        </a>
+        <a href="{{ route('sales.list') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-shopping-cart"></i> Commandes vente
+        </a>
+        
+        <a href="/salesnotes/list" class="btn btn-outline-secondary">
+            <i class="fas fa-file-invoice"></i> Avoirs
+        </a>
+        <a href="{{ route('salesinvoices.index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-file-invoice-dollar"></i> Factures
+        </a>
+    </div>
+</div>
+
+<hr>
+
+<form method="GET" action="{{ route('delivery_notes.salesreturns.list') }}" class="lh-filters">
+    <div class="lh-field lh-wide">
+        <select name="customer_id" class="form-select select2-filter">
+            <option value="">Clients (Tous)</option>
+            @foreach($customers as $customer)
+                <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="lh-field">
+        <select name="delivery_note_id" class="form-select select2-filter">
+            <option value="">Bons de livraison (Tous)</option>
+            @foreach($deliveryNotes as $deliveryNote)
+                <option value="{{ $deliveryNote->id }}" {{ request('delivery_note_id') == $deliveryNote->id ? 'selected' : '' }}>{{ $deliveryNote->numdoc }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="lh-field lh-narrow">
+        <select name="type" class="form-select select2-filter">
+            <option value="">Type (Tous)</option>
+            <option value="total" {{ request('type') == 'total' ? 'selected' : '' }}>Total</option>
+            <option value="partiel" {{ request('type') == 'partiel' ? 'selected' : '' }}>Partiel</option>
+        </select>
+    </div>
+
+    <div class="lh-dates">
+        <span>Du</span>
+        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+        <span>au</span>
+        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-filter"></i> Filtrer
+    </button>
+    <a href="{{ route('delivery_notes.salesreturns.list') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-undo"></i> Réinitialiser
+    </a>
+</form>
 
 
-<a href="{{ route('delivery_notes.returns.free.create') }}" class="btn btn-outline-danger btn-round ms-2">
-                            Créer Retour Libre <i class="fas fa-plus-circle ms-2"></i>
-                        </a>
-
-
-                        </h4>
-
-<!-- <div class="alert alert-primary" role="alert">
-  La création d’un retour de vente se fait à partir d’un <a href="/delivery_notes/list" class="alert-link">bon de livraison</a>, ou est générée automatiquement à partir d’un avoir.
-</div> -->
-                    @if(session('success'))
-                        <div class="alert alert-success">{{ session('success') }}</div>
-                    @endif
-                    @if(session('error'))
-                        <div class="alert alert-danger">{{ session('error') }}</div>
-                    @endif
-
-                    <form method="GET" action="{{ route('delivery_notes.salesreturns.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-                        <select name="customer_id" class="form-select form-select-sm select2" style="width: 150px;">
-                            <option value="">Client (Tous)</option>
-                            @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
-                                    {{ $customer->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <select name="delivery_note_id" class="form-select form-select-sm select2" style="width: 150px;">
-                            <option value="">Bon de livraison (Tous)</option>
-                            @foreach($deliveryNotes as $deliveryNote)
-                                <option value="{{ $deliveryNote->id }}" {{ request('delivery_note_id') == $deliveryNote->id ? 'selected' : '' }}>
-                                    {{ $deliveryNote->numdoc }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <select name="type" class="form-select form-select-sm" style="width: 150px;">
-                            <option value="">Type (Tous)</option>
-                            <option value="total" {{ request('type') == 'total' ? 'selected' : '' }}>Total</option>
-                            <option value="partiel" {{ request('type') == 'partiel' ? 'selected' : '' }}>Partiel</option>
-                        </select>
-                        <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" value="{{ request('date_from') }}">
-                        <span>à</span>
-                        <input type="date" name="date_to" class="form-control form-control-sm" style="width: 120px;" value="{{ request('date_to') }}">
-                        <button type="submit" class="btn btn-outline-primary btn-sm px-3">
-                            <i class="fas fa-filter me-1"></i> Filtrer
-                        </button>
-                        <a href="{{ route('delivery_notes.salesreturns.list') }}" class="btn btn-outline-secondary btn-sm px-3">
-                            <i class="fas fa-undo me-1"></i> Réinitialiser
-                        </a>
-                    </form>
 
 
                                                                                                                         <!-- Pagination avec conservation des filtres -->
@@ -603,7 +651,16 @@
 
     <script>
         $(document).ready(function () {
-            $('.select2').select2({ width: '20%' });
+            $('.lh-filters select.select2-filter').each(function () {
+    var $s = $(this);
+    if ($s.data('select2')) return;
+    $s.select2({
+        width: '100%',
+        placeholder: $s.find('option:first-child').text(),
+        allowClear: true,
+        language: { noResults: function () { return 'Aucun résultat trouvé'; } }
+    });
+});
         });
 
         function toggleLines(id) {

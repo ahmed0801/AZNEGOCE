@@ -50,6 +50,31 @@
         .bg-gradient-primary { background: linear-gradient(135deg, #007bff, #6610f2) !important; }
         .modal-content { border-radius: 15px; overflow: hidden; }
         .card.shadow-sm { transition: transform 0.2s; }
+
+
+
+
+
+
+        /* ===== En-tête liste : boutons + filtres ===== */
+.lh-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+.lh-title{margin:0;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.lh-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.lh-btns .btn,.lh-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
+.lh-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem}
+.lh-filters .lh-field{flex:1 1 150px;min-width:130px;position:relative}
+.lh-filters .lh-field.lh-wide{flex:2 1 220px}
+.lh-filters .lh-field.lh-narrow{flex:0 1 130px;min-width:120px}
+.lh-filters .lh-field i.lh-ico{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.8rem;pointer-events:none}
+.lh-filters .lh-field i.lh-ico + input{padding-left:2.1rem}
+.lh-filters .form-control,.lh-filters .form-select{height:38px;border-radius:8px;font-size:.88rem}
+.lh-filters .lh-dates{display:flex;align-items:center;gap:.4rem;flex:1 1 280px}
+.lh-filters .lh-dates span{color:#6b7280;font-size:.8rem;white-space:nowrap}
+.lh-filters .lh-spacer{flex:1 1 auto}
+.lh-filters .select2-container{width:100%!important}
+.lh-filters .select2-container--default .select2-selection--single{height:38px!important;min-height:38px!important;border-radius:8px!important;display:flex;align-items:center;font-size:.88rem!important;padding:0 .4rem!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px!important}
     </style>
 </head>
 <body>
@@ -257,77 +282,121 @@
                     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
                     @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
 
-                    <div class="container mt-4">
-                        <h4>📋 Liste des factures de vente :
-                            <a href="{{ route('salesinvoices.create_grouped') }}" class="btn btn-outline-success btn-round ms-2">
-                                <span style="cursor:pointer;" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="left" title="À quoi sert cette fonction ?" data-bs-content="Ce bouton permet de collecter tous les BL et retours non facturés d'un client afin de générer une seule facture groupée.">
-                                    Nouvelle Facture Groupée <i class="fas fa-plus-circle ms-2"></i>
-                                </span>
-                            </a>
-                            <a href="{{ route('sales.delivery.create') }}" class="btn btn-outline-success btn-round ms-2">
-                                Nouvelle Commande <i class="fas fa-plus-circle ms-2"></i>
-                            </a>
-                            <a href="/salesnotes/create" class="btn btn-outline-danger btn-round ms-2">
-                                Nouvel Avoir Vente <i class="fas fa-plus-circle ms-2"></i>
-                            </a>
-                            <a href="{{ route('delivery_notes.returns.free.create') }}" class="btn btn-outline-danger btn-round ms-2">
-                                Créer Retour Libre <i class="fas fa-plus-circle ms-2"></i>
-                            </a>
-                        </h4>
+                    <!-- <div class="container mt-4"> -->
+                       
+                    
 
-                        <div class="filter-box mb-2 p-2">
-                            <form method="GET" action="{{ route('salesinvoices.index') }}" class="d-flex flex-wrap align-items-end gap-2">
-                                <select name="customer_id" class="form-select form-select-sm select2" style="width: 140px;">
-                                    <option value="">Client (Tous)</option>
-                                    @foreach($customers as $customer)
-                                        <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
-                                    @endforeach
-                                </select>
-                                <input type="text" name="numdoc" class="form-control form-control-sm" style="width: 75px;" placeholder="N° facture" value="{{ request('numdoc') }}">
-                                <select name="vendeur" class="form-select form-select-sm" style="width: 100px;">
-                                    <option value="">Vendeur (Tous)</option>
-                                    @foreach($vendeurs as $v)
-                                        <option value="{{ $v }}" {{ request('vendeur') == $v ? 'selected' : '' }}>{{ $v }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="col-md-1 col-sm-6">
-                                    <label class="form-label small fw-bold">Véhicule</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text"><i class="fas fa-car"></i></span>
-                                        <input type="text" name="search_vehicle" class="form-control" placeholder="Immat/Marque..." value="{{ request('search_vehicle') }}">
-                                    </div>
-                                </div>
-                                <div class="col-md-1 col-sm-6">
-                                    <label class="form-label small fw-bold">Article</label>
-                                    <input type="text" name="search_article" class="form-control form-control-sm" placeholder="Réf ou Description" value="{{ request('search_article') }}">
-                                </div>
-                                <select name="status" class="form-select form-select-sm" style="width: 75px;">
-                                    <option value="">Statut (Tous)</option>
-                                    <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
-                                    <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
-                                </select>
-                                <select name="paid" class="form-select form-select-sm" style="width: 75px;">
-                                    <option value="">Payé (Tous)</option>
-                                    <option value="1" {{ request('paid') == '1' ? 'selected' : '' }}>Payé</option>
-                                    <option value="0" {{ request('paid') == '0' ? 'selected' : '' }}>Non payé</option>
-                                </select>
-                                <input type="date" name="date_from" class="form-control form-control-sm" style="width: 90px;" value="{{ request('date_from') }}">
-                                <span class="mx-0">à</span>
-                                <input type="date" name="date_to" class="form-control form-control-sm" style="width: 90px;" value="{{ request('date_to') }}">
-                                <button id="btnFilter" type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                                    <i class="fas fa-filter me-1"></i> Filtrer (F8)
-                                </button>
-                                <a id="btnReset" href="{{ route('salesinvoices.index') }}" class="btn btn-outline-secondary btn-sm px-3">
-                                    <i class="fas fa-undo me-1"></i> Réinitialiser (F9)
-                                </a>
-                                <button type="submit" name="action" value="export" formaction="{{ route('salesinvoices.export') }}" class="btn btn-outline-success btn-sm px-3">
-                                    <i class="fas fa-file-excel me-1"></i> EXCEL
-                                </button>
-                                <a href="{{ route('salesinvoices.export.comptable', request()->query()) }}" class="btn btn-outline-primary btn-sm px-3">
-                                    <i class="fas fa-file-invoice me-1"></i> EXPORTATION COMPTABLE
-                                </a>
-                            </form>
-                        </div>
+                    <div class="lh-bar">
+    <h4 class="lh-title"><i class="fas fa-file-invoice-dollar text-primary"></i> Factures de vente</h4>
+    <div class="lh-btns">
+
+    <a href="{{ route('sales.delivery.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Nouvelle commande
+        </a>
+
+        <a href="{{ route('salesinvoices.create_grouped') }}" class="btn btn-outline-primary"
+           title="Collecte tous les BL et retours non facturés d'un client pour générer une seule facture groupée">
+            <i class="fas fa-layer-group"></i> Facture groupée
+        </a>
+        
+        <a href="/salesnotes/create" class="btn btn-outline-danger">
+            <i class="fas fa-plus-circle"></i> Nouvel avoir
+        </a>
+
+                <a href="{{ route('delivery_notes.list') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-truck"></i> Bons de livraison
+        </a>
+
+
+        <a href="{{ route('sales.list') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-shopping-cart"></i> Commandes vente
+        </a>
+
+        <a href="/devislist" class="btn btn-outline-secondary">
+            <i class="fas fa-file-alt"></i> Devis
+        </a>
+
+        <!-- <a href="{{ route('delivery_notes.returns.free.create') }}" class="btn btn-outline-danger">
+            <i class="fas fa-undo-alt"></i> Retour libre
+        </a> -->
+    </div>
+</div>
+<hr>
+<form method="GET" action="{{ route('salesinvoices.index') }}" class="lh-filters">
+    <div class="lh-field lh-wide">
+        <select name="customer_id" class="form-select select2-filter">
+            <option value="">Clients (Tous)</option>
+            @foreach($customers as $customer)
+                <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="lh-field lh-narrow">
+        <i class="fas fa-hashtag lh-ico"></i>
+        <input type="text" name="numdoc" class="form-control" placeholder="N° facture" value="{{ request('numdoc') }}">
+    </div>
+
+    <div class="lh-field">
+        <select name="vendeur" class="form-select select2-filter">
+            <option value="">Vendeurs (Tous)</option>
+            @foreach($vendeurs as $v)
+                <option value="{{ $v }}" {{ request('vendeur') == $v ? 'selected' : '' }}>{{ $v }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="lh-field">
+        <i class="fas fa-car lh-ico"></i>
+        <input type="text" name="search_vehicle" class="form-control" placeholder="Immat / marque…" value="{{ request('search_vehicle') }}">
+    </div>
+
+    <div class="lh-field">
+        <i class="fas fa-box lh-ico"></i>
+        <input type="text" name="search_article" class="form-control" placeholder="Réf ou description article" value="{{ request('search_article') }}">
+    </div>
+
+    <div class="lh-field lh-narrow">
+        <select name="status" class="form-select select2-filter">
+            <option value="">Statut (Tous)</option>
+            <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
+            <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
+        </select>
+    </div>
+
+    <div class="lh-field lh-narrow">
+        <select name="paid" class="form-select select2-filter">
+            <option value="">Paiement (Tous)</option>
+            <option value="1" {{ request('paid') == '1' ? 'selected' : '' }}>Payé</option>
+            <option value="0" {{ request('paid') == '0' ? 'selected' : '' }}>Non payé</option>
+        </select>
+    </div>
+
+    <div class="lh-dates">
+        <span>Du</span>
+        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+        <span>au</span>
+        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+    </div>
+
+    <button id="btnFilter" type="submit" name="action" value="filter" class="btn btn-primary">
+        <i class="fas fa-filter"></i> Filtrer (F8)
+    </button>
+    <a id="btnReset" href="{{ route('salesinvoices.index') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-undo"></i> Réinitialiser (F9)
+    </a>
+    <span class="lh-spacer"></span>
+    <button type="submit" name="action" value="export" formaction="{{ route('salesinvoices.export') }}" class="btn btn-outline-success">
+        <i class="fas fa-file-excel"></i> Excel
+    </button>
+    <a href="{{ route('salesinvoices.export.comptable', request()->query()) }}" class="btn btn-outline-success">
+        <i class="fas fa-file-invoice"></i> Export comptable
+    </a>
+</form>
+
+
+
+                        <!-- </div> -->
 
                         <div class="d-flex justify-content-center mt-3">
                             {{ $invoices->appends(request()->query())->links() }}
@@ -1709,6 +1778,29 @@ document.addEventListener('change', function(e) {
     })
     .catch(function() {
         e.target.checked = !e.target.checked; // rollback réseau
+    });
+});
+</script>
+
+
+
+
+
+
+
+
+
+<script>
+$(function () {
+    $('.lh-filters select.select2-filter').each(function () {
+        var $s = $(this);
+        if ($s.data('select2')) return;
+        $s.select2({
+            width: '100%',
+            placeholder: $s.find('option:first-child').text(),
+            allowClear: true,
+            language: { noResults: function () { return 'Aucun résultat trouvé'; } }
+        });
     });
 });
 </script>

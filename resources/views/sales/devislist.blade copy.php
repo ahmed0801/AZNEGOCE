@@ -195,6 +195,7 @@
                     <div class="collapse" id="parametres">
                         <ul class="nav nav-collapse">
                             <li><a href="/setting"><span class="sub-item">Configuration</span></a></li>
+                            <li><a href="{{ route('admin.golda.index') }}"><span class="sub-item">Import GOLDA</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -576,6 +577,12 @@
                                         <strong>Devis N° : {{ $order->numdoc }}</strong> 
                                         ( {{ $order->numclient }} – {{ $order->customer->name }} )
                                         <span class="text-muted small">({{ \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') }})</span>
+
+                                                                              
+<span class="badge badge-secondary ml-1" style="font-size: 0.75em;">
+        &#128338; créé le {{ $order->created_at->format('d/m/Y H:i') }}
+    </span>
+
                                     </h6>
                                     @if($order->status === 'brouillon')
                                         <span class="badge bg-secondary">{{ ucfirst($order->status) }}</span>
@@ -634,10 +641,12 @@
 
 
 
-
+<a class="dropdown-item" href="#" data-toggle="modal" data-target="#sendEmailModalwithoutref{{ $order->id }}">
+        <i class="fas fa-envelope text-success"></i> Envoyer sans réference
+</a>
 
                                          <a class="dropdown-item" href="#" data-toggle="modal" data-target="#sendEmailModal{{ $order->id }}">
-    <i class="fas fa-envelope"></i> Envoyer par mail
+        <i class="fas fa-envelope text-danger"></i> Envoyer avec réference
 </a>
 
 
@@ -716,13 +725,16 @@
 
                         
 <!-- Modal Send Email -->
+
+
+ <!-- test avec reference -->
 <div class="modal fade" id="sendEmailModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <form action="{{ route('salesorder.sendEmail', $order->id) }}" method="POST">
         @csrf
         <div class="modal-header">
-          <h5 class="modal-title">📧 Envoyer le Document N° :  {{ $order->numdoc }}</h5>
+          <h5 class="modal-title">📧 Envoyer avec référence :  {{ $order->numdoc }}</h5>
           <button type="button" class="btn-close" data-dismiss="modal"></button>
         </div>
         <div class="modal-body">
@@ -751,6 +763,46 @@
     </div>
   </div>
 </div>
+ <!-- test avec reference -->
+
+
+ <!-- test sans reference -->
+<div class="modal fade" id="sendEmailModalwithoutref{{ $order->id }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="{{ route('salesorder.sendEmailwithoutref', $order->id) }}" method="POST">
+        @csrf
+        <div class="modal-header">
+          <h5 class="modal-title">📧 Envoyer sans référence :  {{ $order->numdoc }}</h5>
+          <button type="button" class="btn-close" data-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Email principal -->
+          <div class="form-group mb-2">
+            <label>Email client</label>
+            <input type="email" name="emails[]" class="form-control" value="{{ $order->customer->email ?? '' }}" required>
+          </div>
+
+          <!-- Autres destinataires -->
+          <div id="extraEmails{{ $order->id }}"></div>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addEmailField({{ $order->id }})">
+            + Ajouter un autre destinataire
+          </button>
+
+          <!-- Message -->
+          <div class="form-group mt-3">
+            <label>Message</label>
+            <textarea name="message" class="form-control" rows="4">{{ \App\Models\EmailMessage::first()->messagefacturevente ?? 'Veuillez trouver ci-joint votre Devis.' }}</textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Envoyer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+  <!-- test avec reference -->
 
 <script>
 function addEmailField(id) {

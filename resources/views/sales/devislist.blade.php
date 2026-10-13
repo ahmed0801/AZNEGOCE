@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>AZ ERP - Liste des Bons de Livraison</title>
+    <title>AZ ERP - Liste des Devis</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
     
@@ -81,6 +81,34 @@
     padding: 6px 8px !important;
     background: #f2f1f1ff;
 }
+
+
+
+
+
+
+
+
+
+/* ===== En-tête liste : boutons + filtres ===== */
+.lh-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+.lh-title{margin:0;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.lh-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.lh-btns .btn,.lh-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
+.lh-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem}
+.lh-filters .lh-field{flex:1 1 150px;min-width:130px;position:relative}
+.lh-filters .lh-field.lh-wide{flex:2 1 220px}
+.lh-filters .lh-field.lh-narrow{flex:0 1 130px;min-width:120px}
+.lh-filters .lh-field i.lh-ico{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.8rem;pointer-events:none}
+.lh-filters .lh-field i.lh-ico + input{padding-left:2.1rem}
+.lh-filters .form-control,.lh-filters .form-select{height:38px;border-radius:8px;font-size:.88rem}
+.lh-filters .lh-dates{display:flex;align-items:center;gap:.4rem;flex:1 1 280px}
+.lh-filters .lh-dates span{color:#6b7280;font-size:.8rem;white-space:nowrap}
+.lh-filters .lh-spacer{flex:1 1 auto}
+.lh-filters .select2-container{width:100%!important}
+.lh-filters .select2-container--default .select2-selection--single{height:38px!important;min-height:38px!important;border-radius:8px!important;display:flex;align-items:center;font-size:.88rem!important;padding:0 .4rem!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px!important}
 
 
 
@@ -430,137 +458,105 @@
                         <div class="alert alert-danger">{{ session('error') }}</div>
                     @endif
 
-                    <h4>📋 Liste des Devis :
+                    
+                    
 
-                        <!-- <a href="{{ route('sales.create') }}" class="btn btn-sm btn-success">
-                            Nouvelle <i class="fas fa-plus-circle ms-2"></i>
-                        </a> -->
-
-                                                <a href="{{ route('sales.delivery.create') }}" class="btn btn-outline-success btn-round ms-2">
-                            Nouvelle Commande <i class="fas fa-plus-circle ms-2"></i>
-                        </a>
-
-
-                    </h4>
-
-                    <div class="filter-box mb-2 p-2">
-    <form method="GET"
-          action="{{ route('sales.devislist') }}"
-          class="d-flex flex-wrap align-items-end gap-2">
-
-        {{-- Client --}}
-        <select name="customer_id"
-                class="form-select form-select-sm select2"
-                style="width: 140px;">
-            <option value="">Client (Tous)</option>
-            @foreach($customers as $customer)
-                <option value="{{ $customer->id }}"
-                    {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
-                    {{ $customer->name }}
-                </option>
-            @endforeach
-        </select>
-
-        <!-- NOUVEAU : Recherche par numéro de devis -->
-<div class="me-2">
-    <input type="text"
-           name="numdoc"
-           class="form-control form-control-sm"
-           placeholder="N° Devis"
-           value="{{ request('numdoc') }}"
-           style="width: 87px;">
-</div>
-
-
-
-        {{-- Vendeur --}}
-        <select name="vendeur"
-                class="form-select form-select-sm"
-                style="width: 105px;">
-            <option value="">Vendeur (Tous)</option>
-            @foreach($vendeurs as $vendeur)
-                <option value="{{ $vendeur }}"
-                    {{ request('vendeur') == $vendeur ? 'selected' : '' }}>
-                    {{ $vendeur }}
-                </option>
-            @endforeach
-        </select>
-
-
-
-
-        <!-- Véhicule (nouveau) -->
-        <div class="col-md-1 col-sm-6">
-            <label class="form-label small fw-bold">Véhicule</label>
-            <div class="input-group input-group-sm">
-                <span class="input-group-text"><i class="fas fa-car"></i></span>
-                <input type="text" name="search_vehicle" class="form-control"
-                       placeholder="Immat/Marque..." value="{{ request('search_vehicle') }}">
-            </div>
-        </div>
-
-        <div class="col-md-1 col-sm-6">
-    <label class="form-label small fw-bold">Article</label>
-    <input type="text" name="search_article" class="form-control form-control-sm"
-           placeholder="Réf ou Desc" value="{{ request('search_article') }}">
-</div>
-
-
-
-        {{-- Statut devis --}}
-        <select name="status"
-                class="form-select form-select-sm"
-                style="width: 75px;">
-            <option value="">Statut</option>
-            <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>
-                Brouillon
-            </option>
-            <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>
-                Validée
-            </option>
-        </select>
-
-        {{-- Statut BL --}}
-        <select name="delivery_status"
-                class="form-select form-select-sm"
-                style="width: 75px;">
-            <option value="">BL (Tous)</option>
-            <option value="en_cours" {{ request('delivery_status') == 'en_cours' ? 'selected' : '' }}>
-                En cours
-            </option>
-            <option value="livré" {{ request('delivery_status') == 'livré' ? 'selected' : '' }}>
-                Livré
-            </option>
-        </select>
-
-        {{-- Dates --}}
-        <input type="date"
-               name="date_from"
-               class="form-control form-control-sm"
-               style="width: 93px;"
-               value="{{ request('date_from') }}">
-
-        <span class="mx-0">à</span>
-
-        <input type="date"
-               name="date_to"
-               class="form-control form-control-sm"
-               style="width: 93px;"
-               value="{{ request('date_to') }}">
-
-        {{-- Boutons --}}
-        <button type="submit"
-                class="btn btn-outline-primary btn-sm px-3">
-            <i class="fas fa-filter me-1"></i> Filtrer
-        </button>
-
-        <a href="{{ route('sales.devislist') }}"
-           class="btn btn-outline-secondary btn-sm px-3">
-            <i class="fas fa-undo me-1"></i> Réinitialiser
+                    <div class="lh-bar">
+    <h4 class="lh-title"><i class="fas fa-file-alt text-primary"></i> Devis</h4>
+    <div class="lh-btns">
+        <a href="{{ route('sales.delivery.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Nouvelle commande
         </a>
 
-    </form>
+        <a href="{{ route('salesinvoices.create_grouped') }}" class="btn btn-outline-primary"
+           title="Collecte tous les BL et retours non facturés d'un client pour générer une seule facture groupée">
+            <i class="fas fa-layer-group"></i> Facture groupée
+        </a>
+        <a href="{{ route('delivery_notes.returns.free.create') }}" class="btn btn-outline-danger">
+            <i class="fas fa-undo-alt"></i> Retour libre
+        </a>
+        
+        <a href="{{ route('sales.list') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-shopping-cart"></i> Commandes vente
+        </a>
+        <a href="{{ route('delivery_notes.list') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-truck"></i> Bons de livraison
+        </a>
+        <a href="{{ route('salesinvoices.index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-file-invoice-dollar"></i> Factures
+        </a>
+    </div>
 </div>
+
+
+<hr>
+
+<form method="GET" action="{{ route('sales.devislist') }}" class="lh-filters">
+    <div class="lh-field lh-wide">
+        <select name="customer_id" class="form-select select2-filter">
+            <option value="">Clients (Tous)</option>
+            @foreach($customers as $customer)
+                <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="lh-field lh-narrow">
+        <i class="fas fa-hashtag lh-ico"></i>
+        <input type="text" name="numdoc" class="form-control" placeholder="N° devis" value="{{ request('numdoc') }}">
+    </div>
+
+    <div class="lh-field">
+        <select name="vendeur" class="form-select select2-filter">
+            <option value="">Vendeurs (Tous)</option>
+            @foreach($vendeurs as $vendeur)
+                <option value="{{ $vendeur }}" {{ request('vendeur') == $vendeur ? 'selected' : '' }}>{{ $vendeur }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="lh-field">
+        <i class="fas fa-car lh-ico"></i>
+        <input type="text" name="search_vehicle" class="form-control" placeholder="Immat / marque…" value="{{ request('search_vehicle') }}">
+    </div>
+
+    <div class="lh-field">
+        <i class="fas fa-box lh-ico"></i>
+        <input type="text" name="search_article" class="form-control" placeholder="Réf ou description article" value="{{ request('search_article') }}">
+    </div>
+
+    <div class="lh-field lh-narrow">
+        <select name="status" class="form-select select2-filter">
+            <option value="">Statut (Tous)</option>
+            <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
+            <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
+        </select>
+    </div>
+
+    <div class="lh-field lh-narrow">
+        <select name="delivery_status" class="form-select select2-filter">
+            <option value="">Statut BL (Tous)</option>
+            <option value="en_cours" {{ request('delivery_status') == 'en_cours' ? 'selected' : '' }}>En cours</option>
+            <option value="livré" {{ request('delivery_status') == 'livré' ? 'selected' : '' }}>Livré</option>
+        </select>
+    </div>
+
+    <div class="lh-dates">
+        <span>Du</span>
+        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+        <span>au</span>
+        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-filter"></i> Filtrer
+    </button>
+    <a href="{{ route('sales.devislist') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-undo"></i> Réinitialiser
+    </a>
+</form>
+
+
 
 
                                                                 <!-- Pagination avec conservation des filtres -->
@@ -862,7 +858,16 @@ function addEmailField(id) {
 
     <script>
         $(document).ready(function () {
-            $('.select2').select2({ width: '20%' });
+            $('.lh-filters select.select2-filter').each(function () {
+    var $s = $(this);
+    if ($s.data('select2')) return;
+    $s.select2({
+        width: '100%',
+        placeholder: $s.find('option:first-child').text(),
+        allowClear: true,
+        language: { noResults: function () { return 'Aucun résultat trouvé'; } }
+    });
+});
         });
 
         function toggleLines(id) {

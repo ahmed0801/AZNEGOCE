@@ -108,6 +108,10 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('category.
 Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
 Route::delete('/category/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
 Route::put('/category/{id}', [CategoryController::class, 'update'])->name('category.update');
+Route::get('/category/{id}/subcategories', [CategoryController::class, 'subcategoriesByCategory'])->name('subcategory.byCategory');
+Route::post('/subcategory', [CategoryController::class, 'storeSubcategory'])->name('subcategory.store');
+Route::put('/subcategory/{id}', [CategoryController::class, 'updateSubcategory'])->name('subcategory.update');
+Route::delete('/subcategory/{id}', [CategoryController::class, 'destroySubcategory'])->name('subcategory.destroy');
 
 Route::get('/grouptvas', [TvaController::class, 'index'])->name('grouptva.index');
 Route::post('/grouptva', [TvaController::class, 'store'])->name('grouptva.store');

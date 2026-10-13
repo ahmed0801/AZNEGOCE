@@ -147,6 +147,7 @@
                             <div class="collapse" id="parametres">
                                 <ul class="nav nav-collapse">
                                     <li><a href="/setting"><span class="sub-item">Configuration</span></a></li>
+                                    <li><a href="{{ route('admin.golda.index') }}"><span class="sub-item">Import GOLDA</span></a></li>
                                 </ul>
                             </div>
                         </li>
@@ -1075,5 +1076,27 @@
             updateGlobalTotals();
         });
     </script>
+
+
+
+<script>
+$(document).on('click', '#openCreateCustomerModal', function () {
+    var popup = window.open('/newcustomer', 'createCustomerPopup', 'width=1200,height=700,scrollbars=yes,resizable=yes');
+    var check = setInterval(function () {
+        try {
+            if (popup.document && popup.document.querySelector('#createItemModal')) {
+                clearInterval(check);
+                var el = popup.document.querySelector('#createItemModal');
+                var m  = new popup.bootstrap.Modal(el);
+                m.show();
+                setTimeout(function () { var ni = popup.document.querySelector('input[name="name"]'); if (ni) ni.focus(); }, 500);
+            }
+        } catch (e) {}
+    }, 100);
+});
+</script>
+
+
+
 </body>
 </html>
