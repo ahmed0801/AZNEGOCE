@@ -227,8 +227,15 @@ public function store(Request $request)
 public function destroy($id)
 {
     $item = Item::findOrFail($id);
-    $item->delete();
-
+    $reasons = $item->lockReasons();
+    if ($reasons) {
+        return redirect()->back()->with('error', 'Suppression impossible : ' . implode(' ; ', $reasons) . '. Bloquez l\'article (inactif) à la place.');
+    }
+    try {
+        $item->delete();
+    } catch (\Illuminate\Database\QueryException $e) {
+        return redirect()->back()->with('error', 'Suppression impossible : article référencé ailleurs.');
+    }
     return redirect()->back()->with('success', 'Article supprimé avec succès.');
 }
 

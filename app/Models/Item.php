@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class Item extends Model
 {
@@ -90,6 +92,55 @@ public function supplier3()
         return $this->belongsTo(DiscountGroup::class);
     }
 
+
+
+
+
+
+
+
+
+
+
+    const LOCK_TABLES = [
+    'quote_lines' => 'devis', 'sales_order_lines' => 'commandes vente', 'delivery_note_lines' => 'bons de livraison',
+    'sales_invoice_lines' => 'factures vente', 'sales_return_lines' => 'retours vente', 'sales_note_lines' => 'avoirs vente',
+    'purchase_project_lines' => 'projets d\'achat', 'purchase_order_lines' => 'commandes achat', 'reception_lines' => 'réceptions',
+    'purchase_invoice_lines' => 'factures achat', 'invoice_lines' => 'factures achat', 'purchase_return_lines' => 'retours achat',
+    'purchase_note_lines' => 'avoirs achat',
+];
+
+/** Codes (parmi $codes) qui ne doivent pas être supprimés : clé = code. Une requête par table, pas par article. */
+public static function lockedCodes(array $codes): array
+{
+    $locked = [];
+    if (!$codes) return $locked;
+    foreach (array_keys(self::LOCK_TABLES) as $t) {
+        if (Schema::hasTable($t) && Schema::hasColumn($t, 'article_code')) {
+            foreach (DB::table($t)->whereIn('article_code', $codes)->distinct()->pluck('article_code') as $c) $locked[$c] = true;
+        }
+    }
+    $ids = Item::whereIn('code', $codes)->pluck('id', 'code');   // code => id
+    $byId = array_flip($ids->all());                             // id => code
+    $withMov = DB::table('stock_movements')->whereIn('item_id', $ids->values())->distinct()->pluck('item_id');
+    $withStock = DB::table('stocks')->whereIn('item_id', $ids->values())->where('quantity', '<>', 0)->distinct()->pluck('item_id');
+    foreach ($withMov->merge($withStock) as $id) if (isset($byId[$id])) $locked[$byId[$id]] = true;
+    return $locked;
+}
+
+/** Raisons lisibles pour le message d'erreur. */
+public function lockReasons(): array
+{
+    $r = [];
+    if (DB::table('stock_movements')->where('item_id', $this->id)->exists()) $r[] = 'historique de mouvements de stock';
+    if (DB::table('stocks')->where('item_id', $this->id)->where('quantity', '<>', 0)->exists()) $r[] = 'stock non nul';
+    $docs = [];
+    foreach (self::LOCK_TABLES as $t => $label) {
+        if (Schema::hasTable($t) && Schema::hasColumn($t, 'article_code') && DB::table($t)->where('article_code', $this->code)->exists()) $docs[$label] = true;
+    }
+    if ($docs) $r[] = 'utilisé dans : ' . implode(', ', array_keys($docs));
+    return $r;
+}
 
 
 

@@ -341,6 +341,30 @@
 }
 .az-save-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(16,185,129,0.3); }
 
+
+
+
+.cl-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+.cl-bar h4{margin:0;font-weight:700}
+.cl-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.cl-btns .btn,.cl-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
+.cl-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem}
+.cl-filters .form-control,.cl-filters .form-select{height:38px;border-radius:8px;font-size:.88rem}
+.cl-filters .f-search{flex:2 1 260px}
+.cl-filters .f-sel{flex:1 1 140px;min-width:130px}
+.cl-filters .f-num{flex:0 1 120px;min-width:100px}
+#itemsTable td.col-actions{min-width:150px;white-space:nowrap}
+#itemsTable .act-btns{display:flex;flex-direction:column;gap:.3rem}
+#itemsTable .act-btns+.act-btns{margin-top:.3rem}
+#itemsTable .act-btns .btn{display:inline-flex;align-items:center;justify-content:flex-start;gap:.4rem;font-size:.78rem;font-weight:600;text-align:left}
+
+
+
+
+#allAccountingFilterForm .select2-container--default .select2-selection--single{height:31px;border-radius:.25rem;display:flex;align-items:center;font-size:.875rem}
+#allAccountingFilterForm .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:29px}
+#allAccountingFilterForm .select2-container--default .select2-selection--single .select2-selection__arrow{height:29px}
+.modal-content .select2-dropdown{z-index:1070}
     </style>
 
 
@@ -748,7 +772,7 @@
 
 
 
-        <div class="container mt-4">
+        <div class="container-fluid mt-4">
         {{-- Affichage des messages d'erreur --}}
         @if(session('error'))
             <div class="alert alert-danger">
@@ -757,33 +781,16 @@
         @endif
 
     
-        <div class="container mt-4">
+        <div class="container-fluid mt-4">
 
-       <h4>Liste des Clients :
-
-                  <button type="submit" class="btn btn-outline-success btn-round ms-2" data-bs-toggle="modal" data-bs-target="#createItemModal">Nouveau Client
-           <i class="fas fa-plus-circle ms-2"></i>
-          </button>
-
-
-<button type="submit" class="btn btn-outline-secondary btn-round ms-2" data-bs-toggle="modal" data-bs-target="#allAccountingModal">
-                                Ecritures Comptables Ventes <i class="fas fa-balance-scale me-1"></i>
-                            </button>
-
-
-
-                            <!-- Après la row des KPIs -->
-
-    <a href="{{ route('customer.behavior') }}" class="btn btn-outline-danger btn-round ms-2">
-        <i class="fas fa-chart-line fa-lg me-2"></i>
-        Analyse Comportement Clients
-    </a>
-
-
-
-
-
-       </h4>
+       <div class="cl-bar">
+  <h4><i class="fas fa-users text-primary"></i> Liste des clients</h4>
+  <div class="cl-btns">
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createItemModal"><i class="fas fa-plus-circle"></i> Nouveau client</button>
+    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#allAccountingModal"><i class="fas fa-balance-scale"></i> Écritures comptables ventes</button>
+    <a href="{{ route('customer.behavior') }}" class="btn btn-outline-danger"><i class="fas fa-chart-line"></i> Analyse comportement clients</a>
+  </div>
+</div>
 
 
 
@@ -1031,12 +1038,14 @@
                                             </select>
 <input type="date" name="start_date" class="form-control form-control-sm" style="width: 150px;" placeholder="Date début" value="{{ \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')}}">
 <input type="date" name="end_date" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin" value="{{ \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')}}">
-                                            <select name="customer_id" class="form-select form-select-sm" style="width: 200px;">
-                                                <option value="">Client (Tous)</option>
-                                                @foreach($customers as $customer)
-                                                    <option value="{{ $customer->id }}">{{ $customer->name }}</option>
-                                                @endforeach
-                                            </select>
+                                            <div style="flex:1 1 240px;min-width:220px">
+    <select name="customer_id" id="allCustomerFilter" class="form-select form-select-sm">
+        <option value="">Client (Tous)</option>
+        @foreach($customers as $customer)
+            <option value="{{ $customer->id }}">{{ $customer->name }}{{ $customer->code ? ' (' . $customer->code . ')' : '' }}</option>
+        @endforeach
+    </select>
+</div>
                                             <button type="submit" class="btn btn-outline-primary btn-sm px-3">
                                                 <i class="fas fa-filter me-1"></i> Filtrer
                                             </button>
@@ -1082,55 +1091,27 @@
 
 
    <!-- Filtres -->
-<div class="mb-4">
-    <form method="GET" action="{{ route('customer.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-        <!-- Recherche générale -->
-        <input type="text" name="search" class="form-control form-control-sm" 
-               style="width: 250px;" placeholder="🔍 Recherche (nom, code, téléphone, email...)" 
-               value="{{ request('search') }}">
-        
-        <!-- Statut -->
-        <select name="status" class="form-select form-select-sm" style="width: 120px;">
-            <option value="">Statut (Tous)</option>
-            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>🟢 Actif</option>
-            <option value="blocked" {{ request('status') == 'blocked' ? 'selected' : '' }}>🔴 Bloqué</option>
-        </select>
-        
-        <!-- Ville -->
-        <select name="city" class="form-select form-select-sm" style="width: 160px;">
-            <option value="">Ville (Toutes)</option>
-            @foreach($cities as $city)
-                <option value="{{ $city }}" {{ request('city') == $city ? 'selected' : '' }}>
-                    {{ $city }}
-                </option>
-            @endforeach
-        </select>
-        
-        <!-- Solde min -->
-        <input type="number" step="0.01" name="min_solde" class="form-control form-control-sm" 
-               style="width: 110px;" placeholder="Solde min" value="{{ request('min_solde') }}">
-        <span class="mx-1 text-muted">à</span>
-        
-        <!-- Solde max -->
-        <input type="number" step="0.01" name="max_solde" class="form-control form-control-sm" 
-               style="width: 110px;" placeholder="Solde max" value="{{ request('max_solde') }}">
-        
-        <!-- Actions -->
-        <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-            <i class="fas fa-filter me-1"></i> Filtrer
-        </button>
-        
-        <button type="submit" name="action" value="export" 
-                formaction="{{ route('customers.export') . '?' . http_build_query(request()->query()) }}" 
-                class="btn btn-outline-success btn-sm px-3" target="_blank">
-            <i class="fas fa-file-excel me-1"></i> EXCEL
-        </button>
-        
-        <a href="{{ route('customer.index') }}" class="btn btn-outline-secondary btn-sm px-3">
-            <i class="fas fa-undo me-1"></i> Réinitialiser
-        </a>
-    </form>
-</div>
+
+   
+   <form method="GET" action="{{ route('customer.index') }}" class="cl-filters">
+    <input type="text" name="search" class="form-control f-search" placeholder="🔍 Recherche (nom, code, téléphone, email...)" value="{{ request('search') }}">
+    <select name="status" class="form-select f-sel">
+        <option value="">Statut (tous)</option>
+        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>🟢 Actif</option>
+        <option value="blocked" {{ request('status') == 'blocked' ? 'selected' : '' }}>🔴 Bloqué</option>
+    </select>
+    <select name="city" class="form-select f-sel">
+        <option value="">Ville (toutes)</option>
+        @foreach($cities as $city)
+            <option value="{{ $city }}" {{ request('city') == $city ? 'selected' : '' }}>{{ $city }}</option>
+        @endforeach
+    </select>
+    <input type="number" step="0.01" name="min_solde" class="form-control f-num" placeholder="Solde min" value="{{ request('min_solde') }}">
+    <input type="number" step="0.01" name="max_solde" class="form-control f-num" placeholder="Solde max" value="{{ request('max_solde') }}">
+    <button type="submit" name="action" value="filter" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrer</button>
+    <button type="submit" name="action" value="export" formaction="{{ route('customers.export') . '?' . http_build_query(request()->query()) }}" formtarget="_blank" class="btn btn-outline-success"><i class="fas fa-file-excel"></i> Excel</button>
+    <a href="{{ route('customer.index') }}" class="btn btn-outline-secondary"><i class="fas fa-undo"></i> Réinitialiser</a>
+</form>
 <!-- Recherche rapide (garder l'ancienne) -->
 <!-- <div class="mb-2 d-flex justify-content-center">
     <input type="text" id="searchItemInput" class="form-control search-box" placeholder="🔍 Rechercher un client...">
@@ -1146,8 +1127,8 @@
 <div class="mb-3">
     <button type="button" id="toggleKpiBtn" onclick="toggleKpis()"
         style="background: linear-gradient(135deg, #0056b3, #17a2b8); border: none; border-radius: 10px; padding: 10px 22px; color: #fff; font-size: 0.95rem; font-weight: 600; box-shadow: 0 4px 12px rgba(0,86,179,0.25); transition: all 0.3s ease; cursor: pointer;">
-        <i class="fas fa-chart-bar me-2"></i> Statistiques Clients
-        <i class="fas fa-chevron-down ms-2" id="kpiChevron"></i>
+        <i class="fas fa-chart-bar me-2"></i> <span id="kpiLabel">Statistiques Clients</span>
+<i class="fas fa-chevron-down ms-2" id="kpiChevron"></i>
     </button>
 </div>
 
@@ -1250,14 +1231,15 @@
 function toggleKpis() {
     const section = document.getElementById('kpiSection');
     const chevron = document.getElementById('kpiChevron');
-    const btn = document.getElementById('toggleKpiBtn');
+    const label   = document.getElementById('kpiLabel');
+    if (!section) return;
     const isHidden = section.style.display === 'none';
 
     section.style.display = isHidden ? 'block' : 'none';
-    chevron.className = isHidden ? 'fas fa-chevron-up ms-2' : 'fas fa-chevron-down ms-2';
-    btn.innerHTML = `<i class="fas fa-chart-bar me-2"></i> ${isHidden ? 'Masquer' : 'Statistiques Clients'} <i class="${chevron.className}"></i>`;
+    if (chevron) chevron.className = isHidden ? 'fas fa-chevron-up ms-2' : 'fas fa-chevron-down ms-2';
+    if (label) label.textContent = isHidden ? 'Masquer' : 'Statistiques Clients';
 
-    localStorage.setItem('kpiVisible', isHidden ? '1' : '0');
+    try { localStorage.setItem('kpiVisible', isHidden ? '1' : '0'); } catch (e) {}
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -1276,6 +1258,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     @if ($customers->count())
         <div class="table-responsive">
+            @php $lockedIds = \App\Models\Customer::lockedIds($customers->pluck('id')->all()); @endphp
+
             <table class="table table-bordered table-hover table-text-small" id="itemsTable">
                 <thead class="table-dark">
                     <tr>
@@ -1342,9 +1326,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             <td>
                                 <!-- Bouton Modifier -->
-                                <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ $customer->id }}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
+                               <div class="act-btns">
+  <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ $customer->id }}" title="Consulter / Éditer">
+      <i class="fas fa-edit"></i> Consulter / Éditer
+  </button>
+</div>
 
 
 
@@ -1569,13 +1555,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
                                 <!-- Formulaire suppression -->
-                                <form action="{{ route('customer.destroy', $customer->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ce client ?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm btn-danger">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
+                                <div class="act-btns mt-2">
+  @if(isset($lockedIds[$customer->id]))
+    <span title="Suppression impossible : client avec solde, documents ou règlements. Vous pouvez le bloquer à la place.">
+        <button type="button" class="btn btn-sm btn-secondary w-100" disabled style="pointer-events:none"><i class="fas fa-lock"></i> Supprimer</button>
+    </span>
+  @else
+    <form action="{{ route('customer.destroy', $customer->id) }}" method="POST" onsubmit="return confirm('Supprimer définitivement ce client ?')">
+        @csrf
+        @method('DELETE')
+        <button class="btn btn-sm btn-danger w-100" title="Supprimer"><i class="fas fa-trash-alt"></i> Supprimer</button>
+    </form>
+  @endif
+</div>
                             </td>
                         </tr>
 
@@ -1796,23 +1788,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- JS Recherche -->
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    // Recherche en temps réel sur le tableau
-    document.getElementById("searchItemInput").addEventListener("keyup", function () {
-        const input = this.value.toLowerCase();
-        document.querySelectorAll("#itemsTable tbody tr").forEach(row => {
+document.addEventListener("DOMContentLoaded", function () {
+    var s = document.getElementById("searchItemInput");
+    if (s) s.addEventListener("keyup", function () {
+        var input = this.value.toLowerCase();
+        document.querySelectorAll("#itemsTable tbody tr").forEach(function (row) {
             row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
         });
     });
-
-    // Auto-submit des filtres après 1 seconde d'inactivité
-    let filterTimeout;
-    document.getElementById('filterForm').addEventListener('input', function(e) {
-        clearTimeout(filterTimeout);
-        filterTimeout = setTimeout(() => {
-            this.submit();
-        }, 1000);
-    });
+    var f = document.getElementById('filterForm');
+    if (f) {
+        var t;
+        f.addEventListener('input', function () { clearTimeout(t); t = setTimeout(function () { f.submit(); }, 1000); });
+    }
 });
 </script>
 
@@ -1915,16 +1903,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     
 
-<script>
-document.getElementById("searchItemInput").addEventListener("keyup", function() {
-    var input = this.value.toLowerCase();
-    var rows = document.querySelectorAll("#itemsTable tbody tr");
 
-    rows.forEach(function(row) {
-        row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
-    });
-});
-</script>
 
 
 
@@ -2146,12 +2125,29 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+
+
+
+
+    // Liste clients recherchable dans le modal des écritures
+$('#allCustomerFilter').select2({
+    width: '100%',
+    dropdownParent: $('#allAccountingModal'),
+    placeholder: 'Client (Tous)',
+    allowClear: true,
+    language: { noResults: function () { return 'Aucun client trouvé'; } }
+});
+// Appliquer le filtre dès qu'on choisit un client
+$('#allCustomerFilter').on('change', function () { applyAllFilters(); });
+
+
     // Reset filter function
     window.resetAllAccountingFilter = function () {
         const filterForm = document.getElementById('allAccountingFilterForm');
         const balanceSummary = document.getElementById('allBalanceSummary');
         if (filterForm) {
             filterForm.reset();
+            $('#allCustomerFilter').val('').trigger('change.select2');
             balanceSummary.style.display = 'none'; // Hide balance when resetting
             applyAllFilters();
         }
@@ -2201,8 +2197,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Apply customer filter
         if (customerIdFilter) {
-            entries = entries.filter(entry => entry.customer_id === customerIdFilter);
-        }
+    entries = entries.filter(entry => String(entry.customer_id) === String(customerIdFilter));
+}
 
         // Calculate balance
         let debits = 0;

@@ -270,6 +270,11 @@
 
  .modal-md { max-width: 1000px; }
 
+
+ #itemsTable td.col-actions{min-width:150px;white-space:nowrap}
+#itemsTable .act-btns{display:flex;flex-direction:column;gap:.3rem}
+#itemsTable .act-btns .btn{display:inline-flex;align-items:center;justify-content:flex-start;gap:.4rem;font-size:.78rem;font-weight:600;text-align:left}
+
     </style>
 
 
@@ -691,7 +696,7 @@
 
 
 
-        <div class="container mt-4">
+        <div class="container-fluid mt-4">
         {{-- Affichage des messages d'erreur --}}
         @if(session('error'))
             <div class="alert alert-danger">
@@ -700,7 +705,7 @@
         @endif
 
     
-        <div class="container mt-4">
+        <div class="container-fluid mt-4">
 
         <style>
 .modal-content{position:relative}
@@ -1255,6 +1260,7 @@
 
   @if ($items->count() > 0)
     <div class="table-responsive">
+        @php $lockedCodes = \App\Models\Item::lockedCodes($items->pluck('code')->all()); @endphp
         <table class="table table-bordered table-hover table-text-small" id="itemsTable">
             <thead class="table-dark">
                 <tr>
@@ -1272,6 +1278,7 @@
             </thead>
             <tbody>
                 @foreach ($items as $item)
+                <tr>
 <td>
     {{ $item->code }}<br>
     @if ($item->is_active)
@@ -1453,20 +1460,37 @@
 
 </td>
 
-                        <td>
-                           <!-- Modifier -->
-<!-- Modifier -->
-<button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ $item->id }}" title="Consulter">
-    <i class="fas fa-edit"></i>
-</button>
+                        
+<td class="col-actions">
+  <div class="act-btns">
+    <!-- Consulter / Éditer -->
+    <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ $item->id }}" title="Consulter / Éditer">
+        <i class="fas fa-edit"></i> Consulter / Éditer
+    </button>
 
+    <!-- Ajuster le stock -->
+    <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#adjustStockModal{{ $item->id }}" title="Ajuster le stock">
+        <i class="fas fa-cubes"></i> Ajuster le stock
+    </button>
 
-                          <!-- Ajuster le stock -->
-<button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#adjustStockModal{{ $item->id }}" title="Ajuster le stock">
-    <i class="fas fa-cubes"></i>
-</button>
+    <!-- Supprimer (bloqué si l'article a un historique) -->
+    @if(isset($lockedCodes[$item->code]))
+        <span title="Suppression impossible : article avec stock, mouvements ou documents. Vous pouvez le bloquer (inactif) à la place.">
+            <button type="button" class="btn btn-sm btn-secondary w-100" disabled style="pointer-events:none">
+                <i class="fas fa-lock"></i> Supprimer
+            </button>
+        </span>
+    @else
+        <form action="{{ route('items.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Supprimer définitivement cet article ?')">
+            @csrf
+            @method('DELETE')
+            <button class="btn btn-sm btn-danger w-100" title="Supprimer"><i class="fas fa-trash-alt"></i> Supprimer</button>
+        </form>
+    @endif
+  </div>
+  {{-- Le modal adjustStockModal{{ $item->id }} existant se place ici, inchangé --}}
 
-<!-- Modal Ajuster Stock -->
+  <!-- Modal Ajuster Stock -->
 <div class="modal fade" id="adjustStockModal{{ $item->id }}" tabindex="-1" aria-labelledby="adjustStockModalLabel{{ $item->id }}" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -1527,18 +1551,9 @@
     </div>
 </div>
 
-                           
 
+</td>
 
-                            <!-- Supprimer -->
-                            <form action="{{ route('items.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer cet article ?')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-danger" title="Supprimer">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </form>
-                        </td>
                     </tr>
 
 

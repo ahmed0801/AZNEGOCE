@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,6 +33,68 @@
     <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <style>
+        body{background:#f4f6fb}
+        .dash-hero{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;margin:.25rem 0 1.25rem}
+        .dash-hero h3{margin:0;font-weight:800;letter-spacing:-.3px}
+        .dash-hero .sub{color:#6b7280;font-size:.9rem;margin-top:.15rem}
+        .dash-hero .sub .dt{text-transform:capitalize}
+        .dash-btns{display:flex;flex-wrap:wrap;gap:.6rem}
+        .qa{display:flex;align-items:center;gap:.65rem;padding:.45rem .9rem .45rem .5rem;background:#fff;border:1px solid #e6e9f2;border-radius:14px;box-shadow:0 2px 8px rgba(17,24,39,.05);text-decoration:none!important;color:#111827;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;font-family:inherit;text-align:left}
+        .qa:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(17,24,39,.1);border-color:var(--q)}
+        .qa .qi{flex:0 0 38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.95rem;background:var(--q);box-shadow:0 4px 10px -2px var(--q)}
+        .qa .qt{display:flex;flex-direction:column;line-height:1.15}
+        .qa .qt b{font-size:.86rem;font-weight:700}
+        .qa .qt small{font-size:.72rem;color:#6b7280;font-weight:500;margin-top:2px}
+        .qa.q-main{--q:#2563eb;background:linear-gradient(135deg,#2563eb,#1e40af);border-color:transparent;color:#fff}
+        .qa.q-main .qi{background:rgba(255,255,255,.2);box-shadow:none}
+        .qa.q-main .qt small{color:rgba(255,255,255,.8)}
+        .qa.q-orange{--q:#f59e0b}.qa.q-green{--q:#10b981}.qa.q-violet{--q:#8b5cf6}.qa.q-red{--q:#ef4444}.qa.q-news{--q:#f59e0b;background:#fffbeb;border-color:#fcd34d}
+        .qa .pulse{position:relative}
+        .qa .pulse::after{content:"";position:absolute;top:-3px;right:-3px;width:11px;height:11px;border-radius:50%;background:#ef4444;border:2px solid #fff;animation:qpulse 1.6s infinite}
+        @keyframes qpulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.55)}70%{box-shadow:0 0 0 8px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+        @media (max-width:576px){.qa{flex:1 1 100%}}
+
+        /* annonce temporaire */
+        .news-card{position:relative;background:linear-gradient(135deg,#0f2b5b,#1d4ed8 60%,#3b82f6);color:#fff;border-radius:16px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;box-shadow:0 10px 30px rgba(29,78,216,.28);overflow:hidden}
+        .news-card::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.07)}
+        .news-head{display:flex;flex-wrap:wrap;align-items:center;gap:.75rem;position:relative;z-index:1}
+        .news-head .badge-new{background:#fbbf24;color:#451a03;font-weight:800;font-size:.7rem;letter-spacing:.6px;padding:.3rem .6rem;border-radius:999px}
+        .news-head h5{margin:0;color:#fff;font-weight:700;font-size:1.05rem}
+        .news-head .until{font-size:.75rem;opacity:.8}
+        .news-head .news-actions{margin-left:auto;display:flex;gap:.4rem}
+        .news-actions button{background:rgba(255,255,255,.15);border:0;color:#fff;border-radius:8px;height:32px;padding:0 .75rem;font-size:.78rem;font-weight:600;cursor:pointer}
+        .news-actions button:hover{background:rgba(255,255,255,.28)}
+        .news-body{position:relative;z-index:1;margin-top:1rem}
+        .news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.75rem}
+        .news-item{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:.8rem .9rem}
+        .news-item h6{color:#fff;font-weight:700;font-size:.88rem;margin:0 0 .45rem;display:flex;align-items:center;gap:.5rem}
+        .news-item h6 i{width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.18);display:inline-flex;align-items:center;justify-content:center;font-size:.75rem}
+        .news-item ul{margin:0;padding-left:1.05rem;font-size:.8rem;line-height:1.55;opacity:.95}
+        .news-note{margin-top:.8rem;background:rgba(251,191,36,.18);border:1px solid rgba(251,191,36,.5);border-radius:10px;padding:.55rem .8rem;font-size:.8rem}
+
+        /* KPI */
+        .kpi{position:relative;background:#fff;border-radius:16px;padding:1rem 1.1rem;box-shadow:0 2px 10px rgba(17,24,39,.06);border:1px solid #eef0f5;display:flex;align-items:center;gap:.9rem;height:100%;transition:transform .15s,box-shadow .15s;text-decoration:none!important;color:inherit}
+        a.kpi:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(17,24,39,.1)}
+        .kpi::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0;background:var(--k)}
+        .kpi .k-ico{flex:0 0 48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;color:var(--k);background:var(--kb)}
+        .kpi .k-lab{font-size:.78rem;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+        .kpi .k-val{font-size:1.45rem;font-weight:800;color:#111827;line-height:1.2;margin-top:.1rem}
+        .kpi .k-val small{font-size:.8rem;font-weight:600;color:#6b7280}
+        .kpi.k-blue{--k:#2563eb;--kb:#e8f0ff}.kpi.k-green{--k:#16a34a;--kb:#e6f7ec}.kpi.k-amber{--k:#d97706;--kb:#fff3dc}.kpi.k-violet{--k:#7c3aed;--kb:#f0e9ff}
+
+        /* cartes graphiques / tableaux */
+        .card.card-round{border:1px solid #eef0f5;border-radius:16px;box-shadow:0 2px 10px rgba(17,24,39,.06)}
+        .card.card-round .card-header{background:transparent;border-bottom:1px solid #f1f3f8;padding:1rem 1.25rem .75rem}
+        .card.card-round .card-title{font-weight:700;color:#111827;font-size:1.05rem}
+        .card.card-round .card-category{font-size:.8rem;color:#6b7280}
+        .card.card-round .btn-label-primary,.card.card-round .btn-label-info,.card.card-round .btn-label-success{border-radius:10px;font-weight:600}
+        .table.align-items-center thead th{font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;color:#6b7280;background:#f8fafc;border-bottom:1px solid #eef0f5}
+        .table.align-items-center td,.table.align-items-center th{vertical-align:middle;font-size:.84rem}
+        .table.align-items-center tbody tr:hover{background:#f8fafc}
+        .card-round .badge{border-radius:999px;padding:.35em .7em;font-weight:700;font-size:.7rem}
+        @media (max-width:576px){.dash-btns .btn{flex:1 1 45%}}
+    </style>
 </head>
 <body>
     <div class="wrapper">
@@ -495,158 +556,141 @@
             @else
 
 
-                    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+                    <div class="dash-hero">
                         <div>
-                            <h3 class="fw-bold mb-3">Dashboard</h3>
-                            <h6 class="op-7 mb-2">Aperçu général des ventes
-                            </h6>
+                            <h3>Tableau de bord</h3>
+                            <div class="sub"><span class="dt">{{ \Carbon\Carbon::now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</span> · Aperçu général des ventes</div>
                         </div>
-                        <div class="ms-md-auto py-2 py-md-0">
-
-                        <!-- analytics -->
-                                                 <a href="{{ route('analytics') }}" class="btn btn-label-warning btn-round me-2">
-        <span class="btn-label"><i class="fas fa-chart-line"></i></span> Analytics
-    </a>
-                        <!-- analytics -->
-
-
-
-                    
-
-
-
-
-
-                            <a href="/salesinvoices" class="btn btn-label-info btn-round me-2">
-                                <span class="btn-label"><i class="fas fa-list"></i></span> Voir Factures Ventes
+                        <div class="dash-btns">
+                            <a href="/sales/delivery/create" class="qa q-main">
+                                <span class="qi"><i class="fas fa-plus"></i></span>
+                                <span class="qt"><b>Nouvelle commande</b><small>Créer une commande / un BL</small></span>
                             </a>
-
-                             <a href="/delivery_notes/list" class="btn btn-label-info btn-round me-2">
-                                <span class="btn-label"><i class="fas fa-list"></i></span> Voir Bons de Livraison
+                            <a href="{{ route('analytics') }}" class="qa q-orange">
+                                <span class="qi"><i class="fas fa-chart-line"></i></span>
+                                <span class="qt"><b>Analytics</b><small>Performances et statistiques</small></span>
                             </a>
-
-
-
-                                                    <button 
-        type="button" 
-        class="btn btn-label-danger btn-round me-2" 
-        data-bs-toggle="modal" 
-        data-bs-target="#helpRetourAvoirModal"
-    >
-        <span class="btn-label"><i class="fas fa-question-circle"></i></span>
-        Aide Retour/Avoir
-    </button>
-
-
-
-
-
-    
-
-
-
-                            <a href="/sales/delivery/create" class="btn btn-primary btn-round">
-                                <span class="btn-label"><i class="fas fa-plus"></i></span> Nouvelle Commande
+                            <a href="/salesinvoices" class="qa q-green">
+                                <span class="qi"><i class="fas fa-file-invoice-dollar"></i></span>
+                                <span class="qt"><b>Factures ventes</b><small>Consulter et suivre</small></span>
                             </a>
+                            <a href="/delivery_notes/list" class="qa q-violet">
+                                <span class="qi"><i class="fas fa-truck"></i></span>
+                                <span class="qt"><b>Bons de livraison</b><small>Livraisons et retours</small></span>
+                            </a>
+                            <button type="button" class="qa q-red" data-bs-toggle="modal" data-bs-target="#helpRetourAvoirModal">
+                                <span class="qi"><i class="fas fa-question"></i></span>
+                                <span class="qt"><b>Retour ou avoir ?</b><small>Quel document choisir</small></span>
+                            </button>
+                            @if(now()->lt(\Carbon\Carbon::create(2026, 10, 18, 0, 0, 0)))
+                            <button type="button" class="qa q-news" id="newsOpenBtn" style="display:none">
+                                <span class="qi pulse"><i class="fas fa-gift"></i></span>
+                                <span class="qt"><b>Nouveautés Ventes</b><small>Voir la mise à jour</small></span>
+                            </button>
+                            @endif
                         </div>
                     </div>
 
-
-
-
-                   
-
-
-
-
+                    {{-- ═══ ANNONCE TEMPORAIRE : mise à jour module Ventes — s'efface seule après le 17/10/2026 ═══ --}}
+                    @if(now()->lt(\Carbon\Carbon::create(2026, 10, 18, 0, 0, 0)))
+                    <div class="news-card" id="newsCard">
+                        <div class="news-head">
+                            <span class="badge-new">NOUVEAU</span>
+                            <h5>Mise à jour du module Ventes</h5>
+                            <span class="until">Disponible jusqu'au 17/10/2026</span>
+                            <div class="news-actions">
+                                <button type="button" id="newsToggle" data-bs-toggle="collapse" data-bs-target="#newsBody" aria-expanded="true"><i class="fas fa-chevron-up"></i> Réduire</button>
+                                <button type="button" id="newsClose" title="Ranger dans le bouton « Nouveautés Ventes »"><i class="fas fa-times"></i> Fermer</button>
+                            </div>
+                        </div>
+                        <div class="collapse show news-body" id="newsBody">
+                            <div class="news-grid">
+                                <div class="news-item">
+                                    <h6><i class="fas fa-cart-plus"></i> Nouvelle commande / BL direct</h6>
+                                    <ul>
+                                        <li>Filtres famille, sous-famille, marque, fournisseur et « en stock »</li>
+                                        <li>Recherche plus fiable, navigation ↑ ↓ puis Entrée avec la pièce sélectionnée bien visible</li>
+                                        <li>Brouillon automatique et confirmation avant chaque création</li>
+                                        <li>Protection contre le double envoi, date de commande visible</li>
+                                        <li>Prix d'achat, remise, net et marge directement dans la ligne</li>
+                                    </ul>
+                                </div>
+                                <div class="news-item">
+                                    <h6><i class="fas fa-edit"></i> Modification de commande</h6>
+                                    <ul>
+                                        <li>Mêmes améliorations que la création</li>
+                                        <li>Recalcul de la TVA et des remises si le client change</li>
+                                        <li>Désignations avec apostrophes correctement gérées</li>
+                                    </ul>
+                                </div>
+                                <div class="news-item">
+                                    <h6><i class="fas fa-file-invoice"></i> Avoirs et retours vente</h6>
+                                    <ul>
+                                        <li>Nouvelle page d'avoir : origine par boutons, quantité limitée à celle du document</li>
+                                        <li>Confirmation qui rappelle l'impact sur le solde et le stock</li>
+                                        <li>Retour total / partiel : « tout cocher », quantité maximale restante affichée</li>
+                                    </ul>
+                                </div>
+                                <div class="news-item">
+                                    <h6><i class="fas fa-boxes"></i> Articles et clients</h6>
+                                    <ul>
+                                        <li>Tableaux en pleine largeur, boutons avec libellés</li>
+                                        <li>Suppression bloquée si historique, stock ou documents</li>
+                                        <li>Stock : prix unitaire HT et TTC net après remise</li>
+                                        <li>Clients : filtres modernisés, liste clients recherchable dans les écritures</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="news-note">
+                                <i class="fas fa-lightbulb"></i> <b>À retenir :</b> un article ou un client qui a déjà servi ne peut plus être supprimé. Utilisez plutôt « bloqué / inactif ». Une remarque ou un souci ? Signalez-le à l'équipe.
+                            </div>
+                        </div>
+                    </div>
+                    @endif
 
                     <!-- Statistiques -->
-                    <div class="row">
-                        <div class="col-sm-6 col-md-3">
-                            <div class="card card-stats card-round">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-icon">
-                                            <div class="icon-big text-center icon-primary bubble-shadow-small">
-                                                <i class="fas fa-money-bill-wave"></i>
-                                            </div>
-                                        </div>
-                                        <div class="col col-stats ms-3 ms-sm-0">
-                                            <div class="numbers">
-                                                <p class="card-category">CA Aujourd’hui</p>
-                                                @can('view_sales')
-                                                <h4 class="card-title">{{ number_format($todayRevenue, 2, ',', ' ') }} €</h4>
-                                                @else Non autorisé 
-                                                @endcan
-                                            </div>
-                                        </div>
-                                    </div>
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="kpi k-blue">
+                                <div class="k-ico"><i class="fas fa-sun"></i></div>
+                                <div>
+                                    <div class="k-lab">CA aujourd’hui</div>
+                                    @can('view_sales')
+                                    <div class="k-val">{{ number_format($todayRevenue, 2, ',', ' ') }} <small>€</small></div>
+                                    @else <div class="k-val"><small>Non autorisé</small></div>
+                                    @endcan
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-3">
-                            <div class="card card-stats card-round">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-icon">
-                                            <div class="icon-big text-center icon-primary bubble-shadow-small">
-                                                <i class="fas fa-money-bill-wave"></i>
-                                            </div>
-                                        </div>
-                                        <div class="col col-stats ms-3 ms-sm-0">
-                                            <div class="numbers">
-                                                <p class="card-category">CA Ce Mois</p>
-                                                @can('view_sales')
-                                                <h4 class="card-title">{{ number_format($monthRevenue, 2, ',', ' ') }} €</h4>
-                                                @else Non autorisé 
-                                                @endcan
-                                            </div>
-                                        </div>
-                                    </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="kpi k-green">
+                                <div class="k-ico"><i class="fas fa-calendar-alt"></i></div>
+                                <div>
+                                    <div class="k-lab">CA ce mois</div>
+                                    @can('view_sales')
+                                    <div class="k-val">{{ number_format($monthRevenue, 2, ',', ' ') }} <small>€</small></div>
+                                    @else <div class="k-val"><small>Non autorisé</small></div>
+                                    @endcan
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-3">
-                            <div class="card card-stats card-round">
-                              <a href="/planification-tournee">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-icon">
-                                            <div class="icon-big text-center icon-warning bubble-shadow-small">
-                                                <i class="fas fa-clock"></i>
-                                            </div>
-                                        </div>
-                                        <div class="col col-stats ms-3 ms-sm-0">
-                                            <div class="numbers">
-                                                <p class="card-category">Livraisons en Cours</p>
-                                                <h4 class="card-title">{{ $pendingDeliveries }}</h4>
-                                            </div>
-                                        </div>
-                                    </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <a href="/planification-tournee" class="kpi k-amber">
+                                <div class="k-ico"><i class="fas fa-truck-loading"></i></div>
+                                <div>
+                                    <div class="k-lab">Livraisons en cours</div>
+                                    <div class="k-val">{{ $pendingDeliveries }}</div>
                                 </div>
-                                </a>
-                            </div>
+                            </a>
                         </div>
-                        <div class="col-sm-6 col-md-3">
-                            <div class="card card-stats card-round">
-                                <a href="/customers">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-icon">
-                                            <div class="icon-big text-center icon-success bubble-shadow-small">
-                                                <i class="fas fa-users"></i>
-                                            </div>
-                                        </div>
-                                        <div class="col col-stats ms-3 ms-sm-0">
-                                            <div class="numbers">
-                                                <p class="card-category">Nouveaux Clients</p>
-                                                <h4 class="card-title">{{ $newCustomers->count() }}</h4>
-                                            </div>
-                                        </div>
-                                    </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <a href="/customers" class="kpi k-violet">
+                                <div class="k-ico"><i class="fas fa-user-plus"></i></div>
+                                <div>
+                                    <div class="k-lab">Nouveaux clients</div>
+                                    <div class="k-val">{{ $newCustomers->count() }}</div>
                                 </div>
-                                </a>
-                            </div>
+                            </a>
                         </div>
                     </div>
 
@@ -1149,7 +1193,7 @@
                 <h5 class="modal-title mb-0" style="font-size:0.95rem;">
                     <i class="fas fa-box me-2"></i> Commande Stock — Ajouter à la tournée
                 </h5>
-                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                <button type="button" class="close text-white" data-dismiss="modal" data-bs-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
                 <div class="row g-2">
@@ -1237,7 +1281,7 @@
                 <div id="st-error" class="alert alert-danger mt-2 py-2" style="display:none;font-size:0.82rem;"></div>
             </div>
             <div class="modal-footer py-2">
-                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" data-bs-dismiss="modal">Annuler</button>
                 <button type="button" id="st-submit" class="btn btn-warning btn-sm px-4 fw-bold">
                     <i class="fas fa-box me-1"></i> Ajouter à la tournée
                 </button>
@@ -1542,5 +1586,24 @@ $('#st-article').on('select2:select', function(e) {
 
 
 
+
+    <script>
+    (function () {
+        var KEY = 'news_ventes_2026_10';
+        var card = document.getElementById('newsCard'), openBtn = document.getElementById('newsOpenBtn');
+        if (!card || !openBtn) return;
+        function store(v) { try { localStorage.setItem(KEY, v); } catch (e) {} }
+        function stored() { try { return localStorage.getItem(KEY); } catch (e) { return null; } }
+        function showCard() { card.style.display = ''; openBtn.style.display = 'none'; store('open'); card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+        function hideCard() { card.style.display = 'none'; openBtn.style.display = ''; store('closed'); }
+        // État initial : le bouton "Nouveautés" n'est visible que si l'annonce est rangée
+        if (stored() === 'closed') { card.style.display = 'none'; openBtn.style.display = ''; }
+        document.getElementById('newsClose').addEventListener('click', hideCard);
+        openBtn.addEventListener('click', showCard);
+        var body = document.getElementById('newsBody'), tg = document.getElementById('newsToggle');
+        body.addEventListener('hidden.bs.collapse', function () { tg.innerHTML = '<i class="fas fa-chevron-down"></i> Afficher'; });
+        body.addEventListener('shown.bs.collapse', function () { tg.innerHTML = '<i class="fas fa-chevron-up"></i> Réduire'; });
+    })();
+    </script>
 </body>
 </html>

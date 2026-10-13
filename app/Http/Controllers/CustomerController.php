@@ -228,10 +228,19 @@ class CustomerController extends Controller
     }
 
     public function destroy($id)
-    {
-        Customer::findOrFail($id)->delete();
-        return redirect()->route('customer.index')->with('success', 'Client supprimé avec succès');
+{
+    $customer = Customer::findOrFail($id);
+    $reasons = $customer->lockReasons();
+    if ($reasons) {
+        return redirect()->route('customer.index')->with('error', 'Suppression impossible : ' . implode(' ; ', $reasons) . '. Bloquez le client à la place.');
     }
+    try {
+        $customer->delete();
+    } catch (\Illuminate\Database\QueryException $e) {
+        return redirect()->route('customer.index')->with('error', 'Suppression impossible : client référencé ailleurs.');
+    }
+    return redirect()->route('customer.index')->with('success', 'Client supprimé avec succès');
+}
 
     public function storeVehicle(Request $request, $customer)
     {
