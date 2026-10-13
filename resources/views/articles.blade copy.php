@@ -221,6 +221,49 @@
 
 
 
+
+
+/* Tableau compact multi-fournisseurs */
+.table-responsive {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+/* .table-text-small th, .table-text-small td {
+    font-size: 10px !important;
+    padding: 4px 6px !important;
+    white-space: nowrap;
+} */
+
+.multi-supplier-cell {
+    font-size: 9px;
+    line-height: 1.1;
+}
+
+.multi-supplier-cell .sup {
+    color: #0069d9;
+    font-weight: bold;
+}
+
+.multi-supplier-cell .price {
+    color: #dc3545;
+}
+
+.multi-supplier-cell .rem {
+    color: #28a745;
+}
+
+/* Sur mobile : réduire encore + masquer certaines colonnes */
+@media (max-width: 992px) {
+    .table-text-small th:nth-child(n+8), 
+    .table-text-small td:nth-child(n+8) {
+        display: none;
+    }
+    .table-text-small {
+        font-size: 9px !important;
+    }
+}
+
     </style>
 
 
@@ -344,6 +387,7 @@
                     <div class="collapse" id="parametres">
                         <ul class="nav nav-collapse">
                             <li><a href="/setting"><span class="sub-item">Configuration</span></a></li>
+                            <li><a href="{{ route('admin.golda.index') }}"><span class="sub-item">Import GOLDA</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -652,43 +696,43 @@
     
         <div class="container mt-4">
 
-        <h4>Articles :                         
-          <button type="submit" class="btn btn-outline-success btn-round ms-2" data-bs-toggle="modal" data-bs-target="#createItemModal">Nouvel Article
-           <i class="fas fa-plus-circle ms-2"></i>
-          </button>
+        <style>
+.modal-content{position:relative}
+.modal-content .select2-dropdown{z-index:1070}
+.art-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+.art-bar h4{margin:0;font-weight:700}
+.art-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.art-btns .btn,.art-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
+.art-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem}
+.art-filters .art-search{flex:2 1 220px;position:relative}
+.art-filters .art-search i{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.8rem}
+.art-filters .art-search input{height:38px;padding-left:2.1rem;border-radius:8px;font-size:.88rem}
+.art-filters .art-sel{flex:1 1 150px;min-width:140px}
+.art-filters .art-sel select{width:100%}
+.art-filters .select2-container{width:100%!important}
+.art-filters .select2-container--default .select2-selection--single{height:38px!important;min-height:38px!important;border-radius:8px!important;display:flex;align-items:center;font-size:.88rem!important}
+.art-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px!important}
+.art-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px!important}
+</style>
+
+<div class="art-bar">
+    <h4><i class="fas fa-boxes text-primary me-2"></i>Articles</h4>
+
+    <div class="art-btns">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createItemModal">
+            <i class="fas fa-plus-circle"></i> Nouvel article
+        </button>
+        <a href="{{ url('/categories') }}" class="btn btn-outline-primary"><i class="fas fa-sitemap"></i> Familles &amp; sous-familles</a>
+        <a href="{{ url('/brands') }}" class="btn btn-outline-primary"><i class="fas fa-tags"></i> Marques</a>
+        <a href="/groupremises" class="btn btn-outline-primary"><i class="fas fa-percent"></i> Groupes remises</a>
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createDiscountGroupModal"><i class="fas fa-plus"></i> Nouveau groupe remise</button>
+        <button type="button" class="btn btn-outline-warning" data-bs-toggle="collapse" data-bs-target="#massDiscountPanel" aria-expanded="false" aria-controls="massDiscountPanel"><i class="fas fa-percent"></i> Remise en masse</button>
+        <a href="{{ route('admin.golda.index') }}" class="btn btn-outline-success"><i class="fas fa-cloud-download-alt"></i> Import GOLDA</a>
+        <a href="{{ route('articles.import') }}" class="btn btn-outline-success"><i class="fas fa-file-excel"></i> Import Excel</a>
+    </div>
+</div>
 
 
-
-
-
-          <!-- Bouton Familles Articles -->
-        <a href="{{ url('/categories') }}" class="btn btn-outline-primary btn-round ms-2">
-            Familles
-            <i class="fas fa-layer-group ms-2"></i>
-        </a>
-
-        <!-- Bouton Marques Articles -->
-        <a href="{{ url('/brands') }}" class="btn btn-outline-info btn-round ms-2">
-            Marques
-            <i class="fas fa-tags ms-2"></i>
-        </a>
-
-         <a href="/groupremises" class="btn btn-outline-secondary btn-round ms-2">
-    <i class="fas fa-percent me-2"></i> Groupes Rem.
-</a>
-
-<button type="button" class="btn btn-outline-secondary btn-round ms-2" 
-        data-bs-toggle="modal" data-bs-target="#createDiscountGroupModal">
-    <i class="fas fa-plus-circle me-1"></i> Créer Grp. Remise
-</button>
-
-
-                  <a href="{{ route('articles.import') }}" class="btn btn-outline-danger btn-round ms-2">
-    <i class="fas fa-file-excel me-2"></i> Importer d'Excel
-</a>
-
-
-</h4>
 
 
 <!-- Modal -->
@@ -724,6 +768,17 @@
                             <select class="form-control" id="category_id" name="category_id">
                                                     @foreach($categories as $category)
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Sous-famille -->
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label">Sous-famille</label>
+                            <select class="form-control" name="subcategory_id" data-subcat-select data-cat-source="#category_id">
+                                <option value="">-- Aucune --</option>
+                                @foreach($subcategories as $sub)
+                                    <option value="{{ $sub->id }}" data-category="{{ $sub->category_id }}">{{ $sub->code }} — {{ $sub->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -776,11 +831,7 @@
 </div>
 
 
-                        <!-- Prix d'achat -->
-                        <div class="mb-3 col-md-3">
-                            <label for="cost_price" class="form-label">Prix d’achat</label>
-                            <input type="number" step="0.01" class="form-control" name="cost_price" value="0.00">
-                        </div>
+
 
                         <!-- Marge (%) -->
 <div class="mb-3 col-md-2">
@@ -813,15 +864,84 @@
                         </div>
 
 <!-- Code Fournisseur -->
-<div class="mb-3 col-md-6">
-    <label for="codefournisseur" class="form-label">Code Fournisseur</label>
-    <select name="codefournisseur" id="codefournisseur" class="form-select">
-        <option value="">-- Choisir --</option>
-        @foreach(\App\Models\Supplier::all() as $supplier)
-            <option value="{{ $supplier->code }}">{{ $supplier->code }} - {{ $supplier->name }}</option>
-        @endforeach
-    </select>
+
+
+
+
+
+
+<div class="border p-3 rounded mb-4 bg-light">
+    <h6 class="mb-3 text-primary">Informations fournisseurs (prix d'achat)</h6>
+    <div class="row g-3">
+        <!-- Fournisseur 1 -->
+        <div class="col-md-4">
+            <label>Fournisseur principal</label>
+            <select name="codefournisseur" class="form-select">
+                <option value="">-- Aucun --</option>
+        @foreach(\App\Models\Supplier::all() as $s)
+                    <option value="{{ $s->code }}" {{ old('codefournisseur', $item->codefournisseur ?? '') == $s->code ? 'selected' : '' }}>
+                        {{ $s->code }} - {{ $s->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label>Prix achat principal</label>
+            <input type="number" step="0.0001" name="cost_price" class="form-control" value="{{ old('cost_price', $item->cost_price ?? 0) }}">
+        </div>
+        <div class="col-md-4">
+            <label>Remise achat principal (%)</label>
+            <input type="number" step="0.01" name="remise_achat" class="form-control" value="{{ old('remise_achat', $item->remise_achat ?? 0) }}">
+        </div>
+
+        <!-- Fournisseur 2 -->
+        <div class="col-md-4">
+            <label>Fournisseur 2</label>
+            <select name="codefournisseur_2" class="form-select">
+                <option value="">-- Aucun --</option>
+        @foreach(\App\Models\Supplier::all() as $s)
+                    <option value="{{ $s->code }}" {{ old('codefournisseur_2', $item->codefournisseur_2 ?? '') == $s->code ? 'selected' : '' }}>
+                        {{ $s->code }} - {{ $s->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label>Prix achat 2</label>
+            <input type="number" step="0.0001" name="cost_price_2" class="form-control" value="{{ old('cost_price_2', $item->cost_price_2 ?? 0) }}">
+        </div>
+        <div class="col-md-4">
+            <label>Remise achat 2 (%)</label>
+            <input type="number" step="0.01" name="remise_achat_2" class="form-control" value="{{ old('remise_achat_2', $item->remise_achat_2 ?? 0) }}">
+        </div>
+
+        <!-- Fournisseur 3 -->
+        <div class="col-md-4">
+            <label>Fournisseur 3</label>
+            <select name="codefournisseur_3" class="form-select">
+                <option value="">-- Aucun --</option>
+        @foreach(\App\Models\Supplier::all() as $s)
+                    <option value="{{ $s->code }}" {{ old('codefournisseur_3', $item->codefournisseur_3 ?? '') == $s->code ? 'selected' : '' }}>
+                        {{ $s->code }} - {{ $s->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label>Prix achat 3</label>
+            <input type="number" step="0.0001" name="cost_price_3" class="form-control" value="{{ old('cost_price_3', $item->cost_price_3 ?? 0) }}">
+        </div>
+        <div class="col-md-4">
+            <label>Remise achat 3 (%)</label>
+            <input type="number" step="0.01" name="remise_achat_3" class="form-control" value="{{ old('remise_achat_3', $item->remise_achat_3 ?? 0) }}">
+        </div>
+    </div>
 </div>
+
+
+
+
+
 
 
                         <!-- Magasin -->
@@ -863,76 +983,59 @@
 </div>
 
 
-<form method="GET" action="{{ route('articles.index') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+<form method="GET" action="{{ route('articles.index') }}" class="art-filters">
+    <div class="art-search">
+        <i class="fas fa-search"></i>
+        <input type="text" name="search" class="form-control" placeholder="Rechercher une référence, une désignation…" value="{{ request('search') }}">
+    </div>
 
-    <input type="text" name="search" class="form-control form-control-sm" 
-           style="width: 170px;" placeholder="🔍 Rechercher..." value="{{ request('search') }}">
-
-    <!-- On enlève width fixe + on ajoute une classe wrapper si besoin -->
-    <div class="select2-wrapper" style="min-width: 140px; flex: 1;">
-        <select name="brand_id" class="form-select form-select-sm select2-filter">
-            <option value="">Marques (Tout)</option>
+    <div class="art-sel">
+        <select name="brand_id" class="form-select select2-filter">
+            <option value="">Marques (Toutes)</option>
             @foreach($brands as $brand)
-                <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
-                    {{ $brand->name }}
-                </option>
+                <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
             @endforeach
         </select>
     </div>
 
-    <div class="select2-wrapper" style="min-width: 150px; flex: 1;">
-        <select name="category_id" class="form-select form-select-sm select2-filter">
-            <option value="">Familles (Tout)</option>
+    <div class="art-sel">
+        <select name="category_id" class="form-select select2-filter">
+            <option value="">Familles (Toutes)</option>
             @foreach($categories as $category)
-                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                    {{ $category->name }}
-                </option>
+                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
             @endforeach
         </select>
     </div>
 
-    <div class="select2-wrapper" style="min-width: 220px; flex: 1;">
-        <select name="codefournisseur" class="form-select form-select-sm select2-filter">
-            <option value="">Fournisseurs (Tout)</option>
+    <div class="art-sel">
+        <select name="subcategory_id" class="form-select select2-filter" data-subcat-select data-cat-source="select[name=category_id].select2-filter">
+            <option value="">Sous-familles (Toutes)</option>
+            @foreach($subcategories as $sub)
+                <option value="{{ $sub->id }}" data-category="{{ $sub->category_id }}" {{ request('subcategory_id') == $sub->id ? 'selected' : '' }}>{{ $sub->code }} — {{ $sub->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="art-sel">
+        <select name="codefournisseur" class="form-select select2-filter">
+            <option value="">Fournisseurs (Tous)</option>
             @foreach(\App\Models\Supplier::all() as $supplier)
-                <option value="{{ $supplier->code }}" {{ request('codefournisseur') == $supplier->code ? 'selected' : '' }}>
-                    {{ $supplier->code }} - {{ $supplier->name }}
-                </option>
+                <option value="{{ $supplier->code }}" {{ request('codefournisseur') == $supplier->code ? 'selected' : '' }}>{{ $supplier->code }} - {{ $supplier->name }}</option>
             @endforeach
         </select>
     </div>
 
-    <!-- <div class="select2-wrapper" style="min-width: 140px;">
-        <select name="store_id" class="form-select form-select-sm select2-filter">
-            <option value="">Magasins (Tout)</option>
-            @foreach($stores as $store)
-                <option value="{{ $store->id }}" {{ request('store_id') == $store->id ? 'selected' : '' }}>
-                    {{ $store->name }}
-                </option>
-            @endforeach
-        </select>
-    </div> -->
-
-    <div class="select2-wrapper" style="min-width: 110px;">
-        <select name="is_active" class="form-select form-select-sm select2-filter">
-            <option value="">Statut (Tout)</option>
+    <div class="art-sel" style="flex:0 1 130px;min-width:120px">
+        <select name="is_active" class="form-select select2-filter">
+            <option value="">Statut (Tous)</option>
             <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>Autorisé</option>
             <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>Bloqué</option>
         </select>
     </div>
 
-    <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-        <i class="fas fa-filter me-1"></i> Filtrer
-    </button>
-
-    <button type="submit" name="action" value="export" formaction="{{ route('articles.export') }}"
-            class="btn btn-outline-success btn-sm px-3">
-        <i class="fas fa-file-excel me-1"></i> Exporter
-    </button>
-
-    <a href="{{ route('articles.index') }}" class="btn btn-outline-secondary btn-sm px-3">
-        <i class="fas fa-undo me-1"></i> Réinitialiser
-    </a>
+    <button type="submit" name="action" value="filter" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrer</button>
+    <a href="{{ route('articles.index') }}" class="btn btn-outline-secondary"><i class="fas fa-undo"></i> Réinitialiser</a>
+    <button type="submit" name="action" value="export" formaction="{{ route('articles.export') }}" class="btn btn-outline-success"><i class="fas fa-file-excel"></i> Exporter</button>
 </form>
 
 
@@ -943,34 +1046,36 @@
 
 <!-- essai groupe remise -->
 
-<!-- Application massive de groupe de remise -->
-<div class="mb-3 d-flex align-items-end gap-3 flex-wrap">
-    <div>
-        <label class="form-label fw-bold small">Appliquer groupe remise à la liste filtrée</label>
-        <select name="discount_group_id_mass" id="discount_group_id_mass" class="form-select form-select-sm" style="width: 400px;">
-            <option value="">-- Choisir un groupe --</option>
-            @foreach($discountGroups as $group)
-                <option value="{{ $group->id }}">
-                    {{ $group->name }}
-                    (Particulier: {{ $group->discount_rate }}% | Jobbeur: {{ $group->discount_rate_jobber }}% | Pro: {{ $group->discount_rate_professionnel }}%)
-                </option>
-            @endforeach
-        </select>
+<!-- Application massive de groupe de remise (repliable) -->
+<div class="collapse" id="massDiscountPanel">
+    <div class="card border-warning mb-3" style="border-radius:12px;">
+        <div class="card-body py-3 px-3 d-flex align-items-end gap-3 flex-wrap">
+            <div style="flex:1 1 320px;max-width:520px;">
+                <label class="form-label fw-bold small mb-1">Groupe de remise à appliquer à la liste filtrée</label>
+                <select name="discount_group_id_mass" id="discount_group_id_mass" class="form-select" style="width:100%;">
+                    <option value="">-- Choisir un groupe --</option>
+                    @foreach($discountGroups as $group)
+                        <option value="{{ $group->id }}">
+                            {{ $group->name }}
+                            (Particulier: {{ $group->discount_rate }}% | Jobbeur: {{ $group->discount_rate_jobber }}% | Pro: {{ $group->discount_rate_professionnel }}%)
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <button type="button" class="btn btn-warning" id="applyMassDiscountBtn"
+                    style="height:38px;font-weight:600;border-radius:8px;"
+                    data-bs-toggle="modal" data-bs-target="#confirmMassDiscountModal"
+                    disabled>
+                <i class="fas fa-percent me-1"></i> Appliquer à la liste filtrée
+            </button>
+
+            <button type="button" class="btn btn-light border" style="height:38px;border-radius:8px;"
+                    data-bs-toggle="collapse" data-bs-target="#massDiscountPanel">
+                Fermer
+            </button>
+        </div>
     </div>
-
-    <button type="button" class="btn btn-warning btn-sm px-4" id="applyMassDiscountBtn"
-            data-bs-toggle="modal" data-bs-target="#confirmMassDiscountModal"
-            disabled>
-        <i class="fas fa-percent me-1"></i> Appliquer à la liste filtrée
-    </button>
-
-
-    <!-- <button type="button" class="btn btn-secondary btn-sm px-4"
-        data-bs-toggle="modal" data-bs-target="#createDiscountGroupModal">
-    <i class="fas fa-plus-circle me-1"></i> Nouveau Groupe Remise
-</button> -->
-
-
 </div>
 
 <!-- Modal de confirmation -->
@@ -1150,11 +1255,11 @@
                     <th>Réference</th>
                     <th>Désignation</th>
                     <th>Marque</th>
-                    <th>Famille</th>
+                    <th>Famille / Sous-famille</th>
                     <th>Groupe Rem%</th>
-                    <th>Prix A.HT</th>
-                    <th>Prix V.HT</th>
-                     <th>Fournisseur</th>
+                    <!-- <th>Prix A.HT</th> -->
+                     <th>Fourn./Prix A.HT</th>
+                     <th>Prix.V/Marge</th>
                     <th>Stock</th>
                     <th>Actions</th>
                 </tr>
@@ -1173,7 +1278,8 @@
 
                         <td>{{ $item->name }}</td>
                         <td>{{ $item->brand->name ?? '-' }}</td>
-                        <td>{{ $item->category->name ?? '-' }}</td>
+                        <td>{{ $item->category->name ?? '-' }}
+                            @if($item->subcategory)<br><small class="text-muted">{{ $item->subcategory->code }} · {{ $item->subcategory->name }}</small>@endif</td>
                         
                         <td>
     {{ $item->discountGroup->name ?? 'Standard' }}<br>
@@ -1184,26 +1290,48 @@
     </small>
 </td>
 
-                        <td>{{ number_format($item->cost_price, 2, ',', ' ') }} €</td>
+                        <!-- <td>{{ number_format($item->cost_price, 2, ',', ' ') }} €</td> -->
+
+
+
+              
+<td class="multi-supplier-cell">
+    @if($item->codefournisseur)
+        <span class="sup">1</span>: {{ $item->supplier->name  }}<br>
+        <span class="price">{{ number_format($item->cost_price, 2, ',', ' ') }} €</span> 
+        <span class="rem">(-{{ number_format($item->remise_achat ?? 0, 2) }}%)</span><br>
+    @endif
+
+    @if($item->codefournisseur_2)
+        <span class="sup">2</span>: {{ $item->supplier2->name  }}<br>
+        <span class="price">{{ number_format($item->cost_price_2, 2, ',', ' ') }} €</span> 
+        <span class="rem">(-{{ number_format($item->remise_achat_2 ?? 0, 2) }}%)</span><br>
+    @endif
+
+    @if($item->codefournisseur_3)
+        <span class="sup">3</span>: {{ $item->supplier3->name  }}<br>
+        <span class="price">{{ number_format($item->cost_price_3, 2, ',', ' ') }} €</span> 
+        <span class="rem">(-{{ number_format($item->remise_achat_3 ?? 0, 2) }}%)</span>
+    @endif
+
+    @if(!$item->codefournisseur && !$item->codefournisseur_2 && !$item->codefournisseur_3)
+        <span class="text-muted">—</span>
+    @endif
+</td>
+
 @php
     $marge = $item->sale_price - $item->cost_price;
     $marge_pct = $item->cost_price > 0 ? ($marge / $item->cost_price) * 100 : 0;
 @endphp
-
 <td>
-    {{ number_format($item->sale_price, 2, ',', ' ') }} € <br>
+    {{ number_format($item->sale_price, 2, ',', ' ') }} € HT <br>
     <small class="{{ $marge >= 0 ? 'text-success' : 'text-danger' }}">
         {{ $marge >= 0 ? '+' : '' }}{{ number_format($marge, 2, ',', ' ') }} €
         ({{ number_format($marge_pct, 0, ',', ' ') }}%)
     </small>
 </td>
 
-                        
-<td>
-    {{ $item->supplier->name ?? '-' }}
-    <br>
-    <small class="text-muted">{{ $item->codefournisseur ?? '' }}</small>
-</td>
+          
 
 <td>
     <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#stockDetailsModal{{ $item->id }}" title="Voir les détails du stock">
@@ -1435,7 +1563,7 @@
 
                         <div class="mb-3 col-md-6">
                             <label class="form-label">Famille</label>
-                            <select name="category_id" class="form-select" disabled>
+                            <select name="category_id" id="edit_cat_{{ $item->id }}" class="form-select" disabled>
                                 <option value="">-- Choisir --</option>
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}" {{ $item->category_id == $category->id ? 'selected' : '' }}>
@@ -1446,6 +1574,16 @@
                         </div>
 
                         <div class="mb-3 col-md-6">
+                            <label class="form-label">Sous-famille</label>
+                            <select name="subcategory_id" class="form-select" data-subcat-select data-cat-source="#edit_cat_{{ $item->id }}" disabled>
+                                <option value="">-- Aucune --</option>
+                                @foreach($subcategories as $sub)
+                                    <option value="{{ $sub->id }}" data-category="{{ $sub->category_id }}" {{ $item->subcategory_id == $sub->id ? 'selected' : '' }}>{{ $sub->code }} — {{ $sub->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3 col-md-3">
                             <label class="form-label">Marque</label>
                             <select name="brand_id" class="form-select" disabled>
                                 <option value="">-- Choisir --</option>
@@ -1457,7 +1595,7 @@
                             </select>
                         </div>
 
-                        <div class="mb-3 col-md-6">
+                        <div class="mb-3 col-md-3">
                             <label class="form-label">Unité</label>
                             <select name="unit_id" class="form-select" disabled>
                                 <option value="">-- Choisir --</option>
@@ -1469,7 +1607,7 @@
                             </select>
                         </div>
 
-                        <div class="mb-3 col-md-6">
+                        <div class="mb-3 col-md-3">
                             <label class="form-label">TVA</label>
                             <select class="form-select" name="tva_group_id" disabled>
                                 <option value="">-- Choisir --</option>
@@ -1482,7 +1620,7 @@
                         </div>
 
                         <!-- Groupe de remise -->
-<div class="mb-3 col-md-6">
+<div class="mb-3 col-md-4">
     <label class="form-label">Groupe de remise</label>
     <select name="discount_group_id" class="form-select" disabled>
         <option value="">-- Aucun --</option>
@@ -1496,10 +1634,6 @@
 </div>
 
 
-                        <div class="mb-3 col-md-3">
-                            <label class="form-label">Prix Achat</label>
-                            <input type="number" name="cost_price" step="0.01" class="form-control" value="{{ $item->cost_price }}">
-                        </div>
 
 
                         <!-- Marge (%) - Calculée -->
@@ -1539,15 +1673,94 @@
                         </div>
 
                         <!-- Code Fournisseur -->
-<div class="mb-3 col-md-6">
-    <label for="codefournisseur" class="form-label">Fournisseur</label>
-    <select name="codefournisseur" id="codefournisseur" class="form-select" disabled>
-        <option value="{{ $item->codefournisseur }}">-- Choisir --</option>
-        @foreach(\App\Models\Supplier::all() as $supplier)
-            <option value="{{ $supplier->code }}" {{ $item->codefournisseur == $supplier->code ? 'selected' : '' }}>{{ $supplier->code }} - {{ $supplier->name }}</option>
+
+                        
+
+
+
+
+
+
+<div class="border p-3 rounded mb-4 bg-light">
+    <h6 class="mb-3 text-primary">Informations fournisseurs (prix d'achat)</h6>
+    <div class="row g-3">
+        <!-- Fournisseur 1 -->
+        <div class="col-md-4">
+    <label>Fournisseur principal</label>
+    <select name="codefournisseur" class="form-select" disabled>
+        <option value="">-- Aucun --</option>
+        @foreach(\App\Models\Supplier::all() as $s)
+            <option value="{{ $s->code }}" {{ $item->codefournisseur == $s->code ? 'selected' : '' }}>
+                {{ $s->code }} - {{ $s->name }}
+            </option>
         @endforeach
     </select>
 </div>
+        <div class="col-md-4">
+            <label>Prix achat principal</label>
+            <input type="number" step="0.0001" name="cost_price" class="form-control" value="{{ $item->cost_price ?? 0 }}" disabled>
+        </div>
+        <div class="col-md-4">
+            <label>Remise achat principal (%)</label>
+            <input type="number" step="0.01" name="remise_achat" class="form-control" value="{{ $item->remise_achat ?? 0 }}" disabled>
+        </div>
+
+        <!-- Fournisseur 2 -->
+        
+<div class="col-md-4">
+    <label>Fournisseur 2</label>
+    <select name="codefournisseur_2" class="form-select" disabled>
+        <option value="">-- Aucun --</option>
+        @foreach(\App\Models\Supplier::all() as $s)
+            <option value="{{ $s->code }}" {{ $item->codefournisseur_2 == $s->code ? 'selected' : '' }}>
+                {{ $s->code }} - {{ $s->name }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
+<div class="col-md-4">
+    <label>Prix achat 2</label>
+    <input type="number" step="0.0001" name="cost_price_2" class="form-control" value="{{ $item->cost_price_2 ?? 0 }}" disabled>
+</div>
+
+<div class="col-md-4">
+    <label>Remise achat 2 (%)</label>
+    <input type="number" step="0.01" name="remise_achat_2" class="form-control" value="{{ $item->remise_achat_2 ?? 0 }}" disabled>
+</div>
+        <!-- Fournisseur 3 -->
+        <div class="col-md-4">
+    <label>Fournisseur 3</label>
+    <select name="codefournisseur_3" class="form-select" disabled>
+        <option value="">-- Aucun --</option>
+        @foreach(\App\Models\Supplier::all() as $s)
+            <option value="{{ $s->code }}" {{ $item->codefournisseur_3 == $s->code ? 'selected' : '' }}>
+                {{ $s->code }} - {{ $s->name }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
+<div class="col-md-4">
+    <label>Prix achat 3</label>
+    <input type="number" step="0.0001" name="cost_price_3" class="form-control" value="{{ $item->cost_price_3 ?? 0 }}" disabled>
+</div>
+
+<div class="col-md-4">
+    <label>Remise achat 3 (%)</label>
+    <input type="number" step="0.01" name="remise_achat_." class="form-control" value="{{ $item->remise_achat_3 ?? 0 }}" disabled>
+</div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
 
 
                         <div class="mb-3 col-md-6">
@@ -1772,7 +1985,8 @@ document.addEventListener("DOMContentLoaded", function () {
     
 
 <script>
-document.getElementById("searchItemInput").addEventListener("keyup", function() {
+var _si = document.getElementById("searchItemInput");
+if (_si) _si.addEventListener("keyup", function() {
     var input = this.value.toLowerCase();
     var rows = document.querySelectorAll("#itemsTable tbody tr");
 
@@ -2014,5 +2228,96 @@ $(document).ready(function() {
 });
 </script>
 
-  </body>
+  
+<script>
+/* Sous-familles : liste filtrée selon la famille choisie + Select2 (création, modification, filtre) */
+(function () {
+    var SUBS = @json($subcategories);
+
+    function catSelectOf(sel) {
+        var src = sel.getAttribute('data-cat-source') || '';
+        if (src.indexOf('closest-form:') === 0) {
+            var f = sel.closest('form');
+            return f ? f.querySelector(src.substring(13)) : null;
+        }
+        return document.querySelector(src);
+    }
+
+    function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+
+    function rebuild(sel) {
+        var cat = catSelectOf(sel);
+        var catVal = cat ? cat.value : '';
+        var wanted = sel.value;
+        var first = sel.options.length ? sel.options[0].outerHTML : '<option value="">-- Aucune --</option>';
+        var html = first;
+        SUBS.forEach(function (s) {
+            if (catVal && String(s.category_id) !== String(catVal)) return;
+            html += '<option value="' + s.id + '" data-category="' + esc(s.category_id) + '">' + esc(s.code + ' — ' + s.name) + '</option>';
+        });
+        sel.innerHTML = html;
+        sel.value = wanted;
+        if (sel.value !== wanted) sel.value = '';
+        jQuery(sel).trigger('change.select2');
+    }
+
+    function initSelect2(el, parent) {
+        var $el = jQuery(el);
+        if (!el || $el.data('select2')) return;
+        var opts = { width: '100%', language: { noResults: function () { return 'Aucun résultat trouvé'; } } };
+        if (parent && parent.length) opts.dropdownParent = parent;
+        $el.select2(opts);
+    }
+
+    function start() {
+        try {
+            // filtre initial de toutes les listes de sous-familles
+            document.querySelectorAll('[data-subcat-select]').forEach(rebuild);
+
+            // à chaque changement de famille, on reconstruit les sous-familles liées (délégation : marche aussi pour Select2)
+            jQuery(document).on('change', 'select', function () {
+                var changed = this;
+                document.querySelectorAll('[data-subcat-select]').forEach(function (sel) {
+                    if (sel !== changed && catSelectOf(sel) === changed) rebuild(sel);
+                });
+            });
+
+            // Select2 dans une modale Bootstrap : la modale (tabindex=-1) reprend le focus au clic
+            // et referme la liste aussitôt. On redonne le focus au champ de recherche à l'ouverture.
+            jQuery(document).on('select2:open', function () {
+                setTimeout(function () {
+                    var f = document.querySelector('.select2-container--open .select2-search__field');
+                    if (f) f.focus();
+                }, 0);
+            });
+
+            // sécurité : on re-filtre à l'ouverture d'une modale et quand on active la modification
+            document.addEventListener('shown.bs.modal', function (e) {
+                e.target.querySelectorAll('[data-subcat-select]').forEach(rebuild);
+            });
+            document.addEventListener('click', function (e) {
+                var b = e.target.closest ? e.target.closest('[id^="editBtn"]') : null;
+                if (!b) return;
+                setTimeout(function () {
+                    var m = b.closest('.modal');
+                    if (m) m.querySelectorAll('[data-subcat-select]').forEach(rebuild);
+                }, 0);
+            });
+
+            var $create = jQuery('#createItemModal');
+            var $createBox = $create.find('.modal-content').first();
+            initSelect2(document.getElementById('category_id'), $createBox);
+            $create.find('select[data-subcat-select], select[name^="codefournisseur"]').each(function () { initSelect2(this, $createBox); });
+
+            jQuery('[id^="editItemModal"]').each(function () {
+                var $m = jQuery(this).find('.modal-content').first();
+                $m.find('select[name="category_id"], select[data-subcat-select], select[name^="codefournisseur"]').each(function () { initSelect2(this, $m); });
+            });
+        } catch (e) { console.error('Sous-familles :', e); }
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
+</body>
 </html>

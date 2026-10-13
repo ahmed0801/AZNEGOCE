@@ -238,7 +238,7 @@ if ($request->filled('numdoc')) {
 
         try {
             $item = Item::where('code', $code)
-                        ->with(['stocks.store', 'stockMovements' => function ($query) {
+                        ->with(['stocks.store','tvaGroup', 'stockMovements' => function ($query) {
                             $query->latest()->limit(20);
                         }])
                         ->first();
@@ -256,12 +256,15 @@ if ($request->filled('numdoc')) {
                 ];
             });
 
-            $movements = $item->stockMovements->map(function ($movement) {
+            $tvaRate = is_numeric(optional($item->tvaGroup)->rate) ? (float) $item->tvaGroup->rate : 20.0;
+            $movements = $item->stockMovements->map(function ($movement) use ($tvaRate) {
                 return [
                     'type' => ucfirst($movement->type ?? 'unknown'),
                     'quantity' => (int) ($movement->quantity ?? 0),
                     'store_name' => optional($movement->store)->name ?? '-',
                     'cost_price' => is_numeric($movement->cost_price) ? (float) $movement->cost_price : null,
+'cost_price_ttc' => is_numeric($movement->cost_price) ? round((float) $movement->cost_price * (1 + $tvaRate / 100), 2) : null,
+'tva_rate' => $tvaRate,
                     'supplier_name' => $movement->supplier_name ?? '-',
                     'reference' => $movement->reference ?? '-',
                     'note' => $movement->note ?? '-',
@@ -1588,7 +1591,7 @@ public function validateOrder($id)
         if ($request->filled('subcategory_id')) {
             $query->where('subcategory_id', $request->input('subcategory_id'));
         }
-        
+
         if ($request->filled('reference')) {
             $query->where('code', 'like', '%' . $request->input('reference') . '%')
                 ->orWhere('barcode', 'like', '%' . $request->input('reference') . '%');

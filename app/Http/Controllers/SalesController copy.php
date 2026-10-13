@@ -586,8 +586,12 @@ $paymentTerms = PaymentTerm::all();
         ];
     })->toArray();
 
-    return view('sales.create_direct_delivery', compact('tvaRates', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms','brands','suppliers','suppliersForSelect2'));
-}
+    // Filtres Famille / Sous-famille de la recherche article
+    $categories = \App\Models\ItemCategory::orderBy('name')->get(['id', 'name']);
+    $subcategories = \App\Models\ItemSubcategory::orderBy('code')->get(['id', 'category_id', 'code', 'name']);
+
+    return view('sales.create_direct_delivery', compact('tvaRates', 'tvaGroups', 'discountGroups', 'paymentModes', 'paymentTerms','brands','suppliers','suppliersForSelect2','categories','subcategories'));
+    }
 
 
     /**
@@ -1577,6 +1581,14 @@ public function validateOrder($id)
         if ($request->filled('supplier_id')) {
             $query->where('codefournisseur', Supplier::find($request->input('supplier_id'))->code ?? null);
         }
+
+                if ($request->filled('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
+        if ($request->filled('subcategory_id')) {
+            $query->where('subcategory_id', $request->input('subcategory_id'));
+        }
+        
         if ($request->filled('reference')) {
             $query->where('code', 'like', '%' . $request->input('reference') . '%')
                 ->orWhere('barcode', 'like', '%' . $request->input('reference') . '%');

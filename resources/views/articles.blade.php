@@ -264,6 +264,12 @@
     }
 }
 
+
+
+
+
+ .modal-md { max-width: 1000px; }
+
     </style>
 
 
@@ -1381,46 +1387,54 @@
         </table>
 
         {{-- Historique des mouvements --}}
+        
+        
         <hr>
-        <h6><i class="fas fa-exchange-alt me-1"></i> Mouvements de stock récents :</h6>
-        <table class="table table-bordered table-sm">
-          <thead class="table-light">
-            <tr>
-              <th>Type</th>
-              <!-- <th>Type</th> -->
-              <th>QTE</th>
-              <th>Magasin</th>
-              <th>Prix.HT</th>
-              <th>Source</th>
-              <th>Référence</th>
-              <th>Note</th>
-            </tr>
-          </thead>
-          <tbody>
-            @forelse ($item->stockMovements()->latest()->limit(20)->get() as $movement)
-              <tr>
-                <td>
-                                    <span class="badge bg-{{ $movement->quantity >= 0 ? 'success' : 'danger' }}">
-                    {{ ucfirst($movement->type) }}
-                  </span><br>
-                  {{ $movement->created_at->format('d/m/Y H:i') }}</td>
-                <!-- <td>
-                  <span class="badge bg-{{ $movement->quantity >= 0 ? 'success' : 'danger' }}">
-                    {{ ucfirst($movement->type) }}
-                  </span>
-                </td> -->
-                <td>{{ $movement->quantity }}</td>
-                <td>{{ $movement->store->name ?? '-' }}</td>
-        <td>{{ $movement->cost_price ? number_format($movement->cost_price, 2) . ' €' : '-' }}</td>  {{-- Affiche prix coûtant --}}
-                <td>{{ $movement->supplier_name ?? '-' }}</td>
-                <td>{{ $movement->reference ?? '-' }}</td>
-                <td>{{ $movement->note ?? '-' }}</td>
-              </tr>
-            @empty
-              <tr><td colspan="6" class="text-center text-muted">Aucun mouvement trouvé</td></tr>
-            @endforelse
-          </tbody>
-        </table>
+<h6><i class="fas fa-exchange-alt me-1"></i> Mouvements de stock récents :</h6>
+@php
+    $tvaRate = is_numeric(optional($item->tvaGroup)->rate) ? (float) $item->tvaGroup->rate : 20.0;
+@endphp
+<table class="table table-bordered table-sm">
+  <thead class="table-light">
+    <tr>
+      <th>Type</th>
+      <th>QTE</th>
+      <th>Magasin</th>
+      <th>PU HT net<br><small class="fw-normal text-muted">après remise</small></th>
+      <th>PU TTC net<br><small class="fw-normal text-muted">après remise</small></th>
+      <th>Source</th>
+      <th>Référence</th>
+      <th>Note</th>
+    </tr>
+  </thead>
+  <tbody>
+    @forelse ($item->stockMovements()->with('store')->latest()->limit(20)->get() as $movement)
+      <tr>
+        <td>
+          <span class="badge bg-{{ $movement->quantity >= 0 ? 'success' : 'danger' }}">{{ ucfirst($movement->type) }}</span><br>
+          {{ $movement->created_at->format('d/m/Y H:i') }}
+        </td>
+        <td>{{ $movement->quantity }}</td>
+        <td>{{ $movement->store->name ?? '-' }}</td>
+        <td>{{ is_numeric($movement->cost_price) && $movement->cost_price > 0 ? number_format($movement->cost_price, 2, ',', ' ') . ' €' : '-' }}</td>
+        <td>
+          @if(is_numeric($movement->cost_price) && $movement->cost_price > 0)
+            <b>{{ number_format($movement->cost_price * (1 + $tvaRate / 100), 2, ',', ' ') }} €</b><br>
+            <small class="text-muted">TVA {{ $tvaRate + 0 }} %</small>
+          @else
+            -
+          @endif
+        </td>
+        <td>{{ $movement->supplier_name ?? '-' }}</td>
+        <td>{{ $movement->reference ?? '-' }}</td>
+        <td>{{ $movement->note ?? '-' }}</td>
+      </tr>
+    @empty
+      <tr><td colspan="8" class="text-center text-muted">Aucun mouvement trouvé</td></tr>
+    @endforelse
+  </tbody>
+</table>
+
 
       </div>
 

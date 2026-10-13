@@ -151,6 +151,10 @@
         .lh-actionbar .ab-btns .btn{height:42px;min-width:150px;display:inline-flex;align-items:center;justify-content:center;gap:.45rem;padding:0 1rem;font-size:.9rem;font-weight:600;border-radius:8px;margin:0;white-space:nowrap}
         .lh-actionbar .ab-btns .btn small{font-weight:500;opacity:.85}
         @media (max-width:768px){.lh-actionbar .ab-btns .btn{flex:1 1 45%;min-width:0}}
+
+
+
+        .modal-md { max-width: 1000px; }
     </style>
 </head>
 <body>
@@ -654,7 +658,9 @@
                             <hr>
                             <h6><i class="fas fa-exchange-alt me-1"></i> Mouvements de stock récents :</h6>
                             <table class="table table-bordered table-sm" id="movementTable">
-                                <thead class="table-light"><tr><th>Type</th><th>QTE</th><th>Magasin</th><th>Prix.HT</th><th>Source</th><th>Référence</th></tr></thead>
+                                <thead class="table-light"><tr><th>Type</th><th>QTE</th><th>Magasin</th>
+                                <th>PU HT net<br><small class="fw-normal text-muted">après remise</small></th><th>PU TTC net<br><small class="fw-normal text-muted">après remise</small></th>
+                                <th>Source</th><th>Référence</th></tr></thead>
                                 <tbody id="movementTableBody"></tbody>
                             </table>
                         </div>
@@ -1290,7 +1296,7 @@ $(document).on('click', '.stock-details-btn', function (event) {
         success: function (data) {
             if (data.error) {
                 $('#stockTableBody').append('<tr><td colspan="3" class="text-center text-danger">Erreur: ' + data.error + '</td></tr>');
-                $('#movementTableBody').append('<tr><td colspan="6" class="text-center text-danger">Erreur: ' + data.error + '</td></tr>');
+                $('#movementTableBody').append('<tr><td colspan="7" class="text-center text-danger">Erreur: ' + data.error + '</td></tr>');
                 return;
             }
             if (data.stocks && data.stocks.length > 0) {
@@ -1299,14 +1305,15 @@ $(document).on('click', '.stock-details-btn', function (event) {
             if (data.movements && data.movements.length > 0) {
                 data.movements.forEach(function (m) {
                     var cp = parseFloat(m.cost_price), cpf = isNaN(cp) ? '-' : cp.toFixed(2) + ' €';
-                    $('#movementTableBody').append('<tr><td><span class="badge bg-' + (m.quantity >= 0 ? 'success' : 'danger') + '">' + (m.type||'?') + '</span><br>' + (m.created_at||'-') + '</td><td>' + (m.quantity||0) + '</td><td>' + (m.store_name||'-') + '</td><td>' + cpf + '</td><td>' + (m.supplier_name||'-') + '</td><td>' + (m.reference||'-') + '</td></tr>');
+var cpt = parseFloat(m.cost_price_ttc), cptf = isNaN(cpt) ? '-' : '<b>' + cpt.toFixed(2) + ' €</b><br><small class="text-muted">TVA ' + (parseFloat(m.tva_rate) || 0) + ' %</small>';
+                    $('#movementTableBody').append('<tr><td><span class="badge bg-' + (m.quantity >= 0 ? 'success' : 'danger') + '">' + (m.type||'?') + '</span><br>' + (m.created_at||'-') + '</td><td>' + (m.quantity||0) + '</td><td>' + (m.store_name||'-') + '</td><td>' + cpf + '</td><td>' + cptf + '</td><td>' + (m.supplier_name||'-') + '</td><td>' + (m.reference||'-') + '</td></tr>');
                 });
-            } else { $('#movementTableBody').append('<tr><td colspan="6" class="text-center text-muted">Aucun mouvement trouvé</td></tr>'); }
+            } else { $('#movementTableBody').append('<tr><td colspan="7" class="text-center text-muted">Aucun mouvement trouvé</td></tr>'); }
         },
         error: function (xhr) {
             var msg = xhr.status === 404 ? 'Article non trouvé' : 'Erreur serveur: ' + xhr.status;
             $('#stockTableBody').append('<tr><td colspan="3" class="text-center text-danger">' + msg + '</td></tr>');
-            $('#movementTableBody').append('<tr><td colspan="6" class="text-center text-danger">' + msg + '</td></tr>');
+            $('#movementTableBody').append('<tr><td colspan="7" class="text-center text-danger">' + msg + '</td></tr>');
         }
     });
     $('#stockDetailsModal').modal('show');
