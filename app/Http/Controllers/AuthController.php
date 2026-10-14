@@ -38,9 +38,10 @@ class AuthController extends Controller
     
         // Formulaire de connexion pour les administrateurs
         public function loginFormAdmin()
-        {
-            return view('admin.loginforadmin');
-        }
+{
+    return response()->view('admin.loginforadmin')
+        ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+}
 
 
 
@@ -394,6 +395,15 @@ public function update(Request $request, User $user)
     }
 
     
+
+
+
+    public function csrfRefresh()
+{
+    return response()->json(['token' => csrf_token()])
+        ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+}
+
 
 
     

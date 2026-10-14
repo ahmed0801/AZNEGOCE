@@ -887,7 +887,7 @@ Route::post('/admin/logout', [AuthController::class, 'logoutAdmin'])->name('logo
 Route::get('/dashboard/late-deliveries', [AuthController::class, 'lateDeliveries'])->name('dashboard.late-deliveries');
 
 
-
+Route::get('/csrf-refresh', [AuthController::class, 'csrfRefresh'])->name('csrf.refresh');
 
 
 Route::get('/analytics/export', [AnalyticsExportController::class, 'export'])->name('analytics.export');
