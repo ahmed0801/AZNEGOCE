@@ -85,7 +85,7 @@ class CustomerController extends Controller
 
         // Fetch TecDoc brands
         $response = Http::withHeaders([
-            'X-Api-Key' => env('TECDOC_API_KEY', '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg')
+            'X-Api-Key' => config('tecdoc.api_key')
         ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
             "getLinkageTargets" => [
                 "provider" => env('TECDOC_PROVIDER_ID', 23454),
@@ -179,6 +179,23 @@ class CustomerController extends Controller
         $souche->last_number += 1;
         $souche->save();
 
+
+        // === NOUVEAU : fermeture popup ===
+    if ($request->input('action') === 'create_and_close') {
+        return response('
+            <!DOCTYPE html><html><body>
+            <script>
+                if (window.opener) {
+                    window.opener.location.reload();
+                }
+                window.close();
+            </script>
+            </body></html>
+        ');
+    }
+
+    
+
         return redirect()->back()->with('success', 'Client créé avec succès');
     }
 
@@ -211,10 +228,19 @@ class CustomerController extends Controller
     }
 
     public function destroy($id)
-    {
-        Customer::findOrFail($id)->delete();
-        return redirect()->route('customer.index')->with('success', 'Client supprimé avec succès');
+{
+    $customer = Customer::findOrFail($id);
+    $reasons = $customer->lockReasons();
+    if ($reasons) {
+        return redirect()->route('customer.index')->with('error', 'Suppression impossible : ' . implode(' ; ', $reasons) . '. Bloquez le client à la place.');
     }
+    try {
+        $customer->delete();
+    } catch (\Illuminate\Database\QueryException $e) {
+        return redirect()->route('customer.index')->with('error', 'Suppression impossible : client référencé ailleurs.');
+    }
+    return redirect()->route('customer.index')->with('success', 'Client supprimé avec succès');
+}
 
     public function storeVehicle(Request $request, $customer)
     {
@@ -599,7 +625,7 @@ public function getAllAccountingEntriesHT()
 
         // Fetch TecDoc brands
         $response = Http::withHeaders([
-            'X-Api-Key' => env('TECDOC_API_KEY', '2BeBXg6LDMZPdqWdaoq9CP19qGL6bTDHB9qBJEu6K264jC2Yv8wg')
+            'X-Api-Key' => config('tecdoc.api_key')
         ])->post('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLB.jsonEndpoint', [
             "getLinkageTargets" => [
                 "provider" => env('TECDOC_PROVIDER_ID', 23454),

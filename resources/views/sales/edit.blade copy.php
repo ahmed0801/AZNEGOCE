@@ -56,6 +56,105 @@
         }
         #lines_table thead th { padding: 0.35rem 0.5rem !important; font-size: 0.80rem !important; height: 42px !important; }
         #vehicle_group { display: none; }
+
+        #customer_banner{display:flex;flex-wrap:wrap;align-items:center;gap:0 14px;font-size:.82rem;line-height:1.8;background:#f0f7ff;border:1px solid #b8d4f0;border-left:4px solid #0056b3;border-radius:5px;padding:5px 12px;margin-bottom:10px}
+        #customer_banner .cb-name{font-weight:700;color:#003a80;font-size:.88rem}
+        #customer_banner .cb-sep{color:#aac4e0}
+        #customer_banner .cb-label{color:#666}
+        #customer_banner .cb-val{font-weight:600;color:#222}
+        .badge-very-sm{font-size:.6rem;padding:.15em .4em;vertical-align:middle}
+        .btn-xs{font-size:.7rem;line-height:1.2}
+        #lines_table td:nth-child(1){min-width:0;max-width:140px;width:125px}
+        #lines_table .ref-code{display:block;font-family:'Courier New',Consolas,monospace;font-weight:900;font-size:1.05rem;color:#0040c0;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:105px;line-height:1.35;background:#eef4ff;padding:2px 6px;border-radius:3px;border-left:3px solid #0040c0}
+        #lines_table td:nth-child(2){min-width:160px;max-width:240px}
+        #lines_table td:nth-child(2) .des-name{display:block;font-weight:700;font-size:.88rem;color:#111;line-height:1.35;white-space:normal;word-break:break-word}
+        #lines_table tbody td{padding:5px 6px!important;vertical-align:middle}
+        #lines_table thead th{position:sticky;top:0;z-index:2;background:#1a2b4a!important}
+        #lines_table th.text-center,#lines_table td.text-right{text-align:center!important}
+        #vehicle_group{display:none}
+        .form-control.quantity,.form-control.unit_price_ht,.form-control.remise{font-size:.9rem}
+        /* ============================================================
+           REFONTE PAGE CRÉATION — en-tête, recherche, tableau, barre d'actions
+           ============================================================ */
+        .lh-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+        .lh-title{margin:0;font-weight:700;display:flex;align-items:center;gap:.5rem}
+        .lh-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+        .lh-btns .btn,.lh-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
+        .lh-btns .dropdown{position:relative}
+        .lh-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:.5rem}
+        .lh-filters .lh-field{flex:1 1 150px;min-width:130px;position:relative}
+        .lh-filters .lh-wide{flex:2 1 260px}
+        .lh-filters .lh-field i.lh-ico{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.8rem;pointer-events:none;z-index:2}
+        .lh-filters .form-control{height:38px;border-radius:8px;font-size:.88rem}
+        .lh-filters #search_item{padding-left:2.1rem;background:#e8f4fd;border:1.5px solid #90c0e8}
+        .lh-filters #search_item:focus{background:#fff;border-color:#007bff;box-shadow:0 0 0 3px rgba(0,123,255,.12);outline:none}
+        .lh-filters .select2-container{width:100%!important}
+        .lh-filters .select2-container--default .select2-selection--single{height:38px;border-radius:8px;display:flex;align-items:center}
+        .lh-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px;font-size:.88rem;padding-left:.6rem}
+        .lh-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px}
+        .lh-check{display:inline-flex;align-items:center;gap:.4rem;margin:0;height:38px;font-size:.88rem;font-weight:600;cursor:pointer;user-select:none}
+        .lh-check input{width:16px;height:16px;margin:0}
+        .sr-hint{font-size:.74rem;color:#6b7280;margin:0 0 .35rem .2rem}
+        #search_results{max-height:300px}
+        #search_results:empty{display:none}
+        #search_results .sr-item{display:block;padding:.45rem .7rem;border-bottom:1px solid #dbe7f5;cursor:pointer;line-height:1.5}
+        #search_results .sr-item:hover,#search_results .sr-item.active{background:#dbeafe}
+        #search_results .sr-item.active{outline:2px solid #3b82f6;outline-offset:-2px}
+        #search_results .sr-empty:hover{background:transparent;cursor:default}
+        #search_results .sr-main,#search_results .sr-sub{display:block}
+        #search_results .sr-sub{font-size:.8rem;margin-top:.15rem}
+        #search_results .sr-price{font-weight:700;color:#0f5132}
+        #search_results .sr-name{font-weight:600}
+        #lines_table th:nth-child(3),#lines_table td:nth-child(3){min-width:285px}
+        #lines_table .pp-block{font-size:.8rem}
+        #lines_table .pp-r1,#lines_table .pp-r2{display:flex;align-items:center;gap:6px}
+        #lines_table .pp-r2{margin-top:4px}
+        #lines_table .pp-cost{width:auto;flex:0 0 auto;flex-wrap:nowrap}
+        #lines_table .pp-disc{width:auto;flex:0 0 auto;flex-wrap:nowrap}
+        #lines_table .pp-r1 .input-group-text,#lines_table .pp-disc .input-group-text{padding:0 .4rem;font-size:.75rem}
+        #lines_table .pp-r2 .select2-container{flex:1 1 auto;min-width:110px;max-width:150px}
+        #lines_table .pp-r2 .select2-container--default .select2-selection--single{height:30px;line-height:28px}
+        #lines_table .pp-r2 .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:28px;font-size:.75rem}
+        #lines_table .pp-r2 .select2-container--default .select2-selection--single .select2-selection__arrow{height:28px}
+        #lines_table .pp-margin{white-space:nowrap;font-size:.78rem;color:#6b7280}
+        #lines_table .net-price{min-width:64px;white-space:nowrap}
+
+        /* Ligne Client / Véhicule / Date */
+        .top-row .form-label{font-size:.82rem}
+        .top-row .select2-container--default .select2-selection--single{height:38px;border-radius:8px;display:flex;align-items:center}
+        .top-row .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px;padding-left:.6rem}
+        .top-row .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px}
+        .top-row .form-control.order_date{width:100%;height:38px!important;min-height:38px;border-radius:8px;font-size:.88rem;padding:0 .6rem;line-height:36px}
+        .vg-row{display:flex;align-items:center;gap:.5rem;flex-wrap:nowrap}
+        .vg-plate{flex:0 0 auto;width:178px;flex-wrap:nowrap}
+        .vg-plate .form-control{min-width:0;height:38px;border-radius:8px 0 0 8px;border:2px solid #1f2937;font-weight:800;letter-spacing:.08em;text-transform:uppercase;text-align:center;font-size:.9rem;padding:0 .4rem;background:#f9fafb}
+        .vg-plate .form-control::placeholder{font-weight:500;letter-spacing:.03em;color:#9ca3af}
+        .vg-plate .btn{height:38px;width:40px;padding:0;border-radius:0 8px 8px 0;display:inline-flex;align-items:center;justify-content:center;gap:.25rem}
+        .vg-row #vehicle_id{flex:1 1 160px;min-width:0;height:38px;border-radius:8px}
+        .vg-row .select2-container{flex:1 1 160px;min-width:0;width:auto!important}
+        .vg-actions{display:flex;flex:0 0 auto;gap:.35rem;flex-wrap:nowrap}
+        .vg-actions .btn{height:38px;min-width:42px;padding:0 .7rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;gap:.3rem;margin:0}
+        .vg-actions a.btn[disabled]{opacity:.45;pointer-events:none}
+        @media (max-width:991px){.vg-row{flex-wrap:wrap}.vg-row .select2-container,.vg-row #vehicle_id{flex:1 1 100%}}
+        /* Liste résultats : sélection claire */
+        #search_results{position:relative}
+        #search_results .sr-item{position:relative;border-left:5px solid transparent;padding-right:6rem}
+        #search_results .sr-item:hover{background:#eef5ff}
+        #search_results .sr-item.active{background:#cfe3ff;border-left-color:#0d6efd;outline:none}
+        #search_results .sr-item.active::after{content:"\21B5  Entrée";position:absolute;right:.7rem;top:.5rem;font-size:.72rem;font-weight:700;color:#fff;background:#0d6efd;border-radius:6px;padding:2px 8px}
+        #lines_table th:nth-child(6),#lines_table td:nth-child(6),#lines_table th:nth-child(7),#lines_table td:nth-child(7){width:92px!important;min-width:92px!important}
+        #lines_table .unit_price_ht,#lines_table .unit_price_ttc{width:80px!important;min-width:80px!important;max-width:80px!important}
+        .lh-actionbar{position:sticky;bottom:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-top:.75rem;padding:.7rem 1rem;background:#fff;border:1px solid #dbe3ee;border-radius:10px;box-shadow:0 -4px 14px rgba(0,0,0,.08)}
+        .lh-actionbar .ab-totals{display:flex;gap:1.5rem;align-items:baseline;font-size:1.05rem}
+        .lh-actionbar .ab-totals b{font-size:1.25rem}
+        .lh-actionbar .ab-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+        .lh-actionbar .ab-btns .btn{height:42px;min-width:150px;display:inline-flex;align-items:center;justify-content:center;gap:.45rem;padding:0 1rem;font-size:.9rem;font-weight:600;border-radius:8px;margin:0;white-space:nowrap}
+        .lh-actionbar .ab-btns .btn small{font-weight:500;opacity:.85}
+        @media (max-width:768px){.lh-actionbar .ab-btns .btn{flex:1 1 45%;min-width:0}}
+
+
+
+        .modal-md { max-width: 1000px; }
     </style>
 </head>
 <body>
@@ -256,85 +355,168 @@
                     @if(session('error'))<div class="alert alert-danger">{!! session('error') !!}</div>@endif
 
                     <div class="card shadow-sm">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">Modifier la commande de vente #{{ $order->numdoc }}</h5>
-                        </div>
                         <div class="card-body">
-                            <form action="{{ route('sales.update', $order->numdoc) }}" method="POST" id="salesForm">
+                            <div class="lh-bar">
+                                <h4 class="lh-title"><i class="fas fa-edit text-primary"></i> Modifier la commande de vente <span class="badge bg-primary ms-1">#{{ $order->numdoc }}</span></h4>
+                                <div class="lh-btns">
+                                    <button type="button" id="openCreateCustomerModal" class="btn btn-success">
+                                        <i class="fas fa-user-plus"></i> Nouveau client
+                                    </button>
+                                    <a href="/newcustomer"
+                                       onclick="window.open(this.href,'popupWindow','width=1200,height=700,scrollbars=yes'); return false;"
+                                       class="btn btn-outline-primary">
+                                        <i class="fas fa-users"></i> Liste des clients
+                                    </a>
+                                    <a href="/articles"
+                                       onclick="window.open(this.href,'popupWindow','width=1000,height=700,scrollbars=yes'); return false;"
+                                       class="btn btn-outline-success">
+                                        <i class="fas fa-boxes"></i> Liste des articles
+                                    </a>
+                                    <div class="dropdown">
+                                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-external-link-alt"></i> Externe
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="https://destockpiecesauto.autodata.fr/databox.php#vehicule/immat" target="_blank" rel="noopener">DataBox</a></li>
+                                            <li><a class="dropdown-item" href="https://aznegoce.inoshop.net/search" target="_blank" rel="noopener">AZ</a></li>
+                                            <li><a class="dropdown-item" href="https://apcat.eu/" target="_blank" rel="noopener">AP</a></li>
+                                            <li><a class="dropdown-item" href="https://ottogo.inoshop.net/search" target="_blank" rel="noopener">OttoGo</a></li>
+                                            <li><a class="dropdown-item" href="https://ksdistribpro.fr/index.php" target="_blank" rel="noopener">KS Distrib</a></li>
+                                            <li><a class="dropdown-item" href="https://mymga.fr/" target="_blank" rel="noopener">MyMGA</a></li>
+                                            <li><a class="dropdown-item" href="https://formule1.acrgroup.fr/CCDISP.HTM" target="_blank" rel="noopener">Formule 1</a></li>
+                                            <li><a class="dropdown-item" href="https://www.idlp.fr/" target="_blank" rel="noopener">IDLP</a></li>
+                                            <li><a class="dropdown-item" href="https://shopgroupeidlp.fr:5083/CCDISP.HTM" target="_blank" rel="noopener">Shop IDLP</a></li>
+                                            <li><a class="dropdown-item" href="http://siteweb.cal92.fr/" target="_blank" rel="noopener">CAL92</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form action="{{ route('sales.update', $order->numdoc) }}" method="POST" id="salesForm" novalidate>
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="id" value="{{ $order->id }}">
 
-                                <div class="row mb-3">
-                                    <div class="col-md-4 mb-3">
-                                        <button type="button" id="openCreateCustomerModal" class="btn btn-outline-success btn-round">
-                                            Nouveau Client <i class="fas fa-plus-circle ms-1"></i>
-                                        </button>
-                                        <a href="/newcustomer" onclick="window.open(this.href,'popupWindow','width=1200,height=700,scrollbars=yes'); return false;" class="btn btn-outline-primary btn-round ms-2">Liste Clients ⟰</a>
-                                        <hr>
+                                <div class="row top-row mb-2">
+                                    <div class="col-lg-4 col-12 mb-2">
+                                        <label class="form-label mb-1">Client</label>
                                         <select name="customer_id" id="customer_id" class="form-control select2" required>
                                             <option value="" disabled>Sélectionner un client</option>
                                             @foreach ($customers as $customer)
-                                                <option value="{{ $customer->id }}" data-tva="{{ $customer->tvaGroup->rate ?? 0 }}"
-                                                    {{ $customer->id == $order->customer_id ? 'selected' : '' }}>{{ $customer->name }}</option>
+                                                <option value="{{ $customer->id }}"
+                                                        data-tva="{{ $customer->tvaGroup->rate ?? 0 }}"
+                                                        data-type="{{ $customer->type }}"
+                                                        data-name="{{ $customer->name }}"
+                                                        data-email="{{ $customer->email }}"
+                                                        data-phone="{{ $customer->phone1 }}"
+                                                        data-solde="{{ $customer->solde }}"
+                                                        {{ $customer->id == $order->customer_id ? 'selected' : '' }}>{{ $customer->name }}</option>
                                             @endforeach
                                         </select>
                                         <input type="hidden" name="tva_rate" id="tva_rate" value="{{ $order->tva_rate }}">
                                     </div>
 
-                                    <div class="col-md-5 mb-3" id="vehicle_group">
-                                        <label class="form-label fw-semibold text-dark">
-                                            Associer un véhicule <span class="text-muted fw-normal fs-sm">(Automatique via plaque)</span>
+                                    <div class="col-lg-6 col-12 mb-2" id="vehicle_group">
+                                        <label class="form-label mb-1">
+                                            Véhicule
+                                            <span class="text-muted fw-normal fs-sm">(automatique via la plaque d'immatriculation)</span>
                                         </label>
-                                        <div class="input-group input-group-sm mb-3">
-                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                            <input type="text" id="plate_search" class="form-control" placeholder="Ex: AB-123-CD">
-                                            <button type="button" id="searchByPlateBtn" class="btn btn-outline-primary">
-                                                <span class="spinner-border spinner-border-sm d-none"></span> Rechercher plaque
-                                            </button>
+                                        <div class="vg-row">
+                                            <div class="input-group vg-plate">
+                                                <input type="text" id="plate_search" class="form-control" placeholder="AB-123-CD" autocomplete="off" maxlength="12" title="Plaque d'immatriculation">
+                                                <button type="button" id="searchByPlateBtn" class="btn btn-outline-primary" title="Rechercher la plaque">
+                                                    <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                            <select name="vehicle_id" id="vehicle_id" class="form-select select2-vehicle">
+                                                <option value="">Aucun véhicule</option>
+                                            </select>
+                                            <div class="vg-actions">
+                                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addVehicleInlineModal" title="Nouveau véhicule (TECDOC)">
+                                                    <i class="fas fa-plus"></i><i class="fas fa-car"></i>
+                                                </button>
+                                                <a href="javascript:void(0)" id="loadCatalogBtn" class="btn btn-primary" disabled title="Catalogue du véhicule">
+                                                    <i class="fas fa-book-open"></i>
+                                                </a>
+                                                <a href="javascript:void(0)" id="viewHistoryBtn" class="btn btn-secondary" disabled title="Historique du véhicule">
+                                                    <i class="fas fa-history"></i>
+                                                </a>
+                                            </div>
                                         </div>
-                                        <select name="vehicle_id" id="vehicle_id" class="form-select select2-vehicle">
-                                            <option value="">Aucun véhicule</option>
+                                    </div>
+
+                                    <div class="col-lg-2 col-12 mb-2">
+                                        <label class="form-label mb-1">Date</label>
+                                        <input type="date" name="order_date" id="order_date" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" class="form-control order_date" required>
+                                    </div>
+                                </div>
+
+                                <div id="customer_banner">
+                                    <span class="cb-name" id="cb_name">{{ $order->customer->name ?? '—' }}</span>
+                                    <span class="cb-sep">|</span>
+                                    <span><span class="cb-label">Type : </span><span class="cb-val" id="cb_type">{{ $order->customer->type ?? '—' }}</span></span>
+                                    <span class="cb-sep">|</span>
+                                    <span><span class="cb-label">TVA : </span><span class="cb-val" id="cb_tva">{{ $order->tva_rate }}</span>%</span>
+                                    <span class="cb-sep">|</span>
+                                    <span><span class="cb-label">Solde : </span><span class="cb-val" id="cb_solde">{{ number_format($order->customer->solde ?? 0, 2, ',', ' ') }} €</span></span>
+                                    <span class="cb-sep">|</span>
+                                    <span style="font-size:0.78rem; color:#555;">
+                                        <i class="fas fa-envelope" style="font-size:0.70rem;"></i> <span id="cb_email">{{ $order->customer->email ?? '—' }}</span>
+                                        &nbsp;<i class="fas fa-phone" style="font-size:0.70rem;"></i> <span id="cb_phone">{{ $order->customer->phone1 ?? '—' }}</span>
+                                    </span>
+                                </div>
+
+{{-- RECHERCHE ARTICLE --}}
+                            <div class="mb-2">
+                                <div class="lh-filters">
+                                    <div class="lh-field lh-wide">
+                                        <i class="fas fa-search lh-ico"></i>
+                                        <input type="text" id="search_item" class="form-control"
+                                               placeholder="Référence, désignation... (min. 4 car.)" autocomplete="off">
+                                    </div>
+                                    <button type="button" id="add_divers_item" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> Créer un article
+                                    </button>
+                                    <button type="button" id="add_divers_item_consigne" data-type="consigne" class="btn btn-dark">
+                                        <i class="fas fa-plus"></i> Consigne
+                                    </button>
+                                </div>
+                                <div class="lh-filters">
+                                    <div class="lh-field">
+                                        <select id="filter_category" class="form-control">
+                                            <option value="">Famille</option>
+                                            @foreach(($categories ?? []) as $cat)
+                                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                            @endforeach
                                         </select>
-                                        <div class="btn-group mt-2">
-                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addVehicleInlineModal">
-                                                <i class="fas fa-plus"></i> Nouveau (TECDOC)
-                                            </button>
-                                            <a href="javascript:void(0)" id="loadCatalogBtn" class="btn btn-primary btn-sm" disabled>Catalogue</a>
-                                            <a href="javascript:void(0)" id="viewHistoryBtn" class="btn btn-secondary btn-sm" disabled>Historique</a>
-                                        </div>
                                     </div>
-
-                                    <div class="col-md-3 mb-3">
-                                        <label class="form-label">Date de commande</label>
-                                        <input type="date" name="order_date" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" class="form-control" required>
+                                    <div class="lh-field">
+                                        <select id="filter_subcategory" class="form-control">
+                                            <option value="">Sous-famille</option>
+                                        </select>
                                     </div>
-                                </div>
-
-                                <div class="mb-3" id="customer_details">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <p><strong>Client:</strong> <span id="customer_name">{{ $order->customer->name ?? '' }}</span></p>
-                                            <p><strong>TVA:</strong> <span id="customer_tva">{{ $order->tva_rate }}</span>%</p>
-                                            <!-- <p><strong>Email:</strong> <span id="customer_email">{{ $order->customer->email ?? '' }}</span></p>
-                                            <p><strong>Téléphones :</strong> <span id="customer_phone1">{{ $order->customer->phone1 ?? '' }}</span> / <span id="customer_phone2">{{ $order->customer->phone2 ?? '' }}</span></p> -->
-                                        </div>
-                                        <div class="col-md-6">
-                                            <p><strong>Adresse:</strong> <span id="customer_address">{{ $order->customer->address ?? '' }}</span></p>
-                                            <p><strong>Solde:</strong> <button type="button" class="btn btn-outline-info btn-sm balance-btn" id="balanceBtn" disabled>
-                                                <i class="fas fa-balance-scale me-1"></i> <span id="customer_balance">0,00 €</span>
-                                            </button></p>
-                                        </div>
+                                    <div class="lh-field">
+                                        <select id="filter_brand" class="form-control">
+                                            <option value="">Marque</option>
+                                        </select>
                                     </div>
+                                    <div class="lh-field">
+                                        <select id="filter_supplier_brand" class="form-control">
+                                            <option value="">Fournisseur</option>
+                                        </select>
+                                    </div>
+                                    <label class="lh-check"><input type="checkbox" id="filter_stock"> En stock</label>
+                                    <button type="button" id="filter_reset" class="btn btn-outline-secondary" title="Réinitialiser les filtres">
+                                        <i class="fas fa-undo"></i> Réinitialiser
+                                    </button>
                                 </div>
+                                <div class="sr-hint">↑ ↓ naviguer &nbsp;·&nbsp; Entrée ajouter &nbsp;·&nbsp; Échap fermer</div>
+                                <div id="search_results"></div>
+                            </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Rechercher un article</label>
-                                    <input type="text" id="search_item" class="form-control" placeholder="Par référence ou description, minimum 4 caractères">
-                                    <u><small class="form-text text-muted">Astuce : ajoutez <strong>%</strong> avant/après pour élargir la recherche.</small></u>
-                                    <div id="search_results" class="mt-2"></div>
-                                </div>
 
+                            
                                 <div class="modal fade" id="itemDetailsModal" tabindex="-1" aria-labelledby="itemDetailsLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered modal-lg">
                                         <div class="modal-content">
@@ -348,24 +530,23 @@
                                                 </table>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <h6 class="font-weight-bold mb-2 d-flex align-items-center flex-wrap gap-2">
-                                        <button type="button" id="add_divers_item" class="btn btn-outline-primary btn-sm">+ Créer un article manuellement</button>
-                                        <button type="button" id="add_divers_item" data-type="consigne" class="btn btn-outline-dark btn-sm">+ Consigne</button>
-                                    </h6>
-                                    <div class="table-responsive">
+                                    <div style="overflow-x:auto;"><div id="lines_table_wrap" style="max-height:420px; overflow-y:auto;">
                                         <table class="table table-striped table-bordered table-text-small" id="lines_table">
                                             <thead class="table-dark">
                                                 <tr style="height: 42px;">
                                                     <th class="py-1">Référence</th>
                                                     <th class="py-1">Désignation</th>
-                                                    <th class="py-1 text-center"><div class="small fw-bold">Prix Achat HT</div><div class="text-info" style="font-size: 0.63rem;">Remise → Prix Net → Marge</div></th>
+                                                    <th class="py-1 text-center">
+                                                        <div class="small fw-bold">Achat HT</div>
+                                                        <div class="text-info" style="font-size:0.63rem; line-height:1;">Remise → Net · Marge</div>
+                                                    </th>
                                                     <th class="py-1 text-center">Stock</th>
                                                     <th class="py-1 text-center">Qté</th>
                                                     <th class="py-1 text-center">PU HT</th>
@@ -386,83 +567,78 @@
                                                         $stock = $item->stock_quantity ?? 0;
                                                         $location = $item->location ?? '-';
                                                         $isActive = $item->is_active ?? false;
+                                                        $lineName = $item ? $item->name : ($line->item_name ?? '-');
                                                     @endphp
                                                     <tr data-line-id="{{ $index }}">
                                                         <td>
-                                                            <div class="d-flex align-items-center gap-1">
-                                                                <span class="font-weight-bold">{{ $line->article_code }}</span>
-                                                                <button type="button" class="btn btn-xs btn-outline-secondary copy-line-code px-1 py-0" data-code="{{ $line->article_code }}"><i class="fas fa-copy"></i></button>
-                                                            </div><br>
+                                                            <div style="display:flex;align-items:center;gap:3px;">
+                                                                <span class="ref-code" title="{{ $line->article_code }}">{{ $line->article_code }}</span>
+                                                                <button type="button" class="btn btn-xs btn-outline-secondary copy-line-code px-1 py-0" data-code="{{ $line->article_code }}" title="Copier la référence" style="flex-shrink:0;font-size:0.65rem;padding:1px 4px;border-radius:3px;"><i class="fas fa-copy"></i></button>
+                                                            </div>
                                                             <span class="badge bg-{{ $isActive ? 'success' : 'danger' }} badge-very-sm">{{ $isActive ? 'actif' : 'bloqué' }}</span>
                                                             <input type="hidden" name="lines[{{ $index }}][line_id]" value="{{ $line->id }}">
                                                             <input type="hidden" name="lines[{{ $index }}][article_code]" value="{{ $line->article_code }}">
                                                         </td>
-                                                        <td>{{ $item ? $item->name : $line->item_name ?? '-' }}</td>
+                                                        <td><span class="des-name">{{ $lineName }}</span></td>
                                                         <td class="p-1">
-                                                            <div class="purchase-price-block">
-                                                                <div class="d-flex gap-1 align-items-center mb-1">
-                                                                    <div class="input-group input-group-sm flex-fill">
-                                                                        <span class="input-group-text">€</span>
+                                                            <div class="purchase-price-block pp-block">
+                                                                <div class="pp-r1">
+                                                                    <div class="input-group input-group-sm pp-cost"><span class="input-group-text">€</span>
                                                                         <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
-                                                                               value="{{ number_format($costPrice, 2) }}" name="lines[{{ $index }}][unit_coast]">
+                                                                               value="{{ number_format($costPrice, 2, '.', '') }}" name="lines[{{ $index }}][unit_coast]">
                                                                     </div>
-                                                                    <select class="form-select form-select-sm supplier-select"
-                                                                            name="lines[{{ $index }}][supplier_id]" data-selected="{{ $supplierId }}"></select>
-                                                                </div>
-                                                                <div class="d-flex gap-1 align-items-center justify-content-between">
-                                                                    <div class="input-group input-group-sm" style="width:105px;">
-                                                                        <input type="number" min="0" max="100" step="0.1"
-                                                                               class="form-control form-control-sm text-end purchase-discount"
+                                                                    <div class="input-group input-group-sm pp-disc">
+                                                                        <input type="number" min="0" max="100" step="0.1" class="form-control form-control-sm text-end purchase-discount"
                                                                                value="{{ $purchaseDiscount }}" name="lines[{{ $index }}][discount_coast]">
                                                                         <span class="input-group-text">%</span>
                                                                     </div>
-                                                                    <span class="text-muted small">→</span>
-                                                                    <span class="fw-bold text-success net-price">0,00 €</span>
+                                                                    <span class="text-muted small">→</span><span class="fw-bold text-success net-price">0,00 €</span>
                                                                 </div>
-                                                                <small class="text-muted d-block text-end mt-1">
-                                                                    Marge nette : <span class="margin-display text-primary fw-bold">0%</span>
-                                                                    (<span class="margin-euro text-primary">0,00 €</span>)
-                                                                </small>
+                                                                <div class="pp-r2">
+                                                                    <select class="form-select form-select-sm supplier-select" name="lines[{{ $index }}][supplier_id]" data-selected="{{ $supplierId }}"><option value="">Fournisseur</option></select>
+                                                                    <span class="pp-margin">Marge <span class="margin-display fw-bold">0%</span> <small>(<span class="margin-euro">0,00 €</span>)</small></span>
+                                                                </div>
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <button type="button" class="btn btn-outline-primary btn-sm stock-details-btn"
-                                                                    data-code="{{ $line->article_code }}" data-name="{{ $item ? $item->name : '-' }}">
-                                                                {{ $stock }}
-                                                            </button><br>
+                                                                    data-code="{{ $line->article_code }}" data-name="{{ $lineName }}">{{ $stock }}</button><br>
                                                             <small class="text-muted" style="font-size: 0.7rem;">{{ $location }}</small>
                                                         </td>
                                                         <td><input type="number" name="lines[{{ $index }}][ordered_quantity]" class="form-control quantity" value="{{ $line->ordered_quantity }}" min="0"></td>
-                                                        <td><input type="number" step="0.01" name="lines[{{ $index }}][unit_price_ht]" class="form-control unit_price_ht" value="{{ number_format($line->unit_price_ht, 2) }}"></td>
-                                                        <td><input type="number" step="0.01" name="lines[{{ $index }}][unit_price_ttc]" class="form-control unit_price_ttc" value="{{ number_format($line->unit_price_ttc ?? $line->unit_price_ht * (1 + $order->tva_rate/100), 2) }}"></td>
+                                                        <td><input type="number" step="0.01" name="lines[{{ $index }}][unit_price_ht]" class="form-control unit_price_ht" value="{{ number_format($line->unit_price_ht, 2, '.', '') }}"></td>
+                                                        <td><input type="number" step="0.01" name="lines[{{ $index }}][unit_price_ttc]" class="form-control unit_price_ttc" value="{{ number_format($line->unit_price_ttc ?? $line->unit_price_ht * (1 + $order->tva_rate/100), 2, '.', '') }}"></td>
                                                         <td><input type="number" name="lines[{{ $index }}][remise]" class="form-control remise" value="{{ $line->remise }}" min="0" max="100" step="0.01"></td>
-                                                        <td class="text-right total_ht">{{ number_format($line->total_ligne_ht, 2) }}</td>
-                                                        <td class="text-right total_ttc">{{ number_format($line->total_ligne_ttc, 2) }}</td>
+                                                        <td class="text-right total_ht">{{ number_format($line->total_ligne_ht, 2, ',', ' ') }}</td>
+                                                        <td class="text-right total_ttc">{{ number_format($line->total_ligne_ttc, 2, ',', ' ') }}</td>
                                                         <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"><i class="fas fa-trash-alt"></i></button></td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
                                         </table>
-                                    </div>
-                                    <div class="total-display mt-2 text-end">
-                                        <h6 class="mb-1">Total HT : <span id="total_ht_global" class="text-danger fw-bold">{{ number_format($order->total_ht, 2) }}</span> €</h6>
-                                        <h5 class="mb-0">Total TTC : <span id="total_ttc_global" class="text-success fw-bold">{{ number_format($order->total_ttc, 2) }}</span> €</h5>
-                                    </div>
+                                    </div></div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Notes / Commentaire</label>
-                                    <textarea name="notes" class="form-control" rows="3">{{ $order->notes }}</textarea>
+                                    <textarea name="notes" id="notes" class="form-control" rows="2">{{ $order->notes }}</textarea>
                                 </div>
 
-                                <div class="text-end">
-                                    <button type="submit" name="action" value="save" class="btn btn-warning px-3">Enregistrer</button>
-                                    <button type="submit" name="action" value="validate" class="btn btn-primary px-3 ms-2">Enregistrer et Valider BL</button>
-                                    <button type="submit" name="action" value="validate_and_invoice" class="btn btn-success px-3 ms-2">Enregistrer et Facturer</button>
+                                <div class="lh-actionbar">
+                                    <div class="ab-totals">
+                                        <div>Total HT : <b id="total_ht_global" class="text-danger">{{ number_format($order->total_ht, 2, ',', ' ') }}</b> €</div>
+                                        <div>Total TTC : <b id="total_ttc_global" class="text-success">{{ number_format($order->total_ttc, 2, ',', ' ') }}</b> €</div>
+                                    </div>
+                                    <div class="ab-btns">
+                                        <button type="submit" name="action" value="save" class="btn btn-warning js-submit-btn"><i class="fas fa-save"></i> Enregistrer</button>
+                                        <button type="submit" name="action" value="validate" class="btn btn-primary js-submit-btn"><i class="fas fa-check"></i> Enregistrer et valider BL</button>
+                                        <button type="submit" name="action" value="validate_and_invoice" class="btn btn-success js-submit-btn"><i class="fas fa-file-invoice-dollar"></i> Enregistrer et facturer</button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
                     </div>
+
                 </div>
             </div>
 
@@ -482,7 +658,9 @@
                             <hr>
                             <h6><i class="fas fa-exchange-alt me-1"></i> Mouvements de stock récents :</h6>
                             <table class="table table-bordered table-sm" id="movementTable">
-                                <thead class="table-light"><tr><th>Type</th><th>QTE</th><th>Magasin</th><th>Prix.HT</th><th>Source</th><th>Référence</th></tr></thead>
+                                <thead class="table-light"><tr><th>Type</th><th>QTE</th><th>Magasin</th>
+                                <th>PU HT net<br><small class="fw-normal text-muted">après remise</small></th><th>PU TTC net<br><small class="fw-normal text-muted">après remise</small></th>
+                                <th>Source</th><th>Référence</th></tr></thead>
                                 <tbody id="movementTableBody"></tbody>
                             </table>
                         </div>
@@ -565,377 +743,633 @@
 
     <script>
         window.suppliersList = @json($suppliersForSelect2);
+        window.categoriesList = @json(isset($categories) ? $categories : []);
+        window.subcategoriesList = @json(isset($subcategories) ? $subcategories : []);
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         $(document).ready(function () {
-            function round(number, decimals = 2) {
-                const factor = Math.pow(10, decimals);
-                return Math.round((number * factor) + Number.EPSILON) / factor;
-            }
-            function formatFrench(number, decimals = 2) {
-                return round(number, decimals).toLocaleString('fr-FR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-            }
 
-            $('#customer_id').select2({ width: '100%' });
-            $('#vehicle_id').select2({ width: '100%', placeholder: 'Aucun véhicule', allowClear: true });
-
-            let lineCount = $('#lines_body tr').length;
-
-            if ($('#customer_id').val()) {
-    let customerId = $('#customer_id').val();
-    let currentVehicleId = {{ $order->vehicle_id ?? 'null' }}; // ID du véhicule actuel dans la commande
-    let tvaRate = parseFloat($('#customer_id option:selected').data('tva') || 0);
-    
-    $('#tva_rate').val(tvaRate);
-    $('#customer_details').show();
-    $('#vehicle_group').show();
-
-    $.get('/customers/' + customerId + '/vehicles', function(data) {
-        $('#vehicle_id').empty().append('<option value="">Aucun véhicule</option>');
-        
-        data.forEach(v => {
-            let text = `${v.license_plate} (${v.brand_name} ${v.model_name} - ${v.engine_description})`;
-            let option = new Option(text, v.id, false, v.id == currentVehicleId);
-            $('#vehicle_id').append(option);
-        });
-
-        // === PRÉ-SÉLECTION EXPLICITE DU VÉHICULE ACTUEL ===
-        if (currentVehicleId) {
-            $('#vehicle_id').val(currentVehicleId).trigger('change');
-        }
-
-        // Mise à jour des boutons Catalogue et Historique
-        updateCatalogButton();
-        updateHistoryButton();
-    }).fail(function() {
-        console.error("Erreur lors du chargement des véhicules du client");
-    });
+// === ARRONDISSEMENT & FORMATAGE ===
+function round(number, decimals) {
+    decimals = (decimals === undefined) ? 2 : decimals;
+    var factor = Math.pow(10, decimals);
+    return Math.round((number * factor) + Number.EPSILON) / factor;
+}
+function formatFrench(number, decimals) {
+    decimals = (decimals === undefined) ? 2 : decimals;
+    return round(number, decimals).toLocaleString('fr-FR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+function esc(s) {
+    return String(s === null || s === undefined ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function discountFor(rates, type) {
+    type = (type || '').toLowerCase();
+    if (type.indexOf('professionnel') !== -1) return rates.pro;
+    if (type.indexOf('jobber') !== -1) return rates.jobber;
+    return rates.general;
 }
 
-            $('.supplier-select').each(function() {
-                let $select = $(this);
-                let supplierId = $select.data('selected') || null;
-                $select.select2({ width: '100%', placeholder: 'Fournisseur', allowClear: true, data: window.suppliersList });
-                if (supplierId) $select.val(supplierId).trigger('change');
-            });
+var dirty = false, submitting = false;
+var lineCount = $('#lines_body tr').length;
 
-            function updateGlobalTotals() {
-                let totalHtGlobal = 0;
-                let totalTtcGlobal = 0;
-                $('#lines_body tr').each(function () {
-                    let htText = $(this).find('.total_ht').text().replace(/[^\d,\.-]/g, '').replace(',', '.');
-                    let ttcText = $(this).find('.total_ttc').text().replace(/[^\d,\.-]/g, '').replace(',', '.');
-                    totalHtGlobal += parseFloat(htText) || 0;
-                    totalTtcGlobal += parseFloat(ttcText) || 0;
+$('#customer_id').select2({ width: '100%' });
+$('#vehicle_id').select2({ width: '100%', placeholder: 'Aucun véhicule', allowClear: true });
+
+// Client courant (lu depuis les data-* de l'option sélectionnée)
+function custData() {
+    var $o = $('#customer_id option:selected');
+    if (!$o.length || !$o.val()) return null;
+    return {
+        id: $o.val(), name: $o.attr('data-name') || $o.text(), type: ($o.attr('data-type') || '').toLowerCase().trim(),
+        tva: parseFloat($o.attr('data-tva')) || 0, solde: parseFloat($o.attr('data-solde')) || 0,
+        email: $o.attr('data-email') || '', phone: $o.attr('data-phone') || ''
+    };
+}
+function fillBanner(cd) {
+    $('#cb_name').text((cd.name || '—').toUpperCase());
+    $('#cb_type').text(cd.type || '—');
+    $('#cb_tva').text(cd.tva);
+    $('#cb_solde').text(formatFrench(cd.solde) + ' €').css('color', cd.solde >= 0 ? '#1a7a3a' : '#c0200d');
+    $('#cb_email').text(cd.email || '—');
+    $('#cb_phone').text(cd.phone || '—');
+}
+
+// Recalcul de toutes les lignes quand le client change (TVA + remise selon le type)
+function recalcAllLines() {
+    var cd = custData();
+    var type = cd ? cd.type : '';
+    var tva = parseFloat($('#tva_rate').val()) || 0;
+    var n = 0;
+    $('#lines_body tr').each(function () {
+        var $r = $(this), rates = $r.data('rates');
+        if (rates && !$r.data('remiseManual')) $r.find('.remise').val(discountFor(rates, type).toFixed(2));
+        $r.data('last-modified', 'ht');
+        updateLineTotals($r, tva);
+        updatePurchaseMargin($r);
+        n++;
+    });
+    updateGlobalTotals();
+    return n;
+}
+
+// === VÉHICULES / CATALOGUE / HISTORIQUE ===
+function updateCatalogButton() {
+    var customerId = $('#customer_id').val(), vehicleId = $('#vehicle_id').val(), $btn = $('#loadCatalogBtn');
+    if (customerId && vehicleId) {
+        var href = '/customers/' + customerId + '/vehicles/' + vehicleId + '/catalog';
+        $btn.attr('href', href).removeAttr('disabled').off('click').on('click', function (e) { e.preventDefault(); window.open(href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); });
+    } else {
+        $btn.removeAttr('href').attr('disabled', 'disabled');
+    }
+}
+function updateHistoryButton() {
+    var vehicleId = $('#vehicle_id').val(), customerId = $('#customer_id').val(), $btn = $('#viewHistoryBtn');
+    if (vehicleId && customerId) {
+        $btn.removeAttr('disabled').off('click').on('click', function (e) { e.preventDefault(); window.open('/vehicles/' + vehicleId + '/history', 'popupWindow', 'width=1000,height=700,scrollbars=yes'); });
+    } else {
+        $btn.attr('disabled', 'disabled');
+    }
+}
+function loadVehicles(customerId, selectedId) {
+    $('#vehicle_group').show();
+    $.get('/customers/' + customerId + '/vehicles', function (data) {
+        var $v = $('#vehicle_id');
+        $v.empty().append('<option value="">Aucun véhicule</option>');
+        data.forEach(function (v) {
+            var text = v.license_plate + ' (' + v.brand_name + ' ' + v.model_name + ' - ' + v.engine_description + ')';
+            $v.append(new Option(text, v.id, false, selectedId && v.id == selectedId));
+        });
+        if (selectedId) $v.val(selectedId);
+        $v.trigger('change');
+    }).fail(function () { console.error('Erreur lors du chargement des véhicules du client'); });
+}
+$('#vehicle_id').on('change', function () { updateCatalogButton(); updateHistoryButton(); });
+
+var currentVehicleId = {{ $order->vehicle_id ?? 'null' }};   // véhicule actuel de la commande
+if ($('#customer_id').val()) {
+    var cd0 = custData();
+    if (cd0) { $('#tva_rate').val(cd0.tva); fillBanner(cd0); }
+    loadVehicles($('#customer_id').val(), currentVehicleId);
+}
+
+// Changement de client : TVA, remises, bandeau, véhicules
+$('#customer_id').on('change', function () {
+    var cd = custData();
+    if (!cd) { $('#tva_rate').val(0); return; }
+    $('#tva_rate').val(cd.tva);
+    fillBanner(cd);
+    $('#vehicle_id').empty().append('<option value="">Aucun véhicule</option>').trigger('change');
+    loadVehicles(cd.id, null);
+    var n = recalcAllLines();
+    if (n > 0) { Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'TVA et remises recalculées pour ce client', showConfirmButton: false, timer: 3000 }); }
+    setTimeout(function () { $('#search_item').trigger('focus'); }, 200);
+});
+$(document).on('select2:select select2:clear', function () { dirty = true; });
+
+// === TOTAUX GLOBAUX ===
+function updateGlobalTotals() {
+    var totalHtGlobal = 0, totalTtcGlobal = 0;
+    $('#lines_body tr').each(function () {
+        var ht  = parseFloat($(this).find('.total_ht').text().replace(/[^\d,\.-]/g,'').replace(',','.'))  || 0;
+        var ttc = parseFloat($(this).find('.total_ttc').text().replace(/[^\d,\.-]/g,'').replace(',','.')) || 0;
+        totalHtGlobal  += round(ht);
+        totalTtcGlobal += round(ttc);
+    });
+    totalHtGlobal  = round(totalHtGlobal,  2);
+    totalTtcGlobal = round(totalTtcGlobal, 2);
+    $('#total_ht_global').text(formatFrench(totalHtGlobal));
+    $('#total_ttc_global').text(formatFrench(totalTtcGlobal));
+}
+
+
+// === RECHERCHE ARTICLE ===
+var CATS = {}, SUBS = {};
+(window.categoriesList || []).forEach(function (c) { CATS[String(c.id)] = c.name; });
+(window.subcategoriesList || []).forEach(function (s) { SUBS[String(s.id)] = s.name; });
+
+function initFilterSelect($el, ph) {
+    $el.select2({ width: '100%', placeholder: ph, allowClear: true, language: { noResults: function () { return 'Aucun résultat'; } } });
+}
+initFilterSelect($('#filter_category'), 'Famille');
+initFilterSelect($('#filter_subcategory'), 'Sous-famille');
+initFilterSelect($('#filter_brand'), 'Marque');
+initFilterSelect($('#filter_supplier_brand'), 'Fournisseur');
+
+function rebuildSubs(catId) {
+    var $s = $('#filter_subcategory');
+    $s.empty().append($('<option>').val('').text('Sous-famille'));
+    (window.subcategoriesList || []).forEach(function (x) {
+        if (catId && String(x.category_id) !== String(catId)) return;
+        $s.append($('<option>').val(x.id).text((x.code ? x.code + ' – ' : '') + x.name));
+    });
+    $s.val('').trigger('change.select2');
+}
+rebuildSubs('');
+
+var searchXhr = null, searchSeq = 0, searchTimer = null, searchTimerPending = false, pendingEnter = false;
+function setSearchBusy(on) {
+    $('#search_item').closest('.lh-field').find('i.lh-ico').toggleClass('fa-search', !on).toggleClass('fa-spinner fa-spin', on);
+}
+var lastResults = [], hasResults = false, activeIdx = -1;
+
+function addFacetOptions($sel, vals) {
+    var cur = $sel.val() || '', have = {}, added = false;
+    $sel.find('option').each(function () { have[this.value] = 1; });
+    vals.forEach(function (v) {
+        if (v && !have[v]) { $sel.append($('<option>').val(v).text(v)); have[v] = 1; added = true; }
+    });
+    if (added) $sel.val(cur).trigger('change.select2');
+}
+function resetFacets() {
+    $('#filter_brand, #filter_supplier_brand').each(function () {
+        $(this).find('option:not(:first)').remove();
+        $(this).val('').trigger('change.select2');
+    });
+}
+function resetResults() {
+    if (searchXhr) { searchXhr.abort(); searchXhr = null; }
+    searchSeq++;
+    clearTimeout(searchTimer); searchTimerPending = false;
+    lastResults = []; hasResults = false; activeIdx = -1; pendingEnter = false;
+    setSearchBusy(false);
+    $('#search_results').empty();
+}
+function searchParams() {
+    return {
+        query: ($('#search_item').val() || '').trim(),
+        category_id: $('#filter_category').val() || '',
+        subcategory_id: $('#filter_subcategory').val() || ''
+    };
+}
+function scheduleSearch(immediate) {
+    clearTimeout(searchTimer);
+    searchTimerPending = true;
+    searchTimer = setTimeout(runSearch, immediate ? 0 : 300);
+}
+function runSearch() {
+    searchTimerPending = false;
+    var p = searchParams();
+    if (searchXhr) { searchXhr.abort(); searchXhr = null; }
+    if (p.query.length < 4 && !p.category_id && !p.subcategory_id) {
+        resetResults(); resetFacets(); return;
+    }
+    var seq = ++searchSeq;
+    setSearchBusy(true);
+    if (!$('#search_results .sr-item').length) $('#search_results').html('<div class="sr-empty p-2 text-muted">Recherche…</div>');
+    searchXhr = $.ajax({
+        url: '{{ route("sales.items.search") }}', method: 'GET', data: p,
+        success: function (data) {
+            if (seq !== searchSeq) return;
+            lastResults = Array.isArray(data) ? data : [];
+            hasResults = true;
+            addFacetOptions($('#filter_supplier_brand'), lastResults.map(function (i) { return i.supplier; }));
+            addFacetOptions($('#filter_brand'), lastResults.map(function (i) { return i.brand; }));
+            renderResults();
+        },
+        error: function (xhr, status) {
+            if (status === 'abort' || seq !== searchSeq) return;
+            $('#search_results').html('<div class="sr-empty p-2 text-danger">Erreur de recherche, réessayez.</div>');
+        },
+        complete: function () { if (seq === searchSeq) { searchXhr = null; setSearchBusy(false); } }
+    });
+}
+function renderResults() {
+    if (!hasResults) return;
+    var brandF = $('#filter_brand').val() || '', supF = $('#filter_supplier_brand').val() || '';
+    var onlyStock = $('#filter_stock').is(':checked');
+    var $r = $('#search_results').empty();
+    activeIdx = -1;
+    var shown = 0;
+    lastResults.forEach(function (it, i) {
+        if (brandF && it.brand !== brandF) return;
+        if (supF && it.supplier !== supF) return;
+        var stock = parseFloat(it.stock_quantity) || 0;
+        if (onlyStock && !(stock > 0)) return;
+        shown++;
+        var brandBadge = it.brand ? '<span class="badge text-bg-primary ms-1" style="font-size:0.7rem;">🏷 ' + esc(it.brand) + '</span>' : '';
+        var famName = it.category_id ? (CATS[String(it.category_id)] || '') : '';
+        var subName = it.subcategory_id ? (SUBS[String(it.subcategory_id)] || '') : '';
+        var famBadge = (famName || subName) ? '<span class="badge text-bg-light ms-1" style="font-size:0.7rem;">' + esc(famName) + (subName ? ' › ' + esc(subName) : '') + '</span>' : '';
+        var detailsBtn = '<button type="button" class="btn btn-xs btn-outline-primary voir-details px-2 py-1" style="font-size:0.75rem;" data-idx="' + i + '"><i class="fas fa-eye me-1"></i> Détails Article</button> ';
+        var stockHtml = stock > 0
+            ? detailsBtn + '🟢 ' + esc(it.stock_quantity) + ' En Stock'
+            : detailsBtn + '🔴 Disponible auprès de <span class="badge text-bg-secondary">' + esc(it.supplier || '-') + '</span> au prix de <span class="badge text-bg-success">' + esc(it.cost_price) + ' € HT</span>';
+        $r.append(
+            '<div class="sr-item" data-idx="' + i + '">' +
+              '<span class="sr-main"><span class="badge rounded-pill text-bg-light"><b>' + esc(it.code) + '</b>' +
+              '<button type="button" class="btn btn-xs btn-outline-secondary copy-code px-1 py-0" data-code="' + esc(it.code) + '" title="Copier"><i class="fas fa-copy"></i></button></span>' +
+              brandBadge + famBadge + ' &#8660; <span class="sr-name">' + esc(it.name) + '</span> : <span class="sr-price">' + esc(it.sale_price) + ' € HT</span></span>' +
+              '<span class="sr-sub">' + stockHtml + '</span>' +
+            '</div>'
+        );
+    });
+    if (!shown) { $r.append('<div class="sr-empty p-2 text-muted">Aucun article trouvé.</div>'); pendingEnter = false; return; }
+    // le premier résultat est toujours présélectionné : ce qui est surligné est ce que « Entrée » ajoute
+    activeIdx = 0; markActive($r.find('.sr-item'), true);
+    if (pendingEnter) { pendingEnter = false; if (shown === 1) $r.find('.sr-item').first().trigger('click'); }
+}
+
+$('#search_item').on('input', function () { scheduleSearch(false); });
+$('#filter_category').on('change', function () { rebuildSubs($(this).val() || ''); scheduleSearch(true); });
+$('#filter_subcategory').on('change', function () { scheduleSearch(true); });
+$('#filter_brand, #filter_supplier_brand, #filter_stock').on('change', renderResults);
+$('#filter_reset').on('click', function () {
+    $('#filter_category').val('').trigger('change.select2');
+    rebuildSubs('');
+    $('#filter_brand, #filter_supplier_brand').val('').trigger('change.select2');
+    $('#filter_stock').prop('checked', false);
+    scheduleSearch(true);
+});
+
+// Navigation clavier dans la recherche
+function markActive($items, noScroll) {
+    $items.removeClass('active');
+    if (activeIdx >= 0 && activeIdx < $items.length) {
+        var el = $items.eq(activeIdx).addClass('active')[0];
+        if (!noScroll && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+    }
+}
+$(document).on('mousemove', '#search_results .sr-item', function () {
+    var $items = $('#search_results .sr-item'), i = $items.index(this);
+    if (i !== activeIdx) { activeIdx = i; markActive($items, true); }
+});
+$('#search_item').on('keydown', function (e) {
+    var $items = $('#search_results .sr-item');
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (!$items.length) return;
+        e.preventDefault();
+        activeIdx += (e.key === 'ArrowDown') ? 1 : -1;
+        if (activeIdx >= $items.length) activeIdx = 0;
+        if (activeIdx < 0) activeIdx = $items.length - 1;
+        markActive($items);
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (searchTimerPending || searchXhr) { pendingEnter = true; scheduleSearch(true); return; }   // saisie rapide / scanner : on attend les résultats
+        if (!$items.length) {
+            if (($('#search_item').val() || '').trim().length >= 4) { pendingEnter = true; scheduleSearch(true); }
+            return;
+        }
+        $items.eq(activeIdx >= 0 ? activeIdx : 0).trigger('click');
+    } else if (e.key === 'Escape') {
+        resetResults();
+    }
+});
+
+$(document).on('click', '.copy-code', function (e) {
+    e.stopPropagation();
+    var code = $(this).data('code'), btn = $(this), orig = btn.html();
+    try {
+        navigator.clipboard.writeText(String(code)).then(function () {
+            btn.html('<i class="fas fa-check text-success"></i>').prop('disabled', true);
+            setTimeout(function () { btn.html(orig).prop('disabled', false); }, 1000);
+        });
+    } catch (err) {}
+});
+$(document).on('click', '.copy-line-code', function (e) {
+    e.stopPropagation();
+    try { navigator.clipboard.writeText(String($(this).data('code'))); } catch (err) {}
+});
+
+// Détails article
+$(document).on('click', '.voir-details', function (e) {
+    e.stopPropagation();
+    var item = lastResults[parseInt($(this).attr('data-idx'), 10)];
+    if (!item) return;
+    function r(label, val) { return '<tr><th>' + label + '</th><td>' + esc(val === null || val === undefined || val === '' ? '-' : val) + '</td></tr>'; }
+    var html = r('Code', item.code) + r('Nom', item.name) + r('Prix Achat', (item.cost_price || '-') + ' € HT') + r('Prix Vente', (item.sale_price || '-') + ' € HT') +
+        r('Stock', item.stock_quantity || 0) + r('Famille', CATS[String(item.category_id)] || '-') + r('Sous-famille', SUBS[String(item.subcategory_id)] || '-') +
+        r('Poids', item.Poids) + r('Hauteur', item.Hauteur) + r('Longueur', item.Longueur) + r('Largeur', item.Largeur) +
+        r('Réf TecDoc', item.Ref_TecDoc) + r('Code Pays', item.Code_pays) + r('Code Douane', item.Code_douane) +
+        r('Fournisseur', item.supplier) + r('Marque', item.brand) + r('Emplacement', item.location) + r('État', item.is_active ? '✅ Actif' : '❌ Inactif');
+    $('#itemDetailsBody').html(html);
+    $('#itemDetailsModal').modal('show');
+});
+
+// === SELECT2 FOURNISSEURS ===
+function initSupplierSelect($select, supplierId) {
+    $select.select2({ width: '100%', placeholder: 'Fournisseur', allowClear: true, data: window.suppliersList });
+    if (supplierId) $select.val(supplierId).trigger('change');
+}
+
+function purchaseCellHtml(i, cost, pdisc, isConsigne) {
+    return '<div class="purchase-price-block pp-block' + (isConsigne ? ' d-none' : '') + '">' +
+        '<div class="pp-r1">' +
+            '<div class="input-group input-group-sm pp-cost"><span class="input-group-text">€</span>' +
+            '<input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input" value="' + cost + '" name="lines[' + i + '][unit_coast]"></div>' +
+            '<div class="input-group input-group-sm pp-disc"><input type="number" min="0" max="100" step="0.1" class="form-control form-control-sm text-end purchase-discount" value="' + pdisc + '" name="lines[' + i + '][discount_coast]"><span class="input-group-text">%</span></div>' +
+            '<span class="text-muted small">→</span><span class="fw-bold text-success net-price">0,00 €</span>' +
+        '</div>' +
+        '<div class="pp-r2"><select class="form-select form-select-sm supplier-select" name="lines[' + i + '][supplier_id]"' + (isConsigne ? ' disabled' : '') + '><option value="">Fournisseur</option></select>' +
+            '<span class="pp-margin">Marge <span class="margin-display fw-bold">0%</span> <small>(<span class="margin-euro">0,00 €</span>)</small></span></div>' +
+    '</div>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AJOUT D'UNE LIGNE ARTICLE (clic, Entrée clavier ou restauration brouillon)
+// ═══════════════════════════════════════════════════════════════
+function addItemLine(item, opts) {
+    opts = opts || {};
+    var restore = !!opts.restore, v = opts.values || null;
+    var customerId = $('#customer_id').val();
+    var tvaRate, customerType = '';
+    if (restore) {
+        tvaRate = parseFloat($('#tva_rate').val()) || 0;
+        var cdr = custData();
+        customerType = (cdr && cdr.type) ? String(cdr.type).toLowerCase() : '';
+    } else {
+        if (!customerId || customerId === '%%%') { Swal.fire('Erreur', 'Veuillez sélectionner un client valide.', 'error'); return; }
+        var cd = custData();
+        customerType = (cd && cd.type) ? String(cd.type).toLowerCase() : '';
+        tvaRate = parseFloat(cd && cd.tva ? cd.tva : 0);
+        if (tvaRate === 0 && cd && cd.tva == null) { Swal.fire('Erreur', 'Taux TVA non défini.', 'error'); return; }
+    }
+
+    var code      = item.code;
+    var name      = item.name;
+    var price     = parseFloat(item.sale_price)  || 0;
+    var costPrice = parseFloat(item.cost_price)  || 0;
+    var stock     = parseFloat(item.stock_quantity) || 0;
+    var location  = item.location || '-';
+    var rates = {
+        general: parseFloat(item.discount_rate || 20) || 0,
+        jobber:  parseFloat(item.discount_rate_jobber || 0) || 0,
+        pro:     parseFloat(item.discount_rate_professionnel || 0) || 0
+    };
+    var appliedDiscount = discountFor(rates, customerType);
+    var purchaseDiscount = parseFloat(item.remise_achat) || 0;
+    var unitPriceHt  = price.toFixed(2);
+    var unitPriceTtc = (price * (1 + tvaRate / 100)).toFixed(2);
+    var i = lineCount;
+
+    var row =
+        '<tr data-line-id="' + i + '">' +
+        '<td>' +
+            '<div style="display:flex;align-items:center;gap:3px;">' +
+                '<span class="ref-code" title="' + esc(code) + '">' + esc(code) + '</span>' +
+                '<button type="button" class="btn btn-xs btn-outline-secondary copy-line-code px-1 py-0" data-code="' + esc(code) + '" title="Copier la référence" style="flex-shrink:0;font-size:0.65rem;padding:1px 4px;border-radius:3px;"><i class="fas fa-copy"></i></button>' +
+            '</div>' +
+            '<input type="hidden" name="lines[' + i + '][article_code]" value="' + esc(code) + '">' +
+        '</td>' +
+        '<td><span class="des-name">' + esc(name) + '</span></td>' +
+        '<td class="p-1">' + purchaseCellHtml(i, costPrice.toFixed(2), purchaseDiscount.toFixed(2), false) + '</td>' +
+        '<td>' +
+            '<button type="button" class="btn btn-outline-primary btn-sm stock-details-btn" data-toggle="modal" data-target="#stockDetailsModal" data-code="' + esc(code) + '" data-name="' + esc(name) + '">' + stock.toFixed(0) + '</button>' +
+            '<br><small class="text-muted" style="font-size:0.7rem;">' + esc(location) + '</small>' +
+        '</td>' +
+        '<td><input type="number" name="lines[' + i + '][ordered_quantity]" class="form-control quantity" value="1" min="0"></td>' +
+        '<td><input type="number" inputmode="decimal" name="lines[' + i + '][unit_price_ht]" class="form-control unit_price_ht" value="' + unitPriceHt + '" step="0.01"></td>' +
+        '<td><input type="number" inputmode="decimal" name="lines[' + i + '][unit_price_ttc]" class="form-control unit_price_ttc" value="' + unitPriceTtc + '" step="0.01"></td>' +
+        '<td><input type="number" name="lines[' + i + '][remise]" class="form-control remise" value="' + appliedDiscount.toFixed(2) + '" min="0" max="100" step="0.01"></td>' +
+        '<td class="text-right total_ht">0,00</td>' +
+        '<td class="text-right total_ttc">0,00</td>' +
+        '<td><button type="button" class="btn btn-outline-danger btn-sm remove_line"><i class="fas fa-trash-alt"></i></button></td>' +
+        '</tr>';
+
+    lineCount++;
+    $('#lines_body').append(row);
+    var $newRow = $('#lines_body tr:last');
+    $newRow.data('rates', rates).data('draftItem', item);
+    initSupplierSelect($newRow.find('.supplier-select'), v ? (v.supplierId || '') : (item.supplier_id || ''));
+    if (v) {
+        $newRow.find('.cost-price-input').val(v.cost);
+        $newRow.find('.purchase-discount').val(v.pdisc);
+        $newRow.find('.quantity').val(v.qty);
+        $newRow.find('.unit_price_ht').val(v.puHt);
+        $newRow.find('.unit_price_ttc').val(v.puTtc);
+        $newRow.find('.remise').val(v.remise);
+        if (v.manual) $newRow.data('remiseManual', true);
+        $newRow.data('last-modified', v.last || 'ht');
+    }
+    updatePurchaseMargin($newRow);
+    updateLineTotals($newRow, tvaRate);
+    updateGlobalTotals();
+
+    if (!restore) {
+        $('#search_item').val('');
+        resetResults(); resetFacets();
+        var q = $newRow.find('.quantity');
+        q.trigger('focus'); if (q[0]) q[0].select();
+        dirty = true;
+    }
+}
+
+$(document).on('click', '#search_results .sr-item', function () {
+    var item = lastResults[parseInt($(this).attr('data-idx'), 10)];
+    if (item) addItemLine(item);
+});
+
+// Suppression ligne
+$(document).on('click', '.remove_line', function () {
+    $(this).closest('tr').remove();
+    updateGlobalTotals();
+});
+
+// Recalcul sur saisie
+$(document).on('input', '.unit_price_ht, .unit_price_ttc, .quantity, .remise', function () {
+    var row = $(this).closest('tr');
+    var tvaRate = $('#tva_rate').val() || 0;
+    if ($(this).hasClass('unit_price_ht'))  row.data('last-modified', 'ht');
+    if ($(this).hasClass('unit_price_ttc')) row.data('last-modified', 'ttc');
+    updateLineTotals(row, tvaRate);
+});
+
+// === MARGE ===
+var negativeMarginTimeout = null;
+var negativeMarginToastShown = null;
+
+function updatePurchaseMargin(row) {
+    if (row.data('is-consigne') == '1') {
+        row.find('.net-price').text('—'); row.find('.margin-display').text('—'); row.find('.margin-euro').text('—'); return;
+    }
+    var costPrice        = parseFloat(row.find('.cost-price-input').val().replace(',','.'))   || 0;
+    var purchaseDiscount = parseFloat(row.find('.purchase-discount').val().replace(',','.'))  || 0;
+    var saleDiscount     = parseFloat(row.find('.remise').val().replace(',','.'))             || 0;
+    var salePriceHt      = parseFloat(row.find('.unit_price_ht').val().replace(',','.'))      || 0;
+    var netCost       = round(costPrice * (1 - purchaseDiscount / 100), 4);
+    var realSalePrice = round(salePriceHt * (1 - saleDiscount / 100), 4);
+    row.find('.net-price').text(netCost.toFixed(2).replace('.',',') + ' €');
+    if (realSalePrice > 0 && netCost > 0) {
+        var marginPct = ((realSalePrice - netCost) / netCost) * 100;
+        var marginEur = realSalePrice - netCost;
+        row.find('.margin-display').text(marginPct.toFixed(1) + '%');
+        row.find('.margin-euro').text(marginEur.toFixed(2).replace('.',',') + ' €');
+        var $m = row.find('.margin-display').removeClass('text-danger text-warning text-success');
+        if (marginPct >= 50) $m.addClass('text-success');
+        else if (marginPct >= 30) $m.addClass('text-warning');
+        else $m.addClass('text-danger');
+        if (marginPct < 0) {
+            if (negativeMarginTimeout) clearTimeout(negativeMarginTimeout);
+            if (negativeMarginToastShown) negativeMarginToastShown.close();
+            negativeMarginTimeout = setTimeout(function () {
+                var code = row.find('td:nth-child(1) .ref-code').text().trim() || '???';
+                var name = row.find('td:nth-child(2) .des-name').text().trim();
+                var shortName = name.length > 45 ? name.substring(0,42)+'...' : name;
+                negativeMarginToastShown = Swal.fire({
+                    toast: true, position: 'top-end', icon: 'warning', title: 'VENTE À PERTE !',
+                    html: '<div class="text-start small ms-3"><b>' + code + '</b> – ' + shortName + '<br>Achat net : <b>' + netCost.toFixed(2) + ' €</b> → Vente net HT : <b>' + realSalePrice.toFixed(2) + ' €</b><br><span class="text-danger fw-bold">Perte : ' + Math.abs(marginEur).toFixed(2) + ' € (' + marginPct.toFixed(1) + '%)</span></div>',
+                    showConfirmButton: false, timer: 8000, timerProgressBar: true, background: '#fff8e1',
+                    didClose: function () { negativeMarginToastShown = null; }
                 });
-                $('#total_ht_global').text(formatFrench(totalHtGlobal));
-                $('#total_ttc_global').text(formatFrench(totalTtcGlobal));
+                negativeMarginTimeout = null;
+            }, 1700);
+        } else {
+            if (negativeMarginTimeout) { clearTimeout(negativeMarginTimeout); negativeMarginTimeout = null; }
+            if (negativeMarginToastShown) { negativeMarginToastShown.close(); negativeMarginToastShown = null; }
+        }
+    } else {
+        row.find('.margin-display').text('—'); row.find('.margin-euro').text('—');
+        if (negativeMarginTimeout) { clearTimeout(negativeMarginTimeout); negativeMarginTimeout = null; }
+        if (negativeMarginToastShown) { negativeMarginToastShown.close(); negativeMarginToastShown = null; }
+    }
+}
+$(document).on('input change', '.remise, .cost-price-input, .purchase-discount, .unit_price_ht, .unit_price_ttc', function () { updatePurchaseMargin($(this).closest('tr')); });
+
+// === TOTAUX LIGNE ===
+function updateLineTotals(row, tvaRate) {
+    tvaRate = parseFloat(tvaRate) || 0;
+    var quantity = parseFloat(row.find('.quantity').val().replace(',','.'))    || 0;
+    var remise   = parseFloat(row.find('.remise').val().replace(',','.'))      || 0;
+    var $puHt    = row.find('.unit_price_ht');
+    var $puTtc   = row.find('.unit_price_ttc');
+    var puHt     = parseFloat($puHt.val().replace(',','.'))  || 0;
+    var puTtc    = parseFloat($puTtc.val().replace(',','.')) || 0;
+    var last     = row.data('last-modified') || 'ht';
+    if (last === 'ttc' && puTtc > 0) { puHt = round(puTtc / (1 + tvaRate / 100)); $puHt.val(puHt.toFixed(2)); }
+    else if (last === 'ht' && puHt > 0) { puTtc = round(puHt * (1 + tvaRate / 100)); $puTtc.val(puTtc.toFixed(2)); }
+    var totalHtAvantRemise = round(puHt * quantity);
+    var remiseAmount       = round(totalHtAvantRemise * (remise / 100));
+    var totalHt            = round(totalHtAvantRemise - remiseAmount);
+    var totalTtc           = round(totalHt * (1 + tvaRate / 100));
+    row.find('.total_ht').text(formatFrench(round(totalHt, 2)));
+    row.find('.total_ttc').text(formatFrench(round(totalTtc, 2)));
+    updateGlobalTotals();
+}
+
+// === STOCK DETAILS ===
+$(document).on('click', '.stock-details-btn', function (event) {
+    event.preventDefault(); event.stopPropagation();
+    var code = $(this).data('code'), name = $(this).data('name');
+    $('#stockDetailsModalLabel').text('Détail du stock – ' + code + ' : ' + name);
+    $('#stockTableBody, #movementTableBody').empty();
+    $.ajax({
+        url: '{{ route("items.stock.details") }}', method: 'GET', data: { code: code },
+        success: function (data) {
+            if (data.error) {
+                $('#stockTableBody').append('<tr><td colspan="3" class="text-center text-danger">Erreur: ' + data.error + '</td></tr>');
+                $('#movementTableBody').append('<tr><td colspan="7" class="text-center text-danger">Erreur: ' + data.error + '</td></tr>');
+                return;
             }
-
-            let negativeMarginTimeout = null;
-            let negativeMarginToastShown = null;
-
-            function updatePurchaseMargin(row) {
-                if (row.data('is-consigne') == '1') {
-                    row.find('.net-price, .margin-display, .margin-euro').text('—');
-                    return;
-                }
-                let costPrice = parseFloat(row.find('.cost-price-input').val().replace(',', '.')) || 0;
-                let purchaseDiscount = parseFloat(row.find('.purchase-discount').val().replace(',', '.')) || 0;
-                let saleDiscount = parseFloat(row.find('.remise').val().replace(',', '.')) || 0;
-                let salePriceHt = parseFloat(row.find('.unit_price_ht').val().replace(',', '.')) || 0;
-                let netCost = round(costPrice * (1 - purchaseDiscount / 100), 4);
-                let realSalePrice = round(salePriceHt * (1 - saleDiscount / 100), 4);
-                row.find('.net-price').text(formatFrench(netCost) + ' €');
-                if (realSalePrice > 0 && netCost > 0) {
-                    let marginPct = ((realSalePrice - netCost) / netCost) * 100;
-                    let marginEur = realSalePrice - netCost;
-                    row.find('.margin-display').text(marginPct.toFixed(1) + '%');
-                    row.find('.margin-euro').text(formatFrench(marginEur) + ' €');
-                    let $m = row.find('.margin-display');
-                    $m.removeClass('text-danger text-warning text-success');
-                    if (marginPct >= 50) $m.addClass('text-success');
-                    else if (marginPct >= 30) $m.addClass('text-warning');
-                    else $m.addClass('text-danger');
-                    if (marginPct < 0) {
-                        if (negativeMarginTimeout) clearTimeout(negativeMarginTimeout);
-                        if (negativeMarginToastShown) negativeMarginToastShown.close();
-                        negativeMarginTimeout = setTimeout(() => {
-                            const code = row.find('td:nth-child(1) .font-weight-bold').text().trim() || '???';
-                            const name = row.find('td:nth-child(2)').text().trim();
-                            const shortName = name.length > 45 ? name.substring(0,42)+'...' : name;
-                            negativeMarginToastShown = Swal.fire({
-                                toast: true, position: 'top-end', icon: 'warning', title: 'VENTE À PERTE !',
-                                html: `<div class="text-start small ms-3"><b>${code}</b> – ${shortName}<br>Achat net : <b>${formatFrench(netCost)} €</b> → Vente net HT : <b>${formatFrench(realSalePrice)} €</b><br><span class="text-danger fw-bold">Perte : ${formatFrench(Math.abs(marginEur))} € (${marginPct.toFixed(1)}%)</span></div>`,
-                                timer: 8000, timerProgressBar: true, background: '#fff8e1'
-                            });
-                        }, 1700);
-                    } else {
-                        if (negativeMarginTimeout) clearTimeout(negativeMarginTimeout);
-                        if (negativeMarginToastShown) negativeMarginToastShown.close();
-                    }
-                } else {
-                    row.find('.margin-display, .margin-euro').text('—');
-                }
-            }
-
-            function updateLineTotals(row, tvaRate) {
-                tvaRate = parseFloat(tvaRate) || 0;
-                let quantity = parseFloat(row.find('.quantity').val().replace(',', '.')) || 0;
-                let remise = parseFloat(row.find('.remise').val().replace(',', '.')) || 0;
-                let puHt = parseFloat(row.find('.unit_price_ht').val().replace(',', '.')) || 0;
-                let puTtc = parseFloat(row.find('.unit_price_ttc').val().replace(',', '.')) || 0;
-                let lastModified = row.data('last-modified') || 'ht';
-                if (lastModified === 'ttc' && puTtc > 0) {
-                    puHt = round(puTtc / (1 + tvaRate / 100));
-                    row.find('.unit_price_ht').val(puHt.toFixed(2));
-                } else if (lastModified === 'ht' && puHt > 0) {
-                    puTtc = round(puHt * (1 + tvaRate / 100));
-                    row.find('.unit_price_ttc').val(puTtc.toFixed(2));
-                }
-                let totalHt = round(puHt * quantity * (1 - remise / 100));
-                let totalTtc = round(totalHt * (1 + tvaRate / 100));
-                row.find('.total_ht').text(formatFrench(totalHt));
-                row.find('.total_ttc').text(formatFrench(totalTtc));
-                updateGlobalTotals();
-            }
-
-            $(document).on('input', '.unit_price_ht, .unit_price_ttc, .quantity, .remise', function () {
-                let row = $(this).closest('tr');
-                if ($(this).hasClass('unit_price_ht')) row.data('last-modified', 'ht');
-                if ($(this).hasClass('unit_price_ttc')) row.data('last-modified', 'ttc');
-                updateLineTotals(row, $('#tva_rate').val());
-            });
-
-            $(document).on('input change', '.remise, .cost-price-input, .purchase-discount, .unit_price_ht, .unit_price_ttc', function () {
-                updatePurchaseMargin($(this).closest('tr'));
-            });
-
-            let searchTimeout;
-            $('#search_item').on('input', function () {
-                clearTimeout(searchTimeout);
-                let query = $(this).val();
-                if (query.length > 3) {
-                    searchTimeout = setTimeout(() => {
-                        $.ajax({
-                            url: '{{ route("sales.items.search") }}',
-                            method: 'GET',
-                            data: { query: query },
-                            success: function (data) {
-                                let results = $('#search_results').empty();
-                                if (data.length === 0) {
-                                    results.append('<div class="p-2 text-gray-500">Aucun article trouvé.</div>');
-                                } else {
-                                    data.forEach(item => {
-                                        results.append(`
-                                            <div class="p-2 border-b cursor-pointer hover:bg-gray-100"
-                                                 data-code="${item.code}" data-name="${item.name}" data-price="${item.sale_price}"
-                                                 data-cost-price="${item.cost_price}" data-stock="${item.stock_quantity || 0}"
-                                                 data-location="${item.location || ''}" data-discount-rate="${item.discount_rate || 20}"
-                                                 data-discount-rate-jobber="${item.discount_rate_jobber || 0}"
-                                                 data-discount-rate-professionnel="${item.discount_rate_professionnel || 0}"
-                                                 data-is-active="${item.is_active}" data-supplier-id="${item.supplier_id || ''}">
-                                                <span class="badge rounded-pill text-bg-light"><b>${item.code}</b>
-                                                    <button class="btn btn-xs btn-outline-secondary copy-code px-1 py-0" data-code="${item.code}"><i class="fas fa-copy"></i></button>
-                                                </span> ↔ ${item.name} : ${item.sale_price} € HT
-                                                ${item.stock_quantity > 0 ? '<br><button class="btn btn-xs btn-outline-primary voir-details px-2 py-1" style="font-size: 0.75rem;" data-item=\'' + JSON.stringify(item) + '\'><i class="fas fa-eye me-1"></i> Détails Article</button> 🟢 ' + item.stock_quantity + ' En Stock' :
-                                                '<br><button class="btn btn-xs btn-outline-primary voir-details px-2 py-1" style="font-size: 0.75rem;" data-item=\'' + JSON.stringify(item) + '\'><i class="fas fa-eye me-1"></i> Détails Article</button> 🔴 Disponible auprès de <span class="badge text-bg-secondary">' + (item.supplier || '') + '</span> au prix de <span class="badge text-bg-success">' + item.cost_price + ' € HT </span>'}
-                                            </div><hr class="my-1">
-                                        `);
-                                    });
-                                    $('.copy-code').off('click').on('click', function (e) {
-                                        e.stopPropagation();
-                                        navigator.clipboard.writeText($(this).data('code'));
-                                    });
-                                }
-                            }
-                        });
-                    }, 300);
-                } else {
-                    $('#search_results').empty();
-                }
-            });
-
-            $(document).on('click', '.voir-details', function (e) {
-                e.stopPropagation();
-                const item = JSON.parse($(this).attr('data-item'));
-                let html = '';
-                ['code','name','cost_price','sale_price','stock_quantity','Poids','Hauteur','Longueur','Largeur','Ref_TecDoc','Code_pays','Code_douane','supplier','brand','location'].forEach(k => {
-                    html += `<tr><th>${k.replace(/_/g,' ')}</th><td>${item[k] ?? '-'}</td></tr>`;
+            if (data.stocks && data.stocks.length > 0) {
+                data.stocks.forEach(function (s) { $('#stockTableBody').append('<tr><td>' + (s.store_name||'-') + '</td><td>' + s.quantity + '</td><td>' + (s.updated_at||'-') + '</td></tr>'); });
+            } else { $('#stockTableBody').append('<tr><td colspan="3" class="text-center text-muted">Aucun stock trouvé</td></tr>'); }
+            if (data.movements && data.movements.length > 0) {
+                data.movements.forEach(function (m) {
+                    var cp = parseFloat(m.cost_price), cpf = isNaN(cp) ? '-' : cp.toFixed(2) + ' €';
+var cpt = parseFloat(m.cost_price_ttc), cptf = isNaN(cpt) ? '-' : '<b>' + cpt.toFixed(2) + ' €</b><br><small class="text-muted">TVA ' + (parseFloat(m.tva_rate) || 0) + ' %</small>';
+                    $('#movementTableBody').append('<tr><td><span class="badge bg-' + (m.quantity >= 0 ? 'success' : 'danger') + '">' + (m.type||'?') + '</span><br>' + (m.created_at||'-') + '</td><td>' + (m.quantity||0) + '</td><td>' + (m.store_name||'-') + '</td><td>' + cpf + '</td><td>' + cptf + '</td><td>' + (m.supplier_name||'-') + '</td><td>' + (m.reference||'-') + '</td></tr>');
                 });
-                html += `<tr><th>État</th><td>${item.is_active ? 'Actif' : 'Inactif'}</td></tr>`;
-                $('#itemDetailsBody').html(html);
-                $('#itemDetailsModal').modal('show');
-            });
+            } else { $('#movementTableBody').append('<tr><td colspan="7" class="text-center text-muted">Aucun mouvement trouvé</td></tr>'); }
+        },
+        error: function (xhr) {
+            var msg = xhr.status === 404 ? 'Article non trouvé' : 'Erreur serveur: ' + xhr.status;
+            $('#stockTableBody').append('<tr><td colspan="3" class="text-center text-danger">' + msg + '</td></tr>');
+            $('#movementTableBody').append('<tr><td colspan="7" class="text-center text-danger">' + msg + '</td></tr>');
+        }
+    });
+    $('#stockDetailsModal').modal('show');
+});
 
-            $(document).on('click', '#search_results div', function () {
-                let customerId = $('#customer_id').val();
-                if (!customerId) return Swal.fire('Erreur', 'Sélectionnez un client d\'abord', 'error');
-                let tvaRate = parseFloat($('#customer_id option:selected').data('tva') || 0);
-                let code = $(this).data('code');
-                let name = $(this).data('name');
-                let price = parseFloat($(this).data('price')) || 0;
-                let costPrice = parseFloat($(this).data('cost-price')) || 0;
-                let stock = parseFloat($(this).data('stock')) || 0;
-                let location = $(this).data('location') || '-';
-                let isActive = $(this).data('is-active') ? 1 : 0;
-                let appliedDiscount = parseFloat($(this).data('discount-rate')) || 0;
-                let supplierId = $(this).data('supplier-id') || '';
-                let unitPriceHt = price.toFixed(2);
-                let unitPriceTtc = (price * (1 + tvaRate / 100)).toFixed(2);
-                let row = `
-                    <tr data-line-id="${lineCount}">
-                        <td><div class="d-flex align-items-center gap-1"><span class="font-weight-bold">${code}</span>
-                            <button type="button" class="btn btn-xs btn-outline-secondary copy-line-code px-1 py-0" data-code="${code}"><i class="fas fa-copy"></i></button></div><br>
-                            <span class="badge bg-${isActive ? 'success' : 'danger'} badge-very-sm">${isActive ? 'actif' : 'bloqué'}</span>
-                            <input type="hidden" name="lines[${lineCount}][article_code]" value="${code}">
-                        </td>
-                        <td>${name}</td>
-                        <td class="p-1">
-                            <div class="purchase-price-block">
-                                <div class="d-flex gap-1 align-items-center mb-1">
-                                    <div class="input-group input-group-sm flex-fill"><span class="input-group-text">€</span>
-                                        <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input" value="${costPrice.toFixed(2)}" name="lines[${lineCount}][unit_coast]">
-                                    </div>
-                                    <select class="form-select form-select-sm supplier-select" name="lines[${lineCount}][supplier_id]"></select>
-                                </div>
-                                <div class="d-flex gap-1 align-items-center justify-content-between">
-                                    <div class="input-group input-group-sm" style="width:105px;">
-                                        <input type="number" min="0" max="100" step="0.1" class="form-control form-control-sm text-end purchase-discount" value="0" name="lines[${lineCount}][discount_coast]">
-                                        <span class="input-group-text">%</span>
-                                    </div>
-                                    <span class="text-muted small">→</span>
-                                    <span class="fw-bold text-success net-price">0,00 €</span>
-                                </div>
-                                <small class="text-muted d-block text-end mt-1">Marge nette : <span class="margin-display text-primary fw-bold">0%</span> (<span class="margin-euro text-primary">0,00 €</span>)</small>
-                            </div>
-                        </td>
-                        <td><button type="button" class="btn btn-outline-primary btn-sm stock-details-btn" data-code="${code}" data-name="${name}">${stock}</button><br><small class="text-muted" style="font-size: 0.7rem;">${location}</small></td>
-                        <td><input type="number" name="lines[${lineCount}][ordered_quantity]" class="form-control quantity" value="1" min="0"></td>
-                        <td><input type="number" step="0.01" name="lines[${lineCount}][unit_price_ht]" class="form-control unit_price_ht" value="${unitPriceHt}"></td>
-                        <td><input type="number" step="0.01" name="lines[${lineCount}][unit_price_ttc]" class="form-control unit_price_ttc" value="${unitPriceTtc}"></td>
-                        <td><input type="number" name="lines[${lineCount}][remise]" class="form-control remise" value="${appliedDiscount.toFixed(2)}" min="0" max="100" step="0.01"></td>
-                        <td class="text-right total_ht">0,00</td>
-                        <td class="text-right total_ttc">0,00</td>
-                        <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"><i class="fas fa-trash-alt"></i></button></td>
-                    </tr>`;
-                $('#lines_body').append(row);
-                let $newRow = $('#lines_body tr:last');
-                let $supplierSelect = $newRow.find('.supplier-select');
-                $supplierSelect.select2({ width: '100%', placeholder: 'Fournisseur', allowClear: true, data: window.suppliersList });
-                if (supplierId) $supplierSelect.val(supplierId).trigger('change');
-                updatePurchaseMargin($newRow);
-                updateLineTotals($newRow, tvaRate);
-                lineCount++;
-                $('#search_item').val('');
-                $('#search_results').empty();
-                updateGlobalTotals();
-            });
+// === ARTICLE DIVERS ===
+function addDiversLine(isConsigne, v) {
+    var i = lineCount;
+    lineCount++;
+    v = v || {};
+    var rowHtml =
+        '<tr class="divers-line" data-line-id="divers_' + i + '" data-is-consigne="' + (isConsigne ? '1' : '0') + '">' +
+        '<td>' +
+            '<input type="text" name="lines[' + i + '][article_code]" class="form-control form-control-sm bg-light ref-code" style="font-family:\'Courier New\',monospace; font-weight:800; font-size:0.93rem; color:#003a80;" value="' + (isConsigne ? 'CONSIGNE' : esc(v.code || '')) + '" placeholder="Réf" ' + (isConsigne ? 'readonly' : '') + '>' +
+            '<input type="hidden" name="lines[' + i + '][is_new_item]" value="1">' +
+        '</td>' +
+        '<td>' +
+            '<input type="text" name="lines[' + i + '][item_name]" class="form-control form-control-sm bg-light des-name" style="font-weight:700; font-size:0.88rem; color:#111;" value="' + (isConsigne ? 'CONSIGNE' : esc(v.name || '')) + '" placeholder="Désignation" ' + (isConsigne ? 'readonly' : '') + '>' +
+        '</td>' +
+        '<td class="p-1">' +
+            purchaseCellHtml(i, '0.00', '0', isConsigne) +
+            (isConsigne ? '<div class="text-center text-muted small">Consigne — Pas de marge</div>' : '') +
+        '</td>' +
+        '<td><span class="text-muted">-</span></td>' +
+        '<td><input type="number" name="lines[' + i + '][ordered_quantity]" class="form-control quantity" value="1" min="1"></td>' +
+        '<td><input type="number" inputmode="decimal" step="0.01" name="lines[' + i + '][unit_price_ht]" class="form-control unit_price_ht" value="0.00"></td>' +
+        '<td><input type="number" inputmode="decimal" step="0.01" name="lines[' + i + '][unit_price_ttc]" class="form-control unit_price_ttc" value="0.00"></td>' +
+        '<td><input type="number" name="lines[' + i + '][remise]" class="form-control remise" value="0" min="0" max="100"></td>' +
+        '<td class="text-right total_ht">0,00</td>' +
+        '<td class="text-right total_ttc">0,00</td>' +
+        '<td><button type="button" class="btn btn-outline-danger btn-sm remove_line"><i class="fas fa-trash-alt"></i></button></td>' +
+        '</tr>';
+    $('#lines_body').append(rowHtml);
+    var $r = $('#lines_body tr:last');
+    initSupplierSelect($r.find('.supplier-select'), v.supplierId || '');
+    if (v.cost !== undefined) {
+        $r.find('.cost-price-input').val(v.cost);
+        $r.find('.purchase-discount').val(v.pdisc);
+        $r.find('.quantity').val(v.qty);
+        $r.find('.unit_price_ht').val(v.puHt);
+        $r.find('.unit_price_ttc').val(v.puTtc);
+        $r.find('.remise').val(v.remise);
+        $r.data('last-modified', v.last || 'ht');
+        updatePurchaseMargin($r);
+        updateLineTotals($r, parseFloat($('#tva_rate').val()) || 0);
+    }
+    updateGlobalTotals();
+    return $r;
+}
+$(document).on('click', '#add_divers_item, #add_divers_item_consigne', function () {
+    var $r = addDiversLine($(this).data('type') === 'consigne');
+    var f = $r.find(this.id === 'add_divers_item' ? '.ref-code' : '.unit_price_ht').first();
+    f.trigger('focus');
+    dirty = true;
+});
 
-            $(document).on('click', '.remove_line', function () {
-                $(this).closest('tr').remove();
-                updateGlobalTotals();
-            });
-
-            $(document).on('click', '#add_divers_item', function () {
-                let tvaRate = parseFloat($('#tva_rate').val()) || 20;
-                let i = lineCount++;
-                const isConsigne = $(this).data('type') === 'consigne';
-                let rowHtml = `
-                    <tr class="divers-line" data-line-id="divers_${i}" data-is-consigne="${isConsigne ? '1' : '0'}">
-                        <td><input type="text" name="lines[${i}][article_code]" class="form-control form-control-sm bg-light" value="${isConsigne ? 'CONSIGNE' : ''}" placeholder="Réf (ex: DIV001)" ${isConsigne ? 'readonly' : 'required'}>
-                            <input type="hidden" name="lines[${i}][is_new_item]" value="1"></td>
-                        <td><input type="text" name="lines[${i}][item_name]" class="form-control form-control-sm bg-light" value="${isConsigne ? 'CONSIGNE' : ''}" placeholder="Désignation" ${isConsigne ? 'readonly' : 'required'}></td>
-<td class="p-1">
-            <div class="purchase-price-block ${isConsigne ? 'd-none' : ''}">
-                <div class="d-flex gap-1 align-items-center mb-1">
-                    <div class="input-group input-group-sm flex-fill">
-                        <span class="input-group-text">€</span>
-                        <input type="number" step="0.01" class="form-control form-control-sm text-end cost-price-input"
-                               value="0.00" name="lines[${i}][unit_coast]" placeholder="Prix achat HT">
-                    </div>
-                    <select class="form-select form-select-sm supplier-select" name="lines[${i}][supplier_id]" ${isConsigne ? 'disabled' : ''}>
-                        <option value="">Fournisseur</option>
-                    </select>
-                </div>
-                <div class="d-flex gap-1 align-items-center justify-content-between">
-                    <div class="input-group input-group-sm" style="width: 105px;">
-                        <input type="number" min="0" max="100" step="0.1"
-                               class="form-control form-control-sm text-end purchase-discount"
-                               value="0" name="lines[${i}][discount_coast]" placeholder="Rem%">
-                        <span class="input-group-text">%</span>
-                    </div>
-                    <span class="text-muted small">→</span>
-                    <span class="fw-bold text-success net-price">0,00 €</span>
-                </div>
-                <small class="text-muted d-block text-end mt-1">
-                    Marge nette : <span class="margin-display text-primary fw-bold">0%</span>
-                    (<span class="margin-euro text-primary">0,00 €</span>)
-                </small>
-            </div>
-            ${isConsigne ? '<div class="text-center text-muted small">Consigne — Pas de marge</div>' : ''}
-        </td>                        
-                        <td><span class="text-muted">-</span></td>
-                        <td><input type="number" name="lines[${i}][ordered_quantity]" class="form-control quantity" value="1" min="1" required></td>
-                        <td><input type="number" step="0.01" name="lines[${i}][unit_price_ht]" class="form-control unit_price_ht" value="0.00"></td>
-                        <td><input type="number" step="0.01" name="lines[${i}][unit_price_ttc]" class="form-control unit_price_ttc" value="0.00"></td>
-                        <td><input type="number" name="lines[${i}][remise]" class="form-control remise" value="0" min="0" max="100"></td>
-                        <td class="text-right total_ht">0,00</td>
-                        <td class="text-right total_ttc">0,00</td>
-                        <td><button type="button" class="btn btn-outline-danger btn-sm remove_line"><i class="fas fa-trash-alt"></i></button></td>
-                    </tr>`;
-                $('#lines_body').append(rowHtml);
-                let $newRow = $('#lines_body tr:last');
-                if (!isConsigne) {
-                    $newRow.find('.supplier-select').select2({ width: '100%', placeholder: 'Fournisseur', allowClear: true, data: window.suppliersList });
-                }
-                updateLineTotals($newRow, tvaRate);
-                updateGlobalTotals();
-            });
-
-            function updateCatalogButton() {
-                let customerId = $('#customer_id').val();
-                let vehicleId = $('#vehicle_id').val();
-                let $btn = $('#loadCatalogBtn');
-                if (customerId && vehicleId) {
-                    $btn.attr('href', `/customers/${customerId}/vehicles/${vehicleId}/catalog`).removeAttr('disabled').off('click').on('click', e => { e.preventDefault(); window.open(this.href, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); });
-                } else {
-                    $btn.removeAttr('href').attr('disabled', 'disabled');
-                }
-            }
-
-            function updateHistoryButton() {
-                let vehicleId = $('#vehicle_id').val();
-                let customerId = $('#customer_id').val();
-                let $btn = $('#viewHistoryBtn');
-                if (vehicleId && customerId) {
-                    $btn.removeAttr('disabled').off('click').on('click', e => { e.preventDefault(); window.open(`/vehicles/${vehicleId}/history`, 'popupWindow', 'width=1000,height=700,scrollbars=yes'); });
-                } else {
-                    $btn.attr('disabled', 'disabled');
-                }
-            }
-
-            $('#vehicle_id').on('change', function () {
-                updateCatalogButton();
-                updateHistoryButton();
-            });
-
-            $(document).on('click', '.stock-details-btn', function () {
-                let code = $(this).data('code');
-                let name = $(this).data('name');
-                $('#stockDetailsModalLabel').text(`Détail du stock – ${code} : ${name}`);
-                $('#stockTableBody, #movementTableBody').empty();
-                $.ajax({
-                    url: '{{ route("items.stock.details") }}',
-                    method: 'GET',
-                    data: { code: code },
-                    success: function (data) {
-                        if (data.stocks) data.stocks.forEach(s => $('#stockTableBody').append(`<tr><td>${s.store_name || '-'}</td><td>${s.quantity}</td><td>${s.updated_at || '-'}</td></tr>`));
-                        if (data.movements) data.movements.forEach(m => $('#movementTableBody').append(`<tr><td><span class="badge bg-${m.quantity >= 0 ? 'success' : 'danger'}">${m.type}</span><br>${m.created_at || '-'}</td><td>${m.quantity}</td><td>${m.store_name || '-'}</td><td>${m.cost_price || '-'}</td><td>${m.supplier_name || '-'}</td><td>${m.reference || '-'}</td></tr>`));
-                    }
-                });
-                $('#stockDetailsModal').modal('show');
-            });
 
             const $modal = $('#addVehicleInlineModal');
             const $form = $('#quickVehicleForm');
@@ -1069,11 +1503,103 @@
     }
 });
 
-            $('#lines_body tr').each(function () {
-                updatePurchaseMargin($(this));
-                updateLineTotals($(this), $('#tva_rate').val());
-            });
-            updateGlobalTotals();
+
+// === LIGNES EXISTANTES : fournisseurs, marges, totaux ===
+$('.supplier-select').each(function () {
+    var $select = $(this), supplierId = $select.attr('data-selected') || null;
+    $select.select2({ width: '100%', placeholder: 'Fournisseur', allowClear: true, data: window.suppliersList });
+    if (supplierId) $select.val(supplierId).trigger('change');
+});
+$('#lines_body tr').each(function () {
+    updatePurchaseMargin($(this));
+    updateLineTotals($(this), $('#tva_rate').val());
+});
+updateGlobalTotals();
+
+// === ENTRÉE CLAVIER : ne soumet jamais le formulaire ===
+$('#plate_search').on('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); $('#searchByPlateBtn').trigger('click'); } });
+$('#salesForm').on('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    var $t = $(e.target);
+    if ($t.is('textarea, button, a, [type=submit], #plate_search')) return;
+    e.preventDefault();
+    if ($t.is('.quantity, .unit_price_ht, .unit_price_ttc, .remise, .cost-price-input, .purchase-discount')) {
+        $('#search_item').trigger('focus');
+    }
+});
+$(document).on('input', '.remise', function () { $(this).closest('tr').data('remiseManual', true); });
+$('#salesForm').on('input', function () { dirty = true; });
+$(document).on('click', '.remove_line', function () { dirty = true; });
+window.addEventListener('beforeunload', function (e) {
+    if (dirty && !submitting) { e.preventDefault(); e.returnValue = ''; }
+});
+
+// === ENREGISTREMENT : confirmation par bouton + anti double envoi ===
+var SUBMIT_CFG = {
+    'save':                 { title: 'Enregistrer les modifications ?', ok: 'Enregistrer',                color: '#e0a800' },
+    'validate':             { title: 'Enregistrer et valider le BL ?',  ok: 'Enregistrer et valider BL', color: '#0d6efd' },
+    'validate_and_invoice': { title: 'Enregistrer et facturer ?',       ok: 'Enregistrer et facturer',   color: '#198754' }
+};
+function validateForm() {
+    var cid = $('#customer_id').val();
+    if (!cid) return 'Sélectionnez un client.';
+    var $rows = $('#lines_body tr');
+    if (!$rows.length) return 'Ajoutez au moins une ligne.';
+    var err = '';
+    $rows.each(function (idx) {
+        var $r = $(this), n = idx + 1;
+        var qty = parseFloat(($r.find('.quantity').val() || '').replace(',', '.')) || 0;
+        if (qty <= 0) { err = 'Ligne ' + n + ' : la quantité doit être supérieure à 0.'; return false; }
+        if ($r.hasClass('divers-line')) {
+            if (!$.trim($r.find('.ref-code').val())) { err = 'Ligne ' + n + ' : la référence est obligatoire.'; return false; }
+            if (!$.trim($r.find('.des-name').val())) { err = 'Ligne ' + n + ' : la désignation est obligatoire.'; return false; }
+        }
+    });
+    if (!err && !$('#order_date').val()) err = 'La date est obligatoire.';
+    return err;
+}
+function lossLinesCount() {
+    var n = 0;
+    $('#lines_body tr').each(function () {
+        var m = parseFloat($(this).find('.margin-display').text().replace('%', '').replace(',', '.'));
+        if (!isNaN(m) && m < 0) n++;
+    });
+    return n;
+}
+document.getElementById('salesForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (submitting) return;
+    var form = this, btn = e.submitter || null;
+    var actionValue = btn ? btn.value : null;
+    var cfg = SUBMIT_CFG[actionValue];
+    if (!cfg) return;
+    var err = validateForm();
+    if (err) { Swal.fire({ icon: 'warning', title: 'Document incomplet', text: err }); return; }
+    var cd = custData(), loss = lossLinesCount();
+    var html = '<div class="text-start" style="font-size:.95rem">' +
+        '<div>Client : <b>' + esc(cd ? String(cd.name).toUpperCase() : '') + '</b></div>' +
+        '<div>Lignes : <b>' + $('#lines_body tr').length + '</b></div>' +
+        '<div>Total HT : <b>' + esc($('#total_ht_global').text()) + ' €</b> &nbsp;·&nbsp; Total TTC : <b>' + esc($('#total_ttc_global').text()) + ' €</b></div>' +
+        (loss ? '<div class="text-danger mt-2"><i class="fas fa-exclamation-triangle"></i> ' + loss + ' ligne(s) vendue(s) à perte</div>' : '') +
+        '</div>';
+    Swal.fire({
+        icon: loss ? 'warning' : 'question', title: cfg.title, html: html,
+        showCancelButton: true, confirmButtonText: cfg.ok, cancelButtonText: 'Annuler',
+        confirmButtonColor: cfg.color, reverseButtons: true, focusCancel: !!loss
+    }).then(function (res) {
+        if (!res.isConfirmed || submitting) return;
+        submitting = true;
+        // form.submit() n'envoie pas le bouton cliqué : on transmet « action » (le serveur en dépend)
+        $('<input type="hidden" name="action">').val(actionValue).appendTo(form);
+        $('.js-submit-btn').prop('disabled', true);
+        if (btn) $(btn).html('<span class="spinner-border spinner-border-sm" role="status"></span> Enregistrement…');
+        form.submit();
+    });
+});
+window.addEventListener('pageshow', function (ev) {
+    if (ev.persisted && submitting) { location.reload(); }
+});
+
         });
     </script>
 

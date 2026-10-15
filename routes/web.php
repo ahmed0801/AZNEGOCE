@@ -161,6 +161,10 @@ Route::get('/newcustomer', [CustomerController::class, 'newforsale'])->name('cus
 Route::post('/customer', [CustomerController::class, 'store'])->name('customer.store');
 Route::delete('/customer/{id}', [CustomerController::class, 'destroy'])->name('customer.destroy');
 Route::put('/customer/{id}', [CustomerController::class, 'update'])->name('customer.update');
+// Nouveau
+Route::get('/customers/form-options', [CustomerController::class, 'formOptions'])->name('customers.form-options');
+Route::post('/customers/quick-store', [CustomerController::class, 'quickStore'])->name('customers.quick-store');
+
 
 
 // Vehicle routes vehicule

@@ -1605,21 +1605,336 @@ window.addEventListener('pageshow', function (ev) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+<style>
+#quickCustomerModal .modal-content{border:none;border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(30,45,74,.25)}
+#quickCustomerModal .ncm-head{background:linear-gradient(135deg,#1E2D4A 0%,#2D4A8A 100%);color:#fff;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;position:relative}
+#quickCustomerModal .ncm-head::after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#3B82F6,#10B981,#F59E0B)}
+#quickCustomerModal .ncm-head h5{margin:0;font-size:1rem;font-weight:700;color:#fff}
+#quickCustomerModal .ncm-head small{display:block;color:rgba(255,255,255,.6);font-size:.74rem;margin-top:2px}
+#quickCustomerModal .ncm-x{background:none;border:0;color:#fff;font-size:1.6rem;line-height:1;opacity:.8;cursor:pointer;padding:0 4px}
+#quickCustomerModal .ncm-x:hover{opacity:1}
+#quickCustomerModal .modal-body{background:#F0F4FF;padding:18px 22px 6px}
+#quickCustomerModal .ncm-sec{font-size:.74rem;font-weight:800;color:#1E2D4A;letter-spacing:.07em;text-transform:uppercase;display:flex;align-items:center;gap:7px;margin:4px 0 10px;padding-bottom:6px;border-bottom:1.5px solid #E2E8F0}
+#quickCustomerModal .ncm-sec i{color:#3B82F6}
+#quickCustomerModal .ncm-sec:not(:first-child){margin-top:16px}
+#quickCustomerModal label{font-size:.7rem;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+#quickCustomerModal .ncm-req{color:#EF4444}
+#quickCustomerModal .form-control,#quickCustomerModal .form-select{border:1.5px solid #E2E8F0;border-radius:8px;font-size:.86rem;padding:7px 11px;height:auto}
+#quickCustomerModal .form-control:focus,#quickCustomerModal .form-select:focus{border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,.13)}
+#quickCustomerModal .is-invalid{border-color:#EF4444!important}
+#quickCustomerModal .ncm-err{color:#EF4444;font-size:.72rem;margin-top:2px;display:none}
+#quickCustomerModal .ncm-hint{font-size:.72rem;color:#6B7A99;margin-top:3px}
+#quickCustomerModal .ncm-more{background:none;border:0;color:#3B82F6;font-weight:600;font-size:.8rem;padding:4px 0;cursor:pointer}
+#quickCustomerModal .modal-footer{background:#fff;border-top:1.5px solid #E2E8F0;padding:12px 22px;display:flex;justify-content:space-between;align-items:center}
+#quickCustomerModal .ncm-cancel{background:none;border:1.5px solid #E2E8F0;color:#6B7A99;border-radius:8px;padding:8px 18px;font-size:.84rem;font-weight:600;cursor:pointer}
+#quickCustomerModal .ncm-cancel:hover{border-color:#3B82F6;color:#3B82F6}
+#quickCustomerModal .ncm-save{background:linear-gradient(135deg,#10B981,#059669);border:0;color:#fff;border-radius:8px;padding:9px 22px;font-size:.86rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+#quickCustomerModal .ncm-save:disabled{opacity:.6;cursor:wait}
+#quickCustomerModal .ncm-global{background:#FEE2E2;color:#991B1B;border-radius:8px;padding:8px 12px;font-size:.8rem;margin-bottom:10px;display:none}
+</style>
+
+<div class="modal fade" id="quickCustomerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="ncm-head">
+                <div>
+                    <h5><i class="fas fa-user-plus me-2"></i>Nouveau client</h5>
+                    <small>Le client sera sélectionné automatiquement sur cette commande</small>
+                </div>
+                <button type="button" class="ncm-x" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Fermer">&times;</button>
+            </div>
+
+            <form id="quickCustomerForm" novalidate autocomplete="off">
+                <div class="modal-body">
+                    <div class="ncm-global" id="ncmGlobal"></div>
+
+                    <div class="ncm-sec"><i class="fas fa-user"></i> Identité</div>
+                    <div class="row g-2">
+                        <div class="col-md-8">
+                            <label>Nom complet <span class="ncm-req">*</span></label>
+                            <input type="text" name="name" class="form-control" maxlength="255" placeholder="Ex : DUPONT Jean" required>
+                            <div class="ncm-err" data-for="name"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Type <span class="ncm-req">*</span></label>
+                            <select name="type" class="form-select" required>
+                                <option value="particulier">Particulier</option>
+                                <option value="jobber">Jobber</option>
+                                <option value="professionnel">Professionnel</option>
+                            </select>
+                            <div class="ncm-err" data-for="type"></div>
+                        </div>
+                        <div class="col-md-12"><div class="ncm-hint" id="ncmTypeHint"></div></div>
+                    </div>
+
+                    <div class="ncm-sec"><i class="fas fa-address-card"></i> Contact</div>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label>Téléphone</label>
+                            <input type="text" name="phone1" class="form-control" maxlength="20" placeholder="06 00 00 00 00">
+                            <div class="ncm-err" data-for="phone1"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Email</label>
+                            <input type="email" name="email" class="form-control" maxlength="255" placeholder="contact@exemple.fr">
+                            <div class="ncm-err" data-for="email"></div>
+                        </div>
+                    </div>
+
+                    <div class="ncm-sec"><i class="fas fa-map-marker-alt"></i> Adresse</div>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label>Adresse</label>
+                            <input type="text" name="address" class="form-control" maxlength="255" placeholder="N° et rue">
+                            <div class="ncm-err" data-for="address"></div>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Code postal</label>
+                            <input type="text" name="address_delivery" class="form-control" maxlength="255" placeholder="75001" inputmode="numeric">
+                            <div class="ncm-err" data-for="address_delivery"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Ville</label>
+                            <input type="text" name="city" class="form-control" maxlength="100" placeholder="Paris">
+                            <div class="ncm-err" data-for="city"></div>
+                        </div>
+                    </div>
+
+                    <div class="ncm-sec"><i class="fas fa-euro-sign"></i> Paramètres de vente</div>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <label>TVA <span class="ncm-req">*</span></label>
+                            <select name="tva_group_id" class="form-select" data-opt="tvaGroups" required><option value="">Chargement…</option></select>
+                            <div class="ncm-err" data-for="tva_group_id"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Groupe remise <span class="ncm-req">*</span></label>
+                            <select name="discount_group_id" class="form-select" data-opt="discountGroups" required><option value="">Chargement…</option></select>
+                            <div class="ncm-err" data-for="discount_group_id"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Plafond (€)</label>
+                            <input type="number" step="0.01" min="0" name="plafond" class="form-control" value="0">
+                            <div class="ncm-err" data-for="plafond"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Condition de paiement <span class="ncm-req">*</span></label>
+                            <select name="payment_term_id" class="form-select" data-opt="paymentTerms" required><option value="">Chargement…</option></select>
+                            <div class="ncm-err" data-for="payment_term_id"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Mode de paiement <span class="ncm-req">*</span></label>
+                            <select name="payment_mode_id" class="form-select" data-opt="paymentModes" required><option value="">Chargement…</option></select>
+                            <div class="ncm-err" data-for="payment_mode_id"></div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="ncm-more" id="ncmMoreBtn"></button>
+                    <div id="ncmMore" style="display:none;">
+                        <div class="row g-2">
+                            <div class="col-md-4"><label>SIRET</label><input type="text" name="matfiscal" class="form-control" maxlength="100" placeholder="14 chiffres"><div class="ncm-err" data-for="matfiscal"></div></div>
+                            <div class="col-md-5"><label>IBAN</label><input type="text" name="bank_no" class="form-control" maxlength="100" placeholder="FR76…"><div class="ncm-err" data-for="bank_no"></div></div>
+                            <div class="col-md-3"><label>Pays</label><input type="text" name="country" class="form-control" maxlength="100" value="France"><div class="ncm-err" data-for="country"></div></div>
+                        </div>
+                    </div>
+                    <div style="height:8px"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="ncm-cancel" data-bs-dismiss="modal" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="ncm-save" id="ncmSave"><i class="fas fa-check"></i> Créer et sélectionner</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-$(document).on('click', '#openCreateCustomerModal', function () {
-    var popup = window.open('/newcustomer', 'createCustomerPopup', 'width=1200,height=700,scrollbars=yes,resizable=yes');
-    var check = setInterval(function () {
-        try {
-            if (popup.document && popup.document.querySelector('#createItemModal')) {
-                clearInterval(check);
-                var el = popup.document.querySelector('#createItemModal');
-                var m  = new popup.bootstrap.Modal(el);
-                m.show();
-                setTimeout(function () { var ni = popup.document.querySelector('input[name="name"]'); if (ni) ni.focus(); }, 500);
+(function () {
+    var OPTIONS_URL = @json(route('customers.form-options'));
+    var STORE_URL   = @json(route('customers.quick-store'));
+
+    var modalEl = document.getElementById('quickCustomerModal');
+    var form    = document.getElementById('quickCustomerForm');
+    var saveBtn = document.getElementById('ncmSave');
+    var globalE = document.getElementById('ncmGlobal');
+    var modal   = null;
+    var optionsLoaded = false, busy = false;
+
+    function csrf() {
+        var m = document.querySelector('meta[name="csrf-token"]');
+        return m ? m.getAttribute('content') : '';
+    }
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function getModal() {
+        if (!modal) modal = new bootstrap.Modal(modalEl);
+        return modal;
+    }
+
+    /* ---------- erreurs ---------- */
+    function clearErrors() {
+        globalE.style.display = 'none'; globalE.textContent = '';
+        form.querySelectorAll('.is-invalid').forEach(function (e) { e.classList.remove('is-invalid'); });
+        form.querySelectorAll('.ncm-err').forEach(function (e) { e.style.display = 'none'; e.textContent = ''; });
+    }
+    function setError(name, msg) {
+        var el = form.elements[name], box = form.querySelector('.ncm-err[data-for="' + name + '"]');
+        if (el) el.classList.add('is-invalid');
+        if (box) { box.textContent = msg; box.style.display = 'block'; }
+        // si le champ est dans la partie facultative, on l'ouvre
+        if (el && el.closest('#ncmMore')) showMore(true);
+    }
+    function showGlobal(msg) { globalE.textContent = msg; globalE.style.display = 'block'; }
+
+    function showMore(open) {
+        document.getElementById('ncmMore').style.display = open ? 'block' : 'none';
+        document.getElementById('ncmMoreBtn').innerHTML = open
+            ? '<i class="fas fa-chevron-up me-1"></i> Masquer SIRET, IBAN et pays'
+            : '<i class="fas fa-plus-circle me-1"></i> Client professionnel ? Ajouter SIRET, IBAN, pays';
+    }
+    showMore(false);
+    document.getElementById('ncmMoreBtn').addEventListener('click', function () {
+        showMore(document.getElementById('ncmMore').style.display === 'none');
+    });
+
+    /* ---------- listes déroulantes (chargées une seule fois) ---------- */
+    function fillSelect(sel, rows, labelFn) {
+        sel.innerHTML = '';
+        rows.forEach(function (r, i) {
+            var o = document.createElement('option');
+            o.value = r.id; o.textContent = labelFn(r);
+            if (i === 0) o.selected = true;
+            sel.appendChild(o);
+        });
+        if (!rows.length) sel.innerHTML = '<option value="">— aucune —</option>';
+    }
+    function loadOptions() {
+        if (optionsLoaded) return Promise.resolve();
+        return fetch(OPTIONS_URL, { credentials: 'same-origin', headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+            .then(function (d) {
+                fillSelect(form.elements.tva_group_id,      d.tvaGroups      || [], function (x) { return x.name + ' (' + x.rate + '%)'; });
+                fillSelect(form.elements.discount_group_id, d.discountGroups || [], function (x) { return x.name + ' (' + x.discount_rate + '%)'; });
+                fillSelect(form.elements.payment_term_id,   d.paymentTerms   || [], function (x) { return x.label; });
+                fillSelect(form.elements.payment_mode_id,   d.paymentModes   || [], function (x) { return x.name; });
+                optionsLoaded = true;
+            });
+    }
+
+    /* ---------- aide selon le type ---------- */
+    function typeHint() {
+        var h = document.getElementById('ncmTypeHint');
+        h.innerHTML = form.elements.type.value === 'particulier'
+            ? '<i class="fas fa-info-circle"></i> Un particulier ne peut pas avoir de bon de livraison : la vente se fait en facture directe.'
+            : '';
+    }
+    form.elements.type.addEventListener('change', typeHint);
+
+    /* ---------- ouverture ---------- */
+    document.addEventListener('click', function (e) {
+        var b = e.target.closest ? e.target.closest('#openCreateCustomerModal') : null;
+        if (!b) return;
+        e.preventDefault();
+        form.reset(); clearErrors(); showMore(false); typeHint();
+        getModal().show();
+        loadOptions().catch(function () {
+            showGlobal('Impossible de charger les listes (TVA, remises, paiements). Fermez puis rouvrez la fenêtre.');
+        });
+    });
+    modalEl.addEventListener('shown.bs.modal', function () { form.elements.name.focus(); });
+
+    /* ---------- sélection du client créé dans la commande ---------- */
+    function selectCustomer(c) {
+        var $c = $('#customer_id');
+        $c.find('option').filter(function () { return String(this.value) === String(c.id); }).remove();
+        var opt = new Option(c.text, c.id, true, true);
+        $(opt).data('data', c);               // page avec recherche Ajax : conserve tva / solde / type…
+        $(opt).attr({                          // page de modification (liste statique) : mêmes infos en data-*
+            'data-tva': c.tva, 'data-type': c.type, 'data-name': c.name,
+            'data-email': c.email, 'data-phone': c.phone1, 'data-solde': c.solde
+        });
+        $c.append(opt).trigger('change');     // bandeau client, TVA, recalcul des lignes, véhicules, bouton BL
+        $c[0].dispatchEvent(new Event('input', { bubbles: true }));   // marque la page comme modifiée (alerte avant de quitter, brouillon)
+    }
+
+    /* ---------- envoi ---------- */
+    function send(force) {
+        var payload = {};
+        new FormData(form).forEach(function (v, k) { payload[k] = v; });
+        if (force) payload.force = 1;
+        return fetch(STORE_URL, {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf() },
+            body: JSON.stringify(payload)
+        }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, body: j }; }); });
+    }
+
+    function done(c) {
+        getModal().hide();
+        selectCustomer(c);
+        if (window.Swal) Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Client ' + (c.code || '') + ' sélectionné', showConfirmButton: false, timer: 2500 });
+    }
+
+    function submit(force) {
+        if (busy) return;
+        clearErrors();
+        var ok = true;
+        ['name', 'type', 'tva_group_id', 'discount_group_id', 'payment_term_id', 'payment_mode_id'].forEach(function (n) {
+            var el = form.elements[n];
+            if (!el || !String(el.value).trim()) { setError(n, 'Champ obligatoire'); ok = false; }
+        });
+        if (!ok) { var f = form.querySelector('.is-invalid'); if (f) f.focus(); return; }
+
+        busy = true; saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création…';
+        send(force).then(function (res) {
+            var b = res.body || {};
+            if (res.status === 200 && b.customer) { done(b.customer); return; }
+
+            if (res.status === 409 && b.duplicate) {                       // client similaire déjà présent
+                var list = (b.similar || []).map(function (s) {
+                    return '<li><b>' + esc(s.code) + '</b> — ' + esc(s.name) + (s.phone1 ? ' · ' + esc(s.phone1) : '') + '</li>';
+                }).join('');
+                Swal.fire({
+                    icon: 'warning', title: 'Client similaire existant',
+                    html: '<ul style="text-align:left;margin:0 0 8px 18px;">' + list + '</ul>Voulez-vous utiliser le client existant ou créer un nouveau client ?',
+                    showDenyButton: true, showCancelButton: true,
+                    confirmButtonText: 'Utiliser l\'existant', denyButtonText: 'Créer quand même', cancelButtonText: 'Retour'
+                }).then(function (r) {
+                    if (r.isConfirmed && b.similar && b.similar[0]) { done(b.similar[0].customer); }
+                    else if (r.isDenied) { busy = false; submit(true); }
+                });
+                return;
             }
-        } catch (e) {}
-    }, 100);
-});
+            if (res.status === 422 && b.errors) {
+                Object.keys(b.errors).forEach(function (k) { setError(k, b.errors[k][0]); });
+                if (b.message && !Object.keys(b.errors).length) showGlobal(b.message);
+                return;
+            }
+            if (res.status === 419 || res.status === 401) { showGlobal('Votre session a expiré. Rechargez la page (le brouillon de la commande est conservé).'); return; }
+            showGlobal(b.message || 'Erreur lors de la création du client.');
+        }).catch(function () {
+            showGlobal('Erreur réseau. Vérifiez la connexion et réessayez.');
+        }).then(function () {
+            busy = false; saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-check"></i> Créer et sélectionner';
+        });
+    }
+    form.addEventListener('submit', function (e) { e.preventDefault(); submit(false); });
+})();
 </script>
 
 

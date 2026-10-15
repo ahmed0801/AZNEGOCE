@@ -17,6 +17,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Log; // Added Log facade
+use Illuminate\Support\Facades\DB;
+
 
 class CustomerController extends Controller
 {
@@ -742,6 +744,126 @@ return response()->json([
 ]);
 
 }
+
+
+
+
+
+
+
+ private function customerPayload(Customer $customer): array
+    {
+        $customer->loadMissing('tvaGroup');
+ 
+        return [
+            'id'               => $customer->id,
+            'text'             => ($customer->code ? $customer->code . ' ⭆ ' : '') . $customer->name . ($customer->blocked ? ' 🔒' : ''),
+            'tva'              => $customer->tvaGroup->rate ?? 0,
+            'solde'            => $customer->solde ?? 0,
+            'code'             => $customer->code ?? '',
+            'name'             => $customer->name,
+            'email'            => $customer->email ?? '',
+            'phone1'           => $customer->phone1 ?? '',
+            'phone2'           => $customer->phone2 ?? '',
+            'address'          => $customer->address ?? '',
+            'address_delivery' => $customer->address_delivery ?? '',
+            'city'             => $customer->city ?? '',
+            'country'          => $customer->country ?? '',
+            'type'             => $customer->type,
+            'blocked'          => $customer->blocked,
+            'disabled'         => $customer->blocked,
+        ];
+    }
+ 
+    /** Listes déroulantes du modal "Nouveau client" (chargées à la première ouverture). */
+    public function formOptions()
+    {
+        return response()->json([
+            'tvaGroups'      => TvaGroup::orderBy('id')->get(['id', 'name', 'rate']),
+            'discountGroups' => DiscountGroup::orderBy('id')->get(['id', 'name', 'discount_rate']),
+            'paymentTerms'   => PaymentTerm::orderBy('id')->get(['id', 'label']),
+            'paymentModes'   => PaymentMode::where('type', 'encaissement')->orderBy('id')->get(['id', 'name']),
+        ]);
+    }
+ 
+    /** Création rapide en AJAX depuis la page de vente : renvoie le client prêt à être sélectionné. */
+    public function quickStore(Request $request)
+    {
+        $data = $request->validate([
+            'name'              => 'required|string|max:255',
+            'type'              => 'required|in:particulier,jobber,professionnel',
+            'email'             => 'nullable|email|max:255',
+            'phone1'            => 'nullable|string|max:20',
+            'phone2'            => 'nullable|string|max:20',
+            'address'           => 'nullable|string|max:255',
+            'address_delivery'  => 'nullable|string|max:255',
+            'city'              => 'nullable|string|max:100',
+            'country'           => 'nullable|string|max:100',
+            'matfiscal'         => 'nullable|string|max:100',
+            'bank_no'           => 'nullable|string|max:100',
+            'plafond'           => 'nullable|numeric|min:0',
+            'tva_group_id'      => 'required|exists:tva_groups,id',
+            'discount_group_id' => 'required|exists:discount_groups,id',
+            'payment_mode_id'   => 'required|exists:payment_modes,id',
+            'payment_term_id'   => 'required|exists:payment_terms,id',
+        ]);
+ 
+        // Doublon probable (même téléphone ou même nom) → on demande confirmation, sauf si force=1
+        if (!$request->boolean('force')) {
+            $similar = Customer::with('tvaGroup')
+                ->where(function ($q) use ($data) {
+                    $q->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($data['name']))]);
+                    if (!empty($data['phone1'])) {
+                        $q->orWhere('phone1', $data['phone1']);
+                    }
+                })
+                ->limit(3)
+                ->get();
+ 
+            if ($similar->isNotEmpty()) {
+                return response()->json([
+                    'duplicate' => true,
+                    'similar'   => $similar->map(function ($c) {
+                        return [
+                            'code'     => $c->code,
+                            'name'     => $c->name,
+                            'phone1'   => $c->phone1,
+                            'customer' => $this->customerPayload($c),
+                        ];
+                    })->values(),
+                ], 409);
+            }
+        }
+ 
+        try {
+            $customer = DB::transaction(function () use ($data) {
+                // verrou sur la souche : deux créations simultanées ne peuvent plus obtenir le même code
+                $souche = Souche::where('type', 'client')->lockForUpdate()->first();
+                if (!$souche) {
+                    throw new \RuntimeException('Souche client manquante');
+                }
+ 
+                $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
+ 
+                $customer        = new Customer($data);
+                $customer->code  = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
+                $customer->solde = 0;
+                $customer->save();
+ 
+                $souche->last_number += 1;
+                $souche->save();
+ 
+                return $customer;
+            });
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+ 
+        return response()->json(['success' => true, 'customer' => $this->customerPayload($customer)]);
+    }
+
+
+
 
 
 
