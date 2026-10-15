@@ -362,13 +362,13 @@
                                     <button type="button" id="openCreateCustomerModal" class="btn btn-success">
                                         <i class="fas fa-user-plus"></i> Nouveau client
                                     </button>
-                                    <a href="/newcustomer"
+                                    <a href="/customers"
                                        onclick="window.open(this.href,'popupWindow','width=1200,height=700,scrollbars=yes'); return false;"
                                        class="btn btn-outline-primary">
                                         <i class="fas fa-users"></i> Liste des clients
                                     </a>
                                     <a href="/articles"
-                                       onclick="window.open(this.href,'popupWindow','width=1000,height=700,scrollbars=yes'); return false;"
+                                       onclick="window.open(this.href,'popupWindow','width=1200,height=700,scrollbars=yes'); return false;"
                                        class="btn btn-outline-success">
                                         <i class="fas fa-boxes"></i> Liste des articles
                                     </a>

@@ -365,6 +365,90 @@
 #allAccountingFilterForm .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:29px}
 #allAccountingFilterForm .select2-container--default .select2-selection--single .select2-selection__arrow{height:29px}
 .modal-content .select2-dropdown{z-index:1070}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== Tableau Clients : relooking (à coller dans la balise style de la page, après les styles .cl-) ===== */
+#itemsTable{border-collapse:separate;border-spacing:0;width:100%;background:#fff;border:1px solid #E6ECF5;border-radius:14px;overflow:hidden}
+/* ⚠ combinateurs ">" : les règles ne touchent QUE les cellules de ce tableau, jamais les fenêtres (modals) ni les tableaux imbriqués */
+#itemsTable>thead>tr>th,#itemsTable>tbody>tr>td{text-align:left;vertical-align:middle;border:0;border-bottom:1px solid #EEF2F8;padding:.7rem .9rem}
+#itemsTable>tbody>tr>td:not(:last-child){font-size:.86rem;color:#1A2B4A}
+#itemsTable>thead>tr>th{background:#F6F8FC;color:#6B7A99;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid #E6ECF5;white-space:nowrap}
+#itemsTable>thead>tr>th.t-right,#itemsTable>tbody>tr>td.t-right{text-align:right}
+#itemsTable>thead>tr>th.t-center,#itemsTable>tbody>tr>td.t-center{text-align:center}
+#itemsTable>tbody>tr{transition:background .12s}
+#itemsTable>tbody>tr:hover>td{background:#F8FAFF}
+#itemsTable>tbody>tr:last-child>td{border-bottom:0}
+#itemsTable>tbody>tr.is-blocked>td:first-child{box-shadow:inset 3px 0 0 #EF4444}
+#itemsTable>tbody>tr>td:last-child{min-width:170px}   /* ni white-space ni text-align ici : les modals y sont imbriquées */
+#itemsTable .modal{text-align:left;white-space:normal}
+#itemsTable .act-btns{white-space:nowrap}
+#itemsTable .act-btns .btn{border-radius:8px}
+
+/* client */
+.cl-who{display:flex;align-items:center;gap:.7rem;min-width:200px}
+.cl-avatar{flex:0 0 38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;letter-spacing:.02em}
+.cl-avatar.t-particulier{background:#E0ECFF;color:#1D4ED8}
+.cl-avatar.t-jobber{background:#FEF0D2;color:#B45309}
+.cl-avatar.t-professionnel{background:#D6F5E8;color:#047857}
+.cl-who-txt{min-width:0}
+.cl-name{font-weight:700;color:#1A2B4A;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cl-meta{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem;margin-top:2px}
+.cl-code{font-size:.74rem;color:#8A97B1;font-weight:600}
+.cl-pill{display:inline-flex;align-items:center;gap:.25rem;border-radius:999px;padding:1px 8px;font-size:.68rem;font-weight:700}
+.cl-pill.t-particulier{background:#E0ECFF;color:#1D4ED8}
+.cl-pill.t-jobber{background:#FEF0D2;color:#B45309}
+.cl-pill.t-professionnel{background:#D6F5E8;color:#047857}
+.cl-pill.st-blocked{background:#FEE2E2;color:#B91C1C}
+
+/* adresse / contact */
+.cl-line{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.45}
+.cl-line i{width:14px;color:#9AA7C0;font-size:.75rem;margin-right:3px}
+.cl-sub{color:#6B7A99;font-size:.8rem}
+.cl-empty{color:#B6C0D4;font-size:.8rem}
+
+/* solde : bouton cliquable (ouvre les écritures comptables) */
+.cl-solde{display:inline-flex;align-items:center;gap:.45rem;white-space:nowrap;border:1.5px solid transparent;border-radius:999px;padding:4px 12px;font-size:.92rem;font-weight:800;line-height:1.2;cursor:pointer;transition:transform .12s,box-shadow .12s,background .12s}
+.cl-solde i{font-size:.72rem;opacity:.7}
+.cl-solde:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(30,45,74,.14)}
+.cl-solde:active{transform:none;box-shadow:none}
+.cl-solde.is-due{color:#C2410C;background:#FFF1E6;border-color:#FDBA74}
+.cl-solde.is-due:hover{background:#FFE4CC}
+.cl-solde.is-credit{color:#1D4ED8;background:#E8F0FF;border-color:#A9C5FF}
+.cl-solde.is-credit:hover{background:#D6E5FF}
+.cl-solde.is-zero{color:#047857;background:#E6F8F0;border-color:#9FE0C2}
+.cl-solde.is-zero:hover{background:#D3F3E5}
+.cl-solde-lbl{white-space:nowrap;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:4px;padding-right:6px}
+.cl-solde-lbl.is-due{color:#EA580C}
+.cl-solde-lbl.is-credit{color:#3B82F6}
+.cl-solde-lbl.is-zero{color:#10B981}
+
+/* plafond */
+.cl-gauge{width:130px;height:7px;border-radius:999px;background:#E9EEF6;overflow:hidden}
+.cl-gauge span{display:block;height:100%;border-radius:999px}
+.cl-gauge.is-ok span{background:#10B981}
+.cl-gauge.is-warn span{background:#F59E0B}
+.cl-gauge.is-over span{background:#EF4444}
+.cl-gauge-txt{font-size:.72rem;font-weight:600;margin-top:4px;color:#6B7A99}
+.cl-gauge-txt.is-warn{color:#B45309}
+.cl-gauge-txt.is-over{color:#B91C1C}
+
+/* véhicules */
+.cl-veh{background:#EEF4FF;color:#1D4ED8;border:0;border-radius:999px;padding:4px 12px;font-size:.8rem;font-weight:700;cursor:pointer}
+.cl-veh:hover{background:#DCE8FF}
+.cl-veh.is-empty{background:#F3F5F9;color:#9AA7C0}
     </style>
 
 
@@ -1260,68 +1344,109 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="table-responsive">
             @php $lockedIds = \App\Models\Customer::lockedIds($customers->pluck('id')->all()); @endphp
 
-            <table class="table table-bordered table-hover table-text-small" id="itemsTable">
-                <thead class="table-dark">
+            
+            
+            <table class="table cl-table" id="itemsTable">
+                <thead>
                     <tr>
-                        <th>Code</th>
-                        <th>Nom</th>
-                        <th>Adresse & Ville</th>
+                        <th>Client</th>
+                        <th>Adresse</th>
                         <th>Contact</th>
-                        <th>Solde</th>
-                        <!-- <th>Non.Fact</th> -->
+                        <th class="t-right">Solde</th>
                         <th>Plafond</th>
-                        <th>Véhicules</th>
+                        <th class="t-center">Véhicules</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($customers as $customer)
-                        <tr>
-                            <td>🧑‍💼{{ $customer->code }}
-                              <br>
-                                  @if ($customer->blocked)
-        <span class="badge bg-danger badge-very-sm">🔴 Bloqué</span>
-    @else
-        <span class="badge bg-success badge-very-sm">🟢 Actif</span>
-    @endif
-                            </td>
-                            <td>{{ $customer->name }}<br>
-                            
-                                @switch($customer->type)
-        @case('particulier')
-            <span class="badge bg-primary">Particulier</span>
-            @break
-        @case('jobber')
-            <span class="badge bg-warning text-dark">Jobber</span>
-            @break
-        @case('professionnel')
-            <span class="badge bg-success">Professionnel</span>
-            @break
-    @endswitch
-
-                            </td>
-                            <td>{{ $customer->address }} <br>
-                          🏴󠁢󠁹󠁭󠁩󠁿{{ $customer->city }}</td>
-                            <td>📞 {{ $customer->phone1 }} <br>
-                         📧 {{ $customer->email }} </td>
-
-
-
-                             <td>
- <button type="button" class="btn btn-sm btn-outline-primary solde-btn" data-bs-toggle="modal" data-bs-target="#accountingModal{{ $customer->id }}" data-customer-id="{{ $customer->id }}">
-                                                        {{ number_format($customer->solde, 2, ',', ' ') }} €
-                                                    </button>
-
-</td>
+                        @php
+                            // Convention : solde > 0 = le client nous doit de l'argent (factures non payées)
+                            $solde    = (float) ($customer->solde ?? 0);
+                            $plafond  = (float) ($customer->plafond ?? 0);
+                            $soldeCls = $solde > 0.004 ? 'is-due' : ($solde < -0.004 ? 'is-credit' : 'is-zero');
+                            $soldeLbl = $solde > 0.004 ? 'À encaisser' : ($solde < -0.004 ? 'Crédit client' : 'Soldé');
+                            $pct      = ($plafond > 0 && $solde > 0) ? (int) round($solde / $plafond * 100) : 0;
+                            $gCls     = $pct >= 100 ? 'is-over' : ($pct >= 80 ? 'is-warn' : 'is-ok');
+                            $typeKey  = in_array($customer->type, ['particulier', 'jobber', 'professionnel'], true) ? $customer->type : 'particulier';
+                            $typeLbl  = ['particulier' => 'Particulier', 'jobber' => 'Jobber', 'professionnel' => 'Professionnel'][$typeKey];
+                            $words    = preg_split('/\s+/', trim((string) $customer->name));
+                            $initials = mb_strtoupper(mb_substr($words[0] ?? '?', 0, 1) . (isset($words[1]) ? mb_substr($words[1], 0, 1) : ''));
+                            $zipCity  = trim(($customer->address_delivery ?? '') . ' ' . ($customer->city ?? ''));
+                        @endphp
+                        <tr class="{{ $customer->blocked ? 'is-blocked' : '' }}">
+                            {{-- Client --}}
                             <td>
-{{ $customer->plafond }} €
-</td>
+                                <div class="cl-who">
+                                    <span class="cl-avatar t-{{ $typeKey }}">{{ $initials }}</span>
+                                    <div class="cl-who-txt">
+                                        <div class="cl-name" title="{{ $customer->name }}">{{ $customer->name }}</div>
+                                        <div class="cl-meta">
+                                            <span class="cl-code">{{ $customer->code }}</span>
+                                            <span class="cl-pill t-{{ $typeKey }}">{{ $typeLbl }}</span>
+                                            @if ($customer->blocked)
+                                                <span class="cl-pill st-blocked"><i class="fas fa-ban"></i> Bloqué</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
 
-                         <td>
-                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewVehiclesModal{{ $customer->id }}">
-  <i class="fas fa-car"></i> <span class="badge bg-success">{{$customer->vehicles->count()}}</span>
-</button>
-                         </td>
+                            {{-- Adresse --}}
+                            <td>
+                                @if ($customer->address || $zipCity)
+                                    <div class="cl-line" title="{{ $customer->address }}">{{ $customer->address ?: '—' }}</div>
+                                    <div class="cl-line cl-sub"><i class="fas fa-map-marker-alt"></i> {{ $zipCity ?: '—' }}</div>
+                                @else
+                                    <span class="cl-empty">—</span>
+                                @endif
+                            </td>
+
+                            {{-- Contact --}}
+                            <td>
+                                <div class="cl-line">
+                                    <i class="fas fa-phone"></i>
+                                    @if ($customer->phone1) {{ $customer->phone1 }} @else <span class="cl-empty">—</span> @endif
+                                </div>
+                                <div class="cl-line cl-sub" title="{{ $customer->email }}">
+                                    <i class="fas fa-envelope"></i>
+                                    @if ($customer->email) {{ $customer->email }} @else <span class="cl-empty">—</span> @endif
+                                </div>
+                            </td>
+
+                            {{-- Solde (clic = écritures comptables) --}}
+                            <td class="t-right">
+                                <button type="button" class="solde-btn cl-solde {{ $soldeCls }}"
+                                        data-bs-toggle="modal" data-bs-target="#accountingModal{{ $customer->id }}"
+                                        data-customer-id="{{ $customer->id }}" title="Cliquer pour voir les écritures comptables de ce client">
+                                    {{ number_format($solde, 2, ',', ' ') }} € <i class="fas fa-list-alt"></i>
+                                </button>
+                                <div class="cl-solde-lbl {{ $soldeCls }}">{{ $soldeLbl }}</div>
+                            </td>
+
+                            {{-- Plafond + jauge --}}
+                            <td>
+                                @if ($plafond > 0)
+                                    <div class="cl-gauge {{ $gCls }}"><span style="width: {{ min(100, $pct) }}%"></span></div>
+                                    <div class="cl-gauge-txt {{ $gCls }}">
+                                        @if ($pct >= 100)
+                                            Dépassé de {{ number_format($solde - $plafond, 0, ',', ' ') }} €
+                                        @else
+                                            {{ $pct }} % de {{ number_format($plafond, 0, ',', ' ') }} €
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="cl-empty">Sans plafond</span>
+                                @endif
+                            </td>
+
+                            {{-- Véhicules --}}
+                            <td class="t-center">
+                                <button type="button" class="cl-veh {{ $customer->vehicles->count() ? '' : 'is-empty' }}"
+                                        data-bs-toggle="modal" data-bs-target="#viewVehiclesModal{{ $customer->id }}" title="Véhicules du client">
+                                    <i class="fas fa-car"></i> {{ $customer->vehicles->count() }}
+                                </button>
+                            </td>
 
 
                             <td>
