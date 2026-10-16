@@ -186,6 +186,7 @@
 
 
     </style>
+@include('partials.lh_style')
 
 
 
@@ -242,11 +243,13 @@
                     </a>
                     <div class="collapse" id="achats">
                         <ul class="nav nav-collapse">
-                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
-                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
-                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
-                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
-                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                            <li><a href="{{ route('purchase_docs.create') }}"><span class="sub-item"><i class="fas fa-plus-circle"></i> Nouveau document</span></a></li>
+                            <li><a href="{{ route('purchaseprojects.list') }}"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="{{ route('purchases.list') }}"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="{{ route('receptions.index') }}"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="{{ route('invoices.list') }}"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="{{ route('returns.list') }}"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="{{ route('notes.list') }}"><span class="sub-item">Avoirs</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -589,107 +592,64 @@
         </div>
 
         <div class="container">
-        <div class="page-inner">
-            @if(session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
+    <div class="page-inner">
+        @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+        @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
 
-            @if(session('error'))
-                <div class="alert alert-danger">
-                    {{ session('error') }}
-                </div>
-            @endif
+        <div class="lh-bar">
+            <h3 class="lh-title"><i class="fas fa-file-invoice-dollar text-primary"></i> Avoir {{ $note->numdoc }}
+                <span class="badge bg-{{ $note->status === 'validée' ? 'success' : ($note->status === 'annulée' ? 'danger' : 'secondary') }}" style="font-size:.7rem">{{ ucfirst($note->status) }}</span>
+            </h3>
+            <div class="lh-btns">
+                <a href="{{ route('notes.list') }}" class="btn btn-light border"><i class="fas fa-arrow-left"></i> Liste</a>
+                <a href="{{ route('notes.exportSingle', $note->id) }}" class="btn btn-outline-success"><i class="fas fa-file-excel"></i> Excel</a>
+                <a href="{{ route('notes.printSingle', $note->id) }}" target="_blank" class="btn btn-outline-primary"><i class="fas fa-print"></i> PDF</a>
+                @if($note->status === 'brouillon')
+                    <a href="{{ route('notes.edit', $note->id) }}" class="btn btn-warning"><i class="fas fa-edit"></i> Modifier</a>
+                @endif
+            </div>
+        </div>
 
-            <div class="container mt-4">
-                <h4>📄 Détails de l’avoir #{{ $note->numdoc }}</h4>
-
-                <div class="card mb-4 shadow-sm border-0">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center border-start border-4 border-primary">
-                        <div>
-                            <h6 class="mb-0">
-                                <strong>Avoir N° : {{ $note->numdoc }}</strong> –
-                                {{ $note->supplier->name }}
-                                <span class="text-muted small">({{ \Carbon\Carbon::parse($note->note_date)->format('d/m/Y') }})</span>
-                            </h6>
-                            <span class="badge bg-{{ $note->status === 'brouillon' ? 'secondary' : 'success' }}">{{ ucfirst($note->status) }}</span>
-                            <span class="badge bg-info">{{ ucfirst(str_replace('_', ' ', $note->type)) }}</span>
-                            @if($note->purchaseReturn)
-                                <span class="badge bg-light">Retour #{{ $note->purchaseReturn->numdoc }}</span>
-                            @endif
-                            @if($note->purchaseInvoice)
-                                <span class="badge bg-light">Facture #{{ $note->purchaseInvoice->numdoc }}</span>
-                            @endif
-                        </div>
-                        <div class="btn-group">
-                            <a href="{{ route('notes.exportSingle', $note->id) }}" class="btn btn-xs btn-outline-success">
-                                EXCEL <i class="fas fa-file-excel"></i>
-                            </a>
-                            <a href="{{ route('notes.printSingle', $note->id) }}" class="btn btn-xs btn-outline-primary" title="Télécharger PDF" target="_blank">
-                                PDF <i class="fas fa-print"></i>
-                            </a>
-                            @if($note->status === 'brouillon')
-                                <a href="{{ route('notes.edit', $note->numdoc) }}" class="btn btn-xs btn-outline-warning">
-                                    <i class="fas fa-edit"></i> Modifier
-                                </a>
-                            @endif
-                        </div>
-                    </div>
-
-                    <div class="card-body bg-light">
-                        <h6 class="fw-bold mb-3">🧾 Lignes de l’avoir</h6>
-                        <table class="table table-sm table-bordered align-middle">
-                            <thead class="table-light text-center">
-                                <tr>
-                                    <th>Code Article</th>
-                                    <th>Désignation</th>
-                                    <th>Qté</th>
-                                    <th>PU HT</th>
-                                    <th>Remise (%)</th>
-                                    <th>TVA (%)</th>
-                                    <th>Total Ligne</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($note->lines as $line)
-                                    <tr>
-                                        <td>{{ $line->article_code ?? '-' }}</td>
-                                        <td>{{ $line->item->name ?? $line->description ?? '-' }}</td>
-                                        <td class="text-center">{{ $line->quantity }}</td>
-                                        <td class="text-end">{{ number_format($line->unit_price_ht, 2) }} €</td>
-                                        <td class="text-end">{{ $line->remise }}%</td>
-                                        <td class="text-end">{{ $line->tva }}%</td>
-                                        <td class="text-end">{{ number_format($line->total_ligne_ht, 2) }} €</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-
-                        <div class="text-end mt-3">
-                            <div class="p-3 bg-white border rounded d-inline-block">
-                                <strong>Total HT :</strong> {{ number_format($note->total_ht, 2) }} €<br>
-                                <strong>Total TTC :</strong> {{ number_format($note->total_ttc, 2) }} €
-                            </div>
-                        </div>
-
-                        @if($note->notes)
-                            <div class="mt-3">
-                                <h6 class="fw-bold">Notes :</h6>
-                                <p>{{ $note->notes }}</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-end">
-                    <a href="{{ route('notes.list') }}" class="btn btn-outline-secondary btn-sm px-3">
-                        <i class="fas fa-arrow-left me-1"></i> Retour
-                    </a>
+        <div class="pg-card">
+            <div class="row">
+                <div class="col-md-3"><small class="text-muted d-block">Fournisseur</small><strong>{{ $note->supplier->name ?? '-' }}</strong></div>
+                <div class="col-md-3"><small class="text-muted d-block">Date</small><strong>{{ \Carbon\Carbon::parse($note->note_date)->format('d/m/Y') }}</strong></div>
+                <div class="col-md-3"><small class="text-muted d-block">Type</small><strong>{{ $note->type === 'from_return' ? 'Depuis retour' : ($note->type === 'from_invoice' ? 'Depuis facture' : ucfirst(str_replace('_',' ',$note->type))) }}</strong></div>
+                <div class="col-md-3"><small class="text-muted d-block">Origine</small>
+                    @if($note->purchaseReturn)<span class="badge bg-light text-dark border">Retour {{ $note->purchaseReturn->numdoc }}</span>@endif
+                    @if($note->purchaseInvoice)<span class="badge bg-light text-dark border">Facture {{ $note->purchaseInvoice->numdoc }}</span>@endif
+                    @if(!$note->purchaseReturn && !$note->purchaseInvoice)<span class="text-muted">—</span>@endif
                 </div>
             </div>
+        </div>
 
-    
+        <div class="pg-card table-responsive">
+            <h6>Lignes de l’avoir</h6>
+            <table class="table table-striped table-bordered table-text-small">
+                <thead><tr><th>Code</th><th>Désignation</th><th class="text-center">Qté</th><th class="text-end">PU HT</th><th class="text-end">Remise</th><th class="text-end">TVA</th><th class="text-end">Total HT</th></tr></thead>
+                <tbody>
+                @foreach($note->lines as $line)
+                    <tr>
+                        <td>{{ $line->article_code ?? '-' }}</td>
+                        <td>{{ $line->item->name ?? $line->description ?? '-' }}</td>
+                        <td class="text-center">{{ $line->quantity }}</td>
+                        <td class="text-end">{{ number_format($line->unit_price_ht, 2) }} €</td>
+                        <td class="text-end">{{ $line->remise }}%</td>
+                        <td class="text-end">{{ $line->tva }}%</td>
+                        <td class="text-end">{{ number_format($line->total_ligne_ht, 2) }} €</td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+            @if($note->notes)<div class="mt-2"><strong>Notes :</strong> {{ $note->notes }}</div>@endif
+        </div>
+
+        <div class="lh-actionbar">
+            <div class="ab-totals"><span>Total HT : <b>{{ number_format($note->total_ht, 2) }} €</b></span><span>Total TTC : <b>{{ number_format($note->total_ttc, 2) }} €</b></span></div>
+        </div>
+    </div>
+</div>
+
         <footer class="footer">
           <div class="container-fluid d-flex justify-content-between">
             <nav class="pull-left">

@@ -185,7 +185,26 @@
 
 
 
-    </style>
+    /* ===== En-tête liste : boutons + filtres ===== */
+.lh-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+.lh-title{margin:0;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.lh-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.lh-btns .btn,.lh-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
+.lh-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem}
+.lh-filters .lh-field{flex:1 1 150px;min-width:130px;position:relative}
+.lh-filters .lh-field.lh-wide{flex:2 1 220px}
+.lh-filters .lh-field.lh-narrow{flex:0 1 130px;min-width:120px}
+.lh-filters .lh-field i.lh-ico{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.8rem;pointer-events:none}
+.lh-filters .lh-field i.lh-ico + input{padding-left:2.1rem}
+.lh-filters .form-control,.lh-filters .form-select{height:38px;border-radius:8px;font-size:.88rem}
+.lh-filters .lh-dates{display:flex;align-items:center;gap:.4rem;flex:1 1 280px}
+.lh-filters .lh-dates span{color:#6b7280;font-size:.8rem;white-space:nowrap}
+.lh-filters .lh-spacer{flex:1 1 auto}
+.lh-filters .select2-container{width:100%!important}
+.lh-filters .select2-container--default .select2-selection--single{height:38px!important;min-height:38px!important;border-radius:8px!important;display:flex;align-items:center;font-size:.88rem!important;padding:0 .4rem!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px!important}
+</style>
 
 
 
@@ -242,11 +261,13 @@
                     </a>
                     <div class="collapse" id="achats">
                         <ul class="nav nav-collapse">
-                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
-                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
-                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
-                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
-                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                            <li><a href="{{ route('purchase_docs.create') }}"><span class="sub-item"><i class="fas fa-plus-circle"></i> Nouveau document</span></a></li>
+                            <li><a href="{{ route('purchaseprojects.list') }}"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="{{ route('purchases.list') }}"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="{{ route('receptions.index') }}"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="{{ route('invoices.list') }}"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="{{ route('returns.list') }}"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="{{ route('notes.list') }}"><span class="sub-item">Avoirs</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -601,48 +622,43 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
-        <h4>📋 Liste des projets de commande :
-                    <a href="{{ route('purchaseprojects.index') }}" class="btn btn-outline-success btn-round ms-2">Nouveau Projet De Commande
-                        <i class="fas fa-plus-circle ms-2"></i>
-                    </a>
-                </h4>
+        <div class="lh-bar">
+    <h4 class="lh-title"><i class="fas fa-file-alt text-primary"></i> Projets d'achat</h4>
+    <div class="lh-btns">
+        <a href="{{ route('purchase_docs.create') }}" class="btn btn-primary" title="Import Excel disponible dans la page (menu Excel)"><i class="fas fa-plus-circle"></i> Nouveau projet d'achat</a>
+    </div>
+</div>
 
-                <form method="GET" action="{{ route('purchaseprojects.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-                    <select name="supplier_id" class="form-select form-select-sm" style="width: 150px;">
-                        <option value="">Fournisseur (Tous)</option>
-                        @foreach($suppliers as $supplier)
-                            <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
-                                {{ $supplier->name }}
-                            </option>
-                        @endforeach
-                    </select>
+<form method="GET" action="{{ route('purchaseprojects.list') }}" class="lh-filters">
 
-                    <select name="status" class="form-select form-select-sm" style="width: 170px;">
-                        <option value="">Statut projet (Tous)</option>
-                        <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
-                        <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validé</option>
-                        <option value="converted" {{ request('status') == 'converted' ? 'selected' : '' }}>Converti</option>
-                    </select>
+    <div class="lh-field lh-wide">
+        <select name="supplier_id" class="form-select select2-filter">
+            <option value="">Fournisseurs (Tous)</option>
+            @foreach($suppliers as $supplier)
+                <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}</option>
+            @endforeach
+        </select>
+    </div>
 
-                    <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début"
-                        value="{{ request('date_from') }}">
-                    <span>à</span>
-                    <input type="date" name="date_to" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin"
-                        value="{{ request('date_to') }}">
+    <div class="lh-field lh-narrow">
+        <select name="status" class="form-select select2-filter">
+            <option value="">Statut (Tous)</option>
+        <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
+        <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validé</option>
+        <option value="converted" {{ request('status') == 'converted' ? 'selected' : '' }}>Converti</option>
+        </select>
+    </div>
 
-                    <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                        <i class="fas fa-filter me-1"></i> Filtrer
-                    </button>
+    <div class="lh-dates">
+        <span>Du</span>
+        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+        <span>au</span>
+        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+    </div>
 
-                    <!-- <button type="submit" name="action" value="export" formaction="{{ route('purchaseprojects.export') }}"
-                        class="btn btn-outline-success btn-sm px-3">
-                        <i class="fas fa-file-excel me-1"></i> Exporter
-                    </button> -->
-
-                    <a href="{{ route('purchaseprojects.list') }}" class="btn btn-outline-secondary btn-sm px-3">
-                        <i class="fas fa-undo me-1"></i> Réinitialiser
-                    </a>
-                </form>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrer</button>
+    <a href="{{ route('purchaseprojects.list') }}" class="btn btn-outline-secondary"><i class="fas fa-undo"></i> Réinitialiser</a>
+</form>
 
                 @foreach ($projects as $project)
                     <div class="card mb-4 shadow-sm border-0">
@@ -686,9 +702,9 @@
                                                 <i class="fas fa-arrow-right"></i> Déjà converti
                                             </span>
                                         @endif
-                                        @if($project->status === 'brouillon')
+                                        @if($project->status !== 'converted')
                                             <a class="dropdown-item" href="{{ route('purchaseprojects.edit', $project->id) }}">
-                                                <i class="fas fa-edit"></i> Modifier
+                                                <i class="fas fa-chart-line"></i> Modifier / Aide à la décision
                                             </a>
                                         @endif
                                     </div>
@@ -869,5 +885,6 @@ document.getElementById("searchItemInput").addEventListener("keyup", function() 
 
 
 
-  </body>
+  @include('partials.select2_init')
+</body>
 </html>

@@ -186,6 +186,7 @@
 
 
     </style>
+@include('partials.lh_style')
 
 
 
@@ -242,11 +243,13 @@
                     </a>
                     <div class="collapse" id="achats">
                         <ul class="nav nav-collapse">
-                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
-                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
-                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
-                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
-                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                            <li><a href="{{ route('purchase_docs.create') }}"><span class="sub-item"><i class="fas fa-plus-circle"></i> Nouveau document</span></a></li>
+                            <li><a href="{{ route('purchaseprojects.list') }}"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="{{ route('purchases.list') }}"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="{{ route('receptions.index') }}"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="{{ route('invoices.list') }}"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="{{ route('returns.list') }}"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="{{ route('notes.list') }}"><span class="sub-item">Avoirs</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -600,18 +603,15 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Modifier la facture #{{ $invoice->numdoc }}</h5>
-            </div>
-            <div class="card-body">
-               <form action="{{ route('invoices.update', $invoice->numdoc) }}" method="POST">
+        <div class="lh-bar"><h3 class="lh-title"><i class="fas fa-edit text-primary"></i> Modifier la facture {{ $invoice->numdoc }}</h3>
+<div class="lh-btns"><a href="{{ route('invoices.list') }}" class="btn btn-light border"><i class="fas fa-list"></i> Liste</a></div></div>
+<form action="{{ route('invoices.update', $invoice->numdoc) }}" method="POST">
                             @csrf
                             @method('PUT')
                             <input type="hidden" name="type" value="{{ $invoice->type }}">
                             <input type="hidden" name="tva_rate" id="tva_rate" value="{{ $invoice->tva_rate }}">
 
-                            <div class="row mb-3">
+                            <div class="row mb-3 top-row pg-card mx-0 mb-0" style="margin-bottom:0!important">
                                 <div class="col-md-4">
                                     <label class="form-label">Fournisseur</label>
                                     <select name="supplier_id" class="form-control select2" required>
@@ -632,12 +632,22 @@
                                     <input type="date" name="invoice_date" class="form-control" value="{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('Y-m-d') }}" required>
                                 </div>
                             </div>
+                            <div class="row top-row pg-card mx-0">
+                                <div class="col-md-6">
+                                    <label class="form-label">N° de la facture du fournisseur</label>
+                                    <input type="text" name="supplier_ref" class="form-control" maxlength="60" value="{{ old('supplier_ref', $invoice->supplier_ref) }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Échéance</label>
+                                    <input type="date" name="due_date" class="form-control" value="{{ old('due_date', $invoice->due_date ? \Carbon\Carbon::parse($invoice->due_date)->format('Y-m-d') : '') }}">
+                                </div>
+                            </div>
 
 
 
-                            <h6 class="mt-4 mb-2">Lignes de facture</h6>
-                            <table class="table table-bordered" id="linesTable">
-                                <thead class="table-light">
+                            <h6 class="mt-2 mb-2">Lignes de facture</h6>
+                            <div class="pg-card table-responsive"><table class="table table-striped table-bordered table-text-small" id="linesTable">
+                                <thead>
                                     <tr>
                                         @if($invoice->type === 'groupée')
                                             <th>Article</th>
@@ -676,27 +686,18 @@
 
                             <div class="mb-3 text-end">
                                 <button type="button" class="btn btn-outline-secondary" id="addLine">+ Ajouter une ligne</button>
-                            </div>
+                            </div></div>
 
-                            <div class="row align-items-center mb-4">
-                                <div class="col-md-6">
-                                    <label class="form-label">Notes / Commentaire</label>
-                                    <textarea name="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de facturation, etc.">{{ $invoice->notes }}</textarea>
-                                </div>
-                                <div class="col-md-6 text-end">
-                                    <div class="p-3 bg-light border rounded shadow-sm">
-                                        <h5 class="mb-1">Total HT : <span id="grandTotal" class="text-success fw-bold">{{ number_format($invoice->total_ht, 2) }}</span> €</h5>
-                                        <h6 class="mb-0">Total TTC : <span id="grandTotalTTC" class="text-danger fw-bold">{{ number_format($invoice->total_ttc, 2) }}</span> €</h6>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="text-end">
-                                <button type="submit" name="action" value="save" class="btn btn-primary px-4">✅ Enregistrer Brouillon</button>
-                                <button type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2">✔️ Valider la Facture</button>
-                            </div>
-                        </form>
-            </div>
+                            <div class="pg-card"><label class="form-label">Notes / Commentaire</label><textarea name="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de facturation, etc.">{{ $invoice->notes }}</textarea></div>
+<div class="lh-actionbar">
+  <div class="ab-totals"><span>Total HT : <b id="grandTotal" class="text-success">{{ number_format($invoice->total_ht, 2) }}</b> €</span><span>Total TTC : <b id="grandTotalTTC" class="text-danger">{{ number_format($invoice->total_ttc, 2) }}</b> €</span></div>
+  <div class="ab-btns">
+    <a href="{{ route('invoices.list') }}" class="btn btn-light border">Annuler</a>
+    <button type="submit" name="action" value="save" class="btn btn-primary"><i class="fas fa-save"></i> Brouillon</button>
+    <button type="submit" name="action" value="validate" class="btn btn-success"><i class="fas fa-check"></i> Valider la facture</button>
+  </div>
+</div>
+</form>
     </div>
 </div>
 
@@ -945,5 +946,6 @@ document.getElementById("searchItemInput").addEventListener("keyup", function() 
 
 
 
-  </body>
+  @include('partials.select2_init')
+</body>
 </html>

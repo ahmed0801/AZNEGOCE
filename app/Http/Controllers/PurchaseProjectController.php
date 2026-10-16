@@ -9,6 +9,8 @@ use App\Models\PurchaseOrderLine;
 use App\Models\Supplier;
 use App\Models\Item;
 use App\Models\Souche;
+use App\Services\PurchaseDocumentService;
+use App\Services\PurchaseException;
 use App\Imports\PurchaseProjectImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
@@ -19,239 +21,78 @@ use Illuminate\Support\Facades\Session;
 
 class PurchaseProjectController extends Controller
 {
+    /** L'ancienne page de création (import Excel) est remplacée par la page commune, qui gère aussi l'import Excel. */
     public function index()
     {
-        $suppliers = Supplier::with('tvaGroup')->get();
-        $tvaRates = $suppliers->mapWithKeys(fn($s) => [$s->id => $s->tvaGroup->rate ?? 0])->toJson();
-        return view('purchaseprojects.create', compact('suppliers', 'tvaRates'));
+        return redirect()->route('purchase_docs.create');
     }
 
-
-
-
-
-     public function edit($projectId)
+    /** Édition : même page que la création (recherche d'article, Excel, assistant prix, aide à la décision). */
+    public function edit($projectId)
     {
         $project = PurchaseProject::with('lines.item', 'supplier.tvaGroup')->findOrFail($projectId);
-        
-        if ($project->status !== 'brouillon') {
-            return redirect()->route('purchaseprojects.list')
-                ->with('error', 'Seuls les projets en brouillon peuvent être modifiés.');
+
+        if ($project->status === 'converted') {
+            return redirect()->route('purchaseprojects.list')->with('error', 'Ce projet est déjà converti en commande : il ne se modifie plus.');
         }
 
-        $suppliers = Supplier::with('tvaGroup')->get();
-        $tvaRates = $suppliers->mapWithKeys(fn($s) => [$s->id => $s->tvaGroup->rate ?? 0])->toJson();
-        
-        // Prepare lines for the view, mimicking the import session structure
-        $importedLines = $project->lines->map(function ($line) {
-            return [
-                'article_code' => $line->article_code,
-                'ordered_quantity' => $line->ordered_quantity,
-                'unit_price_ht' => $line->unit_price_ht,
-                'remise' => $line->remise,
-            ];
-        })->toArray();
-        
-        Session::put('imported_lines', $importedLines);
-        Session::put('imported_supplier_id', $project->supplier_id);
-
-        return view('purchaseprojects.edit', compact('project', 'suppliers', 'tvaRates'));
+        return app(PurchaseDocumentController::class)->renderEdit('project', $project);
     }
-
-
-
-
-
-    
 
     public function update(Request $request, $projectId)
     {
-        $project = PurchaseProject::findOrFail($projectId);
-        
-        if ($project->status !== 'brouillon') {
-            return redirect()->route('purchaseprojects.list')
-                ->with('error', 'Seuls les projets en brouillon peuvent être modifiés.');
-        }
-
         $request->validate([
             'supplier_id' => 'required|exists:suppliers,id',
-            'order_date' => 'required|date',
-            'lines' => 'required|array',
-            'lines.*.article_code' => 'required|exists:items,code',
-            'lines.*.ordered_quantity' => 'required|integer|min:1',
-            'lines.*.unit_price_ht' => 'required|numeric|min:0',
-            'lines.*.remise' => 'nullable|numeric|min:0|max:100',
-        ]);
+            'order_date'  => 'required|date',
+            'lines'       => 'required|array|min:1',
+        ], ['lines.required' => 'Ajoutez au moins une ligne au projet.']);
 
-        // Warn if supplier changed
-        if ($request->supplier_id != $project->supplier_id) {
-            Session::flash('warning', 'Vous avez changé de fournisseur. Les lignes peuvent ne pas correspondre au nouveau fournisseur.');
-        }
-
+        $project  = PurchaseProject::findOrFail($projectId);
         $supplier = Supplier::with('tvaGroup')->findOrFail($request->supplier_id);
-        $tvaRate = $supplier->tvaGroup->rate ?? 0;
-        $status = $request->input('action') === 'validate' ? 'validée' : ($request->input('action') === 'convert' ? 'converted' : 'brouillon');
+        $action   = in_array($request->input('action'), ['validate', 'convert'], true) ? $request->input('action') : 'save';
 
-        DB::transaction(function () use ($request, $project, $tvaRate, $status) {
-            // Update project
-            $project->update([
-                'supplier_id' => $request->supplier_id,
-                'order_date' => $request->order_date,
-                'notes' => $request->notes,
-                'status' => $status,
-                'total_ht' => 0,
-                'total_ttc' => 0,
-                'tva_rate' => $tvaRate,
-            ]);
-
-            // Delete existing lines
-            $project->lines()->delete();
-
-            // Create new lines
-            $total = 0;
-            foreach ($request->lines as $line) {
-                $ligne_total = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
-                PurchaseProjectLine::create([
-                    'purchase_project_id' => $project->id,
-                    'article_code' => $line['article_code'],
-                    'ordered_quantity' => $line['ordered_quantity'],
-                    'unit_price_ht' => $line['unit_price_ht'],
-                    'remise' => $line['remise'] ?? 0,
-                    'tva' => $tvaRate,
-                    'total_ligne_ht' => $ligne_total,
-                    'prix_ttc' => $ligne_total * (1 + $tvaRate / 100),
-                ]);
-                $total += $ligne_total;
-            }
-
-            // Update totals
-            $project->update([
-                'total_ht' => $total,
-                'total_ttc' => $total * (1 + $tvaRate / 100),
-            ]);
-
-            // Convert to order if requested
-            if ($request->input('action') === 'convert') {
-                $this->createOrderPurchaseFromProjectPurchase($project->id);
-            }
-        });
-
-        // Clear session data
-        Session::forget(['imported_lines', 'imported_supplier_id']);
-
-        // Set success message
-        switch ($status) {
-            case 'validée':
-                $successMessage = 'Projet validé avec succès.';
-                break;
-            case 'converted':
-                $successMessage = 'Projet converti en commande avec succès.';
-                break;
-            default:
-                $successMessage = 'Projet mis à jour avec succès.';
-                break;
+        try {
+            $res = app(PurchaseDocumentService::class)->updateProject($project, $supplier, [
+                'date'     => $request->input('order_date'),
+                'notes'    => $request->input('notes'),
+                'store_id' => $request->input('store_id') ?: null,
+            ], (array) $request->input('lines'), $action);
+        } catch (PurchaseException $e) {
+            return back()->withInput()->with('error', e($e->getMessage()));
         }
 
-        return redirect()->route('purchaseprojects.list')->with('success', $successMessage);
+        if ($action === 'convert') {
+            return redirect()->route('purchases.list')->with('success', "Projet {$res['project']->numdoc} converti en commande {$res['order']->numdoc}.");
+        }
+        return redirect()->route('purchaseprojects.list')->with('success', $action === 'validate' ? 'Projet validé.' : 'Projet mis à jour.');
     }
 
-
-
-
-
-
-
-
-
-
-
-    
-     public function store(Request $request)
+    /** Création depuis l'ancienne page d'import Excel — passe par le service (numérotation verrouillée, TVA par article). */
+    public function store(Request $request)
     {
         $request->validate([
             'supplier_id' => 'required|exists:suppliers,id',
-            'order_date' => 'required|date',
-            'lines' => 'required|array',
-            'lines.*.article_code' => 'required|exists:items,code',
-            'lines.*.ordered_quantity' => 'required|integer|min:1',
-            'lines.*.unit_price_ht' => 'required|numeric|min:0',
-            'lines.*.remise' => 'nullable|numeric|min:0|max:100',
+            'order_date'  => 'required|date',
+            'lines'       => 'required|array|min:1',
         ]);
 
-        // Warn if supplier changed after import
-        if (Session::has('imported_supplier_id') && $request->supplier_id != Session::get('imported_supplier_id')) {
-            Session::flash('warning', 'Vous avez changé de fournisseur après l\'importation. Les lignes importées peuvent ne pas correspondre au nouveau fournisseur.');
-        }
-
         $supplier = Supplier::with('tvaGroup')->findOrFail($request->supplier_id);
-        $tvaRate = $supplier->tvaGroup->rate ?? 0;
-        $souche = Souche::where('type', 'projet_commande')->firstOrFail();
-        $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
-        $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
-        $status = $request->input('action') === 'validate' ? 'validée' : ($request->input('action') === 'convert' ? 'converted' : 'brouillon');
-
-        DB::transaction(function () use ($request, $tvaRate, $numdoc, $status, $souche) {
-            $project = PurchaseProject::create([
-                'numdoc' => $numdoc,
-                'supplier_id' => $request->supplier_id,
-                'order_date' => $request->order_date,
-                'notes' => $request->notes,
-                'status' => $status,
-                'total_ht' => 0,
-                'total_ttc' => 0,
-                'tva_rate' => $tvaRate,
-            ]);
-
-            $total = 0;
-            foreach ($request->lines as $line) {
-                $ligne_total = $line['ordered_quantity'] * $line['unit_price_ht'] * (1 - ($line['remise'] ?? 0) / 100);
-                PurchaseProjectLine::create([
-                    'purchase_project_id' => $project->id,
-                    'article_code' => $line['article_code'],
-                    'ordered_quantity' => $line['ordered_quantity'],
-                    'unit_price_ht' => $line['unit_price_ht'],
-                    'remise' => $line['remise'] ?? 0,
-                    'tva' => $tvaRate,
-                    'total_ligne_ht' => $ligne_total,
-                    'prix_ttc' => $ligne_total * (1 + $tvaRate / 100),
-                ]);
-                $total += $ligne_total;
-            }
-
-            $project->update([
-                'total_ht' => $total,
-                'total_ttc' => $total * (1 + $tvaRate / 100),
-            ]);
-
-            $souche->last_number += 1;
-            $souche->save();
-
+        $service  = app(PurchaseDocumentService::class);
+        try {
+            $project = $service->createProject($supplier, ['date' => $request->order_date, 'notes' => $request->notes], (array) $request->lines);
+            if ($request->input('action') === 'validate') $service->validateProject($project->id);
             if ($request->input('action') === 'convert') {
-                $this->createOrderPurchaseFromProjectPurchase($project->id);
+                $order = $service->convertProject($project->id);
+                Session::forget(['imported_lines', 'imported_supplier_id']);
+                return redirect()->route('purchases.list')->with('success', "Projet {$project->numdoc} converti en commande {$order->numdoc}.");
             }
-        });
-
-        // Clear session data after successful save
-        Session::forget(['imported_lines', 'imported_supplier_id']);
-
-        // Set success message
-        switch ($status) {
-            case 'validée':
-                $successMessage = 'Projet validé avec succès.';
-                break;
-            case 'converted':
-                $successMessage = 'Projet converti en commande avec succès.';
-                break;
-            default:
-                $successMessage = 'Projet enregistré avec succès.';
-                break;
+        } catch (PurchaseException $e) {
+            return back()->withInput()->with('error', e($e->getMessage()));
         }
 
-        return redirect()->route('purchaseprojects.list')->with('success', $successMessage);
+        Session::forget(['imported_lines', 'imported_supplier_id']);
+        return redirect()->route('purchaseprojects.list')->with('success', $request->input('action') === 'validate' ? 'Projet validé.' : 'Projet enregistré.');
     }
-
-
-
 
     public function import(Request $request)
     {
@@ -309,51 +150,14 @@ class PurchaseProjectController extends Controller
 
 
 
-     public function createOrderPurchaseFromProjectPurchase($projectId)
+    public function createOrderPurchaseFromProjectPurchase($projectId)
     {
-        $project = PurchaseProject::with('lines.item', 'supplier.tvaGroup')->findOrFail($projectId);
-
-        if ($project->status === 'convertedxxxx') {
-            return redirect()->route('purchaseprojects.list')
-                ->with('error', 'Ce projet a déjà été converti en commande.');
+        try {
+            $order = app(PurchaseDocumentService::class)->convertProject((int) $projectId);
+        } catch (PurchaseException $e) {
+            return redirect()->route('purchaseprojects.list')->with('error', e($e->getMessage()));
         }
-
-        $souche = Souche::where('type', 'commande_achat')->firstOrFail();
-        $nextNumber = str_pad($souche->last_number + 1, $souche->number_length, '0', STR_PAD_LEFT);
-        $numdoc = ($souche->prefix ?? '') . ($souche->suffix ?? '') . $nextNumber;
-
-        DB::transaction(function () use ($project, $numdoc, $souche) {
-            $order = PurchaseOrder::create([
-                'numdoc' => $numdoc,
-                'supplier_id' => $project->supplier_id,
-                'order_date' => $project->order_date,
-                'notes' => $project->notes,
-                'total_ht' => $project->total_ht,
-                'total_ttc' => $project->total_ttc,
-                'status' => 'brouillon',
-                'tva_rate' => $project->tva_rate,
-            ]);
-
-            foreach ($project->lines as $line) {
-                PurchaseOrderLine::create([
-                    'purchase_order_id' => $order->id,
-                    'article_code' => $line->article_code,
-                    'ordered_quantity' => $line->ordered_quantity,
-                    'unit_price_ht' => $line->unit_price_ht,
-                    'remise' => $line->remise,
-                    'tva' => $line->tva,
-                    'total_ligne_ht' => $line->total_ligne_ht,
-                    'prix_ttc' => $line->prix_ttc,
-                ]);
-            }
-
-            $project->update(['status' => 'converted']);
-            $souche->last_number += 1;
-            $souche->save();
-        });
-
-        return redirect()->route('purchases.list')
-            ->with('success', 'Projet converti en commande avec succès.');
+        return redirect()->route('purchases.list')->with('success', "Projet converti en commande {$order->numdoc}.");
     }
 
     public function exportSingle($projectId)

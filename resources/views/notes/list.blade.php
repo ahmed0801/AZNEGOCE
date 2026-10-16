@@ -185,7 +185,26 @@
 
 
 
-    </style>
+    /* ===== En-tête liste : boutons + filtres ===== */
+.lh-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+.lh-title{margin:0;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.lh-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.lh-btns .btn,.lh-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
+.lh-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem}
+.lh-filters .lh-field{flex:1 1 150px;min-width:130px;position:relative}
+.lh-filters .lh-field.lh-wide{flex:2 1 220px}
+.lh-filters .lh-field.lh-narrow{flex:0 1 130px;min-width:120px}
+.lh-filters .lh-field i.lh-ico{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.8rem;pointer-events:none}
+.lh-filters .lh-field i.lh-ico + input{padding-left:2.1rem}
+.lh-filters .form-control,.lh-filters .form-select{height:38px;border-radius:8px;font-size:.88rem}
+.lh-filters .lh-dates{display:flex;align-items:center;gap:.4rem;flex:1 1 280px}
+.lh-filters .lh-dates span{color:#6b7280;font-size:.8rem;white-space:nowrap}
+.lh-filters .lh-spacer{flex:1 1 auto}
+.lh-filters .select2-container{width:100%!important}
+.lh-filters .select2-container--default .select2-selection--single{height:38px!important;min-height:38px!important;border-radius:8px!important;display:flex;align-items:center;font-size:.88rem!important;padding:0 .4rem!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px!important}
+</style>
 
 
 
@@ -242,11 +261,13 @@
                     </a>
                     <div class="collapse" id="achats">
                         <ul class="nav nav-collapse">
-                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
-                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
-                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
-                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
-                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                            <li><a href="{{ route('purchase_docs.create') }}"><span class="sub-item"><i class="fas fa-plus-circle"></i> Nouveau document</span></a></li>
+                            <li><a href="{{ route('purchaseprojects.list') }}"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="{{ route('purchases.list') }}"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="{{ route('receptions.index') }}"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="{{ route('invoices.list') }}"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="{{ route('returns.list') }}"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="{{ route('notes.list') }}"><span class="sub-item">Avoirs</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -607,67 +628,63 @@
                     @endif
 
                     <div class="container mt-4">
-                        <h4>📄 Liste des avoirs d'achat :
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-outline-success btn-round ms-2 dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    Nouvel Avoir Achat <i class="fas fa-plus-circle ms-2"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    @if($returns->isEmpty())
-                                        <a class="dropdown-item disabled" href="#">À partir d’un retour (aucun retour disponible)</a>
-                                    @else
-                                        <a class="dropdown-item" href="{{ route('notes.create_from_return') }}">À partir d’un retour</a>
-                                    @endif
-                                    @if($invoices->isEmpty())
-                                        <a class="dropdown-item disabled" href="#">À partir d’une facture (aucune facture disponible)</a>
-                                    @else
-                                        <a class="dropdown-item" href="{{ route('notes.create_from_invoice') }}">À partir d’une facture</a>
-                                    @endif
-                                </div>
-                            </div>
-                        </h4>
+                        <div class="lh-bar">
+    <h4 class="lh-title"><i class="fas fa-file-invoice text-primary"></i> Avoirs d'achat</h4>
+    <div class="lh-btns">
+        @if($returns->isEmpty())
+            <span class="btn btn-outline-secondary disabled" title="Aucun retour disponible"><i class="fas fa-undo-alt"></i> Avoir depuis un retour</span>
+        @else
+            <a href="{{ route('notes.create_from_return') }}" class="btn btn-primary"><i class="fas fa-undo-alt"></i> Avoir depuis un retour</a>
+        @endif
+        @if($invoices->isEmpty())
+            <span class="btn btn-outline-secondary disabled" title="Aucune facture disponible"><i class="fas fa-file-invoice-dollar"></i> Avoir depuis une facture</span>
+        @else
+            <a href="{{ route('notes.create_from_invoice') }}" class="btn btn-outline-primary"><i class="fas fa-file-invoice-dollar"></i> Avoir depuis une facture</a>
+        @endif
+    </div>
+</div>
 
-                        <form method="GET" action="{{ route('notes.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-                            <select name="supplier_id" class="form-select form-select-sm select2" style="width: 150px;">
-                                <option value="">Fournisseur (Tous)</option>
-                                @foreach($suppliers as $supplier)
-                                    <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
-                                        {{ $supplier->name }}
-                                    </option>
-                                @endforeach
-                            </select>
+EXCEL
+<form method="GET" action="{{ route('notes.list') }}" class="lh-filters">
 
-                            <select name="status" class="form-select form-select-sm select2" style="width: 170px;">
-                                <option value="">Statut avoir (Tous)</option>
-                                <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
-                                <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
-                            </select>
+    <div class="lh-field lh-wide">
+        <select name="supplier_id" class="form-select select2-filter">
+            <option value="">Fournisseurs (Tous)</option>
+            @foreach($suppliers as $supplier)
+                <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}</option>
+            @endforeach
+        </select>
+    </div>
 
-                            <select name="type" class="form-select form-select-sm select2" style="width: 170px;">
-                                <option value="">Type avoir (Tous)</option>
-                                <option value="from_return" {{ request('type') == 'from_return' ? 'selected' : '' }}>À partir d’un retour</option>
-                                <option value="from_invoice" {{ request('type') == 'from_invoice' ? 'selected' : '' }}>À partir d’une facture</option>
-                            </select>
-de
-                            <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début"
-                                value="{{ request('date_from') }}">
-à
-                            <input type="date" name="date_to" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin"
-                                value="{{ request('date_to') }}">
+    <div class="lh-field lh-narrow">
+        <select name="status" class="form-select select2-filter">
+            <option value="">Statut (Tous)</option>
+        <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
+        <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
+        </select>
+    </div>
 
-                            <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                                <i class="fas fa-filter me-1"></i> Filtrer
-                            </button>
+    <div class="lh-field">
+        <select name="type" class="form-select select2-filter">
+            <option value="">Type (Tous)</option>
+        <option value="from_return" {{ request('type') == 'from_return' ? 'selected' : '' }}>Depuis un retour</option>
+        <option value="from_invoice" {{ request('type') == 'from_invoice' ? 'selected' : '' }}>Depuis une facture</option>
+        </select>
+    </div>
 
-                            <button type="submit" name="action" value="export" formaction="{{ route('notes.export') }}"
-                                class="btn btn-outline-success btn-sm px-3">
-                                <i class="fas fa-file-excel me-1"></i> EXCEL
-                            </button>
+    <div class="lh-dates">
+        <span>Du</span>
+        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+        <span>au</span>
+        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+    </div>
 
-                            <a href="{{ route('notes.list') }}" class="btn btn-outline-secondary btn-sm px-3">
-                                <i class="fas fa-undo me-1"></i> Réinitialiser
-                            </a>
-                        </form>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrer</button>
+    <button type="submit" name="action" value="export" formaction="{{ route('notes.export') }}" class="btn btn-outline-success">
+        <i class="fas fa-file-excel"></i> Exporter
+    </button>
+    <a href="{{ route('notes.list') }}" class="btn btn-outline-secondary"><i class="fas fa-undo"></i> Réinitialiser</a>
+</form>
 
 
                                                                                                                                         <!-- Pagination avec conservation des filtres -->
@@ -687,11 +704,15 @@ de
                                         </h6>
                                         @if($note->status === 'brouillon')
                                             <span class="badge bg-secondary">{{ ucfirst($note->status) }}</span>
+                                        @elseif($note->status === 'annulée')
+                                            <span class="badge bg-dark">Annulé</span>
                                         @else
                                             <span class="badge bg-success">{{ ucfirst($note->status) }}</span>
                                         @endif
+                                        <span class="badge rounded-pill text-bg-secondary">Total TTC : {{ number_format($note->total_ttc, 2, ',', ' ') }} €</span>
+                                        @if($note->return_goods)<span class="badge bg-light text-dark border" title="La validation a fait ressortir la marchandise du stock"><i class="fas fa-dolly"></i> Marchandise retournée</span>@endif
 
-                                        @if($note->status != 'brouillon')
+                                        @if($note->status === 'validée')
                                             @if($note->paid)
                                                 <span class="badge bg-success">Payé</span>
                                             @else
@@ -722,6 +743,15 @@ de
                                                     <a class="dropdown-item" href="{{ route('notes.edit', $note->id) }}">
                                                         <i class="fas fa-edit"></i> Modifier
                                                     </a>
+                                                    <form action="{{ route('notes.validate', $note->id) }}" method="POST" onsubmit="return confirm('Valider cet avoir ? Le solde du fournisseur diminuera de {{ number_format(abs($note->total_ttc), 2, ',', ' ') }} €.{{ $note->return_goods ? ' La marchandise sera ressortie du stock.' : '' }}')">
+                                                        @csrf
+                                                        <button type="submit" class="dropdown-item"><i class="fas fa-check"></i> Valider l'avoir</button>
+                                                    </form>
+                                                @endif
+                                                @if($note->status !== 'annulée')
+                                                    <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#cancelNote{{ $note->id }}">
+                                                        <i class="fas fa-ban"></i> Annuler l'avoir
+                                                    </a>
                                                 @endif
 
                                                  @if($note->status === 'validée' && !$note->paid)
@@ -731,20 +761,40 @@ de
                                                 @endif
 
 
-                                                @if($note->purchaseReturn)
-                                                    <a class="dropdown-item" href="{{ route('returns.show', $note->purchaseReturn->id) }}">
-                                                        <i class="fas fa-eye"></i> Retour #{{ $note->purchaseReturn->numdoc }}
+                                                @foreach($note->lines->pluck('purchaseReturn')->filter()->unique('id') as $srcReturn)
+                                                    <a class="dropdown-item" href="{{ route('purchases.return.show', $srcReturn->id) }}">
+                                                        <i class="fas fa-eye"></i> Retour #{{ $srcReturn->numdoc }}
                                                     </a>
-                                                @endif
-                                                @if($note->purchaseInvoice)
-                                                    <a class="dropdown-item" href="{{ route('invoices.show', $note->purchaseInvoice->id) }}>
-                                                        <i class="fas fa-eye"></i> Facture #{{ $note->purchaseInvoice->numdoc }}
+                                                @endforeach
+                                                @foreach($note->lines->pluck('purchaseInvoice')->filter()->unique('id') as $srcInvoice)
+                                                    <a class="dropdown-item" href="{{ route('invoices.list', ['q' => $srcInvoice->numdoc]) }}">
+                                                        <i class="fas fa-eye"></i> Facture #{{ $srcInvoice->numdoc }}
                                                     </a>
-                                                @endif
+                                                @endforeach
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
+                                @if($note->status !== 'annulée')
+                                <div class="modal fade" id="cancelNote{{ $note->id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog"><div class="modal-content">
+                                        <form action="{{ route('notes.cancel', $note->id) }}" method="POST">
+                                            @csrf
+                                            <div class="modal-header"><h5 class="modal-title">Annuler l'avoir {{ $note->numdoc }} ?</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                                            <div class="modal-body">
+                                                <ul class="small">
+                                                    @if($note->status === 'validée')<li>Le solde du fournisseur remonte de {{ number_format(abs($note->total_ttc), 2, ',', ' ') }} €.</li>@endif
+                                                    @if($note->return_goods && $note->status === 'validée')<li>La marchandise ressortie du stock par cet avoir y revient.</li>@endif
+                                                    <li>Les retours qu'il couvrait redeviennent disponibles. Refusé s'il existe des règlements.</li>
+                                                </ul>
+                                                <input type="text" name="reason" class="form-control" maxlength="150" placeholder="Motif (facultatif)">
+                                            </div>
+                                            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button><button type="submit" class="btn btn-danger">Annuler l'avoir</button></div>
+                                        </form>
+                                    </div></div>
+                                </div>
+                                @endif
 
                                 <div id="lines-{{ $note->id }}" class="card-body d-none bg-light">
                                     <h6 class="fw-bold mb-3">🧾 Lignes de l’avoir</h6>
@@ -1030,5 +1080,6 @@ de
     }
 </script>
 
-  </body>
+  @include('partials.select2_init')
+</body>
 </html>

@@ -186,6 +186,27 @@
 
 
     </style>
+@include('partials.lh_style')
+<style>
+.nf-step{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#0d6efd;color:#fff;font-size:.75rem;margin-right:.4rem}
+.nf-hint{font-weight:400;color:#6b7280;font-size:.8rem;margin-left:.5rem}
+.nf-cards{display:flex;flex-wrap:wrap;gap:.6rem}
+.nf-card{display:flex;align-items:center;gap:.6rem;border:2px solid #e5e7eb;border-radius:10px;padding:.6rem .9rem;cursor:pointer;min-width:260px;background:#fff}
+.nf-card:hover{border-color:#9ec5fe;background:#f5f9ff}
+.nf-card.on{border-color:#0d6efd;background:#eef5ff}
+.nf-card i{color:#9ca3af;font-size:1.1rem}.nf-card.on i{color:#0d6efd}
+.nf-card small{display:block;color:#6b7280;font-size:.78rem}
+.nf-empty{color:#6b7280;font-style:italic;padding:.4rem 0}
+.nf-types{display:flex;flex-wrap:wrap;gap:.6rem}
+.nf-type{flex:1 1 280px;display:flex;align-items:flex-start;gap:.6rem;border:2px solid #e5e7eb;border-radius:10px;padding:.7rem .9rem;cursor:pointer;margin:0}
+.nf-type:has(input:checked){border-color:#0d6efd;background:#eef5ff}
+.nf-type input{margin-top:.3rem}
+.nf-type small{display:block;color:#6b7280;font-size:.78rem}
+#linesTable tr.nf-group td{background:#eef2f7;font-weight:700;text-align:left;color:#374151}
+#linesTable tr.nf-line.off td{opacity:.55}
+#linesTable tr.nf-line.off input.form-control{background:#f3f4f6}
+</style>
+
 
 
 
@@ -242,11 +263,13 @@
                     </a>
                     <div class="collapse" id="achats">
                         <ul class="nav nav-collapse">
-                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
-                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
-                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
-                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
-                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                            <li><a href="{{ route('purchase_docs.create') }}"><span class="sub-item"><i class="fas fa-plus-circle"></i> Nouveau document</span></a></li>
+                            <li><a href="{{ route('purchaseprojects.list') }}"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="{{ route('purchases.list') }}"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="{{ route('receptions.index') }}"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="{{ route('invoices.list') }}"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="{{ route('returns.list') }}"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="{{ route('notes.list') }}"><span class="sub-item">Avoirs</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -599,79 +622,78 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Créer un avoir à partir d’une facture</h5>
+        <div class="lh-bar">
+    <h3 class="lh-title"><i class="fas fa-file-invoice text-primary"></i> Nouvel avoir fournisseur</h3>
+    <div class="lh-btns"><a href="{{ route('notes.list') }}" class="btn btn-light border"><i class="fas fa-list"></i> Liste des avoirs</a></div>
+</div>
+
+<form action="{{ route('notes.store') }}" method="POST" id="noteForm">
+    @csrf
+    <input type="hidden" name="type" value="from_invoice">
+    <input type="hidden" name="tva_rate" id="tva_rate" value="0">
+    <input type="hidden" id="tva_display" value="0">
+    <div id="invoiceInputs"></div>
+
+    <div class="pg-card">
+        <h6><span class="nf-step">1</span> Fournisseur et date</h6>
+        <div class="row top-row">
+            <div class="col-md-6 mb-2">
+                <label class="form-label">Fournisseur</label>
+                <select name="supplier_id" class="form-control select2" required>
+                    <option value="">Choisir le fournisseur…</option>
+                    @foreach($suppliers as $supplier)
+                        <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                    @endforeach
+                </select>
             </div>
-            <div class="card-body">
-                <form action="{{ route('notes.store') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="type" value="from_invoice">
-                    <input type="hidden" name="tva_rate" id="tva_rate" value="0">
-
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Fournisseur</label>
-                            <select name="supplier_id" class="form-control select2" required>
-                                <option value="">Sélectionner un fournisseur</option>
-                                @foreach($suppliers as $supplier)
-                                    <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">TVA %</label>
-                            <input type="text" id="tva_display" class="form-control" readonly value="0">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Date de l’avoir</label>
-                            <input type="date" name="note_date" class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Factures à inclure</label>
-                        <select name="invoices[]" class="form-control select2-invoices" multiple required></select>
-                    </div>
-
-                    <h6 class="mt-4 mb-2">Lignes de l’avoir</h6>
-                    <table class="table table-bordered" id="linesTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Facture</th>
-                                <th>Article</th>
-                                <th>Qté</th>
-                                <th>PU HT</th>
-                                <th>Remise %</th>
-                                <th>TVA %</th>
-                                <th>Total HT</th>
-                                <th>Total TTC</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lines">
-                        </tbody>
-                    </table>
-
-                    <div class="row align-items-center mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label">Notes / Commentaire</label>
-                            <textarea name="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de l’avoir, etc."></textarea>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            <div class="p-3 bg-light border rounded shadow-sm">
-                                <h5 class="mb-1">Total HT : <span id="grandTotal" class="text-success fw-bold">0.00</span> €</h5>
-                                <h6 class="mb-0">Total TTC : <span id="grandTotalTTC" class="text-danger fw-bold">0.00</span> €</h6>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="text-end">
-                        <button type="submit" name="action" value="save" class="btn btn-primary px-4">✅ Enregistrer Brouillon</button>
-                        <button type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2">✔️ Valider l’Avoir</button>
-                    </div>
-                </form>
+            <div class="col-md-3 mb-2">
+                <label class="form-label">Date de l’avoir</label>
+                <input type="date" name="note_date" class="form-control order_date" value="{{ date('Y-m-d') }}" required>
             </div>
         </div>
+    </div>
+
+    <div class="pg-card">
+        <h6><span class="nf-step">2</span> Sur quelle(s) facture(s) porte l’avoir ?</h6>
+        <div id="invoiceCards" class="nf-cards"><div class="nf-empty">Choisissez d’abord un fournisseur : ses factures validées apparaîtront ici.</div></div>
+    </div>
+
+    <div class="pg-card">
+        <h6><span class="nf-step">3</span> Pourquoi cet avoir ?</h6>
+        <div class="nf-types">
+            <label class="nf-type"><input type="radio" name="return_goods" value="1" checked>
+                <span><i class="fas fa-undo"></i> <b>Je renvoie la marchandise</b><small>Un retour fournisseur est créé à la validation et le stock diminue.</small></span></label>
+            <label class="nf-type"><input type="radio" name="return_goods" value="0">
+                <span><i class="fas fa-tags"></i> <b>Geste commercial / erreur de prix</b><small>Pas de mouvement de stock : seul le montant dû au fournisseur baisse.</small></span></label>
+        </div>
+    </div>
+
+    <div class="pg-card" id="linesCard" style="display:none">
+        <h6><span class="nf-step">4</span> Que voulez-vous créditer ?
+            <span class="nf-hint">Cochez les lignes concernées, ajustez la quantité (ou le prix pour un geste commercial).</span></h6>
+        <div class="table-responsive">
+        <table class="table table-striped table-bordered table-text-small" id="linesTable">
+            <thead><tr>
+                <th style="width:36px"><input type="checkbox" id="checkAll" title="Tout cocher"></th>
+                <th>Article</th><th style="width:90px">Qté</th><th style="width:110px">PU HT</th><th style="width:80px">Rem.%</th><th style="width:80px">TVA%</th><th style="width:110px">Total HT</th><th style="width:110px">Total TTC</th>
+            </tr></thead>
+            <tbody id="lines"></tbody>
+        </table>
+        </div>
+    </div>
+
+    <div class="pg-card"><label class="form-label">Notes / Commentaire</label>
+        <textarea name="notes" class="form-control" rows="2" placeholder="Motif de l’avoir, n° de dossier fournisseur…"></textarea></div>
+
+    <div class="lh-actionbar">
+        <div class="ab-totals"><span>Total HT : <b id="grandTotal" class="text-success">0.00</b> €</span><span>Total TTC : <b id="grandTotalTTC" class="text-danger">0.00</b> €</span></div>
+        <div class="ab-btns">
+            <a href="{{ route('notes.list') }}" class="btn btn-light border">Annuler</a>
+            <button type="submit" name="action" value="save" class="btn btn-primary"><i class="fas fa-save"></i> Brouillon</button>
+            <button type="submit" name="action" value="validate" class="btn btn-success"><i class="fas fa-check"></i> Valider l’avoir</button>
+        </div>
+    </div>
+</form>
     </div>
 
 
@@ -749,120 +771,120 @@
 
 <script>
 let lineIndex = 0;
+const fmt = v => (Math.round((v + Number.EPSILON) * 100) / 100).toFixed(2);
+let INVOICES = [];
+let CHOSEN = {};
 
 $(document).ready(function () {
     $('.select2').select2({ width: '100%' });
 
-    $('.select2-invoices').select2({
-        ajax: {
-            url: "{{ route('invoices.search') }}", // You’ll need to create this route
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {
-                return {
-                    term: params.term || '',
-                    supplier_id: $('select[name="supplier_id"]').val() || '',
-                    status: 'validée'
-                };
-            },
-            processResults: function (data) {
-                return {
-                    results: data.map(item => ({
-                        id: item.id,
-                        text: `Facture #${item.numdoc} - ${item.supplier_name} (${new Date(item.invoice_date).toLocaleDateString()})`,
-                        lines: item.lines,
-                        tva_rate: item.tva_rate
-                    }))
-                };
-            },
-            cache: true
-        },
-        placeholder: 'Sélectionner des factures validées',
-        minimumInputLength: 0,
-        width: '100%'
-    });
+    function renderCards() {
+        const $c = $('#invoiceCards').empty();
+        if (!$('select[name="supplier_id"]').val()) { $c.html('<div class="nf-empty">Choisissez d’abord un fournisseur : ses factures validées apparaîtront ici.</div>'); return; }
+        if (!INVOICES.length) { $c.html('<div class="nf-empty">Aucune facture validée avec des lignes encore créditables pour ce fournisseur.</div>'); return; }
+        INVOICES.forEach(inv => {
+            let tot = 0; inv.lines.forEach(l => tot += l.quantity * l.unit_price_ht * (1 - (l.remise || 0) / 100));
+            const d = inv.invoice_date ? new Date(inv.invoice_date).toLocaleDateString('fr-FR') : '';
+            $c.append(`<div class="nf-card ${CHOSEN[inv.id] ? 'on' : ''}" data-id="${inv.id}">
+                <i class="fas ${CHOSEN[inv.id] ? 'fa-check-circle' : 'fa-circle'}"></i>
+                <div><b>Facture ${inv.numdoc}</b><small>${d} · ${inv.lines.length} ligne(s) · ${fmt(tot)} € HT créditables</small></div></div>`);
+        });
+    }
 
-    function getTVA() {
-        const selectedItems = $('.select2-invoices').select2('data');
-        if (selectedItems.length === 0) return 0;
-        const tvaRates = selectedItems.map(item => parseFloat(item.tva_rate));
-        if (new Set(tvaRates).size > 1) {
-            alert('Erreur : Les factures sélectionnées ont des taux de TVA différents.');
-            $('.select2-invoices').val(null).trigger('change');
-            $('#lines').empty();
-            return 0;
-        }
-        return tvaRates[0] || 0;
+    function renderLines() {
+        $('#lines').empty(); lineIndex = 0;
+        const chosen = INVOICES.filter(i => CHOSEN[i.id]);
+        $('#invoiceInputs').html(chosen.map(i => `<input type="hidden" name="invoices[]" value="${i.id}">`).join(''));
+        $('#linesCard').toggle(chosen.length > 0);
+        chosen.forEach(inv => {
+            $('#lines').append(`<tr class="nf-group"><td colspan="8"><i class="fas fa-file-invoice"></i> Facture ${inv.numdoc}</td></tr>`);
+            inv.lines.forEach(line => {
+                const max = Math.abs(line.quantity);
+                const tvaL = (line.tva !== undefined && line.tva !== null) ? parseFloat(line.tva) : (parseFloat(inv.tva_rate) || 0);
+                $('#lines').append(`
+                <tr class="nf-line off">
+                    <td class="text-center"><input type="checkbox" class="pick"></td>
+                    <td class="text-start">${line.article_code} — ${line.item_name || '-'}
+                        <input type="hidden" class="f" data-n="purchase_invoice_id" value="${inv.id}">
+                        <input type="hidden" class="f" data-n="article_code" value="${line.article_code}"></td>
+                    <td><input type="number" step="any" min="0" max="${max}" class="form-control qty f" data-n="quantity" value="${max}" data-max="${max}"></td>
+                    <td><input type="number" step="0.01" class="form-control pu f" data-n="unit_price_ht" value="${line.unit_price_ht}"></td>
+                    <td><input type="number" step="0.01" class="form-control remise f" data-n="remise" value="${line.remise || 0}"></td>
+                    <td><input type="text" class="form-control tva_ligne f" data-n="tva" value="${tvaL.toFixed(2)}" readonly></td>
+                    <td><input type="text" class="form-control total" value="0.00" readonly></td>
+                    <td><input type="text" class="form-control totalttc" value="0.00" readonly></td>
+                </tr>`);
+            });
+        });
+        syncNames(); recalculate();
+    }
+
+    // les champs d'une ligne décochée ne sont ni envoyés ni comptés
+    function syncNames() {
+        let i = 0;
+        $('#lines tr.nf-line').each(function () {
+            const on = $(this).find('.pick').is(':checked');
+            $(this).toggleClass('off', !on);
+            $(this).find('.f').each(function () {
+                if (on) { $(this).attr('name', `lines[${i}][${$(this).data('n')}]`).prop('disabled', false); }
+                else { $(this).removeAttr('name').prop('disabled', true); }
+            });
+            if (on) i++;
+        });
     }
 
     function recalculate() {
-        let totalHT = 0;
-        const tva = getTVA();
-
-        $('#lines tr').each(function () {
+        let totalHT = 0, totalTTC = 0;
+        $('#lines tr.nf-line').each(function () {
+            const on = $(this).find('.pick').is(':checked');
             const qty = parseFloat($(this).find('.qty').val()) || 0;
             const pu = parseFloat($(this).find('.pu').val()) || 0;
             const remise = parseFloat($(this).find('.remise').val()) || 0;
-            const lineHT = qty * pu * (1 - remise / 100);
-            const lineTTC = lineHT * (1 + tva / 100);
-
-            $(this).find('.tva_ligne').val(tva.toFixed(2));
-            $(this).find('.total').val(lineHT.toFixed(2));
-            $(this).find('.totalttc').val(lineTTC.toFixed(2));
-
-            totalHT += lineHT;
+            const tvaL = parseFloat($(this).find('.tva_ligne').val()) || 0;
+            const lineHT = on ? qty * pu * (1 - remise / 100) : 0;
+            const lineTTC = lineHT * (1 + tvaL / 100);
+            $(this).find('.total').val(fmt(lineHT));
+            $(this).find('.totalttc').val(fmt(lineTTC));
+            totalHT += lineHT; totalTTC += lineTTC;
         });
-
-        const totalTTC = totalHT * (1 + tva / 100);
-        $('#grandTotal').text(totalHT.toFixed(2));
-        $('#grandTotalTTC').text(totalTTC.toFixed(2));
-        $('#tva_rate').val(tva);
+        $('#grandTotal').text(fmt(totalHT));
+        $('#grandTotalTTC').text(fmt(totalTTC));
+        const first = INVOICES.find(i => CHOSEN[i.id]);
+        $('#tva_rate').val(first ? (parseFloat(first.tva_rate) || 0) : 0);
     }
 
-    $('select[name="supplier_id"]').on('change', function () {
-        $('#tva_display').val(0);
-        $('#tva_rate').val(0);
-        $('.select2-invoices').val(null).trigger('change');
-        $('#lines').empty();
+    function loadInvoices() {
+        CHOSEN = {}; INVOICES = [];
+        const sid = $('select[name="supplier_id"]').val();
+        renderCards(); renderLines();
+        if (!sid) return;
+        $('#invoiceCards').html('<div class="nf-empty">Chargement…</div>');
+        $.getJSON("{{ route('invoices.search') }}", { supplier_id: sid, status: 'validée' }, function (data) {
+            INVOICES = data; renderCards();
+            if (INVOICES.length === 1) { CHOSEN[INVOICES[0].id] = true; renderCards(); renderLines(); }
+        }).fail(function () { $('#invoiceCards').html('<div class="nf-empty text-danger">Impossible de charger les factures.</div>'); });
+    }
+
+    $('select[name="supplier_id"]').on('change', loadInvoices);
+    $('#invoiceCards').on('click', '.nf-card', function () {
+        const id = $(this).data('id'); CHOSEN[id] = !CHOSEN[id];
+        renderCards(); renderLines();
+    });
+    $('#lines').on('change', '.pick', function () { syncNames(); recalculate(); });
+    $('#checkAll').on('change', function () { $('#lines .pick').prop('checked', this.checked); syncNames(); recalculate(); });
+    $('#lines').on('input', '.qty, .pu, .remise', function () {
+        const $q = $(this).closest('tr').find('.qty');
+        const maxQty = parseFloat($q.data('max')) || 0;
+        if ((parseFloat($q.val()) || 0) > maxQty) { $q.val(maxQty); alert('La quantité ne peut pas dépasser la quantité encore créditable de la facture.'); }
+        if (!$(this).closest('tr').find('.pick').is(':checked')) { $(this).closest('tr').find('.pick').prop('checked', true); syncNames(); }
         recalculate();
     });
-
-    $('.select2-invoices').on('change', function () {
-        $('#lines').empty();
-        lineIndex = 0;
-        const selectedItems = $(this).select2('data');
-        const tva = getTVA();
-        $('#tva_display').val(tva.toFixed(2));
-        $('#tva_rate').val(tva);
-
-        selectedItems.forEach(item => {
-            item.lines.forEach(line => {
-                const lineHT = line.quantity * line.unit_price_ht * (1 - (line.remise || 0) / 100);
-                const lineTTC = lineHT * (1 + tva / 100);
-                const row = `
-                    <tr>
-                        <td><input type="text" value="${item.text}" class="form-control" readonly>
-                            <input type="hidden" name="lines[${lineIndex}][purchase_invoice_id]" value="${item.id}">
-                        </td>
-                        <td><input type="text" value="${line.article_code} - ${line.item_name || '-'}" class="form-control" readonly>
-                            <input type="hidden" name="lines[${lineIndex}][article_code]" value="${line.article_code}">
-                        </td>
-                        <td><input type="number" name="lines[${lineIndex}][quantity]" class="form-control qty" value="${-line.quantity}" required></td>
-                        <td><input type="number" step="0.01" name="lines[${lineIndex}][unit_price_ht]" class="form-control pu" value="${line.unit_price_ht}" required></td>
-                        <td><input type="number" step="0.01" name="lines[${lineIndex}][remise]" class="form-control remise" value="${line.remise || 0}"></td>
-                        <td><input type="text" name="lines[${lineIndex}][tva]" class="form-control tva_ligne" value="${tva.toFixed(2)}" readonly></td>
-                        <td><input type="text" class="form-control total" value="${lineHT.toFixed(2)}" readonly></td>
-                        <td><input type="text" class="form-control totalttc" value="${lineTTC.toFixed(2)}" readonly></td>
-                    </tr>`;
-                $('#lines').append(row);
-                lineIndex++;
-            });
-        });
-        recalculate();
+    $('#noteForm').on('submit', function (e) {
+        const n = $('#lines .pick:checked').length;
+        if (!n) { e.preventDefault(); alert('Cochez au moins une ligne à créditer.'); return; }
+        let bad = false; $('#lines .pick:checked').each(function () { if (!(parseFloat($(this).closest('tr').find('.qty').val()) > 0)) bad = true; });
+        if (bad) { e.preventDefault(); alert('Une ligne cochée a une quantité à zéro.'); }
     });
-
-    $('#lines').on('input', '.qty, .pu, .remise', recalculate);
-    $('select[name="supplier_id"]').trigger('change');
 });
 </script>
 

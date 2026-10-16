@@ -177,9 +177,42 @@ public function index(Request $request)
         return redirect()->route('supplier.index')->with('success', 'fournisseur modifié avec succès');
     }
 
+    /**
+     * Raisons qui empêchent de supprimer des fournisseurs : [id => ['2 commande(s)', ...]].
+     * Une seule requête par table (utilisé par la liste pour afficher le cadenas, et par destroy()).
+     */
+    public static function deletionBlockers(array $ids): array
+    {
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+        $out = [];
+        if (!$ids) return $out;
+        $links = [
+            'purchase_projects' => 'projet(s) d\'achat', 'purchase_orders' => 'commande(s)', 'receptions' => 'réception(s)',
+            'purchase_invoices' => 'facture(s)', 'purchase_returns' => 'retour(s)', 'purchase_notes' => 'avoir(s)', 'payments' => 'règlement(s)',
+        ];
+        foreach ($links as $table => $label) {
+            if (!\Illuminate\Support\Facades\Schema::hasTable($table) || !\Illuminate\Support\Facades\Schema::hasColumn($table, 'supplier_id')) continue;
+            $rows = \Illuminate\Support\Facades\DB::table($table)->whereIn('supplier_id', $ids)->selectRaw('supplier_id, COUNT(*) as n')->groupBy('supplier_id')->get();
+            foreach ($rows as $r) $out[(int) $r->supplier_id][] = $r->n . ' ' . $label;
+        }
+        foreach (Supplier::whereIn('id', $ids)->get(['id', 'solde']) as $sp) {
+            if (abs((float) $sp->solde) > 0.004) $out[(int) $sp->id][] = 'un solde non nul (' . number_format((float) $sp->solde, 2, ',', ' ') . ' €)';
+        }
+        return $out;
+    }
+
     public function destroy($id)
     {
-        Supplier::findOrFail($id)->delete();
+        $supplier = Supplier::findOrFail($id);
+
+        // Un fournisseur qui a une histoire (commandes, factures, règlements…) ne se supprime pas :
+        // on perdrait la traçabilité comptable. On le bloque à la place.
+        $used = self::deletionBlockers([$supplier->id])[$supplier->id] ?? [];
+        if ($used) {
+            return redirect()->route('supplier.index')->with('error', 'Suppression impossible : ' . e($supplier->name) . ' a ' . implode(', ', $used) . '. Utilisez plutôt « Bloquer » pour ne plus lui passer de commande.');
+        }
+
+        $supplier->delete();
         return redirect()->route('supplier.index')->with('success', 'fournisseur supprimé avec succès');
     }
 

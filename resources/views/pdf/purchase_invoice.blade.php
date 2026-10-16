@@ -1,303 +1,105 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Facture #{{ $invoice->numdoc }}</title>
-    <style>
-        /* Reset defaults for PDF compatibility */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 12px;
-            color: #333333;
-            margin: 40px 40px 60px 40px; /* Reduced to prevent overlap */
-            line-height: 1.4;
-        }
-
-        /* Page layout for A4 */
-        @page {
-            margin: 15mm;
-        }
-
-        /* Header */
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 110px; /* Increased slightly to accommodate larger triangles */
-            text-align: center;
-            border: 4px double #007bff; /* Original double border */
-            background-color: #f8f9fa;
-            padding: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            position: relative; /* For triangle positioning */
-        }
-
-        /* Blue triangles in header corners */
-        header::before,
-        header::after,
-        header .triangle-top-right,
-        header .triangle-bottom-left {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            z-index: 1001;
-        }
-
-        header::before { /* Top-left triangle (larger) */
-            top: -2px;
-            left: -2px;
-            border-width: 25px 25px 0 0; /* Increased size */
-            border-color: #007bff transparent transparent transparent;
-        }
-
-        header::after { /* Bottom-right triangle (larger) */
-            bottom: -2px;
-            right: -2px;
-            border-width: 0 0 25px 25px; /* Increased size */
-            border-color: transparent transparent #007bff transparent;
-        }
-
-        header .triangle-top-right { /* Top-right triangle (original size) */
-            top: -2px;
-            right: -2px;
-            border-width: 0 15px 15px 0;
-            border-color: transparent #007bff transparent transparent;
-        }
-
-        header .triangle-bottom-left { /* Bottom-left triangle (original size) */
-            bottom: -2px;
-            left: -2px;
-            border-width: 15px 0 0 15px;
-            border-color: transparent transparent transparent #007bff;
-        }
-
-        header img.logo {
-            height: 85px;
-            float: left;
-            margin-left: 5px;
-        }
-
-        header h1 {
-            margin: 20px 0 10px 0;
-            font-size: 20px;
-            color: #2c3e50;
-            font-weight: bold;
-        }
-
-        header h4 {
-            margin: 0;
-            font-size: 14px;
-            color: #555555;
-        }
-
-        header h4.barcode-container {
-            margin-bottom: 10px; /* Space below barcode */
-        }
-
-        header img.barcode {
-            height: 15px;
-            margin-top: 3px;
-            margin-left: 80px;
-        }
-
-        /* Footer */
-        footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 90px;
-            padding: 10px 40px;
-            background-color: #2c3e50; /* Dark footer */
-            color: #ecf0f1; /* Light text for contrast */
-            font-size: 10px;
-            border-top: 2px double #007bff; /* Enhanced with double border */
-            line-height: 1.3;
-            text-align: center;
-            z-index: 1000;
-        }
-
-        footer hr {
-            margin-bottom: 5px;
-            border-color: #555555;
-        }
-
-        /* Main content */
-        main {
-            margin: 20px 0;
-        }
-
-        /* Tables */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-        }
-
-        th, td {
-            border: 1px solid #2c3e50;
-            padding: 8px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #e9ecef;
-            color: #2c3e50;
-            font-weight: bold;
-            border-bottom: 2px solid #007bff;
-        }
-
-        .info-table {
-            margin-bottom: 20px;
-            border: 1px solid #2c3e50;
-        }
-
-        .info-table td {
-            text-align: left;
-            padding: 6px;
-            border: none;
-        }
-
-        .info-table tr:nth-child(odd) {
-            background-color: #f8f9fa;
-        }
-
-        .items-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        /* Totals box */
-        .totals-box {
-            width: 300px;
-            margin: 20px 0 0 auto;
-            border: 2px double #2c3e50; /* Enhanced with double border */
-            padding: 10px;
-            background-color: #ffffff;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .totals-box table {
-            border: none;
-        }
-
-        .totals-box td {
-            padding: 5px;
-            border: none;
-            text-align: right;
-        }
-
-        .totals-box td.label {
-            text-align: left;
-            font-weight: bold;
-        }
-
-        /* Clear floats */
-        .clearfix::after {
-            content: "";
-            display: table;
-            clear: both;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Facture #{{ $invoice->numdoc }}</title>
+@include('pdf.partials.pa_style')
 </head>
 <body>
-    <header>
-        <img src="{{ public_path($company->logo_path) }}" alt="Logo" class="logo">
-        <h1>{{ $company->name }}</h1>
-        <h4>Facture N° : {{ $invoice->numdoc }}</h4>
-        <h4 class="barcode-container"><img src="{{ $barcode }}" alt="Code-barres" class="barcode"></h4>
-        <div class="triangle-top-right"></div>
-        <div class="triangle-bottom-left"></div>
-    </header>
+@php
+    $lines = $invoice->lines;
+    $rows = $lines->map(fn($l) => ['ht' => (float) $l->total_ligne_ht, 'ttc' => (float) $l->prix_ttc, 'tva' => (float) $l->tva]);
+@endphp
+@php
+    $fmt = fn($v) => number_format((float) $v, 2, ',', ' ');
+    $vat = $rows->groupBy(fn($r) => number_format((float) $r['tva'], 2, '.', ''))->map(fn($g) => [
+        'base' => round($g->sum('ht'), 2), 'tva' => round($g->sum('ttc') - $g->sum('ht'), 2),
+    ])->sortKeys();
+    $netHT = round($rows->sum('ht'), 2); $netTTC = round($rows->sum('ttc'), 2);
+@endphp
+@include('pdf.partials.pa_header', [
+    'docTitle' => 'FACTURE', 'docNo' => $invoice->numdoc, 'docDate' => $invoice->invoice_date, 'supplier' => $invoice->supplier,
+    'meta' => [
+        'Réf. fournisseur' => $invoice->supplier_ref,
+        'Échéance' => $invoice->due_date ? \Carbon\Carbon::parse($invoice->due_date)->format('d/m/Y') : null,
+        'Statut' => ucfirst($invoice->status),
+    ],
+])
 
-    <main>
-        <table class="info-table">
-            <tr>
-                <td><strong>Fournisseur :</strong> {{ $invoice->supplier->name ?? '-' }}</td>
-                <td><strong>Date Facture :</strong> {{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</td>
+<main>
+    @if($invoice->notes)<p>Note : {{ $invoice->notes }}</p>@endif
+    @php
+        $hasReturns = $lines->contains(fn($l) => $l->purchase_return_id || (float) $l->quantity < 0);
+        $groups = $lines->groupBy(function ($l) {
+            if ($l->purchase_return_id) return 'R|Retour N° ' . ($l->purchaseReturn->numdoc ?? '#'.$l->purchase_return_id) . ($l->purchaseReturn && $l->purchaseReturn->return_date ? ' — ' . \Carbon\Carbon::parse($l->purchaseReturn->return_date)->format('d/m/Y') : '');
+            if ($l->reception_id) return 'B|Réception N° ' . ($l->reception->numdoc ?? '#'.$l->reception_id) . ($l->reception && $l->reception->reception_date ? ' — ' . \Carbon\Carbon::parse($l->reception->reception_date)->format('d/m/Y') : '');
+            return 'D|Facture directe';
+        });
+        $grouped = $invoice->type === 'groupée';
+    @endphp
+    <table class="items-table">
+        <thead><tr>
+            <th>Code</th><th>Désignation</th><th>Qté</th><th>PU HT</th><th>Remise</th><th>TVA</th><th>Total HT</th><th>Total TTC</th>
+        </tr></thead>
+        <tbody>
+        @foreach($groups as $key => $glines)
+            @php $isRet = str_starts_with($key, 'R|'); $label = substr($key, 2); @endphp
+            @if($grouped)
+            <tr><td colspan="8" class="grp" style="background-color: {{ $isRet ? '#fff5f5' : '#f0f8ff' }}; color: {{ $isRet ? '#c62828' : '#1976d2' }}; border-left: 3px solid {{ $isRet ? '#e57373' : '#2196f3' }};">{{ $label }}</td></tr>
+            @endif
+            @foreach($glines as $line)
+            <tr @if($isRet) style="background-color:#fffafa" @endif>
+                <td>{{ $line->article_code ?? '-' }}</td>
+                <td>@if($isRet)<strong class="badge-ret">RETOUR :</strong> @endif{{ $line->item->name ?? $line->description ?? '-' }}</td>
+                <td class="ctr {{ $isRet ? 'badge-ret' : '' }}">{{ $isRet ? '-' . rtrim(rtrim(number_format(abs((float) $line->quantity), 2, ',', ''), '0'), ',') : rtrim(rtrim(number_format((float) $line->quantity, 2, ',', ''), '0'), ',') }}</td>
+                <td class="num">{{ $fmt($line->unit_price_ht) }} €</td>
+                <td class="ctr">{{ $fmt($line->remise ?? 0) }}%</td>
+                <td class="ctr">{{ $fmt($line->tva) }}%</td>
+                <td class="num" @if($isRet) style="color:#c62828" @endif>{{ $fmt($line->total_ligne_ht) }} €</td>
+                <td class="num" @if($isRet) style="color:#c62828" @endif>{{ $fmt($line->prix_ttc) }} €</td>
             </tr>
-            <tr>
-                <td><strong>Numéro Fournisseur :</strong> {{ $invoice->supplier->code ?? '-' }}</td>
-                <td><strong>Statut :</strong> {{ ucfirst($invoice->status) }}</td>
-            </tr>
-            <tr>
-                <td><strong>Type Facture :</strong> {{ ucfirst($invoice->type) }}</td>
-                <td><strong>TVA Facture :</strong> {{ number_format($invoice->tva_rate, 2, ',', ' ') }}%</td>
-            </tr>
-        </table>
+            @endforeach
+            @if($grouped)
+            <tr style="font-weight:bold;background-color:#f8f9fa"><td colspan="6" class="num" style="border-top:2px solid #ddd">Total {{ $isRet ? 'retour' : 'réception' }} TTC :</td><td colspan="2" class="num" style="border-top:2px solid #ddd;color:#1976d2">{{ $fmt($glines->sum('prix_ttc')) }} €</td></tr>
+            <tr><td colspan="8" style="height:6px;border:none;background:transparent"></td></tr>
+            @endif
+        @endforeach
+        @if($lines->isEmpty())<tr><td colspan="8" class="ctr">Aucune ligne</td></tr>@endif
+        </tbody>
+    </table>
 
-        <table class="items-table">
-            <thead>
-                <tr>
-                    <th>Code Article</th>
-                    <th>Désignation</th>
-                    <th>Qté</th>
-                    <th>PU HT</th>
-                    <th>Remise (%)</th>
-                    <th>TVA (%)</th>
-                    <th>Total HT</th>
-                    <th>Total TTC</th>
-                </tr>
-            </thead>
+    @if($hasReturns)
+        <p style="font-size:9px;color:#a94442;margin-top:3px">Les lignes de retour fournisseur sont déduites de la facture (montants négatifs).</p>
+    @endif
+
+    @include('pdf.partials.pa_totals', ['vat' => $vat, 'netHT' => $netHT, 'netTTC' => $netTTC, 'labelHT' => $hasReturns ? 'Net HT' : 'Total HT', 'labelTTC' => $hasReturns ? 'Net à payer TTC' : 'Total TTC'])
+
+    {{-- Règlements --}}
+    <div style="margin-top:10px; border:2px solid #28a745; border-radius:15px; padding:4px; background-color:#f8fff8;">
+        @if($invoice->payments->count() > 0)
+        <table style="width:100%; font-size:11px; border-collapse:collapse;">
             <tbody>
-                @php
-                    $totalHT = 0;
-                @endphp
-                @foreach ($invoice->lines as $line)
-                    @php
-                        $totalLigne = $line->total_ligne_ht;
-                        $totalLigneTTC = $line->prix_ttc;
-                        $totalHT += $totalLigne;
-                    @endphp
-                    <tr>
-                        <td>{{ $line->article_code ?? '-' }}</td>
-                        <td>{{ $line->item->name ?? $line->description ?? '-' }}</td>
-                        <td>{{ $line->quantity }}</td>
-                        <td>{{ number_format($line->unit_price_ht, 2, ',', ' ') }} €</td>
-                        <td>{{ $line->remise }}%</td>
-                        <td>{{ number_format($line->tva, 2, ',', ' ') }}%</td>
-                        <td>{{ number_format($totalLigne, 2, ',', ' ') }} €</td>
-                        <td>{{ number_format($totalLigneTTC, 2, ',', ' ') }} €</td>
-                    </tr>
-                @endforeach
+            @foreach($invoice->payments as $payment)
+                <tr>
+                    <td style="padding:4px;border:1px solid #ddd">{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
+                    <td style="padding:4px;border:1px solid #ddd">{{ $payment->payment_mode }}</td>
+                    <td style="padding:4px;border:1px solid #ddd;text-align:right;font-weight:bold;color:#1e7e34">{{ $fmt(abs($payment->amount)) }} €</td>
+                    <td style="padding:4px;border:1px solid #ddd">{{ $payment->reference ?? '-' }}</td>
+                </tr>
+            @endforeach
+            <tr style="background-color:#f0fdf0">
+                <td style="padding:5px;text-align:right;font-weight:bold;color:#1e7e34">{{ $invoice->paid ? 'Payée' : 'Reste à payer : ' . $fmt($invoice->getRemainingBalanceAttribute()) . ' €' }}</td>
+                <td style="padding:5px;text-align:right;font-weight:bold">Total réglé :</td>
+                <td style="padding:5px;text-align:right;font-weight:bold;color:#1e7e34">{{ $fmt($invoice->payments->sum('amount')) }} €</td>
+                <td></td>
+            </tr>
             </tbody>
         </table>
-
-        <div class="totals-box">
-            <table>
-                <tr>
-                    <td class="label">Total HT :</td>
-                    <td>{{ number_format($totalHT, 2, ',', ' ') }} €</td>
-                </tr>
-                <tr>
-                    <td class="label">TVA ({{ number_format($invoice->tva_rate, 2, ',', ' ') }}%) :</td>
-                    <td>{{ number_format($totalHT * ($invoice->tva_rate / 100), 2, ',', ' ') }} €</td>
-                </tr>
-                <tr>
-                    <td class="label">Total TTC :</td>
-                    <td>{{ number_format($invoice->total_ttc, 2, ',', ' ') }} €</td>
-            </table>
-        </div>
-
-        <div class="clearfix"></div>
-    </main>
-
-    <footer>
-        <hr>
-        <p>
-            <strong>{{ $company->name }}</strong> | {{ $company->address }}<br>
-            MF : {{ $company->matricule_fiscal }} | SWIFT : {{ $company->swift }} | Tél : {{ $company->phone }}<br>
-            RIB : {{ $company->rib }} | IBAN : {{ $company->iban }} | Email : <strong>{{ $company->email }}</strong>
-        </p>
-    </footer>
+        @else
+            <p style="margin:0;font-style:italic;color:#6c757d">Aucun règlement enregistré.</p>
+        @endif
+    </div>
+</main>
+@include('pdf.partials.pa_footer')
 </body>
 </html>

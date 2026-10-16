@@ -160,11 +160,13 @@
                     </a>
                     <div class="collapse" id="achats">
                         <ul class="nav nav-collapse">
-                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
-                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
-                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
-                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
-                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                            <li><a href="{{ route('purchase_docs.create') }}"><span class="sub-item"></i> Nouveau document</span></a></li>
+<li><a href="{{ route('purchaseprojects.list') }}"><span class="sub-item">Projets d’Achat</span></a></li>
+<li><a href="{{ route('purchases.list') }}"><span class="sub-item">Commandes</span></a></li>
+<li><a href="{{ route('receptions.index') }}"><span class="sub-item">Réceptions</span></a></li>
+<li><a href="{{ route('invoices.list') }}"><span class="sub-item">Factures</span></a></li>
+<li><a href="{{ route('returns.list') }}"><span class="sub-item">Retours</span></a></li>
+<li><a href="{{ route('notes.list') }}"><span class="sub-item">Avoirs</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -463,7 +465,7 @@
         <a href="{{ route('sales.list') }}" class="btn btn-outline-secondary">
             <i class="fas fa-shopping-cart"></i> Commandes vente
         </a>
-        
+
         <a href="/salesnotes/list" class="btn btn-outline-secondary">
             <i class="fas fa-file-invoice"></i> Avoirs
         </a>

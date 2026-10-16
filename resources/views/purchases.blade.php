@@ -185,7 +185,26 @@
 
 
 
-    </style>
+    /* ===== En-tête liste : boutons + filtres ===== */
+.lh-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+.lh-title{margin:0;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.lh-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.lh-btns .btn,.lh-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
+.lh-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem}
+.lh-filters .lh-field{flex:1 1 150px;min-width:130px;position:relative}
+.lh-filters .lh-field.lh-wide{flex:2 1 220px}
+.lh-filters .lh-field.lh-narrow{flex:0 1 130px;min-width:120px}
+.lh-filters .lh-field i.lh-ico{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.8rem;pointer-events:none}
+.lh-filters .lh-field i.lh-ico + input{padding-left:2.1rem}
+.lh-filters .form-control,.lh-filters .form-select{height:38px;border-radius:8px;font-size:.88rem}
+.lh-filters .lh-dates{display:flex;align-items:center;gap:.4rem;flex:1 1 280px}
+.lh-filters .lh-dates span{color:#6b7280;font-size:.8rem;white-space:nowrap}
+.lh-filters .lh-spacer{flex:1 1 auto}
+.lh-filters .select2-container{width:100%!important}
+.lh-filters .select2-container--default .select2-selection--single{height:38px!important;min-height:38px!important;border-radius:8px!important;display:flex;align-items:center;font-size:.88rem!important;padding:0 .4rem!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px!important}
+</style>
 
 
 
@@ -242,11 +261,13 @@
                     </a>
                     <div class="collapse" id="achats">
                         <ul class="nav nav-collapse">
-                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
-                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
-                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
-                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
-                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                            <li><a href="{{ route('purchase_docs.create') }}"><span class="sub-item"><i class="fas fa-plus-circle"></i> Nouveau document</span></a></li>
+                            <li><a href="{{ route('purchaseprojects.list') }}"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="{{ route('purchases.list') }}"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="{{ route('receptions.index') }}"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="{{ route('invoices.list') }}"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="{{ route('returns.list') }}"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="{{ route('notes.list') }}"><span class="sub-item">Avoirs</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -601,54 +622,61 @@
             </div>
         @endif
 
-        <h4>📋 Liste des commandes d'achat : 
-            <a href="/purchases" class="btn btn-outline-success btn-round ms-2">Nouvelle Commande Achat 
-                <i class="fas fa-plus-circle ms-2"></i>
-            </a>
-        </h4>
+        <div class="lh-bar">
+    <h4 class="lh-title"><i class="fas fa-clipboard-list text-primary"></i> Commandes d'achat</h4>
+    <div class="lh-btns">
+        <a href="{{ route('purchase_docs.create') }}" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Nouveau document d'achat</a>
+        <a href="{{ route('receptions.index') }}" class="btn btn-outline-primary" title="Réceptions d'achat et facturation groupée"><i class="fas fa-dolly"></i> Réceptions</a>
+        <a href="{{ route('invoices.list') }}" class="btn btn-outline-success"><i class="fas fa-file-invoice-dollar"></i> Factures</a>
+    </div>
+</div>
 
-        <form method="GET" action="{{ route('purchases.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-            <select name="supplier_id" class="form-select form-select-sm" style="width: 150px;">
-                <option value="">Fournisseur (Tous)</option>
-                @foreach($suppliers as $supplier)
-                    <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
-                        {{ $supplier->name }}
-                    </option>
-                @endforeach
-            </select>
+<form method="GET" action="{{ route('purchases.list') }}" class="lh-filters">
 
-            <select name="status" class="form-select form-select-sm" style="width: 170px;">
-                <option value="">Statut commande (Tous)</option>
-                <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
-                <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validé</option>
-            </select>
+    <div class="lh-field lh-wide">
+        <i class="fas fa-hashtag lh-ico"></i>
+        <input type="text" name="q" class="form-control" placeholder="N° commande ou fournisseur" value="{{ request('q') }}">
+    </div>
 
-            <select name="reception_status" class="form-select form-select-sm" style="width: 160px;">
-                <option value="">Statut réception (Tous)</option>
-                <option value="En_cours" {{ request('reception_status') == 'En_cours' ? 'selected' : '' }}>Non Réceptionnée</option>
-                <option value="Reçu" {{ request('reception_status') == 'Reçu' ? 'selected' : '' }}>Reçu</option>
-                <option value="Partiel" {{ request('reception_status') == 'Partiel' ? 'selected' : '' }}>Partiel</option>
-            </select>
-de
-            <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début"
-                value="{{ request('date_from') }}">
-à
-            <input type="date" name="date_to" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin"
-                value="{{ request('date_to') }}">
+    <div class="lh-field lh-wide">
+        <select name="supplier_id" class="form-select select2-filter">
+            <option value="">Fournisseurs (Tous)</option>
+            @foreach($suppliers as $supplier)
+                <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}</option>
+            @endforeach
+        </select>
+    </div>
 
-            <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                <i class="fas fa-filter me-1"></i> Filtrer
-            </button>
+    <div class="lh-field lh-narrow">
+        <select name="status" class="form-select select2-filter">
+            <option value="">Statut (Tous)</option>
+        <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
+        <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
+        </select>
+    </div>
 
-            <button type="submit" name="action" value="export" formaction="{{ route('purchases.export') }}" 
-                class="btn btn-outline-success btn-sm px-3">
-                <i class="fas fa-file-excel me-1"></i> Exporter
-            </button>
+    <div class="lh-field lh-narrow">
+        <select name="reception_status" class="form-select select2-filter">
+            <option value="">Réception (Toutes)</option>
+        <option value="a_recevoir" {{ request('reception_status') == 'a_recevoir' ? 'selected' : '' }}>À recevoir</option>
+        <option value="partielle" {{ request('reception_status') == 'partielle' ? 'selected' : '' }}>Partiellement reçue</option>
+        <option value="recue" {{ request('reception_status') == 'recue' ? 'selected' : '' }}>Reçue</option>
+        </select>
+    </div>
 
-            <a href="{{ route('purchases.list') }}" class="btn btn-outline-secondary btn-sm px-3">
-                <i class="fas fa-undo me-1"></i> Réinitialiser
-            </a>
-        </form>
+    <div class="lh-dates">
+        <span>Du</span>
+        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+        <span>au</span>
+        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+    </div>
+
+    <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrer</button>
+    <button type="submit" name="action" value="export" formaction="{{ route('purchases.export') }}" class="btn btn-outline-success">
+        <i class="fas fa-file-excel"></i> Exporter
+    </button>
+    <a href="{{ route('purchases.list') }}" class="btn btn-outline-secondary"><i class="fas fa-undo"></i> Réinitialiser</a>
+</form>
 
 
                                                                                                             <!-- Pagination avec conservation des filtres -->
@@ -680,13 +708,13 @@ de
                         @endif
 
 
-                        @if($purchase->reception)
-                            @if(ucfirst($purchase->reception->status) == 'En_cours')
-                                <span class="badge bg-danger text-dark">Non Réceptionnée</span>
-                            @elseif(ucfirst($purchase->reception->status) == 'Reçu')
-                                <span class="badge bg-success text-dark">Réceptionnée</span>
-                            @elseif(ucfirst($purchase->reception->status) == 'Partiel')
-                                <span class="badge bg-warning text-dark">Partiellement Réceptionnée</span>
+                        @if($purchase->status === 'validée')
+                            @if($purchase->reception_status === 'recue')
+                                <span class="badge bg-success">Reçue</span>
+                            @elseif($purchase->reception_status === 'partielle')
+                                <span class="badge bg-warning text-dark">Partiellement reçue</span>
+                            @else
+                                <span class="badge bg-danger">À recevoir</span>
                             @endif
                         @endif
 
@@ -723,11 +751,23 @@ de
                                 <span class="sr-only">Actions</span> <i class="fas fa-cog"></i>
                             </button>
                             <div class="dropdown-menu">
-                                @if($purchase->reception)
-                                    <a class="dropdown-item" href="{{ route('receptions.show', $purchase->reception->id) }}" title="Voir la réception">
-                                        <i class="fas fa-box"></i> Voir Réception ({{ ucfirst($purchase->reception->status) }})
+                                @php
+                                    $isLegacy = $purchase->status === 'validée' && !$purchase->invoiced && $purchase->reception_status === 'recue'
+                                        && $purchase->receptions->count() > 0
+                                        && $purchase->receptions->every(function ($r) { return strpos((string) $r->numdoc, 'REC-H') === 0 || $r->status === 'annulée'; })
+                                        && $purchase->receptions->contains(function ($r) { return strpos((string) $r->numdoc, 'REC-H') === 0 && $r->status !== 'annulée'; });
+                                @endphp
+                                @if($purchase->status === 'validée' && $purchase->reception_status !== 'recue')
+                                    <a class="dropdown-item" href="{{ route('receptions.create', ['order_id' => $purchase->id]) }}">
+                                        <i class="fas fa-dolly"></i> Réceptionner
                                     </a>
-                                @elseif($purchase->status === 'brouillon')
+                                @endif
+                                @if($purchase->status === 'validée' && $purchase->reception_status !== 'a_recevoir')
+                                    <a class="dropdown-item" href="{{ route('receptions.index', ['q' => $purchase->numdoc]) }}">
+                                        <i class="fas fa-box"></i> Voir les réceptions
+                                    </a>
+                                @endif
+                                @if($purchase->status === 'brouillon')
                                     <form action="{{ route('purchases.validate', $purchase->id) }}" method="POST" onsubmit="return confirm('Valider cette commande ?')" class="d-inline">
                                         @csrf
                                         @method('PUT')
@@ -735,23 +775,29 @@ de
                                             <i class="fas fa-check"></i> Valider la commande
                                         </button>
                                     </form>
-                                @else
-                                    <span class="dropdown-item disabled" title="Aucune réception disponible">
-                                        <i class="fas fa-box"></i> Aucune réception
-                                    </span>
                                 @endif
-                                <a class="dropdown-item" href="{{ route('purchases.edit', $purchase->id) }}">
-                                    <i class="fas fa-edit"></i> Modifier
-                                </a>
-                                @if($purchase->status === 'validée' && !$purchase->invoiced)
-                                    <a class="dropdown-item" href="{{ route('invoices.create_direct', $purchase->id) }}">
-                                        <i class="fas fa-file-invoice"></i> Créer une facture directe
+                                @if($purchase->reception_status === 'a_recevoir')
+                                    <a class="dropdown-item" href="{{ route('purchases.edit', $purchase->id) }}">
+                                        <i class="fas fa-edit"></i> Modifier
                                     </a>
+                                @endif
+                                @if($purchase->status === 'validée' && !$purchase->invoiced)
+                                    @if($isLegacy)
+                                        <form action="{{ route('invoices.legacy_store') }}" method="POST" onsubmit="return confirm('Facturer cette ancienne commande ? Le stock n\'est pas modifié (il a été pris en compte à l\'époque).')">
+                                            @csrf
+                                            <input type="hidden" name="order_ids[]" value="{{ $purchase->id }}">
+                                            <button type="submit" class="dropdown-item"><i class="fas fa-file-invoice"></i> Facturer (ancienne commande)</button>
+                                        </form>
+                                    @else
+                                        <a class="dropdown-item" href="{{ route('invoices.create_direct', $purchase->id) }}">
+                                            <i class="fas fa-file-invoice"></i> Facturer
+                                        </a>
+                                    @endif
                                 @endif
                                 @php
                                     $parametres = \App\Models\ParametresAchat::first();
                                 @endphp
-                                @if($purchase->status === 'validée' && (!$parametres->reception_obligatoire_retour || ($purchase->reception && in_array($purchase->reception->status, ['Reçu', 'Partiel']))))
+                                @if($purchase->status === 'validée' && (!$parametres->reception_obligatoire_retour || in_array($purchase->reception_status, ['partielle', 'recue'])))
                                     <a class="dropdown-item" href="{{ route('purchases.return.create', $purchase->id) }}">
                                         <i class="fas fa-undo"></i> Créer un retour
                                     </a>
@@ -996,5 +1042,6 @@ document.getElementById("searchItemInput").addEventListener("keyup", function() 
 
 
 
-  </body>
+  @include('partials.select2_init')
+</body>
 </html>

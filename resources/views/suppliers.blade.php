@@ -1172,11 +1172,12 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php $delBlockers = \App\Http\Controllers\SupplierController::deletionBlockers(collect($suppliers instanceof \Illuminate\Pagination\AbstractPaginator ? $suppliers->items() : $suppliers)->pluck('id')->all()); @endphp
                     @foreach ($suppliers as $supplier)
                         @php
                             $solde    = (float) ($supplier->solde ?? 0);
-                            $soldeCls = abs($solde) > 0.004 ? 'is-open' : 'is-zero';
-                            $soldeLbl = abs($solde) > 0.004 ? 'Non soldé' : 'Soldé';
+                            $soldeCls = $solde > 0.004 ? 'is-due' : ($solde < -0.004 ? 'is-credit' : 'is-zero');
+                            $soldeLbl = $solde > 0.004 ? 'Nous lui devons' : ($solde < -0.004 ? 'Il nous doit (avoir)' : 'Soldé');
                             $words    = preg_split('/\s+/', trim((string) $supplier->name));
                             $initials = mb_strtoupper(mb_substr($words[0] ?? '?', 0, 1) . (isset($words[1]) ? mb_substr($words[1], 0, 1) : ''));
                             $b2bUrl   = preg_match('#^https?://#i', (string) $supplier->b2b_url) ? $supplier->b2b_url : null;
@@ -1250,11 +1251,16 @@
                                     </button>
                                 </div>
                                 <div class="act-btns mt-2">
+                                    @if(!empty($delBlockers[$supplier->id]))
+                                        @php $lockMsg = 'Suppression impossible : ' . implode(', ', $delBlockers[$supplier->id]) . '. Pour ne plus lui passer de commande, passez-le en Bloqué.'; @endphp
+                                        <button type="button" class="btn btn-sm btn-secondary w-100" style="opacity:.75;cursor:not-allowed" title="Suppression impossible : {{ e(implode(', ', $delBlockers[$supplier->id])) }}. Utilisez « Bloquer »." onclick="alert({!! json_encode($lockMsg, JSON_HEX_APOS | JSON_HEX_QUOT) !!})"><i class="fas fa-lock"></i> Supprimer</button>
+                                    @else
                                     <form action="{{ route('supplier.destroy', $supplier->id) }}" method="POST" onsubmit="return confirm('Supprimer définitivement ce fournisseur ?')">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-sm btn-danger w-100" title="Supprimer"><i class="fas fa-trash-alt"></i> Supprimer</button>
                                     </form>
+                                    @endif
                                 </div>
 
  <!-- Accounting Entries Modal -->

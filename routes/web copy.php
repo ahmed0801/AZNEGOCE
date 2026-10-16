@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\AnalyticsExportController;
 use App\Http\Controllers\ArticleImportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AvoirController;
@@ -23,12 +24,14 @@ use App\Http\Controllers\TecdocController;
 use App\Http\Controllers\DevisController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\GeneralAccountsController;
+use App\Http\Controllers\GoldaController;
 use App\Http\Controllers\ImmatController;
 use App\Http\Controllers\PayementmodeController;
 use App\Http\Controllers\PayementtermController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanificationTourneeController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\PurchaseDocumentController;
 use App\Http\Controllers\PurchaseInvoiceController;
 use App\Http\Controllers\PurchaseProjectController;
 use App\Http\Controllers\PurchaseSettingsController;
@@ -83,9 +86,14 @@ Route::middleware(['auth', 'single.session'])->group(function () {
 
 
 Route::get('/items/search', [ItemController::class, 'search'])->name('items.search');
+Route::get('/items/searchforstock', [ItemController::class, 'searchforstock'])->name('items.searchforstock');
 
 Route::get('/dashboard', [AuthController::class, 'adminDashboard'])->name('dashboard');
 
+
+// pointer
+Route::post('/invoice-lines/{id}/toggle-pointed', [SalesController::class, 'togglePointed'])->name('invoice_lines.toggle_pointed');
+Route::post('/delivery-note-lines/{id}/toggle-pointed', [DeliveryNotesController::class, 'togglePointed'])->name('delivery_note_lines.toggle_pointed');
 
 
 
@@ -101,6 +109,10 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('category.
 Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
 Route::delete('/category/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
 Route::put('/category/{id}', [CategoryController::class, 'update'])->name('category.update');
+Route::get('/category/{id}/subcategories', [CategoryController::class, 'subcategoriesByCategory'])->name('subcategory.byCategory');
+Route::post('/subcategory', [CategoryController::class, 'storeSubcategory'])->name('subcategory.store');
+Route::put('/subcategory/{id}', [CategoryController::class, 'updateSubcategory'])->name('subcategory.update');
+Route::delete('/subcategory/{id}', [CategoryController::class, 'destroySubcategory'])->name('subcategory.destroy');
 
 Route::get('/grouptvas', [TvaController::class, 'index'])->name('grouptva.index');
 Route::post('/grouptva', [TvaController::class, 'store'])->name('grouptva.store');
@@ -150,6 +162,10 @@ Route::get('/newcustomer', [CustomerController::class, 'newforsale'])->name('cus
 Route::post('/customer', [CustomerController::class, 'store'])->name('customer.store');
 Route::delete('/customer/{id}', [CustomerController::class, 'destroy'])->name('customer.destroy');
 Route::put('/customer/{id}', [CustomerController::class, 'update'])->name('customer.update');
+// Nouveau
+Route::get('/customers/form-options', [CustomerController::class, 'formOptions'])->name('customers.form-options');
+Route::post('/customers/quick-store', [CustomerController::class, 'quickStore'])->name('customers.quick-store');
+
 
 
 // Vehicle routes vehicule
@@ -215,6 +231,14 @@ Route::post('/company-information', [PurchaseController::class, 'storeCompanyInf
 Route::get('/purchase-settings', [PurchaseSettingsController::class, 'index'])->name('purchase-settings.index');
 Route::put('/purchase-settings', [PurchaseSettingsController::class, 'store'])->name('purchase-settings.store');
 Route::match(['get', 'post'], '/returns/search', [PurchaseController::class, 'searchReturns'])->name('returns.search');
+
+
+
+Route::get('/purchase-documents/create', [PurchaseDocumentController::class, 'create'])->name('purchase_docs.create');
+Route::get('/purchase-documents/items',  [PurchaseDocumentController::class, 'searchItems'])->name('purchase_docs.items');
+Route::post('/purchase-documents',       [PurchaseDocumentController::class, 'store'])->name('purchase_docs.store');
+
+
 
 
 
@@ -850,7 +874,7 @@ Route::post('/articles/preview', [ArticleImportController::class, 'preview'])->n
  
 
 
-
+Route::get('/tournee/parametres', [TourneeLineController::class, 'getParametres'])->name('tournee.parametres');
 
     
     // Autres routes protégées...
@@ -874,6 +898,21 @@ Route::post('/admin/login', [AuthController::class, 'loginAdmin'])->name('login.
 Route::get('/admin/dashboard', [AuthController::class, 'adminDashboard'])->name('admin.dashboard')->middleware('auth');
 Route::post('/admin/logout', [AuthController::class, 'logoutAdmin'])->name('logout.admin');
 Route::get('/dashboard/late-deliveries', [AuthController::class, 'lateDeliveries'])->name('dashboard.late-deliveries');
+
+
+Route::get('/csrf-refresh', [AuthController::class, 'csrfRefresh'])->name('csrf.refresh');
+
+
+Route::get('/analytics/export', [AnalyticsExportController::class, 'export'])->name('analytics.export');
+
+
+
+Route::get('/admin/golda', [GoldaController::class, 'index'])->name('admin.golda.index');
+Route::post('/admin/golda/sync', [GoldaController::class, 'syncMarques'])->name('admin.golda.sync');
+Route::post('/admin/golda/settings', [GoldaController::class, 'saveSettings'])->name('admin.golda.settings');
+Route::post('/admin/golda/run', [GoldaController::class, 'runImport'])->name('admin.golda.run');
+
+
 
 
 

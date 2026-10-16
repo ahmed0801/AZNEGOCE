@@ -23,6 +23,7 @@ class PurchaseNote extends Model
         'paid',
         'purchase_return_id',
         'purchase_invoice_id',
+        'return_goods',
     ];
 
     public function supplier()

@@ -185,7 +185,26 @@
 
 
 
-    </style>
+    /* ===== En-tête liste : boutons + filtres ===== */
+.lh-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+.lh-title{margin:0;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.lh-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.lh-btns .btn,.lh-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
+.lh-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem}
+.lh-filters .lh-field{flex:1 1 150px;min-width:130px;position:relative}
+.lh-filters .lh-field.lh-wide{flex:2 1 220px}
+.lh-filters .lh-field.lh-narrow{flex:0 1 130px;min-width:120px}
+.lh-filters .lh-field i.lh-ico{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.8rem;pointer-events:none}
+.lh-filters .lh-field i.lh-ico + input{padding-left:2.1rem}
+.lh-filters .form-control,.lh-filters .form-select{height:38px;border-radius:8px;font-size:.88rem}
+.lh-filters .lh-dates{display:flex;align-items:center;gap:.4rem;flex:1 1 280px}
+.lh-filters .lh-dates span{color:#6b7280;font-size:.8rem;white-space:nowrap}
+.lh-filters .lh-spacer{flex:1 1 auto}
+.lh-filters .select2-container{width:100%!important}
+.lh-filters .select2-container--default .select2-selection--single{height:38px!important;min-height:38px!important;border-radius:8px!important;display:flex;align-items:center;font-size:.88rem!important;padding:0 .4rem!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px!important}
+</style>
 
 
 
@@ -242,11 +261,13 @@
                     </a>
                     <div class="collapse" id="achats">
                         <ul class="nav nav-collapse">
-                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
-                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
-                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
-                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
-                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                            <li><a href="{{ route('purchase_docs.create') }}"><span class="sub-item"><i class="fas fa-plus-circle"></i> Nouveau document</span></a></li>
+                            <li><a href="{{ route('purchaseprojects.list') }}"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="{{ route('purchases.list') }}"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="{{ route('receptions.index') }}"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="{{ route('invoices.list') }}"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="{{ route('returns.list') }}"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="{{ route('notes.list') }}"><span class="sub-item">Avoirs</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -604,75 +625,71 @@
         @endif
 
         <div class="container mt-4">
-            <h4>📄 Liste des factures d'achat :
-                <div class="btn-group">
-                    <button type="button" class="btn btn-outline-success btn-round ms-2 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Nouvelle facture Achat <i class="fas fa-plus-circle ms-2"></i>
-                    </button>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="{{ route('invoices.create_free') }}">Facture Libre (hors stock)</a>
-                        <a class="dropdown-item" href="{{ route('invoices.create_grouped') }}">Facture Achat Groupée</a>
-                    </div>
+            <div class="lh-bar">
+    <h4 class="lh-title"><i class="fas fa-file-invoice-dollar text-primary"></i> Factures d'achat</h4>
+    <div class="lh-btns">
+        <a href="{{ route('invoices.create_free') }}" class="btn btn-primary" title="Facture hors stock (transport, services…)"><i class="fas fa-plus-circle"></i> Facture libre</a>
+        <a href="{{ route('receptions.index', ['state' => 'a_facturer']) }}" class="btn btn-outline-primary" title="Facture directe ou groupée à partir des réceptions non facturées"><i class="fas fa-layer-group"></i> Facturer des réceptions</a>
+        <a href="{{ route('purchase_docs.create') }}" class="btn btn-outline-success"><i class="fas fa-dolly"></i> Réceptionner et facturer</a>
+    </div>
+</div>
 
-                    <a href="/purchases" class="btn btn-outline-success btn-round ms-2">Nouvelle Commande Achat 
-                <i class="fas fa-plus-circle ms-2"></i>
-            </a>
+EXCEL
+<form method="GET" action="{{ route('invoices.list') }}" class="lh-filters">
 
-                </div>
-            </h4>
+    <div class="lh-field lh-wide">
+        <i class="fas fa-hashtag lh-ico"></i>
+        <input type="text" name="q" class="form-control" placeholder="N° facture, réf. fournisseur…" value="{{ request('q') }}">
+    </div>
 
-            <form method="GET" action="{{ route('invoices.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-                <select name="supplier_id" class="form-select form-select-sm" style="width: 150px;">
-                    <option value="">Fournisseur (Tous)</option>
-                    @foreach($suppliers as $supplier)
-                        <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
-                            {{ $supplier->name }}
-                        </option>
-                    @endforeach
-                </select>
+    <div class="lh-field lh-wide">
+        <select name="supplier_id" class="form-select select2-filter">
+            <option value="">Fournisseurs (Tous)</option>
+            @foreach($suppliers as $supplier)
+                <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}</option>
+            @endforeach
+        </select>
+    </div>
 
-                <select name="status" class="form-select form-select-sm" style="width: 110px;">
-                    <option value="">Statut (Tous)</option>
-                    <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
-                    <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
-                </select>
+    <div class="lh-field lh-narrow">
+        <select name="status" class="form-select select2-filter">
+            <option value="">Statut (Tous)</option>
+        <option value="brouillon" {{ request('status') == 'brouillon' ? 'selected' : '' }}>Brouillon</option>
+        <option value="validée" {{ request('status') == 'validée' ? 'selected' : '' }}>Validée</option>
+        <option value="annulée" {{ request('status') == 'annulée' ? 'selected' : '' }}>Annulée</option>
+        </select>
+    </div>
 
-                <select name="paid" class="form-select form-select-sm" style="width: 110px;">
-                                <option value="">Payé (Tous)</option>
-                                <option value="1" {{ request('paid') == '1' ? 'selected' : '' }}>Payé</option>
-                                <option value="0" {{ request('paid') == '0' ? 'selected' : '' }}>Non payé</option>
-                            </select>
+    <div class="lh-field lh-narrow">
+        <select name="paid" class="form-select select2-filter">
+            <option value="">Paiement (Tous)</option>
+        <option value="1" {{ request('paid') == '1' ? 'selected' : '' }}>Payées</option>
+        <option value="0" {{ request('paid') == '0' ? 'selected' : '' }}>Non payées</option>
+        </select>
+    </div>
 
-                <select name="type" class="form-select form-select-sm" style="width: 110px;">
-                    <option value="">Type (Tous)</option>
-                    <option value="direct" {{ request('type') == 'direct' ? 'selected' : '' }}>Directe</option>
-                    <option value="groupée" {{ request('type') == 'groupée' ? 'selected' : '' }}>Groupée</option>
-                    <option value="libre" {{ request('type') == 'libre' ? 'selected' : '' }}>Libre</option>
-                </select>
-de
-                <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début"
-                    value="{{ request('date_from') }}">
-à
-                <input type="date" name="date_to" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin"
-                    value="{{ request('date_to') }}">
+    <div class="lh-field lh-narrow">
+        <select name="type" class="form-select select2-filter">
+            <option value="">Type (Tous)</option>
+        <option value="direct" {{ request('type') == 'direct' ? 'selected' : '' }}>Directe</option>
+        <option value="groupée" {{ request('type') == 'groupée' ? 'selected' : '' }}>Groupée</option>
+        <option value="libre" {{ request('type') == 'libre' ? 'selected' : '' }}>Libre</option>
+        </select>
+    </div>
 
-                <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                    <i class="fas fa-filter me-1"></i> Filtrer
-                </button>
+    <div class="lh-dates">
+        <span>Du</span>
+        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+        <span>au</span>
+        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+    </div>
 
-                <button type="submit" name="action" value="export" formaction="{{ route('invoices.export') }}"
-                    class="btn btn-outline-success btn-sm px-3">
-                    <i class="fas fa-file-excel me-1"></i> EXCEL
-                </button>
-                                    <!-- <button type="submit" name="action" value="export_pdf" formaction="{{ route('invoices.export') }}"
-                            class="btn btn-outline-primary btn-sm px-3">
-                        <i class="fas fa-file-pdf me-1"></i> PDF
-                    </button> -->
-
-                <a href="{{ route('invoices.list') }}" class="btn btn-outline-secondary btn-sm px-3">
-                    <i class="fas fa-undo me-1"></i> Réinitialiser
-                </a>
-            </form>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrer</button>
+    <button type="submit" name="action" value="export" formaction="{{ route('invoices.export') }}" class="btn btn-outline-success">
+        <i class="fas fa-file-excel"></i> Exporter
+    </button>
+    <a href="{{ route('invoices.list') }}" class="btn btn-outline-secondary"><i class="fas fa-undo"></i> Réinitialiser</a>
+</form>
 
 
 
@@ -694,13 +711,17 @@ de
                             </h6>
                             @if($invoice->status === 'brouillon')
                                 <span class="badge bg-secondary">{{ ucfirst($invoice->status) }}</span>
+                            @elseif($invoice->status === 'annulée')
+                                <span class="badge bg-dark">Annulée</span>
                             @else
                                 <span class="badge bg-success">{{ ucfirst($invoice->status) }}</span>
                             @endif
+                            @if($invoice->supplier_ref)<span class="badge rounded-pill text-bg-light" title="N° de la facture du fournisseur">Réf. fournisseur : {{ $invoice->supplier_ref }}</span>@endif
+                            @if($invoice->due_date)<span class="badge rounded-pill text-bg-light"><i class="far fa-calendar-alt"></i> Échéance : {{ \Carbon\Carbon::parse($invoice->due_date)->format('d/m/Y') }}</span>@endif
 
 
                                 <span class="badge rounded-pill text-bg-secondary">Total TTC : {{ number_format($invoice->total_ttc, 2, ',', ' ') }} €</span>
-@if($invoice->status != 'brouillon')
+@if($invoice->status === 'validée')
                                             @if($invoice->paid)
                                                 <span class="badge bg-success">Payé</span>
                                             @else
@@ -752,6 +773,18 @@ de
                                         <a class="dropdown-item" href="{{ route('invoices.edit', $invoice->id) }}">
                                             <i class="fas fa-edit"></i> Modifier
                                         </a>
+                                        <form action="{{ route('invoices.validate', $invoice->id) }}" method="POST" onsubmit="return confirm('Valider cette facture ? Le solde du fournisseur sera augmenté de {{ number_format($invoice->total_ttc, 2, ',', ' ') }} €.')">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item"><i class="fas fa-check"></i> Valider la facture</button>
+                                        </form>
+                                    @endif
+                                    @if($invoice->status !== 'annulée')
+                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#headerModal{{ $invoice->id }}">
+                                            <i class="fas fa-pen"></i> Modifier les mentions (réf., échéance, notes)
+                                        </a>
+                                        <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#cancelModal{{ $invoice->id }}">
+                                            <i class="fas fa-ban"></i> Annuler la facture
+                                        </a>
                                     @endif
                                     @if($invoice->type === 'direct' && $invoice->orders()->exists())
                                         @foreach($invoice->orders as $order)
@@ -788,6 +821,7 @@ de
                         <table class="table table-sm table-bordered align-middle">
                             <thead class="table-light text-center">
                                 <tr>
+                                    <th>Réception</th>
                                     <th>Code Article</th>
                                     <th>Désignation</th>
                                     <th>Qté</th>
@@ -800,6 +834,7 @@ de
                             <tbody>
                                 @foreach ($invoice->lines as $line)
                                     <tr>
+                                        <td>@if($line->reception)<a href="{{ route('receptions.show', $line->reception->id) }}">{{ $line->reception->numdoc }}</a>@else - @endif</td>
                                         <td>{{ $line->article_code ?? '-' }}</td>
                                         <td>{{ $line->item->name ?? $line->description ?? '-' }}</td>
                                         <td class="text-center">{{ $line->quantity }}</td>
@@ -827,6 +862,45 @@ de
 
 
 
+
+                @if($invoice->status !== 'annulée')
+                <div class="modal fade" id="headerModal{{ $invoice->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog"><div class="modal-content">
+                        <form action="{{ route('invoices.header', $invoice->id) }}" method="POST">
+                            @csrf @method('PUT')
+                            <div class="modal-header"><h5 class="modal-title">Mentions de {{ $invoice->numdoc }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                            <div class="modal-body">
+                                <p class="text-muted small mb-3">Les montants d'une facture ne changent pas ici. Pour les corriger : annulez la facture puis refacturez les réceptions.</p>
+                                <div class="mb-2"><label class="form-label">N° de la facture du fournisseur</label><input type="text" name="supplier_ref" class="form-control" value="{{ $invoice->supplier_ref }}"></div>
+                                <div class="row">
+                                    <div class="col-6 mb-2"><label class="form-label">Date de facture</label><input type="date" name="invoice_date" class="form-control" value="{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('Y-m-d') }}"></div>
+                                    <div class="col-6 mb-2"><label class="form-label">Échéance</label><input type="date" name="due_date" class="form-control" value="{{ $invoice->due_date ? \Carbon\Carbon::parse($invoice->due_date)->format('Y-m-d') : '' }}"></div>
+                                </div>
+                                <div class="mb-2"><label class="form-label">Notes</label><textarea name="notes" class="form-control" rows="3">{{ $invoice->notes }}</textarea></div>
+                            </div>
+                            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button><button type="submit" class="btn btn-primary">Enregistrer</button></div>
+                        </form>
+                    </div></div>
+                </div>
+                <div class="modal fade" id="cancelModal{{ $invoice->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog"><div class="modal-content">
+                        <form action="{{ route('invoices.cancel', $invoice->id) }}" method="POST">
+                            @csrf
+                            <div class="modal-header"><h5 class="modal-title">Annuler la facture {{ $invoice->numdoc }} ?</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                            <div class="modal-body">
+                                <ul class="small">
+                                    @if($invoice->status === 'validée')<li>Le solde de {{ $invoice->supplier->name }} diminue de {{ number_format($invoice->total_ttc, 2, ',', ' ') }} €.</li>@endif
+                                    <li>Les réceptions / commandes de cette facture redeviennent « à facturer ». Le stock n'est pas touché.</li>
+                                    <li>Refusée s'il existe des règlements ou un avoir sur cette facture.</li>
+                                </ul>
+                                <label class="form-label">Motif (facultatif)</label>
+                                <input type="text" name="reason" class="form-control" maxlength="150" placeholder="Ex : doublon, mauvais fournisseur">
+                            </div>
+                            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button><button type="submit" class="btn btn-danger">Annuler la facture</button></div>
+                        </form>
+                    </div></div>
+                </div>
+                @endif
 
                 <!-- Make Payment Modal -->
                             <div class="modal fade" id="makePaymentModal{{ $invoice->id }}" tabindex="-1" aria-labelledby="makePaymentModalLabel{{ $invoice->id }}" aria-hidden="true">
@@ -1088,5 +1162,6 @@ document.getElementById("searchItemInput").addEventListener("keyup", function() 
 
 
 
-  </body>
+  @include('partials.select2_init')
+</body>
 </html>

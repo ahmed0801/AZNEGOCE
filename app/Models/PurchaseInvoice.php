@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\Auth;
 class PurchaseInvoice extends Model
 {
     protected $fillable = [
-        'supplier_id', 'numdoc', 'invoice_date', 'status','paid', 'total_ht', 'total_ttc','acheteur',
-        'tva_rate', 'notes', 'type','supplier_invoice_file'
+        'supplier_id', 'numdoc', 'invoice_date', 'due_date', 'status', 'paid', 'total_ht', 'total_ttc', 'acheteur',
+        'tva_rate', 'notes', 'type', 'supplier_invoice_file', 'supplier_ref',
     ];
 
-public function supplier()
+    public function supplier()
     {
         return $this->belongsTo(Supplier::class);
     }
@@ -28,34 +28,24 @@ public function supplier()
         return $this->belongsToMany(PurchaseOrder::class, 'purchase_invoice_lines', 'purchase_invoice_id', 'purchase_order_id');
     }
 
-
-
-public function payments()
+    public function payments()
     {
         return $this->morphMany(Payment::class, 'payable');
     }
 
-
-
-    
     public function getRemainingBalanceAttribute()
     {
-        // Calculate remaining balance: total_ttc - sum of payment amounts
+        // Reste = total_ttc + somme des règlements (les décaissements sont stockés en négatif)
         $paidAmount = $this->payments->sum('amount');
-        // For purchase invoices, total_ttc can be negative (e.g., credit invoice).
-        // A negative payment (décaissement) reduces the liability.
         return round($this->total_ttc + $paidAmount, 2);
     }
 
     public function markAsPaid()
     {
-        $this->update(['paid' => $this->getRemainingBalanceAttribute() <= 0.01]); // Add tolerance
+        $this->update(['paid' => $this->getRemainingBalanceAttribute() <= 0.01]);
     }
 
-
-
-
-         protected static function boot()
+    protected static function boot()
     {
         parent::boot();
 
@@ -71,7 +61,4 @@ public function payments()
             }
         });
     }
-
-    
-
 }

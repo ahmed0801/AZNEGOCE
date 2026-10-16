@@ -16,6 +16,7 @@ class PurchaseReturnLine extends Model
         'unit_price_ht',
         'remise',
         'total_ligne_ht',
+        'tva',
     ];
 
     public function purchaseReturn()

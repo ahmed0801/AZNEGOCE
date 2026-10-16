@@ -11,8 +11,10 @@ class PurchaseOrderLine extends Model
         'purchase_order_id',
         'article_code',
         'ordered_quantity',
+        'received_quantity',
         'unit_price_ht',
         'remise',
+        'tva',
         'total_ligne_ht'
     ];
 
@@ -24,5 +26,11 @@ class PurchaseOrderLine extends Model
     public function item()
     {
         return $this->belongsTo(Item::class, 'article_code', 'code');
+    }
+
+    /** Reste à recevoir (jamais négatif). */
+    public function getRemainingQuantityAttribute()
+    {
+        return max(0, (float) $this->ordered_quantity - (float) $this->received_quantity);
     }
 }

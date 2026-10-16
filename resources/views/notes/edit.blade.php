@@ -186,6 +186,7 @@
 
 
     </style>
+@include('partials.lh_style')
 
 
 
@@ -242,11 +243,13 @@
                     </a>
                     <div class="collapse" id="achats">
                         <ul class="nav nav-collapse">
-                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
-                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
-                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
-                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
-                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                            <li><a href="{{ route('purchase_docs.create') }}"><span class="sub-item"><i class="fas fa-plus-circle"></i> Nouveau document</span></a></li>
+                            <li><a href="{{ route('purchaseprojects.list') }}"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="{{ route('purchases.list') }}"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="{{ route('receptions.index') }}"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="{{ route('invoices.list') }}"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="{{ route('returns.list') }}"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="{{ route('notes.list') }}"><span class="sub-item">Avoirs</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -599,18 +602,15 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Modifier l’avoir #{{ $note->numdoc }}</h5>
-            </div>
-            <div class="card-body">
-                <form action="{{ route('notes.update', $note->numdoc) }}" method="POST">
+        <div class="lh-bar"><h3 class="lh-title"><i class="fas fa-edit text-primary"></i> Modifier l’avoir #{{ $note->numdoc }}</h3>
+<div class="lh-btns"><a href="{{ route('notes.list') }}" class="btn btn-light border"><i class="fas fa-list"></i> Liste des avoirs</a></div></div>
+<form action="{{ route('notes.update', $note->numdoc) }}" method="POST">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="type" value="{{ $note->type }}">
                     <input type="hidden" name="tva_rate" id="tva_rate" value="{{ $note->tva_rate }}">
 
-                    <div class="row mb-3">
+                    <div class="row mb-3 top-row pg-card mx-0">
                         <div class="col-md-4">
                             <label class="form-label">Fournisseur</label>
                             <select name="supplier_id" class="form-control select2" required>
@@ -632,9 +632,9 @@
                         </div>
                     </div>
 
-                    <h6 class="mt-4 mb-2">Lignes de l’avoir</h6>
-                    <table class="table table-bordered" id="linesTable">
-                        <thead class="table-light">
+                    <h6 class="mt-2 mb-2">Lignes de l’avoir</h6>
+                    <div class="pg-card table-responsive"><table class="table table-striped table-bordered table-text-small" id="linesTable">
+                        <thead>
                             <tr>
                                 <th>Article</th>
                                 <th>Qté</th>
@@ -667,28 +667,26 @@
                                 </tr>
                             @endforeach
                         </tbody>
-                    </table>
+                    </table></div>
 
-                    <div class="row align-items-center mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label">Notes / Commentaire</label>
-                            <textarea name="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de l’avoir, etc.">{{ $note->notes }}</textarea>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            <div class="p-3 bg-light border rounded shadow-sm">
-                                <h5 class="mb-1">Total HT : <span id="grandTotal" class="text-success fw-bold">{{ number_format($note->total_ht, 2) }}</span> €</h5>
-                                <h6 class="mb-0">Total TTC : <span id="grandTotalTTC" class="text-danger fw-bold">{{ number_format($note->total_ttc, 2) }}</span> €</h6>
-                            </div>
-                        </div>
+                    @if($note->type === 'from_invoice')
+                    <div class="form-check mb-3 pg-card">
+                        <input type="hidden" name="return_goods" value="0">
+                        <input class="form-check-input" type="checkbox" name="return_goods" value="1" id="return_goods" {{ $note->return_goods ? 'checked' : '' }}>
+                        <label class="form-check-label" for="return_goods"><strong>Retourner la marchandise au fournisseur</strong> (retour créé et stock diminué à la validation).</label>
                     </div>
+                    @endif
 
-                    <div class="text-end">
-                        <button type="submit" name="action" value="save" class="btn btn-primary px-4">✅ Enregistrer Brouillon</button>
-                        <button type="submit" name="action" value="validate" class="btn btn-success px-4 ms-2">✔️ Valider l’Avoir</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                    <div class="pg-card"><label class="form-label">Notes / Commentaire</label><textarea name="notes" class="form-control" rows="3" placeholder="Remarques internes, conditions de l’avoir, etc.">{{ $note->notes }}</textarea></div>
+<div class="lh-actionbar">
+  <div class="ab-totals"><span>Total HT : <b id="grandTotal" class="text-success">0.00</b> €</span><span>Total TTC : <b id="grandTotalTTC" class="text-danger">0.00</b> €</span></div>
+  <div class="ab-btns">
+    <a href="{{ route('notes.list') }}" class="btn btn-light border">Annuler</a>
+    <button type="submit" name="action" value="save" class="btn btn-primary"><i class="fas fa-save"></i> Brouillon</button>
+    <button type="submit" name="action" value="validate" class="btn btn-success"><i class="fas fa-check"></i> Valider l’avoir</button>
+  </div>
+</div>
+</form>
     </div>
 
 
@@ -768,24 +766,19 @@ $(document).ready(function () {
     $('.select2').select2({ width: '100%' });
 
     function recalculate() {
-        let totalHT = 0;
-        const tva = parseFloat($('#tva_rate').val()) || 0;
-
+        let totalHT = 0, totalTTC = 0;
         $('#lines tr').each(function () {
             const qty = parseFloat($(this).find('.qty').val()) || 0;
             const pu = parseFloat($(this).find('.pu').val()) || 0;
             const remise = parseFloat($(this).find('.remise').val()) || 0;
+            const tvaL = parseFloat($(this).find('.tva_ligne').val()) || 0;
             const lineHT = qty * pu * (1 - remise / 100);
-            const lineTTC = lineHT * (1 + tva / 100);
-
-            $(this).find('.tva_ligne').val(tva.toFixed(2));
+            const lineTTC = lineHT * (1 + tvaL / 100);
             $(this).find('.total').val(lineHT.toFixed(2));
             $(this).find('.totalttc').val(lineTTC.toFixed(2));
-
             totalHT += lineHT;
+            totalTTC += lineTTC;
         });
-
-        const totalTTC = totalHT * (1 + tva / 100);
         $('#grandTotal').text(totalHT.toFixed(2));
         $('#grandTotalTTC').text(totalTTC.toFixed(2));
     }

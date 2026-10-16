@@ -20,6 +20,8 @@ class PurchaseReturn extends Model
         'tva_rate',
         'supplier_id',
         'invoiced',
+        'status',
+        'purchase_note_id',
     ];
 
     public function purchaseOrder()

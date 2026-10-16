@@ -31,6 +31,7 @@ use App\Http\Controllers\PayementtermController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanificationTourneeController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\PurchaseDocumentController;
 use App\Http\Controllers\PurchaseInvoiceController;
 use App\Http\Controllers\PurchaseProjectController;
 use App\Http\Controllers\PurchaseSettingsController;
@@ -198,6 +199,77 @@ Route::get('/purchases/{id}/export', [PurchaseController::class, 'exportSingle']
 
 Route::get('/purchases/{id}/return', [PurchaseController::class, 'createReturn'])->name('purchases.return.create');
 Route::post('/purchases/{id}/return', [PurchaseController::class, 'storeReturn'])->name('purchases.return.store');
+Route::post('/returns/{id}/cancel', [PurchaseController::class, 'cancelReturnAction'])->whereNumber('id')->name('purchases.return.cancel');
+
+
+
+
+
+Route::get('/purchase-documents/create', [PurchaseDocumentController::class, 'create'])->name('purchase_docs.create');
+Route::get('/purchase-documents/items',  [PurchaseDocumentController::class, 'searchItems'])->name('purchase_docs.items');
+Route::post('/purchase-documents',       [PurchaseDocumentController::class, 'store'])->name('purchase_docs.store');
+
+// Excel : modèle, export des lignes saisies, import (page nouvelle commande achat)
+Route::get('/purchase-documents/excel-template',  [PurchaseDocumentController::class, 'downloadTemplate'])->name('purchase_docs.template');
+Route::post('/purchase-documents/export-lines',   [PurchaseDocumentController::class, 'exportLines'])->name('purchase_docs.export');
+Route::post('/purchase-documents/import-lines',   [PurchaseDocumentController::class, 'importLines'])->name('purchase_docs.import');
+
+// Assistant prix de vente (propositions, puis application après validation)
+Route::post('/purchase-documents/price-review',  [PurchaseDocumentController::class, 'priceReview'])->name('purchase_docs.price_review');
+Route::post('/purchase-documents/apply-prices',  [PurchaseDocumentController::class, 'applyPrices'])->name('purchase_docs.apply_prices');
+
+// Aide à la décision (projet / commande)
+Route::get('/purchase-documents/insights',      [PurchaseDocumentController::class, 'insights'])->name('purchase_docs.insights');
+Route::get('/purchase-documents/replenishment', [PurchaseDocumentController::class, 'replenishment'])->name('purchase_docs.replenishment');
+
+
+
+
+
+
+
+
+
+
+Route::post('/invoices/legacy',            [PurchaseController::class, 'storeLegacyInvoice'])->name('invoices.legacy_store');
+Route::post('/invoices/{id}/validate',     [PurchaseController::class, 'validateInvoiceAction'])->whereNumber('id')->name('invoices.validate');
+Route::put('/invoices/{id}/header',        [PurchaseController::class, 'updateInvoiceHeaderAction'])->whereNumber('id')->name('invoices.header');
+Route::post('/invoices/{id}/cancel',       [PurchaseController::class, 'cancelInvoiceAction'])->whereNumber('id')->name('invoices.cancel');
+
+// Retours d'achat — annulation (même groupe que les routes /purchases/{id}/return)
+Route::post('/returns/{id}/cancel', [PurchaseController::class, 'cancelReturnAction'])->whereNumber('id')->name('purchases.return.cancel');
+
+// Avoirs d'achat — validation / annulation
+Route::post('/notes/{id}/validate', [PurchaseController::class, 'validateNoteAction'])->whereNumber('id')->name('notes.validate');
+Route::post('/notes/{id}/cancel',   [PurchaseController::class, 'cancelNoteAction'])->whereNumber('id')->name('notes.cancel');
+
+// Retours d'achat — page unique « Nouveau retour fournisseur »
+Route::get('/purchase-returns/new',               [PurchaseController::class, 'newReturn'])->name('purchases.return.new');
+Route::get('/purchase-returns/orders',            [PurchaseController::class, 'returnOrders'])->name('purchases.return.orders');
+Route::get('/purchase-returns/orders/{id}/lines', [PurchaseController::class, 'returnOrderLines'])->whereNumber('id')->name('purchases.return.lines');
+
+
+
+
+
+
+
+
+
+
+
+Route::get('/purchase-documents/create', [PurchaseDocumentController::class, 'create'])->name('purchase_docs.create');
+Route::get('/purchase-documents/items',  [PurchaseDocumentController::class, 'searchItems'])->name('purchase_docs.items');
+Route::post('/purchase-documents',       [PurchaseDocumentController::class, 'store'])->name('purchase_docs.store');
+
+// Excel : modèle, export des lignes saisies, import (page nouvelle commande achat)
+Route::get('/purchase-documents/excel-template',  [PurchaseDocumentController::class, 'downloadTemplate'])->name('purchase_docs.template');
+Route::post('/purchase-documents/export-lines',   [PurchaseDocumentController::class, 'exportLines'])->name('purchase_docs.export');
+Route::post('/purchase-documents/import-lines',   [PurchaseDocumentController::class, 'importLines'])->name('purchase_docs.import');
+
+
+
+
 
 // avis de retrait
 Route::post('/purchases/{id}/withdrawal_notice', [PurchaseController::class, 'withdrawalNotice'])->name('purchases.withdrawal_notice');
@@ -230,6 +302,14 @@ Route::post('/company-information', [PurchaseController::class, 'storeCompanyInf
 Route::get('/purchase-settings', [PurchaseSettingsController::class, 'index'])->name('purchase-settings.index');
 Route::put('/purchase-settings', [PurchaseSettingsController::class, 'store'])->name('purchase-settings.store');
 Route::match(['get', 'post'], '/returns/search', [PurchaseController::class, 'searchReturns'])->name('returns.search');
+
+
+
+Route::get('/purchase-documents/create', [PurchaseDocumentController::class, 'create'])->name('purchase_docs.create');
+Route::get('/purchase-documents/items',  [PurchaseDocumentController::class, 'searchItems'])->name('purchase_docs.items');
+Route::post('/purchase-documents',       [PurchaseDocumentController::class, 'store'])->name('purchase_docs.store');
+
+
 
 
 
@@ -268,13 +348,25 @@ Route::get('notes/{id}/export', [PurchaseController::class, 'exportSingleNote'])
 Route::get('notes/export', [PurchaseController::class, 'exportNotes'])->name('notes.export');
 Route::get('notes/{id}/print', [PurchaseController::class, 'printSingleNote'])->name('notes.printSingle');
 
+
+Route::post('/notes/{id}/validate', [PurchaseController::class, 'validateNoteAction'])->whereNumber('id')->name('notes.validate');
+Route::post('/notes/{id}/cancel',   [PurchaseController::class, 'cancelNoteAction'])->whereNumber('id')->name('notes.cancel');
+
+
 Route::get('/invoices/search', [PurchaseController::class, 'searchInvoices'])->name('invoices.search');
 
-Route::get('/receptions/create', [ReceptionController::class, 'create'])->name('receptions.create');
-Route::post('/receptions', [ReceptionController::class, 'store'])->name('receptions.store');
-Route::get('/receptions/{id}', [ReceptionController::class, 'show'])->name('receptions.show');
-Route::get('/receptions/{id}/edit', [ReceptionController::class, 'edit'])->name('receptions.edit');
-Route::put('/receptions/{id}', [ReceptionController::class, 'update'])->name('receptions.update');
+
+Route::get('/receptions',               [ReceptionController::class, 'index'])->name('receptions.index');
+Route::get('/receptions/create',        [ReceptionController::class, 'create'])->name('receptions.create');       // ?order_id=
+Route::get('/receptions/lookup',        [ReceptionController::class, 'lookup'])->name('receptions.lookup');       // scan : code / code-barres
+Route::post('/receptions',              [ReceptionController::class, 'store'])->name('receptions.store');
+Route::post('/receptions/invoice',      [ReceptionController::class, 'invoice'])->name('receptions.invoice');     // facturer 1 ou plusieurs réceptions
+Route::get('/receptions/{id}',          [ReceptionController::class, 'show'])->whereNumber('id')->name('receptions.show');
+Route::get('/receptions/{id}/edit',     [ReceptionController::class, 'edit'])->whereNumber('id')->name('receptions.edit');
+Route::put('/receptions/{id}',          [ReceptionController::class, 'update'])->whereNumber('id')->name('receptions.update');
+Route::post('/receptions/{id}/cancel',  [ReceptionController::class, 'cancel'])->whereNumber('id')->name('receptions.cancel');
+Route::get('/receptions/{id}/pdf',      [ReceptionController::class, 'generatePdf'])->whereNumber('id')->name('receptions.pdf');
+Route::get('/receptions/{id}/generate-pdf', [ReceptionController::class, 'generatePdf'])->whereNumber('id')->name('receptions.generate_pdf'); // ancien nom conservé
 
 
 
@@ -295,6 +387,24 @@ Route::get('/purchase-invoices/create', [PurchaseInvoiceController::class, 'crea
     Route::put('/invoices/{numdoc}', [PurchaseController::class, 'updateInvoice'])->name('invoices.update');
     Route::get('/invoices/{id}/export', [PurchaseController::class, 'exportSingleInvoice'])->name('invoices.export_single');
     Route::get('/invoices/{id}/print', [PurchaseController::class, 'printSingleInvoice'])->name('invoices.print_single');
+
+
+Route::post('/invoices/legacy',            [PurchaseController::class, 'storeLegacyInvoice'])->name('invoices.legacy_store');
+Route::post('/invoices/{id}/validate',     [PurchaseController::class, 'validateInvoiceAction'])->whereNumber('id')->name('invoices.validate');
+Route::put('/invoices/{id}/header',        [PurchaseController::class, 'updateInvoiceHeaderAction'])->whereNumber('id')->name('invoices.header');
+Route::post('/invoices/{id}/cancel',       [PurchaseController::class, 'cancelInvoiceAction'])->whereNumber('id')->name('invoices.cancel');
+
+
+
+
+    Route::post('/invoices/legacy',            [PurchaseController::class, 'storeLegacyInvoice'])->name('invoices.legacy_store');
+Route::post('/invoices/{id}/validate',     [PurchaseController::class, 'validateInvoiceAction'])->whereNumber('id')->name('invoices.validate');
+Route::put('/invoices/{id}/header',        [PurchaseController::class, 'updateInvoiceHeaderAction'])->whereNumber('id')->name('invoices.header');
+Route::post('/invoices/{id}/cancel',       [PurchaseController::class, 'cancelInvoiceAction'])->whereNumber('id')->name('invoices.cancel');
+
+
+
+
 Route::get('/invoices/export', [PurchaseController::class, 'exportinvoices'])->name('invoices.export');
 Route::get('/purchases/search', [PurchaseController::class, 'search'])->name('purchases.search');
 
@@ -745,16 +855,6 @@ Route::get('/passwordform', function () {
 
 
 
-Route::get('/receptions', [ReceptionController::class, 'index'])->name('receptions.index');
-Route::get('/receptions/{NumReception}', [ReceptionController::class, 'show'])->name('receptions.shownav');
-Route::post('/receptions/pdf', [ReceptionController::class, 'genererPDF'])->name('receptions.pdf');
-Route::post('/receptions/print-multiple', [ReceptionController::class, 'printMultiple'])->name('receptions.printMultiple');
-Route::get('/receptions/multiple/{Nums}', [ReceptionController::class, 'showMultiple'])->name('receptions.showMultiple');
-
-
-Route::get('/receptions/{id}/scan', [ReceptionController::class, 'scan'])->name('receptions.scan');
-Route::post('/receptions/{id}/scan', [ReceptionController::class, 'scanReception'])->name('receptions.scan.update');
-Route::get('/receptions/{id}/generate-pdf', [ReceptionController::class, 'generatePdf'])->name('receptions.generate_pdf');
 
 
 

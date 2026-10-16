@@ -185,7 +185,26 @@
 
 
 
-    </style>
+    /* ===== En-tête liste : boutons + filtres ===== */
+.lh-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+.lh-title{margin:0;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.lh-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.lh-btns .btn,.lh-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
+.lh-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem}
+.lh-filters .lh-field{flex:1 1 150px;min-width:130px;position:relative}
+.lh-filters .lh-field.lh-wide{flex:2 1 220px}
+.lh-filters .lh-field.lh-narrow{flex:0 1 130px;min-width:120px}
+.lh-filters .lh-field i.lh-ico{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.8rem;pointer-events:none}
+.lh-filters .lh-field i.lh-ico + input{padding-left:2.1rem}
+.lh-filters .form-control,.lh-filters .form-select{height:38px;border-radius:8px;font-size:.88rem}
+.lh-filters .lh-dates{display:flex;align-items:center;gap:.4rem;flex:1 1 280px}
+.lh-filters .lh-dates span{color:#6b7280;font-size:.8rem;white-space:nowrap}
+.lh-filters .lh-spacer{flex:1 1 auto}
+.lh-filters .select2-container{width:100%!important}
+.lh-filters .select2-container--default .select2-selection--single{height:38px!important;min-height:38px!important;border-radius:8px!important;display:flex;align-items:center;font-size:.88rem!important;padding:0 .4rem!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px!important}
+.lh-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px!important}
+</style>
 
 
 
@@ -242,11 +261,13 @@
                     </a>
                     <div class="collapse" id="achats">
                         <ul class="nav nav-collapse">
-                            <li><a href="/purchases/list"><span class="sub-item">Commandes</span></a></li>
-                            <li><a href="/purchaseprojects/list"><span class="sub-item">Projets d’Achat</span></a></li>
-                            <li><a href="/returns"><span class="sub-item">Retours</span></a></li>
-                            <li><a href="/invoices"><span class="sub-item">Factures</span></a></li>
-                            <li><a href="/notes"><span class="sub-item">Avoirs</span></a></li>
+                            <li><a href="{{ route('purchase_docs.create') }}"><span class="sub-item"><i class="fas fa-plus-circle"></i> Nouveau document</span></a></li>
+                            <li><a href="{{ route('purchaseprojects.list') }}"><span class="sub-item">Projets d’Achat</span></a></li>
+                            <li><a href="{{ route('purchases.list') }}"><span class="sub-item">Commandes</span></a></li>
+                            <li><a href="{{ route('receptions.index') }}"><span class="sub-item">Réceptions</span></a></li>
+                            <li><a href="{{ route('invoices.list') }}"><span class="sub-item">Factures</span></a></li>
+                            <li><a href="{{ route('returns.list') }}"><span class="sub-item">Retours</span></a></li>
+                            <li><a href="{{ route('notes.list') }}"><span class="sub-item">Avoirs</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -607,55 +628,56 @@
         @endif
         <div class="container mt-4">
 
-<h4>📋 Liste des retours d'achat :</h4>
-<div class="alert alert-primary" role="alert">
-  La création d’un retour Achat se fait à partir d’une <a href="/purchases/list" class="alert-link">Commande Achat</a> non facturée, ou est générée automatiquement à partir d’un avoir Achat.
+<div class="lh-bar">
+    <h4 class="lh-title"><i class="fas fa-undo-alt text-primary"></i> Retours d'achat</h4>
+    <div class="lh-btns">
+        <a href="{{ route('purchases.return.new') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Nouveau retour</a>
+        <a href="{{ route('purchases.list') }}" class="btn btn-outline-secondary"><i class="fas fa-clipboard-list"></i> Commandes d'achat</a>
+        <a href="{{ route('notes.list') }}" class="btn btn-outline-danger"><i class="fas fa-file-invoice"></i> Avoirs</a>
+    </div>
 </div>
 
+<form method="GET" action="{{ route('returns.list') }}" class="lh-filters">
 
-            <form method="GET" action="{{ route('returns.list') }}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
-                <select name="supplier_id" class="form-select form-select-sm" style="width: 150px;">
-                    <option value="">Fournisseur (Tous)</option>
-                    @foreach($suppliers as $supplier)
-                        <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
-                            {{ $supplier->name }}
-                        </option>
-                    @endforeach
-                </select>
+    <div class="lh-field lh-wide">
+        <select name="supplier_id" class="form-select select2-filter">
+            <option value="">Fournisseurs (Tous)</option>
+            @foreach($suppliers as $supplier)
+                <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}</option>
+            @endforeach
+        </select>
+    </div>
 
-                <select name="purchase_order_id" class="form-select form-select-sm" style="width: 170px;">
-                    <option value="">Commande (Toutes)</option>
-                    @foreach($purchaseOrders as $order)
-                        <option value="{{ $order->id }}" {{ request('purchase_order_id') == $order->id ? 'selected' : '' }}>
-                            {{ $order->numdoc }}
-                        </option>
-                    @endforeach
-                </select>
+    <div class="lh-field">
+        <select name="purchase_order_id" class="form-select select2-filter">
+            <option value="">Commandes (Toutes)</option>
+            @foreach($purchaseOrders as $order)
+                <option value="{{ $order->id }}" {{ request('purchase_order_id') == $order->id ? 'selected' : '' }}>{{ $order->numdoc }}</option>
+            @endforeach
+        </select>
+    </div>
 
-                <select name="type" class="form-select form-select-sm" style="width: 160px;">
-                    <option value="">Type (Tous)</option>
-                    <option value="total" {{ request('type') == 'total' ? 'selected' : '' }}>Total</option>
-                    <option value="partiel" {{ request('type') == 'partiel' ? 'selected' : '' }}>Partiel</option>
-                </select>
-de
-                <input type="date" name="date_from" class="form-control form-control-sm" style="width: 120px;" placeholder="Date début"
-                    value="{{ request('date_from') }}">
-à
-                <input type="date" name="date_to" class="form-control form-control-sm" style="width: 150px;" placeholder="Date fin"
-                    value="{{ request('date_to') }}">
+    <div class="lh-field lh-narrow">
+        <select name="type" class="form-select select2-filter">
+            <option value="">Type (Tous)</option>
+        <option value="total" {{ request('type') == 'total' ? 'selected' : '' }}>Total</option>
+        <option value="partiel" {{ request('type') == 'partiel' ? 'selected' : '' }}>Partiel</option>
+        </select>
+    </div>
 
-                <button type="submit" name="action" value="filter" class="btn btn-outline-primary btn-sm px-3">
-                    <i class="fas fa-filter me-1"></i> Filtrer
-                </button>
-                <button type="submit" name="action" value="export" formaction="{{ route('returns.export') }}"
-                    class="btn btn-outline-success btn-sm px-3">
-                    <i class="fas fa-file-excel me-1"></i> Exporter
-                </button>
+    <div class="lh-dates">
+        <span>Du</span>
+        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+        <span>au</span>
+        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+    </div>
 
-                <a href="{{ route('returns.list') }}" class="btn btn-outline-secondary btn-sm px-3">
-                    <i class="fas fa-undo me-1"></i> Réinitialiser
-                </a>
-            </form>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrer</button>
+    <button type="submit" name="action" value="export" formaction="{{ route('returns.export') }}" class="btn btn-outline-success">
+        <i class="fas fa-file-excel"></i> Exporter
+    </button>
+    <a href="{{ route('returns.list') }}" class="btn btn-outline-secondary"><i class="fas fa-undo"></i> Réinitialiser</a>
+</form>
 
                       <div class="d-flex justify-content-center mt-3">
     {{ $returns->appends(request()->query())->links() }}
@@ -676,6 +698,8 @@ Fournisseur : {{ $return->supplier ? $return->supplier->name : 'N/A' }}
                                 <span class="text-muted small">({{ \Carbon\Carbon::parse($return->return_date)->format('d/m/Y') }})</span>
                             </h6>
                             <span class="badge bg-primary">{{ ucfirst($return->type) }}</span>
+                            @if($return->status === 'annulée')<span class="badge bg-dark">Annulé</span>@endif
+                            <span class="badge rounded-pill text-bg-secondary">Total TTC : {{ number_format($return->total_ttc, 2, ',', ' ') }} €</span>
 
                                                     <span class="text-muted small">
                             @if($return->invoiced)
@@ -704,11 +728,31 @@ Fournisseur : {{ $return->supplier ? $return->supplier->name : 'N/A' }}
                                     <a class="dropdown-item" href="{{ route('purchases.return.show', $return->id) }}">
                                         <i class="fas fa-eye"></i> Voir détails
                                     </a>
+                                    @if($return->status !== 'annulée' && !$return->invoiced)
+                                        <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#cancelReturn{{ $return->id }}">
+                                            <i class="fas fa-ban"></i> Annuler le retour
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    @if($return->status !== 'annulée' && !$return->invoiced)
+                    <div class="modal fade" id="cancelReturn{{ $return->id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog"><div class="modal-content">
+                            <form action="{{ route('purchases.return.cancel', $return->id) }}" method="POST">
+                                @csrf
+                                <div class="modal-header"><h5 class="modal-title">Annuler le retour {{ $return->numdoc }} ?</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                                <div class="modal-body">
+                                    <p class="small mb-2">Le stock des articles retournés revient en magasin. Refusé si le retour est facturé ou s'il existe un avoir.</p>
+                                    <input type="text" name="reason" class="form-control" maxlength="150" placeholder="Motif (facultatif)">
+                                </div>
+                                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button><button type="submit" class="btn btn-danger">Annuler le retour</button></div>
+                            </form>
+                        </div></div>
+                    </div>
+                    @endif
                     <div id="lines-{{ $return->id }}" class="card-body d-none bg-light">
                         <h6 class="fw-bold mb-3">🧾 Lignes du retour</h6>
                         <table class="table table-sm table-bordered align-middle">
@@ -877,5 +921,6 @@ document.getElementById("searchItemInput").addEventListener("keyup", function() 
 
 
 
-  </body>
+  @include('partials.select2_init')
+</body>
 </html>
