@@ -19,7 +19,7 @@ class CompanionService
     const MAX_ANCHORS = 6;      // on n'analyse que les derniers articles ajoutés
     const MAX_DOCS = 600;       // ventes récentes analysées par article
     const MIN_SUPPORT = 2;      // au moins 2 ventes communes
-    const MIN_CONFIDENCE = 0.15;
+    const MIN_CONFIDENCE = 0.08;
 
     /** @var object|null dépôt de données (permet de tester sans base) */
     private $repo;
