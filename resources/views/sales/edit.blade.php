@@ -92,6 +92,17 @@
         .lh-filters .select2-container--default .select2-selection--single{height:38px;border-radius:8px;display:flex;align-items:center}
         .lh-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px;font-size:.88rem;padding-left:.6rem}
         .lh-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px}
+        /* Barre de recherche compacte : la recherche fait la moitié de l'ancienne largeur, les filtres sont étroits et alignés */
+        .lh-filters.lh-compact{flex-wrap:wrap;gap:.5rem;margin-bottom:.4rem}
+        .lh-filters.lh-compact .lh-search{flex:0 0 280px;width:280px;min-width:200px}
+        .lh-filters.lh-compact .lh-f{flex:0 0 150px;width:150px;min-width:120px}
+        .lh-filters.lh-compact .lh-actions-right{margin-left:auto;display:inline-flex;gap:.5rem}
+        .lh-filters.lh-compact #filter_reset{padding:0 .8rem}
+        @media (max-width:768px){
+            .lh-filters.lh-compact .lh-search{flex:1 1 100%;width:100%}
+            .lh-filters.lh-compact .lh-f{flex:1 1 45%;width:auto}
+            .lh-filters.lh-compact .lh-actions-right{margin-left:0;width:100%}
+        }
         .lh-check{display:inline-flex;align-items:center;gap:.4rem;margin:0;height:38px;font-size:.88rem;font-weight:600;cursor:pointer;user-select:none}
         .lh-check input{width:16px;height:16px;margin:0}
         .sr-hint{font-size:.74rem;color:#6b7280;margin:0 0 .35rem .2rem}
@@ -435,8 +446,8 @@
                                                 <option value="">Aucun véhicule</option>
                                             </select>
                                             <div class="vg-actions">
-                                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addVehicleInlineModal" title="Nouveau véhicule (TECDOC)">
-                                                    <i class="fas fa-plus"></i><i class="fas fa-car"></i>
+                                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addVehicleInlineModal" title="Créer un véhicule manuel">
+                                                    <i class="fas fa-plus"></i><i class="fas fa-car"></i> <small style="font-size:.72rem;font-weight:700;white-space:nowrap">Véhicule manuel</small>
                                                 </button>
                                                 <a href="javascript:void(0)" id="loadCatalogBtn" class="btn btn-primary" disabled title="Catalogue du véhicule">
                                                     <i class="fas fa-book-open"></i>
@@ -471,21 +482,24 @@
 
 {{-- RECHERCHE ARTICLE --}}
                             <div class="mb-2">
-                                <div class="lh-filters">
-                                    <div class="lh-field lh-wide">
+                                {{-- Une seule barre : recherche → Marque → Fournisseur → Famille → Sous-famille → options → actions --}}
+                                <div class="lh-filters lh-compact">
+                                    <div class="lh-field lh-search">
                                         <i class="fas fa-search lh-ico"></i>
                                         <input type="text" id="search_item" class="form-control"
-                                               placeholder="Référence, désignation... (min. 4 car.)" autocomplete="off">
+                                               placeholder="Référence, désignation… (4 car. min.)" autocomplete="off">
                                     </div>
-                                    <button type="button" id="add_divers_item" class="btn btn-primary">
-                                        <i class="fas fa-plus"></i> Créer un article
-                                    </button>
-                                    <button type="button" id="add_divers_item_consigne" data-type="consigne" class="btn btn-dark">
-                                        <i class="fas fa-plus"></i> Consigne
-                                    </button>
-                                </div>
-                                <div class="lh-filters">
-                                    <div class="lh-field">
+                                    <div class="lh-field lh-f">
+                                        <select id="filter_brand" class="form-control">
+                                            <option value="">Marque</option>
+                                        </select>
+                                    </div>
+                                    <div class="lh-field lh-f">
+                                        <select id="filter_supplier_brand" class="form-control">
+                                            <option value="">Fournisseur</option>
+                                        </select>
+                                    </div>
+                                    <div class="lh-field lh-f">
                                         <select id="filter_category" class="form-control">
                                             <option value="">Famille</option>
                                             @foreach(($categories ?? []) as $cat)
@@ -493,25 +507,23 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="lh-field">
+                                    <div class="lh-field lh-f">
                                         <select id="filter_subcategory" class="form-control">
                                             <option value="">Sous-famille</option>
                                         </select>
                                     </div>
-                                    <div class="lh-field">
-                                        <select id="filter_brand" class="form-control">
-                                            <option value="">Marque</option>
-                                        </select>
-                                    </div>
-                                    <div class="lh-field">
-                                        <select id="filter_supplier_brand" class="form-control">
-                                            <option value="">Fournisseur</option>
-                                        </select>
-                                    </div>
                                     <label class="lh-check"><input type="checkbox" id="filter_stock"> En stock</label>
                                     <button type="button" id="filter_reset" class="btn btn-outline-secondary" title="Réinitialiser les filtres">
-                                        <i class="fas fa-undo"></i> Réinitialiser
+                                        <i class="fas fa-undo"></i>
                                     </button>
+                                    <span class="lh-actions-right">
+                                        <button type="button" id="add_divers_item" class="btn btn-primary">
+                                            <i class="fas fa-plus"></i> Créer un article
+                                        </button>
+                                        <button type="button" id="add_divers_item_consigne" data-type="consigne" class="btn btn-dark">
+                                            <i class="fas fa-plus"></i> Consigne
+                                        </button>
+                                    </span>
                                 </div>
                                 <div class="sr-hint">↑ ↓ naviguer &nbsp;·&nbsp; Entrée ajouter &nbsp;·&nbsp; Échap fermer</div>
                                 <div id="search_results"></div>
@@ -675,11 +687,16 @@
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header bg-primary text-white">
-                            <h5 class="modal-title" id="addVehicleInlineModalLabel"><i class="fas fa-car"></i> Associer un nouveau véhicule</h5>
+                            <h5 class="modal-title" id="addVehicleInlineModalLabel"><i class="fas fa-car"></i> Créer un véhicule manuel</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
-                        <form id="quickVehicleForm">
+                        <form id="quickVehicleForm" novalidate>
                             <div class="modal-body">
+                            <div class="btn-group w-100 mb-3" role="group" id="vehModeTabs">
+                                <button type="button" class="btn btn-primary" data-mode="free"><i class="fas fa-keyboard"></i> Saisie libre</button>
+                                <button type="button" class="btn btn-outline-primary" data-mode="tecdoc"><i class="fas fa-database"></i> À partir de TecDoc</button>
+                            </div>
+                            <div id="vehPaneTecdoc" style="display:none">
                                 <div class="row">
                                     <div class="col-md-4">
                                         <label class="form-label">Immatriculation <span class="text-danger">*</span></label>
@@ -714,6 +731,12 @@
                                     </div>
                                 </div>
                             </div>
+                            <div id="vehPaneFree">
+                                <label class="form-label">Immatriculation ou description du véhicule <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="free_vehicle_label" maxlength="50" autocomplete="off" placeholder="Ex : AB-123-CD   ou   Polo 6 modèle 2012">
+                                <small class="text-muted">Saisie libre : tout ce que vous écrivez ici est enregistré tel quel dans le champ « immatriculation » (50 caractères max.). Aucune marque ni motorisation à choisir.</small>
+                            </div>
+                        </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                                 <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Créer et sélectionner</button>
@@ -749,7 +772,8 @@
         window.subcategoriesList = @json(isset($subcategories) ? $subcategories : []);
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        $(document).ready(function () {
+        function vehLabel(v){ var b=$.trim((v.brand_name||'')+' '+(v.model_name||'')); return b ? v.license_plate+' ('+v.brand_name+' '+v.model_name+' - '+v.engine_description+')' : v.license_plate; }
+$(document).ready(function () {
 
 // === ARRONDISSEMENT & FORMATAGE ===
 function round(number, decimals) {
@@ -838,7 +862,7 @@ function loadVehicles(customerId, selectedId) {
         var $v = $('#vehicle_id');
         $v.empty().append('<option value="">Aucun véhicule</option>');
         data.forEach(function (v) {
-            var text = v.license_plate + ' (' + v.brand_name + ' ' + v.model_name + ' - ' + v.engine_description + ')';
+            var text = vehLabel(v);
             $v.append(new Option(text, v.id, false, selectedId && v.id == selectedId));
         });
         if (selectedId) $v.val(selectedId);
@@ -1376,10 +1400,10 @@ $(document).on('click', '#add_divers_item, #add_divers_item_consigne', function 
             const $modal = $('#addVehicleInlineModal');
             const $form = $('#quickVehicleForm');
             function initTecdocSelect2() {
-                $('#quick_brand_id, #quick_model_id, #quick_engine_id').select2('destroy');
-                $('#quick_brand_id').select2({ width: '100%', dropdownParent: $modal });
-                $('#quick_model_id').select2({ width: '100%', dropdownParent: $modal });
-                $('#quick_engine_id').select2({ width: '100%', dropdownParent: $modal });
+                $('#quick_brand_id, #quick_model_id, #quick_engine_id').each(function () { if ($(this).hasClass('select2-hidden-accessible')) $(this).select2('destroy'); });
+                $('#quick_brand_id').select2({ width: '100%', dropdownParent: $modal, minimumResultsForSearch: 0 });
+                $('#quick_model_id').select2({ width: '100%', dropdownParent: $modal, minimumResultsForSearch: 0 });
+                $('#quick_engine_id').select2({ width: '100%', dropdownParent: $modal, minimumResultsForSearch: 0 });
             }
             $modal.on('shown.bs.modal', function () {
                 $form[0].reset();
@@ -1409,6 +1433,52 @@ $(document).on('click', '#add_divers_item, #add_divers_item_consigne', function 
                 $('#quick_engine_description').val($opt.data('description'));
                 $('#quick_linkage_target_id').val($opt.data('linking-target-id') || $(this).val());
             });
+    // ── Mode « saisie libre » du véhicule manuel ──
+    var vehMode = 'free';
+    function setVehMode(m) {
+        vehMode = m;
+        $('#vehModeTabs button').each(function () {
+            var on = $(this).data('mode') === m;
+            $(this).toggleClass('btn-primary', on).toggleClass('btn-outline-primary', !on);
+        });
+        $('#vehPaneTecdoc').toggle(m === 'tecdoc');
+        $('#vehPaneFree').toggle(m === 'free');
+        if (m === 'free') { $('#free_vehicle_label').trigger('focus'); }
+        else { initTecdocSelect2(); $('#quick_license_plate').trigger('focus'); }   // (ré)initialise les listes une fois le panneau visible
+    }
+    $(document).on('click', '#vehModeTabs button', function () { setVehMode($(this).data('mode')); });
+    $('#addVehicleInlineModal').on('show.bs.modal', function () { $('#free_vehicle_label').val(''); setVehMode('free'); });
+    $('#addVehicleInlineModal').on('shown.bs.modal', function () { if (vehMode === 'free') $('#free_vehicle_label').trigger('focus'); });
+    // listes déroulantes TecDoc : toujours un champ de recherche, et le curseur y va dès l'ouverture
+    $(document).on('select2:open', '#quick_brand_id, #quick_model_id, #quick_engine_id', function () {
+        setTimeout(function () { var f = document.querySelector('.select2-container--open .select2-search__field'); if (f) f.focus(); }, 0);
+    });
+    // enregistré AVANT le handler TecDoc : en mode libre, celui-ci n'est pas exécuté
+    $form.on('submit', function (e) {
+        if (vehMode !== 'free') return;
+        e.preventDefault(); e.stopImmediatePropagation();
+        var customerId = $('#customer_id').val();
+        if (!customerId || customerId === '%%%') { Swal.fire('Erreur', 'Sélectionnez un client d\'abord', 'error'); return; }
+        var label = $.trim($('#free_vehicle_label').val());
+        if (!label) { Swal.fire('Champ manquant', 'Saisissez une immatriculation ou une description du véhicule.', 'warning'); return; }
+        $.ajax({
+            url: '/customers/' + customerId + '/vehicles/quick-store-free', method: 'POST', data: { _token: csrfToken, license_plate: label },
+            success: function (res) {
+                if (res.success) {
+                    var $v = $('#vehicle_id');
+                    if (!$v.find('option[value="' + res.vehicle.id + '"]').length) $v.append(new Option(res.vehicle.text, res.vehicle.id, true, true));
+                    $v.val(res.vehicle.id).trigger('change');
+                    $('#addVehicleInlineModal').modal('hide');
+                    Swal.fire('Succès', 'Véhicule créé et sélectionné !', 'success');
+                } else { Swal.fire('Erreur', res.message || 'Erreur inconnue', 'error'); }
+            },
+            error: function (xhr) {
+                var m = (xhr.responseJSON && xhr.responseJSON.errors && xhr.responseJSON.errors.license_plate) ? xhr.responseJSON.errors.license_plate.join(', ') : ((xhr.responseJSON && xhr.responseJSON.message) || 'Erreur inconnue');
+                Swal.fire('Erreur', m, 'error');
+            }
+        });
+    });
+
             $form.on('submit', function (e) {
                 e.preventDefault();
                 let customerId = $('#customer_id').val();

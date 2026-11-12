@@ -503,6 +503,9 @@ Route::get('/customers/{customer}/vehicles/from-plate', [CustomerController::cla
 Route::post('/customers/{customer}/vehicles/quick-store', [CustomerController::class, 'quickStoreVehicle'])
     ->name('customers.vehicles.quick-store');
 
+    Route::post('/customers/{customer}/vehicles/quick-store-free', [\App\Http\Controllers\VehicleFreeController::class, 'store'])
+    ->name('customers.vehicles.quick-store-free');
+
 
 
 // Sales Invoices
