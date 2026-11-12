@@ -741,6 +741,11 @@ Route::post('/sales/delivery/store-and-invoice', [SalesController::class, 'store
     Route::get('/sales/items/{itemId}/history', [SalesController::class, 'itemHistory'])->name('sales.items.history');
 
 
+    Route::get('/sales/items/companions', [\App\Http\Controllers\SalesCompanionController::class, 'index'])->name('sales.items.companions');
+
+    
+
+
 Route::get('/analytics', [AnalyticsController::class, 'index'])
     ->name('analytics');
 

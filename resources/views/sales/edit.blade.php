@@ -103,6 +103,28 @@
             .lh-filters.lh-compact .lh-f{flex:1 1 45%;width:auto}
             .lh-filters.lh-compact .lh-actions-right{margin-left:0;width:100%}
         }
+        /* Compléter la réparation : cartes compactes sur 2 lignes, référence en avant */
+        .cp-panel{border:1.5px solid #f6d77a;background:linear-gradient(135deg,#fffdf3,#fff8e1);border-radius:10px;padding:.3rem .6rem .4rem;margin-bottom:.5rem}
+        .cp-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.25rem}
+        .cp-title{font-weight:700;color:#8a6100;font-size:.84rem}
+        .cp-title i{color:#f0a500;margin-right:.3rem}
+        .cp-title small{font-weight:400;color:#8c7a4a;margin-left:.5rem;font-size:.72rem}
+        .cp-head-btns{display:inline-flex;gap:.35rem}
+        .cp-head-btns .btn{padding:.1rem .5rem;font-size:.74rem;line-height:1.5}
+        .cp-cards{display:flex;gap:.45rem;overflow-x:auto;padding:.2rem .2rem .1rem 0}
+        .cp-card{flex:0 0 330px;background:#fff;border:1px solid #ecd9a0;border-radius:8px;padding:.3rem .5rem;position:relative;display:flex;flex-direction:column;gap:.15rem;cursor:pointer;min-width:0}
+        .cp-card:hover{border-color:#f0a500;box-shadow:0 1px 6px rgba(240,165,0,.25)}
+        .cp-l1,.cp-l2{display:flex;align-items:center;gap:.4rem;min-width:0}
+        .cp-ref{flex:0 0 auto;font-weight:800;font-size:.84rem;color:#111827;letter-spacing:.2px;white-space:nowrap}
+        .cp-name{flex:1 1 auto;min-width:0;font-size:.72rem;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .cp-price{flex:0 0 auto;font-weight:700;color:#0f5132;font-size:.8rem;white-space:nowrap}
+        .cp-why{flex:1 1 auto;min-width:0;font-size:.68rem;color:#8a6100;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .cp-why b{color:#b45309}
+        .cp-stk{flex:0 0 auto;font-size:.64rem;color:#9ca3af;white-space:nowrap}
+        .cp-add{flex:0 0 auto;height:22px;padding:0 .5rem;font-size:.7rem;font-weight:700;border-radius:6px;line-height:20px}
+        .cp-x{position:absolute;top:-6px;right:-5px;width:16px;height:16px;border:0;border-radius:50%;background:#e5e7eb;color:#6b7280;font-size:.75rem;line-height:15px;padding:0;cursor:pointer;display:none}
+        .cp-card:hover .cp-x{display:block}
+        .cp-x:hover{background:#dc2626;color:#fff}
         .lh-check{display:inline-flex;align-items:center;gap:.4rem;margin:0;height:38px;font-size:.88rem;font-weight:600;cursor:pointer;user-select:none}
         .lh-check input{width:16px;height:16px;margin:0}
         .sr-hint{font-size:.74rem;color:#6b7280;margin:0 0 .35rem .2rem}
@@ -550,6 +572,17 @@
                                     </div>
                                 </div>
 
+                                {{-- Compléter la réparation : bandeau compact d'articles souvent vendus avec ceux du document --}}
+                                <div id="companion_panel" class="cp-panel" style="display:none">
+                                    <div class="cp-head">
+                                        <span class="cp-title"><i class="fas fa-lightbulb"></i> Compléter la réparation <small>Souvent vendus avec les articles de ce document</small></span>
+                                        <span class="cp-head-btns">
+                                            <button type="button" id="cp_addall" class="btn btn-sm btn-success" style="display:none"><i class="fas fa-plus"></i> Tout ajouter (<span id="cp_addall_n">0</span>)</button>
+                                            <button type="button" id="cp_hide" class="btn btn-sm btn-outline-secondary" title="Masquer les suggestions"><i class="fas fa-times"></i></button>
+                                        </span>
+                                    </div>
+                                    <div id="cp_cards" class="cp-cards"></div>
+                                </div>
                                 <div class="mb-3">
                                     <div style="overflow-x:auto;"><div id="lines_table_wrap" style="max-height:420px; overflow-y:auto;">
                                         <table class="table table-striped table-bordered table-text-small" id="lines_table">
@@ -1223,6 +1256,73 @@ $(document).on('click', '#search_results .sr-item', function () {
     var item = lastResults[parseInt($(this).attr('data-idx'), 10)];
     if (item) addItemLine(item);
 });
+
+// ═══ Compléter la réparation : suggestions « souvent vendu avec » ═══
+var compData = [], compDismissed = {}, compTimer = null, compXhr = null, compKey = '', compHidden = false;
+function compDocCodes() {
+    var codes = [];
+    $('#lines_body tr').each(function () {
+        if ($(this).data('is-consigne') == '1' || $(this).attr('data-is-consigne') == '1') return;
+        var v = $.trim($(this).find('input[name$="[article_code]"]').first().val() || '');
+        if (v && codes.indexOf(v) < 0) codes.push(v);
+    });
+    return codes;
+}
+function scheduleCompanions() { clearTimeout(compTimer); compTimer = setTimeout(refreshCompanions, 500); }
+function refreshCompanions() {
+    var codes = compDocCodes(), key = codes.join('|');
+    if (!codes.length) { compKey = ''; compData = []; renderCompanions(); return; }
+    if (key === compKey) return;
+    compKey = key; compHidden = false;
+    if (compXhr) { compXhr.abort(); compXhr = null; }
+    compXhr = $.ajax({
+        url: '{{ route("sales.items.companions") }}', method: 'GET', data: { codes: codes },
+        success: function (d) { compData = Array.isArray(d) ? d : []; renderCompanions(); },
+        error: function (x, s) { if (s !== 'abort') { compData = []; renderCompanions(); } },
+        complete: function () { compXhr = null; }
+    });
+}
+function renderCompanions() {
+    var list = compData.map(function (it, i) { return { it: it, i: i }; }).filter(function (o) { return !compDismissed[o.it.code]; }).slice(0, 8);
+    var $p = $('#companion_panel');
+    if (!list.length || compHidden) { $p.hide(); return; }
+    var html = '';
+    list.forEach(function (o) {
+        var it = o.it, st = parseFloat(it.stock_quantity) || 0, c = it.companion || {};
+        html += '<div class="cp-card" data-i="' + o.i + '" title="' + esc(it.name + (it.brand ? ' — ' + it.brand : '')) + '">' +
+            '<button type="button" class="cp-x" title="Ne plus proposer">&times;</button>' +
+            '<div class="cp-l1"><span class="cp-ref">' + esc(it.code) + '</span><span class="cp-name">' + esc(it.name) + '</span>' +
+              '<span class="cp-price">' + (parseFloat(it.sale_price) || 0).toFixed(2) + ' € HT</span></div>' +
+            '<div class="cp-l2"><span class="cp-why">Avec <b>' + esc(c.anchor) + '</b> · <b>' + c.percent + ' %</b> des ventes (' + c.times + '×)</span>' +
+              '<span class="cp-stk">stock ' + st + '</span>' +
+              '<button type="button" class="btn btn-warning cp-add"><i class="fas fa-plus"></i> Ajouter</button></div></div>';
+    });
+    $('#cp_cards').html(html);
+    $('#cp_addall_n').text(list.length);
+    $('#cp_addall').toggle(list.length > 1);
+    $p.show();
+}
+$(document).on('click', '#cp_cards .cp-card', function (e) {
+    if ($(e.target).closest('.cp-x').length) return;
+    var it = compData[parseInt($(this).attr('data-i'), 10)];
+    if (it) { addItemLine(it); if (typeof dirty !== 'undefined') dirty = true; }
+});
+$(document).on('click', '#cp_cards .cp-x', function () {
+    var it = compData[parseInt($(this).closest('.cp-card').attr('data-i'), 10)];
+    if (it) { compDismissed[it.code] = true; renderCompanions(); }
+});
+$(document).on('click', '#cp_addall', function () {
+    compData.slice(0, 8).forEach(function (it) { if (!compDismissed[it.code]) addItemLine(it); });
+    if (typeof dirty !== 'undefined') dirty = true;
+});
+$(document).on('click', '#cp_hide', function () { compHidden = true; renderCompanions(); });
+// toute modification des lignes (ajout, suppression, restauration de brouillon) relance l'analyse
+(function () {
+    var body = document.getElementById('lines_body');
+    if (body && window.MutationObserver) new MutationObserver(scheduleCompanions).observe(body, { childList: true });
+    scheduleCompanions();
+})();
+
 
 // Suppression ligne
 $(document).on('click', '.remove_line', function () {
