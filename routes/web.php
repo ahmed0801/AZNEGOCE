@@ -743,7 +743,7 @@ Route::post('/sales/delivery/store-and-invoice', [SalesController::class, 'store
 
     Route::get('/sales/items/companions', [\App\Http\Controllers\SalesCompanionController::class, 'index'])->name('sales.items.companions');
 
-    
+    Route::get('/sales/customers/{customer}/last-prices', [\App\Http\Controllers\CustomerLastPriceController::class, 'index'])->name('sales.customers.last-prices');
 
 
 Route::get('/analytics', [AnalyticsController::class, 'index'])

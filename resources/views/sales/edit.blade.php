@@ -125,6 +125,19 @@
         .cp-x{position:absolute;top:-6px;right:-5px;width:16px;height:16px;border:0;border-radius:50%;background:#e5e7eb;color:#6b7280;font-size:.75rem;line-height:15px;padding:0;cursor:pointer;display:none}
         .cp-card:hover .cp-x{display:block}
         .cp-x:hover{background:#dc2626;color:#fff}
+        /* Dernier prix vendu à ce client (sous la désignation) */
+        .lp-hint{display:block;width:fit-content;max-width:100%;white-space:nowrap;margin-top:3px;padding:1px .5rem;border-radius:5px;font-size:.7rem;line-height:1.35;cursor:pointer;border:1px solid transparent}
+        .lp-hint .lp-t{font-weight:700}
+        .lp-lbl{margin-top:2px;font-size:.64rem;font-weight:700;line-height:1.15;white-space:normal;cursor:pointer}
+        .lp-lbl.same{color:#157347;cursor:default}
+        .lp-lbl.up{color:#0a58ca}
+        .lp-lbl.down{color:#b45309}
+        .lp-hint .lp-s{font-weight:700;margin-left:.3rem}
+        .lp-hint .lp-a{margin-left:.3rem;font-weight:700}
+        .lp-hint.same{background:#e8f7ee;color:#157347;cursor:default}
+        .lp-hint.up{background:#e7f1ff;color:#0a58ca;border-color:#cfe0ff}
+        .lp-hint.down{background:#fff1e0;color:#b45309;border-color:#fde0b8}
+        .lp-hint.up:hover,.lp-hint.down:hover{filter:brightness(.95)}
         .lh-check{display:inline-flex;align-items:center;gap:.4rem;margin:0;height:38px;font-size:.88rem;font-weight:600;cursor:pointer;user-select:none}
         .lh-check input{width:16px;height:16px;margin:0}
         .sr-hint{font-size:.74rem;color:#6b7280;margin:0 0 .35rem .2rem}
@@ -1321,6 +1334,79 @@ $(document).on('click', '#cp_hide', function () { compHidden = true; renderCompa
     var body = document.getElementById('lines_body');
     if (body && window.MutationObserver) new MutationObserver(scheduleCompanions).observe(body, { childList: true });
     scheduleCompanions();
+})();
+
+// ═══ Dernier prix vendu à ce client ═══
+var lpData = {}, lpCust = null, lpTimer = null, lpXhr = null;
+function lpCodes() {
+    var codes = [];
+    $('#lines_body tr').each(function () {
+        var v = $.trim($(this).find('input[name$="[article_code]"]').first().val() || '');
+        if (v && v !== 'CONSIGNE' && codes.indexOf(v) < 0) codes.push(v);
+    });
+    return codes;
+}
+function scheduleLastPrices() { clearTimeout(lpTimer); lpTimer = setTimeout(refreshLastPrices, 400); }
+function refreshLastPrices() {
+    var cid = String($('#customer_id').val() || '');
+    if (!/^\d+$/.test(cid)) { lpCust = null; lpData = {}; renderLastPrices(); return; }
+    if (lpCust !== cid) { lpCust = cid; lpData = {}; }
+    var need = lpCodes().filter(function (c) { return !(c in lpData); });
+    if (!need.length) { renderLastPrices(); return; }
+    if (lpXhr) { lpXhr.abort(); lpXhr = null; }
+    lpXhr = $.ajax({
+        url: '/sales/customers/' + cid + '/last-prices', method: 'GET', data: { codes: need },
+        success: function (d) {
+            if (lpCust !== cid) return;
+            need.forEach(function (c) { lpData[c] = (d && d[c]) ? d[c] : []; });
+            renderLastPrices();
+        },
+        complete: function () { lpXhr = null; }
+    });
+}
+function lpNum(x) { return parseFloat(String(x || '0').replace(',', '.')) || 0; }
+function lpFmt(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
+function renderLastPriceRow($r) {
+    var $des = $r.find('.des-name').first();
+    var $td = $des.length ? $des.closest('td') : $r.find('.unit_price_ht').first().closest('td');
+    var $refTd = $r.find('.ref-code').first().closest('td');
+    $r.find('.lp-hint, .lp-lbl').remove();
+    var code = $.trim($r.find('input[name$="[article_code]"]').first().val() || '');
+    var hist = lpData[code];
+    if (!hist || !hist.length) return;
+    var h = hist[0];
+    var netLast = h.price * (1 - h.remise / 100);
+    var netCur = lpNum($r.find('.unit_price_ht').val()) * (1 - lpNum($r.find('.remise').val()) / 100);
+    var diff = netCur - netLast, cls, state, action = '';
+    if (Math.abs(diff) < 0.005) { cls = 'same'; state = '✓ même prix'; }
+    else if (diff > 0) { cls = 'up'; state = '▲ +' + lpFmt(diff); action = '↺'; }
+    else { cls = 'down'; state = '▼ −' + lpFmt(-diff); action = '↺'; }
+    var tip = 'Dernières ventes de cet article à ce client :\n' + hist.map(function (x) {
+        return (x.date || '—') + ' : ' + lpFmt(x.price) + (x.remise ? ' (remise ' + x.remise + ' %)' : '') + ' × ' + x.qty;
+    }).join('\n') + (action ? '\n\n▲/▼ = écart du prix net actuel par rapport au dernier prix\n↺ ou clic : reprendre le dernier prix et sa remise' : '');
+    var $h = $('<div class="lp-hint ' + cls + '" title="' + esc(tip) + '"></div>');
+    if ($refTd.length) $('<div class="lp-lbl ' + cls + '" title="' + esc(tip) + '"></div>').text('Dernier prix client :').appendTo($refTd);
+    else $('<span class="lp-t"></span>').text('Dernier prix client : ').appendTo($h);
+    $h.append(document.createTextNode(lpFmt(h.price) + (h.remise ? ' (remise ' + h.remise + ' %)' : '') + (h.date ? ' · ' + h.date.replace(/(\d+\/\d+\/)\d{2}(\d{2})/, '$1$2') : '')));
+    $('<span class="lp-s"></span>').text(state).appendTo($h);
+    if (action) $('<span class="lp-a"></span>').text(action).appendTo($h);
+    $h.appendTo($td);
+}
+function renderLastPrices() { $('#lines_body tr').each(function () { renderLastPriceRow($(this)); }); }
+$(document).on('input', '#lines_body .unit_price_ht, #lines_body .unit_price_ttc, #lines_body .remise', function () { renderLastPriceRow($(this).closest('tr')); });
+$(document).on('click', '.lp-hint.up, .lp-hint.down, .lp-lbl.up, .lp-lbl.down', function () {
+    var $r = $(this).closest('tr'), code = $.trim($r.find('input[name$="[article_code]"]').first().val() || '');
+    var h = (lpData[code] || [])[0];
+    if (!h) return;
+    $r.find('.unit_price_ht').val(h.price.toFixed(2)).trigger('input');
+    $r.find('.remise').val(h.remise.toFixed(2)).trigger('input');
+    if (typeof dirty !== 'undefined') dirty = true;
+});
+$('#customer_id').on('change', scheduleLastPrices);
+(function () {
+    var body = document.getElementById('lines_body');
+    if (body && window.MutationObserver) new MutationObserver(scheduleLastPrices).observe(body, { childList: true });
+    scheduleLastPrices();
 })();
 
 
