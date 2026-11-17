@@ -843,6 +843,15 @@
     </select>
 </div>
 
+<!-- Prix net -->
+<div class="mb-3 col-md-6">
+    <label for="prix_net" class="form-label">Prix net <small class="text-muted">(protégé des imports)</small></label>
+    <select class="form-control" id="prix_net" name="prix_net">
+        <option value="0" {{ old('prix_net', '0') == '0' ? 'selected' : '' }}>Non</option>
+        <option value="1" {{ old('prix_net') == '1' ? 'selected' : '' }}>Oui — prix fixe, non modifié par les imports</option>
+    </select>
+</div>
+
 
 
 
@@ -1044,6 +1053,14 @@
             @foreach($discountGroups as $group)
                 <option value="{{ $group->id }}" {{ (string) request('discount_group_id') === (string) $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
             @endforeach
+        </select>
+    </div>
+
+    <div class="art-sel" style="flex:0 1 130px;min-width:120px">
+        <select name="prix_net" class="form-select select2-filter">
+            <option value="">Prix net (Tous)</option>
+            <option value="1" {{ request('prix_net') === '1' ? 'selected' : '' }}>Prix net : Oui</option>
+            <option value="0" {{ request('prix_net') === '0' ? 'selected' : '' }}>Prix net : Non</option>
         </select>
     </div>
 
@@ -1296,6 +1313,9 @@
         <span class="badge bg-success badge-very-sm">🟢 actif</span>
     @else
         <span class="badge bg-danger badge-very-sm">🔴 bloqué</span>
+    @endif
+    @if ($item->prix_net)
+        <span class="badge bg-warning text-dark badge-very-sm" title="Prix net : non modifié par les imports Excel / GOLDA">prix net</span>
     @endif
 </td>
 
@@ -1670,6 +1690,15 @@
                 (G: {{ $group->discount_rate }}% | J: {{ $group->discount_rate_jobber }}% | P: {{ $group->discount_rate_professionnel }}%)
             </option>
         @endforeach
+    </select>
+</div>
+
+<!-- Prix net -->
+<div class="mb-3 col-md-4">
+    <label class="form-label">Prix net</label>
+    <select name="prix_net" class="form-select" disabled>
+        <option value="0" {{ !$item->prix_net ? 'selected' : '' }}>Non</option>
+        <option value="1" {{ $item->prix_net ? 'selected' : '' }}>Oui</option>
     </select>
 </div>
 

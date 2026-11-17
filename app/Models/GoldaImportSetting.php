@@ -11,7 +11,7 @@ class GoldaImportSetting extends Model
         'code_marque', 'nom_marque', 'brand_id', 'active',
         'update_cost_price', 'update_sale_price', 'update_description',
         'update_barcode', 'update_dimensions', 'create_new_items',
-        'deactivate_removed', 'margin_override', 'supplier_code',
+        'deactivate_removed', 'skip_net_price', 'margin_override', 'supplier_code',
         'last_import_count', 'last_deactivated_count', 'last_imported_at','prefixe_tarif',
     ];
 
@@ -24,6 +24,7 @@ class GoldaImportSetting extends Model
         'update_dimensions'   => 'boolean',
         'create_new_items'    => 'boolean',
         'deactivate_removed'  => 'boolean',
+        'skip_net_price'      => 'boolean',
         'last_imported_at'    => 'datetime',
     ];
 

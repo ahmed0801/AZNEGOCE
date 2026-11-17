@@ -62,6 +62,9 @@ $query = Item::with(['category', 'subcategory', 'brand', 'tvaGroup', 'store', 's
     if ($request->filled('discount_group_id')) {
         $query->where('discount_group_id', $request->discount_group_id);
     }
+    if (in_array($request->input('prix_net'), ['0', '1'], true)) {
+        $query->where('prix_net', (int) $request->input('prix_net'));
+    }
     if ($request->filled('codefournisseur')) {
     $query->where('codefournisseur', $request->codefournisseur);
 }
@@ -164,6 +167,7 @@ public function store(Request $request)
         'codefournisseur'=> 'nullable|exists:suppliers,code',
         'location'       => 'nullable|string|max:255',
         'discount_group_id' => 'nullable|exists:discount_groups,id', // ← Nouveau champ
+        'prix_net'          => 'nullable|boolean',
 
         'remise_achat'      => 'nullable|numeric|min:0|max:100',
         'codefournisseur_2' => 'nullable|exists:suppliers,code',
@@ -206,6 +210,7 @@ public function store(Request $request)
         'location'        => $validated['location'] ?? null,
         'is_active'       => true,
         'discount_group_id' => $validated['discount_group_id'] ?? 1, // ← Par défaut groupe ID 1
+        'prix_net'        => !empty($validated['prix_net']),
 
 
         'remise_achat'      => $validated['remise_achat'] ?? 0.00,
@@ -267,6 +272,7 @@ public function update(Request $request, $id)
 'location' => 'nullable|string|max:255',
 'is_active' => 'required|boolean',
 'discount_group_id' => 'nullable|exists:discount_groups,id', // ← Nouveau champ
+'prix_net'          => 'nullable|boolean',
 
 
 'remise_achat'      => 'nullable|numeric|min:0|max:100',
@@ -794,6 +800,7 @@ public function massUpdateDiscount(Request $request)
     if ($request->filled('subcategory_id')) $query->where('subcategory_id', $request->subcategory_id);
     if ($request->filled('store_id'))    $query->where('store_id', $request->store_id);
     if ($request->filled('discount_group_id')) $query->where('discount_group_id', $request->discount_group_id);
+    if (in_array($request->input('prix_net'), ['0', '1'], true)) $query->where('prix_net', (int) $request->input('prix_net'));
     if ($request->filled('codefournisseur')) {
         $query->where('codefournisseur', $request->codefournisseur);
     }

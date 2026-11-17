@@ -585,7 +585,8 @@
                                 <li>Si un article avec ce code <strong>existe d&eacute;j&agrave;</strong> dans la base, il sera <strong>mis &agrave; jour</strong> (ou ignor&eacute; selon l'option choisie).</li>
                                 <li>Si le code n'existe <strong>pas encore</strong>, l'article sera <strong>cr&eacute;&eacute;</strong> &mdash; le champ <strong>nom</strong> devient alors obligatoire.</li>
                                 <li>Les cellules <strong>vides</strong> ne modifient pas les donn&eacute;es existantes lors d'une mise &agrave; jour &mdash; seules les colonnes remplies sont &eacute;crites.</li>
-                                <li>N'ajoutez pas de colonnes suppl&eacute;mentaires et ne changez pas le nom des ent&ecirc;tes.</li>
+                                <li>Les articles marqu&eacute;s <strong>prix net</strong> gardent leurs prix (achat, vente, remises, groupe de remise) quand l'option <strong>&laquo;&nbsp;Prot&eacute;ger les prix&nbsp;&raquo;</strong> est active. Les autres champs (nom, famille, etc.) restent mis &agrave; jour.</li>
+                                                                <li>N'ajoutez pas de colonnes suppl&eacute;mentaires et ne changez pas le nom des ent&ecirc;tes.</li>
                             </ul>
                         </div>
 
@@ -631,6 +632,7 @@
                                         ['col'=>'cost_price_3',   'label'=>'Prix d\'achat chez le fournisseur 3',               'ex'=>'145.00',            'req'=>false],
                                         ['col'=>'remise_achat_3', 'label'=>'Remise achat fournisseur 3 (%)',                    'ex'=>'0.00',              'req'=>false],
                                         ['col'=>'discount_group', 'label'=>'Groupe de remise client',                           'ex'=>'R0',                'req'=>false],
+                                        ['col'=>'prix_net',       'label'=>'<strong>Prix net</strong> (Oui / Non) &mdash; Oui = prix prot&eacute;g&eacute; des imports', 'ex'=>'Non', 'req'=>false],
                                         ['col'=>'Poids',          'label'=>'Poids de l\'article (en kg)',                       'ex'=>'1.25',              'req'=>false],
                                         ['col'=>'Hauteur',        'label'=>'Hauteur (en cm)',                                   'ex'=>'15',                'req'=>false],
                                         ['col'=>'Longueur',       'label'=>'Longueur (en cm)',                                  'ex'=>'30',                'req'=>false],
@@ -690,6 +692,19 @@
                             </div>
 
                             <div class="opt-group">
+                                <label class="opt-label">Articles &laquo;&nbsp;prix net&nbsp;&raquo;</label>
+                                <div class="radio-group">
+                                    <div class="radio-btn active" data-val="1" onclick="setMode(this,'skip_net_price')" title="Les prix des articles marqu&eacute;s &laquo; prix net &raquo; ne sont pas modifi&eacute;s">
+                                        <i class="fas fa-lock"></i> Prot&eacute;ger les prix
+                                    </div>
+                                    <div class="radio-btn" data-val="0" onclick="setMode(this,'skip_net_price')" title="Les prix des articles &laquo; prix net &raquo; sont aussi mis &agrave; jour">
+                                        <i class="fas fa-unlock"></i> Mettre &agrave; jour aussi
+                                    </div>
+                                </div>
+                                <input type="hidden" name="skip_net_price" id="skip_net_price" value="1">
+                            </div>
+
+                            <div class="opt-group">
                                 <label class="opt-label">Colonnes &agrave; traiter</label>
                                 <div class="radio-group">
                                     <div class="radio-btn active" data-val="all" onclick="setColMode(this,'all')">
@@ -731,6 +746,7 @@
                                     ['key'=>'location',      'label'=>'Emplacement',   'icon'=>'fa-map-marker-alt'],
                                     ['key'=>'is_active',     'label'=>'Actif',         'icon'=>'fa-toggle-on'],
                                     ['key'=>'discount_group','label'=>'Groupe remise', 'icon'=>'fa-percent'],
+                                    ['key'=>'prix_net',      'label'=>'Prix net',      'icon'=>'fa-lock'],
                                     ['key'=>'poids',         'label'=>'Poids',         'icon'=>'fa-weight'],
                                     ['key'=>'hauteur',       'label'=>'Hauteur',       'icon'=>'fa-arrows-alt-v'],
                                     ['key'=>'longueur',      'label'=>'Longueur',      'icon'=>'fa-arrows-alt-h'],

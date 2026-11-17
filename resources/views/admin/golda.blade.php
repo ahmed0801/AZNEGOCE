@@ -631,6 +631,7 @@
                                             ['key'=>'update_barcode',     'label'=>'Code EAN',           'icon'=>'fa-barcode'],
                                             ['key'=>'update_dimensions',  'label'=>'Dimensions',         'icon'=>'fa-ruler'],
                                             ['key'=>'create_new_items',   'label'=>'Créer nouveaux',     'icon'=>'fa-plus-circle'],
+                                            ['key'=>'skip_net_price',     'label'=>'Ignorer prix net',   'icon'=>'fa-lock'],
                                             ['key'=>'deactivate_removed', 'label'=>'Désactiver supprimés','icon'=>'fa-trash'],
                                         ];
                                     @endphp

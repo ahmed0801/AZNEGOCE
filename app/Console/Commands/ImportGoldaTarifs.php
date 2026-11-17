@@ -136,6 +136,7 @@ class ImportGoldaTarifs extends Command
                 'imported'    => 0,
                 'updated'     => 0,
                 'skipped'     => 0,
+                'net_protected' => 0,
                 'deactivated' => 0,
                 'errors'      => [],
             ];
@@ -269,6 +270,13 @@ class ImportGoldaTarifs extends Command
                             $updateData['codefournisseur'] = $setting->supplier_code;
                         }
 
+                        // Article « prix net » : on ne touche pas aux prix
+                        if ($setting->skip_net_price && $item->prix_net) {
+                            $had = isset($updateData['cost_price']) || isset($updateData['sale_price']);
+                            unset($updateData['cost_price'], $updateData['sale_price']);
+                            if ($had) $marqueReport['net_protected']++;
+                        }
+
                         if (!empty($updateData) && !$this->dryRun) {
                             $item->update($updateData);
                         }
@@ -308,6 +316,9 @@ class ImportGoldaTarifs extends Command
                 }
 
                 $this->info("  ✅ {$marqueReport['imported']} créés · {$marqueReport['updated']} mis à jour · {$marqueReport['skipped']} ignorés");
+                if ($marqueReport['net_protected'] > 0) {
+                    $this->info("  🔒 {$marqueReport['net_protected']} article(s) prix net : prix non modifiés");
+                }
                 Log::info("GOLDA [{$codeMarque}]: créés={$marqueReport['imported']}, màj={$marqueReport['updated']}");
 
             } catch (\Exception $e) {

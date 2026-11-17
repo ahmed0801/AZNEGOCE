@@ -16,8 +16,13 @@ class Item extends Model
     'codefournisseur_2', 'cost_price_2', 'remise_achat_2',
     'codefournisseur_3', 'cost_price_3', 'remise_achat_3'
     , 'sale_price','tva_group_id',
-        'stock_min', 'stock_max', 'store_id', 'location', 'is_active','codefournisseur','Poids','Hauteur','Longueur','Largeur','Ref_TecDoc','Code_pays','Code_douane','discount_group_id'
+        'stock_min', 'stock_max', 'store_id', 'location', 'is_active','codefournisseur','Poids','Hauteur','Longueur','Largeur','Ref_TecDoc','Code_pays','Code_douane','discount_group_id','prix_net'
     ];
+
+    protected $casts = ['prix_net' => 'boolean'];
+
+    /** Champs prix : non modifiés par les imports pour un article à prix net. */
+    const NET_PRICE_PROTECTED = ['cost_price', 'sale_price', 'remise_achat', 'cost_price_2', 'remise_achat_2', 'cost_price_3', 'remise_achat_3', 'discount_group_id'];
 
     public function category()
     {

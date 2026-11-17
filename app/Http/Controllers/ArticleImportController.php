@@ -32,7 +32,7 @@ class ArticleImportController extends Controller
             'supplier_2', 'cost_price_2', 'remise_achat_2',
             'supplier_3', 'cost_price_3', 'remise_achat_3',
             'Poids', 'Hauteur', 'Longueur', 'Largeur',
-            'Ref_TecDoc', 'Code_pays', 'Code_douane', 'discount_group'
+            'Ref_TecDoc', 'Code_pays', 'Code_douane', 'discount_group', 'prix_net'
         ];
 
         $spreadsheet = new Spreadsheet();
@@ -62,6 +62,7 @@ class ArticleImportController extends Controller
             '', '', '', '',             // Poids, Hauteur, Longueur, Largeur
             '', '', '',                 // Ref_TecDoc, Code_pays, Code_douane
             'R0',                       // discount_group
+            'Non',                      // prix_net (Oui / Non) : Oui = prix protégé des imports
         ];
         if (count($example) !== count($columns)) {
             throw new \RuntimeException('Modèle Excel : la ligne exemple ne correspond pas aux colonnes.');
@@ -112,18 +113,23 @@ class ArticleImportController extends Controller
             'file'            => 'required|file|mimes:xlsx,xls,csv|max:10240',
             'selected_columns' => 'nullable|array',
             'update_mode'     => 'nullable|in:skip,update',
+            'skip_net_price'  => 'nullable|in:0,1',
         ]);
 
         $selectedColumns = $request->input('selected_columns', []);
         $updateMode      = $request->input('update_mode', 'update');
+        $skipNetPrice    = $request->input('skip_net_price', '1') === '1';   // par défaut : on protège les prix nets
 
         try {
-            $importer = new ItemsImport($selectedColumns, $updateMode);
+            $importer = new ItemsImport($selectedColumns, $updateMode, $skipNetPrice);
             Excel::import($importer, $request->file('file'));
 
             $stats = $importer->getStats();
 
             $msg = "Importation réussie ! {$stats['created']} créé(s), {$stats['updated']} mis à jour, {$stats['skipped']} ignoré(s).";
+            if (!empty($stats['net_protected'])) {
+                $msg .= " {$stats['net_protected']} article(s) à prix net protégé(s) : prix non modifiés.";
+            }
             if (!empty($stats['errors'])) {
                 $msg .= ' ' . count($stats['errors']) . ' erreur(s).';
             }

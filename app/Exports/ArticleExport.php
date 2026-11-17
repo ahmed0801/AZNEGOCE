@@ -50,6 +50,10 @@ class ArticleExport implements FromCollection, WithHeadings
             $query->where('discount_group_id', $this->request->discount_group_id);
         }
 
+        if (in_array($this->request->input('prix_net'), ['0', '1'], true)) {
+            $query->where('prix_net', (int) $this->request->input('prix_net'));
+        }
+
         if ($this->request->filled('codefournisseur')) {
             $query->where('codefournisseur', $this->request->codefournisseur);
         }
@@ -73,6 +77,7 @@ class ArticleExport implements FromCollection, WithHeadings
                 'Remise Achat (%)' => $item->remise_achat,
                 'Prix Vente HT' => $item->sale_price,
                 'Groupe Remise' => $item->discountGroup ? $item->discountGroup->name : '',
+                'Prix Net' => $item->prix_net ? 'Oui' : 'Non',
                 'Fournisseur' => $item->supplier ? $item->supplier->name : '',
                 'Code Fournisseur' => $item->codefournisseur,
                 'Stock' => $item->stocks->sum('quantity'),
@@ -86,7 +91,7 @@ class ArticleExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            'Code', 'Nom', 'Marque', 'Famille', 'Sous-famille', 'Prix Achat HT', 'Remise Achat (%)', 'Prix Vente HT', 'Groupe Remise',
+            'Code', 'Nom', 'Marque', 'Famille', 'Sous-famille', 'Prix Achat HT', 'Remise Achat (%)', 'Prix Vente HT', 'Groupe Remise', 'Prix Net',
             'Fournisseur', 'Code Fournisseur', 'Stock', 'Magasin', 'Emplacement', 'Statut',
         ];
     }

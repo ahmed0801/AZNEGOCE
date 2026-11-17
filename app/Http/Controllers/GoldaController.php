@@ -97,6 +97,7 @@ class GoldaController extends Controller
             'update_dimensions'  => 'boolean',
             'create_new_items'   => 'boolean',
             'deactivate_removed' => 'boolean',
+            'skip_net_price'     => 'boolean',
             'margin_override'    => 'nullable|numeric|min:0|max:200',
         ]);
 

@@ -21,16 +21,19 @@ class ItemsImport implements ToCollection, WithHeadingRow
     protected array $selectedColumns;
     protected string $updateMode;
     protected int $currentLine = 0;
-    protected array $stats = ['created' => 0, 'updated' => 0, 'skipped' => 0, 'errors' => [], 'warnings' => []];
+    protected array $stats = ['created' => 0, 'updated' => 0, 'skipped' => 0, 'net_protected' => 0, 'errors' => [], 'warnings' => []];
+    protected bool $skipNetPrice;
 
     /**
      * @param array  $selectedColumns Colonnes à traiter. Vide = toutes.
      * @param string $updateMode      'update' ou 'skip'
+     * @param bool   $skipNetPrice    true = les articles « prix net » existants gardent leurs prix (non modifiés)
      */
-    public function __construct(array $selectedColumns = [], string $updateMode = 'update')
+    public function __construct(array $selectedColumns = [], string $updateMode = 'update', bool $skipNetPrice = true)
     {
         $this->selectedColumns = $selectedColumns;
         $this->updateMode      = $updateMode;
+        $this->skipNetPrice    = $skipNetPrice;
     }
 
     public function getStats(): array
@@ -298,6 +301,31 @@ class ItemsImport implements ToCollection, WithHeadingRow
             $data['is_active'] = (bool)$row['is_active'];
         } elseif (!$isUpdate) {
             $data['is_active'] = true;
+        }
+
+        // ── prix_net (oui/non) ──
+        if ($col('prix_net')) {
+            $pn = mb_strtolower(trim((string)($row['prix_net'] ?? '')));
+            if ($pn !== '') {
+                if (in_array($pn, ['1', 'oui', 'yes', 'true', 'x', 'o', 'vrai'], true)) {
+                    $data['prix_net'] = true;
+                } elseif (in_array($pn, ['0', 'non', 'no', 'false', 'n', 'faux'], true)) {
+                    $data['prix_net'] = false;
+                } else {
+                    $this->stats['warnings'][] = "Ligne {$this->currentLine} : « prix net » = « {$pn} » non reconnu (oui/non attendu) — ignoré.";
+                }
+            } elseif (!$isUpdate) {
+                $data['prix_net'] = false;
+            }
+        }
+
+        // ── Protection des articles à prix net (mise à jour uniquement) ──
+        if ($isUpdate && $this->skipNetPrice && $item->prix_net) {
+            $touched = array_intersect_key($data, array_flip(Item::NET_PRICE_PROTECTED));
+            if (!empty($touched)) {
+                $this->stats['net_protected']++;
+                $data = array_diff_key($data, $touched);
+            }
         }
 
         // ── Champs texte simples ──
