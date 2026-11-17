@@ -19,7 +19,7 @@ class ArticleExport implements FromCollection, WithHeadings
 
     public function collection(): Collection
     {
-        $query = Item::with(['category', 'brand', 'store', 'supplier', 'stocks']);
+        $query = Item::with(['category', 'subcategory', 'brand', 'store', 'supplier', 'stocks', 'discountGroup']);
 
         // Filtre de recherche
         if ($this->request->filled('search')) {
@@ -29,7 +29,7 @@ class ArticleExport implements FromCollection, WithHeadings
             });
         }
 
-        // Filtres spécifiques
+        // Filtres spécifiques (mêmes filtres que la page Articles)
         if ($this->request->filled('brand_id')) {
             $query->where('brand_id', $this->request->brand_id);
         }
@@ -38,15 +38,23 @@ class ArticleExport implements FromCollection, WithHeadings
             $query->where('category_id', $this->request->category_id);
         }
 
+        if ($this->request->filled('subcategory_id')) {
+            $query->where('subcategory_id', $this->request->subcategory_id);
+        }
+
         if ($this->request->filled('store_id')) {
             $query->where('store_id', $this->request->store_id);
+        }
+
+        if ($this->request->filled('discount_group_id')) {
+            $query->where('discount_group_id', $this->request->discount_group_id);
         }
 
         if ($this->request->filled('codefournisseur')) {
             $query->where('codefournisseur', $this->request->codefournisseur);
         }
 
-        if ($this->request->has('is_active') && $this->request->is_active !== null) {
+        if ($this->request->has('is_active') && $this->request->is_active !== null && $this->request->is_active !== '') {
             $query->where('is_active', $this->request->is_active);
         }
 
@@ -55,18 +63,21 @@ class ArticleExport implements FromCollection, WithHeadings
 
         // Mapper les données pour l'export
         return $items->map(function ($item) {
-            return(object) [
+            return (object) [
                 'Code' => $item->code,
                 'Nom' => $item->name,
                 'Marque' => $item->brand ? $item->brand->name : '',
-                'Catégorie' => $item->category ? $item->category->name : '',
+                'Famille' => $item->category ? $item->category->name : '',
+                'Sous-famille' => $item->subcategory ? $item->subcategory->code . ' — ' . $item->subcategory->name : '',
                 'Prix Achat HT' => $item->cost_price,
+                'Remise Achat (%)' => $item->remise_achat,
                 'Prix Vente HT' => $item->sale_price,
+                'Groupe Remise' => $item->discountGroup ? $item->discountGroup->name : '',
                 'Fournisseur' => $item->supplier ? $item->supplier->name : '',
                 'Code Fournisseur' => $item->codefournisseur,
                 'Stock' => $item->stocks->sum('quantity'),
                 'Magasin' => $item->store ? $item->store->name : '',
-                                'Emplacement' => $item->location ?? '', // Ajout du champ location
+                'Emplacement' => $item->location ?? '',
                 'Statut' => $item->is_active ? 'Actif' : 'Bloqué',
             ];
         });
@@ -75,7 +86,7 @@ class ArticleExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            'Code', 'Nom', 'Marque', 'Catégorie', 'Prix Achat HT', 'Prix Vente HT',
+            'Code', 'Nom', 'Marque', 'Famille', 'Sous-famille', 'Prix Achat HT', 'Remise Achat (%)', 'Prix Vente HT', 'Groupe Remise',
             'Fournisseur', 'Code Fournisseur', 'Stock', 'Magasin', 'Emplacement', 'Statut',
         ];
     }

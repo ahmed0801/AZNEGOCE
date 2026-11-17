@@ -59,6 +59,9 @@ $query = Item::with(['category', 'subcategory', 'brand', 'tvaGroup', 'store', 's
     if ($request->filled('store_id')) {
         $query->where('store_id', $request->store_id);
     }
+    if ($request->filled('discount_group_id')) {
+        $query->where('discount_group_id', $request->discount_group_id);
+    }
     if ($request->filled('codefournisseur')) {
     $query->where('codefournisseur', $request->codefournisseur);
 }
@@ -790,6 +793,7 @@ public function massUpdateDiscount(Request $request)
     if ($request->filled('category_id')) $query->where('category_id', $request->category_id);
     if ($request->filled('subcategory_id')) $query->where('subcategory_id', $request->subcategory_id);
     if ($request->filled('store_id'))    $query->where('store_id', $request->store_id);
+    if ($request->filled('discount_group_id')) $query->where('discount_group_id', $request->discount_group_id);
     if ($request->filled('codefournisseur')) {
         $query->where('codefournisseur', $request->codefournisseur);
     }

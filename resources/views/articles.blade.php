@@ -1038,6 +1038,15 @@
         </select>
     </div>
 
+    <div class="art-sel">
+        <select name="discount_group_id" class="form-select select2-filter">
+            <option value="">Groupes remise (Tous)</option>
+            @foreach($discountGroups as $group)
+                <option value="{{ $group->id }}" {{ (string) request('discount_group_id') === (string) $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
     <div class="art-sel" style="flex:0 1 130px;min-width:120px">
         <select name="is_active" class="form-select select2-filter">
             <option value="">Statut (Tous)</option>
