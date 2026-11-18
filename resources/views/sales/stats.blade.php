@@ -350,12 +350,28 @@
                     <div class="st-kpi k-green"><span>Marge estimée</span><b>{{ $eur($cur['margin']) }}</b>{!! $delta($dl['margin']) !!}<em>{{ $cur['margin_pc'] === null ? '—' : $fm($cur['margin_pc'], 1) . ' % de taux' }}@if($dl['margin_pc'] !== null) ({{ ($dl['margin_pc'] > 0 ? '+' : '') . $fm($dl['margin_pc'], 1) }} pts)@endif</em></div>
                     <div class="st-kpi k-violet"><span>Bons de livraison</span><b>{{ $fm($cur['docs'], 0) }}</b>{!! $delta($dl['docs']) !!}<em>panier moyen {{ $eur($cur['basket']) }} {!! $delta($dl['basket']) !!}</em></div>
                     <div class="st-kpi k-orange"><span>Quantités vendues</span><b>{{ $fm($cur['qty'], 0) }}</b>{!! $delta($dl['qty']) !!}<em>{{ $fm($cur['articles'], 0) }} références différentes</em></div>
-                    <div class="st-kpi k-teal"><span>Clients actifs</span><b>{{ $fm($cur['clients'], 0) }}</b>{!! $delta($dl['clients']) !!}<em>{{ $cur['clients'] ? $eur($cur['ca'] / $cur['clients']) : '—' }} / client</em></div>
+                    <div class="st-kpi k-teal"><span>Clients actifs</span><b id="kpiCliV">…</b><em id="kpiCliE">calcul en cours</em></div>
                     <div class="st-kpi k-red"><span>Stock dormant</span><b id="kpiDormV">…</b><span class="st-d st-d0" id="kpiDormN">calcul en cours</span><em>immobilisé au coût net</em></div>
                 </div>
 
                 {{-- ══ ENSEIGNEMENTS ═════════════════════════════════ --}}
-                <div class="st-insights">
+                @if(!empty($debug))
+<div id="stDbg" class="card mb-3 st-noprint"><div class="card-body" style="font-size:12px">
+<b>Diagnostic performance</b> (cache ignoré) — requêtes du cœur : durée / lignes retournées
+<table class="table table-sm mb-2"><thead><tr><th>Requête</th><th class="text-end">Durée</th><th class="text-end">Lignes</th></tr></thead><tbody id="stDbgT">
+@foreach($data['timings'] as $t)<tr><td>{{ $t[0] }}</td><td class="text-end">{{ $t[1] }} ms</td><td class="text-end">{{ $t[2] }}</td></tr>@endforeach
+</tbody></table>
+<small class="text-muted">Les sections chargées en différé s'ajoutent ci-dessus.</small>
+@if($diag)
+<div class="mt-2"><b>Lignes (estimation)</b> : @foreach($diag['counts'] as $k => $v) {{ $k }} = {{ number_format((int) $v, 0, ',', ' ') }} · @endforeach</div>
+<div><b>Collations</b> : @foreach($diag['collations'] as $k => $v) {{ $k }} = {{ $v }} · @endforeach <em>(si items.code et delivery_note_lines.article_code diffèrent, la jointure n'utilise pas d'index)</em></div>
+<div><b>Index</b> :
+@foreach($diag['indexes'] as $t => $ix)<br>{{ $t }} : @foreach($ix as $n => $c) {{ $n }}({{ $c }}) @endforeach @endforeach</div>
+@if(isset($diag['error']))<div class="text-danger">{{ $diag['error'] }}</div>@endif
+@endif
+</div></div>
+@endif
+<div class="st-insights">
                     @foreach($data['insights'] as $ins)
                     <div class="st-ins i-{{ $ins['type'] }}">{{ $ins['text'] }}</div>
                     @endforeach
@@ -571,7 +587,9 @@
             .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
             .then(function (d) {
                 $box.html(d.html); initTables($box);
-                if (d.kpi) { $('#kpiDormV').text(d.kpi.value); $('#kpiDormN').text(d.kpi.count); }
+                if (d.kpi && d.kpi.value) { $('#kpiDormV').text(d.kpi.value); $('#kpiDormN').text(d.kpi.count); }
+                if (d.kpi && d.kpi.clients) { $('#kpiCliV').text(d.kpi.clients); $('#kpiCliE').text(d.kpi.per_client); }
+                if (d.timings && $('#stDbg').length) { d.timings.forEach(function (t) { $('#stDbgT').append('<tr><td>' + t[0] + '</td><td class="text-end">' + t[1] + ' ms</td><td class="text-end">' + t[2] + '</td></tr>'); }); }
                 (d.insights || []).forEach(function (i) { $('.st-insights').append($('<div class="st-ins"></div>').addClass('i-' + i.type).text(i.text)); });
                 return d;
             })
@@ -579,6 +597,7 @@
                 loaded[name] = null;
                 $box.html('<div class="st-err"><i class="fas fa-exclamation-triangle"></i> Chargement impossible (' + e.message + '). <a href="#" class="st-retry" data-s="' + name + '">Réessayer</a></div>');
                 if (name === 'dormants') { $('#kpiDormV').text('—'); $('#kpiDormN').text('indisponible'); }
+                if (name === 'clients') { $('#kpiCliV').text('—'); $('#kpiCliE').text('indisponible'); }
             });
         return loaded[name];
     }
@@ -591,7 +610,7 @@
     @if($hasSales)
     setTimeout(function () { loadSection('dormants').then(function () { return loadSection('clients'); }).then(function () { return loadSection('vendeurs'); }); }, 300);
     @else
-    $('#kpiDormV').text('—');
+    $('#kpiDormV').text('—'); $('#kpiCliV').text('—'); $('#kpiCliE').text('');
     @endif
     window.stPrint = function () {
         Promise.all([loadSection('dormants'), loadSection('clients'), loadSection('vendeurs')]).then(function () {

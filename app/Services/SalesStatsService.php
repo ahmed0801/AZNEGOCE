@@ -42,6 +42,9 @@ class SalesStatsService
     protected $to;         // Carbon fin (inclus)
     protected $days;       // nb jours de la période
     protected $custCol;    // colonne nom client
+    protected $timings = [];   // [libellé, ms, nb lignes] de chaque requête (diagnostic ?debug=1)
+    protected $clientsMeta = ['count' => 0, 'ca' => 0];
+    protected $catalogAgg;     // agrégats catalogue (une seule lecture de la table items)
 
     public static function normalize(array $in)
     {
@@ -88,14 +91,20 @@ class SalesStatsService
     // ═══════════════════════════════════════════════════════════
     public function core()
     {
-        $cur  = $this->kpis($this->from, $this->to);
         $prevTo   = $this->from->copy()->subDay();
         $prevFrom = $prevTo->copy()->subDays($this->days - 1);
-        $prev = $this->kpis($prevFrom, $prevTo);
 
-        $daily    = $this->daily();
-        $articles = $this->articlesAll();      // 1 seule requête lourde ; groupes / ABC / alertes en sont dérivés en PHP
+        // UNE seule passe sur les lignes pour la période courante ET la précédente (ventes par jour)
+        $all = $this->dailyRange($prevFrom, $this->to);
+        $daily = []; $prevRows = [];
+        $cut = $this->from->format('Y-m-d');
+        foreach ($all as $r) { if (substr($r['day'], 0, 10) >= $cut) $daily[] = $r; else $prevRows[] = $r; }
+        $cur  = $this->kpisLight($daily, $this->days);
+        $prev = $this->kpisLight($prevRows, $this->days);
+
+        $articles = $this->articlesAll();      // 2e et dernière requête lourde ; groupes / ABC / alertes en sont dérivés en PHP
         $rows     = $articles['rows'];
+        $cur['articles'] = count($rows);
         $abc      = $this->abc($articles);
         $groups   = [
             'category'    => $this->group('category', $rows),
@@ -112,6 +121,7 @@ class SalesStatsService
                 'prev_from' => $prevFrom->format('Y-m-d'), 'prev_to' => $prevTo->format('Y-m-d'),
             ],
             'generated_at' => date('d/m/Y H:i'),
+            'timings'  => [],
             'kpis'     => ['cur' => $cur, 'prev' => $prev, 'delta' => $this->deltas($cur, $prev)],
             'series'   => $this->series($daily),
             'weekday'  => $this->weekday($daily),
@@ -121,6 +131,7 @@ class SalesStatsService
             'groups'   => $groups,
         ];
         $data['insights'] = $this->insights($data);
+        $data['timings'] = $this->timings;
         return $data;
     }
 
@@ -129,7 +140,8 @@ class SalesStatsService
     {
         $data = $this->core();
         $data['dormants'] = $this->dormants();
-        $data['clients']  = $this->clients();
+        $cf = $this->clientsFull(); $data['clients'] = $cf['rows'];
+        $data['kpis']['cur']['clients'] = $cf['count'];
         $data['vendeurs'] = $this->vendeurs();
         $data['insights'] = array_merge($data['insights'], $this->lateInsights($data['dormants'], $data['clients']));
         return $data;
@@ -206,7 +218,35 @@ class SalesStatsService
 
     protected function rows($sql, array $bind)
     {
-        return array_map(function ($r) { return (array) $r; }, DB::select($sql, $bind));
+        $t = microtime(true);
+        $r = array_map(function ($x) { return (array) $x; }, DB::select($sql, $bind));
+        $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $this->timings[] = [isset($bt[1]['function']) ? $bt[1]['function'] : 'rows', (int) round((microtime(true) - $t) * 1000), count($r)];
+        return $r;
+    }
+
+    public function timings() { return $this->timings; }
+
+    /** Diagnostic (?debug=1) : volumétrie, collations des colonnes de jointure, index présents */
+    public function diagnostics()
+    {
+        $out = ['counts' => [], 'collations' => [], 'indexes' => []];
+        try {
+            foreach (['delivery_note_lines', 'delivery_notes', 'items', 'stocks'] as $t) {
+                $r = DB::select('SELECT TABLE_ROWS AS n FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?', [$t]);
+                $out['counts'][$t] = $r ? (int) $r[0]->n : null;
+            }
+            foreach ([['items', 'code'], ['delivery_note_lines', 'article_code'], ['delivery_notes', 'numclient'], ['customers', 'code']] as $c) {
+                $r = DB::select('SELECT COLLATION_NAME AS c FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?', [$c[0], $c[1]]);
+                $out['collations'][$c[0] . '.' . $c[1]] = $r ? $r[0]->c : null;
+            }
+            foreach (['delivery_note_lines', 'delivery_notes', 'stocks', 'items'] as $t) {
+                $names = [];
+                foreach (DB::select('SHOW INDEX FROM `' . $t . '`') as $i) $names[$i->Key_name][] = $i->Column_name;
+                $out['indexes'][$t] = array_map(function ($c) { return implode(',', $c); }, $names);
+            }
+        } catch (\Exception $e) { $out['error'] = $e->getMessage(); }
+        return $out;
     }
 
     protected function num($v, $d = 2) { return round((float) $v, $d); }
@@ -259,15 +299,30 @@ class SalesStatsService
     // ═══════════════════════════════════════════════════════════
     //  ÉVOLUTION
     // ═══════════════════════════════════════════════════════════
-    protected function daily()
+    protected function dailyRange(Carbon $from, Carbon $to)
     {
         $bind = [];
         $needCu = (bool) $this->f['client'];
         $sql = 'SELECT DATE(d.delivery_date) AS day, SUM(' . self::AMT . ') AS ca, SUM(l.delivered_quantity) AS qty,'
              . ' SUM(' . self::COST . ') AS cost, SUM(' . self::AMT_K . ') AS ca_k, COUNT(DISTINCT d.id) AS docs'
-             . $this->salesFrom($needCu) . $this->salesWhere($this->from, $this->to, $bind, $needCu)
+             . $this->salesFrom($needCu) . $this->salesWhere($from, $to, $bind, $needCu)
              . ' GROUP BY DATE(d.delivery_date) ORDER BY day';
         return $this->rows($sql, $bind);
+    }
+
+    /** KPI calculés à partir des lignes journalières (les BL ont une seule date : les « docs » s'additionnent).
+     *  clients actifs : chargés ensuite avec la section clients ; références vendues : déduites du classement articles. */
+    protected function kpisLight(array $rows, $days)
+    {
+        $ca = $qty = $cost = $caK = 0.0; $docs = 0;
+        foreach ($rows as $r) { $ca += (float) $r['ca']; $qty += (float) $r['qty']; $cost += (float) $r['cost']; $caK += (float) $r['ca_k']; $docs += (int) $r['docs']; }
+        $margin = $caK - $cost;
+        return [
+            'ca' => $this->num($ca), 'qty' => $this->num($qty), 'docs' => $docs, 'clients' => null, 'articles' => null,
+            'basket' => $docs ? $this->num($ca / $docs) : 0,
+            'margin' => $this->num($margin), 'margin_pc' => $caK > 0 ? $this->num($margin / $caK * 100, 1) : null,
+            'per_day' => $this->num($ca / max(1, $days)),
+        ];
     }
 
     protected function series(array $daily)
@@ -517,70 +572,88 @@ class SalesStatsService
         return $out;
     }
 
-    /** Catalogue actif + stock par groupe (taux d'articles vendus, valeur de stock, couverture) */
+    /** Catalogue actif + stock par groupe : UNE lecture de la table items (curseur), agrégée pour les 4 dimensions */
     protected function catalog($dim)
     {
-        $c = $this->dimConfig($dim);
-        $b2 = [];
-        // Stock via table dérivée (MySQL ONLY_FULL_GROUP_BY interdit la sous-requête corrélée dans un agrégat groupé)
-        $sql2 = 'SELECT ' . $c['key'] . ' AS k, COUNT(*) AS catalog, COALESCE(SUM(COALESCE(st.q,0)),0) AS stock_qty,'
-              . ' COALESCE(SUM(COALESCE(st.q,0) * ' . self::NET_COST . '),0) AS stock_val'
-              . ' FROM items i LEFT JOIN (SELECT item_id, SUM(quantity) AS q FROM stocks GROUP BY item_id) st ON st.item_id = i.id'
-              . ' WHERE i.is_active = 1' . $this->itemFilters($b2, false)
-              . ' GROUP BY ' . $c['key'];
-        $cat = [];
-        foreach ($this->rows($sql2, $b2) as $r) $cat[(string) $r['k']] = $r;
-        return $cat;
+        if ($this->catalogAgg === null) {
+            $agg = ['category' => [], 'subcategory' => [], 'brand' => [], 'supplier' => []];
+            $b = [];
+            $sql = 'SELECT i.category_id AS category, i.subcategory_id AS subcategory, i.brand_id AS brand, i.codefournisseur AS supplier,'
+                 . ' COALESCE(st.q, 0) AS stock, ' . self::NET_COST . ' AS net_cost'
+                 . ' FROM items i LEFT JOIN (SELECT item_id, SUM(quantity) AS q FROM stocks GROUP BY item_id) st ON st.item_id = i.id'
+                 . ' WHERE i.is_active = 1' . $this->itemFilters($b, false);
+            $t = microtime(true); $n = 0;
+            foreach (DB::cursor($sql, $b) as $r) {
+                $n++;
+                $stock = (float) $r->stock; $val = $stock * (float) $r->net_cost;
+                foreach ($agg as $d => $_) {
+                    $k = (string) $r->{$d};
+                    if (!isset($agg[$d][$k])) $agg[$d][$k] = ['catalog' => 0, 'stock_qty' => 0.0, 'stock_val' => 0.0];
+                    $agg[$d][$k]['catalog']++;
+                    $agg[$d][$k]['stock_qty'] += $stock;
+                    $agg[$d][$k]['stock_val'] += $val;
+                }
+            }
+            $this->timings[] = ['catalog (items)', (int) round((microtime(true) - $t) * 1000), $n];
+            $this->catalogAgg = $agg;
+        }
+        return $this->catalogAgg[$dim];
     }
-
 
     // ═══════════════════════════════════════════════════════════
     //  DORMANTS : en stock mais aucune vente sur la période
     // ═══════════════════════════════════════════════════════════
     public function dormants()
     {
+        // 1) codes vendus sur la période (une seule requête DISTINCT, sans jointure article ni filtre client/vendeur)
+        $bs = [$this->from->format('Y-m-d'), $this->to->copy()->addDay()->format('Y-m-d')];
+        $sold = [];
+        foreach ($this->rows('SELECT DISTINCT l.article_code AS code FROM delivery_note_lines l JOIN delivery_notes d ON d.id = l.delivery_note_id'
+            . ' WHERE l.delivered_quantity > 0 AND d.status NOT IN (' . self::EXCLUDED_STATUS . ')'
+            . ' AND d.delivery_date >= ? AND d.delivery_date < ?', $bs) as $r) {
+            $sold[strtolower(trim($r['code']))] = true;
+        }
+
+        // 2) articles actifs en stock (curseur), moins ceux vendus : différence faite en PHP
         $b = [];
-        $where = ' FROM items i'
-               . ' LEFT JOIN ' . $this->tbl(Brand::class) . ' bn ON bn.id = i.brand_id'
-               . ' LEFT JOIN ' . $this->tbl(ItemCategory::class) . ' cn ON cn.id = i.category_id'
-               . ' WHERE i.is_active = 1 AND ' . self::STOCK . ' > 0'
-               . ' AND NOT EXISTS (SELECT 1 FROM delivery_note_lines l JOIN delivery_notes d ON d.id = l.delivery_note_id'
-               . ' WHERE l.article_code = i.code AND l.delivered_quantity > 0 AND d.status NOT IN (' . self::EXCLUDED_STATUS . ')'
-               . ' AND d.delivery_date >= ? AND d.delivery_date < ?)';
-        $b[] = $this->from->format('Y-m-d');
-        $b[] = $this->to->copy()->addDay()->format('Y-m-d');
-        $where .= $this->itemFilters($b, false);
+        $sql = 'SELECT i.code AS code, i.name AS name, bn.name AS brand, cn.name AS category, st.q AS stock, ' . self::NET_COST . ' AS net_cost'
+             . ' FROM items i JOIN (SELECT item_id, SUM(quantity) AS q FROM stocks GROUP BY item_id HAVING SUM(quantity) > 0) st ON st.item_id = i.id'
+             . ' LEFT JOIN ' . $this->tbl(Brand::class) . ' bn ON bn.id = i.brand_id'
+             . ' LEFT JOIN ' . $this->tbl(ItemCategory::class) . ' cn ON cn.id = i.category_id'
+             . ' WHERE i.is_active = 1' . $this->itemFilters($b, false);
+        $t = microtime(true); $n = 0; $count = 0; $value = 0.0; $cand = [];
+        foreach (DB::cursor($sql, $b) as $r) {
+            $n++;
+            if (isset($sold[strtolower(trim($r->code))])) continue;
+            $val = (float) $r->stock * (float) $r->net_cost;
+            $count++; $value += $val;
+            $cand[] = [$val, $r->code, $r->name, $r->brand, $r->category, (float) $r->stock, (float) $r->net_cost];
+        }
+        $this->timings[] = ['dormants (items en stock)', (int) round((microtime(true) - $t) * 1000), $n];
+        usort($cand, function ($x, $y) { return $y[0] <=> $x[0]; });
+        $cand = array_slice($cand, 0, 300);
 
-        $sum = $this->rows('SELECT COUNT(*) AS n, COALESCE(SUM(' . self::STOCK . ' * ' . self::NET_COST . '),0) AS val' . $where, $b);
-        $sum = $sum ? $sum[0] : ['n' => 0, 'val' => 0];
-
-        $rows = $this->rows(
-            'SELECT i.code AS code, i.name AS name, COALESCE(bn.name, \'—\') AS brand, COALESCE(cn.name, \'Non classé\') AS category,'
-            . ' ' . self::STOCK . ' AS stock, ' . self::NET_COST . ' AS net_cost, ' . self::STOCK . ' * ' . self::NET_COST . ' AS val'
-            . $where . ' ORDER BY val DESC LIMIT 300', $b);
-
-        // dernière vente (tout l'historique) pour ces articles
+        // 3) dernière vente (tout l'historique) pour ces 300 articles seulement
         $last = [];
-        if ($rows) {
-            $codes = array_map(function ($r) { return $r['code']; }, $rows);
+        if ($cand) {
+            $codes = array_map(function ($c) { return $c[1]; }, $cand);
             $ph = implode(',', array_fill(0, count($codes), '?'));
-            $lr = $this->rows('SELECT l.article_code AS code, MAX(d.delivery_date) AS last_sale FROM delivery_note_lines l'
+            foreach ($this->rows('SELECT l.article_code AS code, MAX(d.delivery_date) AS last_sale FROM delivery_note_lines l'
                 . ' JOIN delivery_notes d ON d.id = l.delivery_note_id'
                 . ' WHERE l.article_code IN (' . $ph . ') AND l.delivered_quantity > 0 AND d.status NOT IN (' . self::EXCLUDED_STATUS . ')'
-                . ' GROUP BY l.article_code', $codes);
-            foreach ($lr as $r) $last[$r['code']] = substr($r['last_sale'], 0, 10);
+                . ' GROUP BY l.article_code', $codes) as $r) $last[$r['code']] = substr($r['last_sale'], 0, 10);
         }
         $list = [];
-        foreach ($rows as $r) {
-            $ls = isset($last[$r['code']]) ? $last[$r['code']] : null;
+        foreach ($cand as $c) {
+            $ls = isset($last[$c[1]]) ? $last[$c[1]] : null;
             $list[] = [
-                'code' => $r['code'], 'name' => $r['name'], 'brand' => $r['brand'], 'category' => $r['category'],
-                'stock' => $this->num($r['stock']), 'net_cost' => $this->num($r['net_cost'], 4), 'val' => $this->num($r['val']),
+                'code' => $c[1], 'name' => $c[2], 'brand' => $c[3] !== null ? $c[3] : '—', 'category' => $c[4] !== null ? $c[4] : 'Non classé',
+                'stock' => $this->num($c[5]), 'net_cost' => $this->num($c[6], 4), 'val' => $this->num($c[0]),
                 'last_sale' => $ls,
                 'idle_days' => $ls ? (int) Carbon::parse($ls)->diffInDays(Carbon::today()) : null,
             ];
         }
-        return ['count' => (int) $sum['n'], 'value' => $this->num($sum['val']), 'rows' => $list];
+        return ['count' => $count, 'value' => $this->num($value), 'rows' => $list, 'timings' => $this->timings];
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -596,12 +669,12 @@ class SalesStatsService
              . ' COUNT(DISTINCT d.id) AS docs, COUNT(DISTINCT l.article_code) AS articles, MAX(d.delivery_date) AS last_buy'
              . $this->salesFrom(true) . $this->salesWhere($this->from, $this->to, $bind, true)
              . ' AND d.numclient IS NOT NULL'
-             . ' GROUP BY d.numclient' . ($col ? ', cu.' . $col : '') . ' ORDER BY ca DESC LIMIT 100';
-        $rows = $this->rows($sql, $bind);
-        $total = 0.0;
-        foreach ($rows as $r) $total += (float) $r['ca'];
-        // part sur le CA global de la période (pas seulement le top 100)
-        $glob = $this->kpis($this->from, $this->to);
+             . ' GROUP BY d.numclient' . ($col ? ', cu.' . $col : '') . ' ORDER BY ca DESC';
+        $all = $this->rows($sql, $bind);
+        $nb = count($all); $totCa = 0.0;
+        foreach ($all as $r) $totCa += (float) $r['ca'];
+        $rows = array_slice($all, 0, 100);
+        $glob = ['ca' => $totCa];
         $out = [];
         foreach ($rows as $r) {
             $ca = (float) $r['ca']; $caK = (float) $r['ca_k']; $cost = (float) $r['cost'];
@@ -615,7 +688,15 @@ class SalesStatsService
                 'last_buy' => $r['last_buy'] ? substr($r['last_buy'], 0, 10) : null,
             ];
         }
+        $this->clientsMeta = ['count' => $nb, 'ca' => $this->num($totCa)];
         return $out;
+    }
+
+    /** Clients : top 100 + nombre de clients actifs et CA total (pour le KPI chargé en différé) */
+    public function clientsFull()
+    {
+        $rows = $this->clients();
+        return ['rows' => $rows, 'count' => $this->clientsMeta['count'], 'ca' => $this->clientsMeta['ca']];
     }
 
     public function vendeurs()
