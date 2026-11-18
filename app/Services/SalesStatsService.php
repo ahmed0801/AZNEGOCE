@@ -83,8 +83,10 @@ class SalesStatsService
 
     // ═══════════════════════════════════════════════════════════
     //  POINT D'ENTRÉE
+    //  La page charge d'abord core() (rapide : une seule passe sur les lignes de vente),
+    //  puis dormants / clients / vendeurs à la demande (AJAX) car plus coûteux.
     // ═══════════════════════════════════════════════════════════
-    public function build()
+    public function core()
     {
         $cur  = $this->kpis($this->from, $this->to);
         $prevTo   = $this->from->copy()->subDay();
@@ -92,17 +94,16 @@ class SalesStatsService
         $prev = $this->kpis($prevFrom, $prevTo);
 
         $daily    = $this->daily();
-        $articles = $this->articlesAll();
+        $articles = $this->articlesAll();      // 1 seule requête lourde ; groupes / ABC / alertes en sont dérivés en PHP
+        $rows     = $articles['rows'];
         $abc      = $this->abc($articles);
         $groups   = [
-            'category'    => $this->group('category'),
-            'subcategory' => $this->group('subcategory'),
-            'brand'       => $this->group('brand'),
-            'supplier'    => $this->group('supplier'),
+            'category'    => $this->group('category', $rows),
+            'subcategory' => $this->group('subcategory', $rows),
+            'brand'       => $this->group('brand', $rows),
+            'supplier'    => $this->group('supplier', $rows),
         ];
-        $dorm     = $this->dormants();
-        $clients  = $this->clients();
-        $vendeurs = $this->vendeurs();
+        $this->addDetail($rows, 300);
 
         $data = [
             'filters'  => $this->f,
@@ -110,19 +111,27 @@ class SalesStatsService
                 'from' => $this->from->format('Y-m-d'), 'to' => $this->to->format('Y-m-d'), 'days' => $this->days,
                 'prev_from' => $prevFrom->format('Y-m-d'), 'prev_to' => $prevTo->format('Y-m-d'),
             ],
+            'generated_at' => date('d/m/Y H:i'),
             'kpis'     => ['cur' => $cur, 'prev' => $prev, 'delta' => $this->deltas($cur, $prev)],
             'series'   => $this->series($daily),
             'weekday'  => $this->weekday($daily),
-            'articles' => $articles['rows'],
+            'articles' => $rows,
             'abc'      => $abc,
-            'alerts'   => $this->alerts($articles['rows']),
+            'alerts'   => $this->alerts($rows),
             'groups'   => $groups,
-            'dormants' => $dorm,
-            'clients'  => $clients,
-            'vendeurs' => $vendeurs,
         ];
         $data['insights'] = $this->insights($data);
+        return $data;
+    }
 
+    /** Version complète (export Excel) : core + sections lourdes */
+    public function build()
+    {
+        $data = $this->core();
+        $data['dormants'] = $this->dormants();
+        $data['clients']  = $this->clients();
+        $data['vendeurs'] = $this->vendeurs();
+        $data['insights'] = array_merge($data['insights'], $this->lateInsights($data['dormants'], $data['clients']));
         return $data;
     }
 
@@ -325,18 +334,23 @@ class SalesStatsService
     // ═══════════════════════════════════════════════════════════
     protected function articlesAll()
     {
+        // Une seule passe, SANS COUNT(DISTINCT) (coûteux) : clients / BL par article sont ajoutés ensuite pour le top (addDetail).
         $bind = [];
         $needCu = (bool) $this->f['client'];
         $sql = 'SELECT l.article_code AS code, COALESCE(i.name, l.article_code) AS name, i.id AS item_id,'
-             . ' COALESCE(bn.name, \'—\') AS brand, COALESCE(cn.name, \'Non classé\') AS category,'
+             . ' i.category_id AS cat_id, i.subcategory_id AS sub_id, i.brand_id AS brand_id, i.codefournisseur AS sup_code,'
+             . ' bn.name AS g_brand, cn.name AS g_cat, sn.name AS g_sub, su.name AS g_sup,'
              . ' SUM(' . self::AMT . ') AS ca, SUM(l.delivered_quantity) AS qty, SUM(' . self::COST . ') AS cost,'
-             . ' SUM(' . self::AMT_K . ') AS ca_k, COUNT(DISTINCT d.id) AS docs, COUNT(DISTINCT d.numclient) AS clients,'
-             . ' MAX(d.delivery_date) AS last_sale, COALESCE(' . self::STOCK . ', 0) AS stock'
+             . ' SUM(' . self::AMT_K . ') AS ca_k, MAX(d.delivery_date) AS last_sale, COALESCE(MAX(stk.q), 0) AS stock'
              . $this->salesFrom($needCu)
+             . ' LEFT JOIN (SELECT item_id, SUM(quantity) AS q FROM stocks GROUP BY item_id) stk ON stk.item_id = i.id'
              . ' LEFT JOIN ' . $this->tbl(Brand::class) . ' bn ON bn.id = i.brand_id'
              . ' LEFT JOIN ' . $this->tbl(ItemCategory::class) . ' cn ON cn.id = i.category_id'
+             . ' LEFT JOIN ' . $this->tbl(ItemSubcategory::class) . ' sn ON sn.id = i.subcategory_id'
+             . ' LEFT JOIN ' . $this->tbl(Supplier::class) . ' su ON su.code = i.codefournisseur'
              . $this->salesWhere($this->from, $this->to, $bind, $needCu)
-             . ' GROUP BY l.article_code, i.id, i.name, bn.name, cn.name'
+             . ' GROUP BY l.article_code, i.id, i.name, i.category_id, i.subcategory_id, i.brand_id, i.codefournisseur,'
+             . ' bn.name, cn.name, sn.name, su.name'
              . ' ORDER BY ca DESC';
         $raw = $this->rows($sql, $bind);
 
@@ -354,11 +368,12 @@ class SalesStatsService
             $class = $before < 80 ? 'A' : ($before < 95 ? 'B' : 'C');
             $cum += $ca;
             $rows[] = [
-                'code' => $r['code'], 'name' => $r['name'], 'brand' => $r['brand'], 'category' => $r['category'],
+                'code' => $r['code'], 'name' => $r['name'],
+                'brand' => $r['g_brand'] !== null ? $r['g_brand'] : '—', 'category' => $r['g_cat'] !== null ? $r['g_cat'] : 'Non classé',
                 'qty' => $this->num($qty), 'ca' => $this->num($ca), 'avg_price' => $qty > 0 ? $this->num($ca / $qty) : 0,
                 'margin' => $this->num($caK - $cost),
                 'margin_pc' => $caK > 0 ? $this->num(($caK - $cost) / $caK * 100, 1) : null,
-                'docs' => (int) $r['docs'], 'clients' => (int) $r['clients'],
+                'docs' => null, 'clients' => null,
                 'last_sale' => $r['last_sale'] ? substr($r['last_sale'], 0, 10) : null,
                 'stock' => $this->num($stock),
                 'coverage' => ($perDay > 0 && $stock > 0) ? (int) round($stock / $perDay) : null,
@@ -366,10 +381,37 @@ class SalesStatsService
                 'share' => $this->num($share, 1), 'cum' => $this->num($total > 0 ? $cum / $total * 100 : 0, 1),
                 'class' => $class,
                 'per_day' => $perDay,
+                // données brutes pour dériver les groupes
+                '_ca' => $ca, '_qty' => $qty, '_ca_k' => $caK, '_cost' => $cost,
+                '_cat' => [$r['cat_id'], $r['g_cat']], '_sub' => [$r['sub_id'], $r['g_sub']],
+                '_brand' => [$r['brand_id'], $r['g_brand']], '_sup' => [$r['sup_code'], $r['g_sup']],
             ];
         }
         return ['rows' => $rows, 'total' => $total];
     }
+
+    /** Nb de BL et de clients distincts pour les $limit premiers articles (requête ciblée, bien plus légère que sur tout le catalogue) */
+    protected function addDetail(array &$rows, $limit)
+    {
+        $codes = [];
+        foreach (array_slice($rows, 0, $limit) as $r) $codes[] = $r['code'];
+        if (!$codes) return;
+        $bind = [];
+        $needCu = (bool) $this->f['client'];
+        $ph = implode(',', array_fill(0, count($codes), '?'));
+        $sql = 'SELECT l.article_code AS code, COUNT(DISTINCT d.id) AS docs, COUNT(DISTINCT d.numclient) AS clients'
+             . $this->salesFrom($needCu) . $this->salesWhere($this->from, $this->to, $bind, $needCu)
+             . ' AND l.article_code IN (' . $ph . ') GROUP BY l.article_code';
+        $map = [];
+        foreach ($this->rows($sql, array_merge($bind, $codes)) as $r) $map[$r['code']] = $r;
+        foreach ($rows as $i => $r) {
+            if (isset($map[$r['code']])) {
+                $rows[$i]['docs'] = (int) $map[$r['code']]['docs'];
+                $rows[$i]['clients'] = (int) $map[$r['code']]['clients'];
+            }
+        }
+    }
+
 
     protected function abc(array $articles)
     {
@@ -432,48 +474,42 @@ class SalesStatsService
         }
     }
 
-    protected function group($dim)
+    /** Groupes dérivés des lignes article (aucune requête de vente supplémentaire) + stats de catalogue */
+    protected function group($dim, array $rows)
     {
-        $c = $this->dimConfig($dim);
-        $bind = [];
-        $needCu = (bool) $this->f['client'];
-        $sql = 'SELECT ' . $c['key'] . ' AS k, ' . $c['label'] . ' AS label,'
-             . ' SUM(' . self::AMT . ') AS ca, SUM(l.delivered_quantity) AS qty, SUM(' . self::COST . ') AS cost,'
-             . ' SUM(' . self::AMT_K . ') AS ca_k, COUNT(DISTINCT l.article_code) AS sold, COUNT(DISTINCT d.id) AS docs'
-             . $this->salesFrom($needCu) . $c['join']
-             . $this->salesWhere($this->from, $this->to, $bind, $needCu)
-             . ' GROUP BY ' . $c['gb'] . ' ORDER BY ca DESC';
-        $rows = $this->rows($sql, $bind);
+        $field = ['category' => '_cat', 'subcategory' => '_sub', 'brand' => '_brand', 'supplier' => '_sup'][$dim];
+        $none  = ['category' => 'Non classé', 'subcategory' => 'Non classé', 'brand' => 'Sans marque', 'supplier' => 'Sans fournisseur'][$dim];
 
-        // Catalogue actif + stock par groupe (taux d'articles vendus, valeur de stock, couverture)
-        $b2 = [];
-        // Stock via table dérivée (MySQL ONLY_FULL_GROUP_BY interdit la sous-requête corrélée dans un agrégat groupé)
-        $sql2 = 'SELECT ' . $c['key'] . ' AS k, COUNT(*) AS catalog, COALESCE(SUM(COALESCE(st.q,0)),0) AS stock_qty,'
-              . ' COALESCE(SUM(COALESCE(st.q,0) * ' . self::NET_COST . '),0) AS stock_val'
-              . ' FROM items i LEFT JOIN (SELECT item_id, SUM(quantity) AS q FROM stocks GROUP BY item_id) st ON st.item_id = i.id'
-              . $c['join'] . ' WHERE i.is_active = 1' . $this->itemFilters($b2, false)
-              . ' GROUP BY ' . $c['gb'];
-        $cat = [];
-        foreach ($this->rows($sql2, $b2) as $r) $cat[(string) $r['k']] = $r;
+        $g = [];
+        foreach ($rows as $r) {
+            list($key, $label) = $r[$field];
+            $k = (string) $key;
+            if (!isset($g[$k])) $g[$k] = ['label' => $label !== null && $label !== '' ? $label : ($dim === 'supplier' && $key ? $key : $none),
+                                          'ca' => 0.0, 'qty' => 0.0, 'cost' => 0.0, 'ca_k' => 0.0, 'sold' => 0];
+            $g[$k]['ca']   += $r['_ca'];
+            $g[$k]['qty']  += $r['_qty'];
+            $g[$k]['cost'] += $r['_cost'];
+            $g[$k]['ca_k'] += $r['_ca_k'];
+            $g[$k]['sold']++;
+        }
+        uasort($g, function ($a, $b) { return $b['ca'] <=> $a['ca']; });
 
+        $cat = $this->catalog($dim);
         $total = 0.0;
-        foreach ($rows as $r) $total += (float) $r['ca'];
+        foreach ($g as $x) $total += $x['ca'];
 
         $out = [];
-        foreach ($rows as $r) {
-            $ca = (float) $r['ca']; $qty = (float) $r['qty'];
-            $caK = (float) $r['ca_k']; $cost = (float) $r['cost'];
-            $k = (string) $r['k'];
+        foreach ($g as $k => $x) {
             $ct = isset($cat[$k]) ? $cat[$k] : null;
             $catalog = $ct ? (int) $ct['catalog'] : 0;
             $stockQty = $ct ? (float) $ct['stock_qty'] : 0;
-            $perDay = $qty / $this->days;
+            $perDay = $x['qty'] / $this->days;
             $out[] = [
-                'label' => $r['label'], 'ca' => $this->num($ca), 'share' => $total > 0 ? $this->num($ca / $total * 100, 1) : 0,
-                'qty' => $this->num($qty), 'docs' => (int) $r['docs'], 'sold' => (int) $r['sold'],
-                'catalog' => $catalog, 'sold_pc' => $catalog > 0 ? $this->num(min(100, $r['sold'] / $catalog * 100), 1) : null,
-                'margin' => $this->num($caK - $cost),
-                'margin_pc' => $caK > 0 ? $this->num(($caK - $cost) / $caK * 100, 1) : null,
+                'label' => $x['label'], 'ca' => $this->num($x['ca']), 'share' => $total > 0 ? $this->num($x['ca'] / $total * 100, 1) : 0,
+                'qty' => $this->num($x['qty']), 'sold' => $x['sold'],
+                'catalog' => $catalog, 'sold_pc' => $catalog > 0 ? $this->num(min(100, $x['sold'] / $catalog * 100), 1) : null,
+                'margin' => $this->num($x['ca_k'] - $x['cost']),
+                'margin_pc' => $x['ca_k'] > 0 ? $this->num(($x['ca_k'] - $x['cost']) / $x['ca_k'] * 100, 1) : null,
                 'stock_qty' => $this->num($stockQty), 'stock_val' => $ct ? $this->num($ct['stock_val']) : 0,
                 'coverage' => ($perDay > 0 && $stockQty > 0) ? (int) round($stockQty / $perDay) : null,
             ];
@@ -481,10 +517,27 @@ class SalesStatsService
         return $out;
     }
 
+    /** Catalogue actif + stock par groupe (taux d'articles vendus, valeur de stock, couverture) */
+    protected function catalog($dim)
+    {
+        $c = $this->dimConfig($dim);
+        $b2 = [];
+        // Stock via table dérivée (MySQL ONLY_FULL_GROUP_BY interdit la sous-requête corrélée dans un agrégat groupé)
+        $sql2 = 'SELECT ' . $c['key'] . ' AS k, COUNT(*) AS catalog, COALESCE(SUM(COALESCE(st.q,0)),0) AS stock_qty,'
+              . ' COALESCE(SUM(COALESCE(st.q,0) * ' . self::NET_COST . '),0) AS stock_val'
+              . ' FROM items i LEFT JOIN (SELECT item_id, SUM(quantity) AS q FROM stocks GROUP BY item_id) st ON st.item_id = i.id'
+              . ' WHERE i.is_active = 1' . $this->itemFilters($b2, false)
+              . ' GROUP BY ' . $c['key'];
+        $cat = [];
+        foreach ($this->rows($sql2, $b2) as $r) $cat[(string) $r['k']] = $r;
+        return $cat;
+    }
+
+
     // ═══════════════════════════════════════════════════════════
     //  DORMANTS : en stock mais aucune vente sur la période
     // ═══════════════════════════════════════════════════════════
-    protected function dormants()
+    public function dormants()
     {
         $b = [];
         $where = ' FROM items i'
@@ -533,7 +586,7 @@ class SalesStatsService
     // ═══════════════════════════════════════════════════════════
     //  CLIENTS / VENDEURS
     // ═══════════════════════════════════════════════════════════
-    protected function clients()
+    public function clients()
     {
         $col = $this->custNameCol();
         $label = $col ? "COALESCE(NULLIF(cu.$col, ''), d.numclient)" : 'd.numclient';
@@ -565,7 +618,7 @@ class SalesStatsService
         return $out;
     }
 
-    protected function vendeurs()
+    public function vendeurs()
     {
         $bind = [];
         $needCu = (bool) $this->f['client'];
@@ -602,9 +655,6 @@ class SalesStatsService
         }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  INSIGHTS (phrases automatiques)
-    // ═══════════════════════════════════════════════════════════
     protected function insights(array $d)
     {
         $m = function ($v) { return number_format($v, 0, ',', ' ') . ' €'; };
@@ -625,7 +675,6 @@ class SalesStatsService
                 $out[] = ['type' => 'info', 'text' => $p[1] . ' « ' . $g[0]['label'] . ' » réalise ' . str_replace('.', ',', $g[0]['share']) . ' % du CA (' . $m($g[0]['ca']) . ').'];
             }
         }
-        // meilleure marge (groupes significatifs : ≥ 3 % du CA)
         $best = null;
         foreach ($d['groups']['brand'] as $g) {
             if ($g['margin_pc'] !== null && $g['share'] >= 3 && ($best === null || $g['margin_pc'] > $best['margin_pc'])) $best = $g;
@@ -639,11 +688,19 @@ class SalesStatsService
         if ($d['alerts']) {
             $out[] = ['type' => 'bad', 'text' => count($d['alerts']) . ' article(s) A/B en rupture ou à moins de 15 jours de couverture : à réapprovisionner (onglet Rotation & ABC).'];
         }
-        if ($d['dormants']['count'] > 0) {
-            $out[] = ['type' => 'warn', 'text' => $d['dormants']['count'] . ' article(s) en stock sans aucune vente sur la période immobilisent ' . $m($d['dormants']['value']) . ' (au coût net).'];
+        return $out;
+    }
+
+    /** Enseignements issus des sections chargées après coup */
+    public function lateInsights($dormants, $clients)
+    {
+        $m = function ($v) { return number_format($v, 0, ',', ' ') . ' €'; };
+        $out = [];
+        if ($dormants && $dormants['count'] > 0) {
+            $out[] = ['type' => 'warn', 'text' => $dormants['count'] . ' article(s) en stock sans aucune vente sur la période immobilisent ' . $m($dormants['value']) . ' (au coût net).'];
         }
-        if ($d['clients'] && $d['clients'][0]['share'] >= 10) {
-            $out[] = ['type' => 'warn', 'text' => 'Dépendance client : « ' . $d['clients'][0]['name'] . ' » représente ' . str_replace('.', ',', $d['clients'][0]['share']) . ' % du CA.'];
+        if ($clients && $clients[0]['share'] >= 10) {
+            $out[] = ['type' => 'warn', 'text' => 'Dépendance client : « ' . $clients[0]['name'] . ' » représente ' . str_replace('.', ',', $clients[0]['share']) . ' % du CA.'];
         }
         return $out;
     }

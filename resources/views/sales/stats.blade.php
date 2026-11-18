@@ -88,6 +88,8 @@
 .st-abc-c .abc{width:34px;height:34px;font-size:1rem;flex:0 0 34px}
 .abc-bg-A{background:#f4fbf6}.abc-bg-B{background:#fffaf0}.abc-bg-C{background:#f8fafc}
 .st-ok{color:#166534;background:#f0fdf4;border-radius:8px;padding:10px 12px;font-size:.8rem}
+.st-loading{padding:40px;text-align:center;color:#94a3b8;font-size:.85rem}
+.st-err{padding:30px;text-align:center;color:#991b1b;font-size:.85rem}
 .st-note{font-size:.7rem;color:var(--mut);margin:8px 2px 0}
 .st-empty{text-align:center;padding:60px 20px;color:#94a3b8;background:#fff;border:1px dashed #cbd5e1;border-radius:14px}
 .st-empty i{font-size:2.5rem;margin-bottom:10px}
@@ -292,10 +294,11 @@
                 <div class="st-head">
                     <div>
                         <h3><i class="fas fa-chart-line me-2"></i> Statistiques de vente</h3>
-                        <small>{{ $fr($per['from']) }} → {{ $fr($per['to']) }} · {{ $per['days'] }} jours · comparée à {{ $fr($per['prev_from']) }} → {{ $fr($per['prev_to']) }}</small>
+                        <small>{{ $fr($per['from']) }} → {{ $fr($per['to']) }} · {{ $per['days'] }} jours · comparée à {{ $fr($per['prev_from']) }} → {{ $fr($per['prev_to']) }} · calculé à {{ $data['generated_at'] }}</small>
                     </div>
                     <div class="d-flex gap-2 flex-wrap st-noprint">
-                        <button type="button" class="btn btn-sm btn-light" onclick="window.print()"><i class="fas fa-print me-1"></i> Imprimer / PDF</button>
+                        <a class="btn btn-sm btn-outline-light" href="{{ route('sales.stats') }}?{{ $qs }}&refresh=1" title="Recalculer (les résultats sont gardés 10 min en cache)"><i class="fas fa-sync-alt me-1"></i> Actualiser</a>
+                        <button type="button" class="btn btn-sm btn-light" onclick="stPrint()"><i class="fas fa-print me-1"></i> Imprimer / PDF</button>
                         <a class="btn btn-sm btn-success" href="{{ route('sales.stats.export') }}?{{ $qs }}"><i class="fas fa-file-excel me-1"></i> Exporter Excel</a>
                     </div>
                 </div>
@@ -348,7 +351,7 @@
                     <div class="st-kpi k-violet"><span>Bons de livraison</span><b>{{ $fm($cur['docs'], 0) }}</b>{!! $delta($dl['docs']) !!}<em>panier moyen {{ $eur($cur['basket']) }} {!! $delta($dl['basket']) !!}</em></div>
                     <div class="st-kpi k-orange"><span>Quantités vendues</span><b>{{ $fm($cur['qty'], 0) }}</b>{!! $delta($dl['qty']) !!}<em>{{ $fm($cur['articles'], 0) }} références différentes</em></div>
                     <div class="st-kpi k-teal"><span>Clients actifs</span><b>{{ $fm($cur['clients'], 0) }}</b>{!! $delta($dl['clients']) !!}<em>{{ $cur['clients'] ? $eur($cur['ca'] / $cur['clients']) : '—' }} / client</em></div>
-                    <div class="st-kpi k-red"><span>Stock dormant</span><b>{{ $eur($data['dormants']['value']) }}</b><span class="st-d st-d0">{{ $fm($data['dormants']['count'], 0) }} articles sans vente</span><em>immobilisé au coût net</em></div>
+                    <div class="st-kpi k-red"><span>Stock dormant</span><b id="kpiDormV">…</b><span class="st-d st-d0" id="kpiDormN">calcul en cours</span><em>immobilisé au coût net</em></div>
                 </div>
 
                 {{-- ══ ENSEIGNEMENTS ═════════════════════════════════ --}}
@@ -462,51 +465,19 @@
                             <div class="st-note">Rotation = quantités vendues annualisées / stock actuel. Couverture = jours de vente que le stock actuel permet d'assurer au rythme de la période. Les colonnes « Rotation » et « Couverture » détaillées par article figurent dans l'export Excel.</div>
                         </div>
 
-                        {{-- DORMANTS --}}
+                        {{-- ARTICLES DORMANTS (chargé à la demande) --}}
                         <div class="tab-pane fade" id="t-dorm" data-title="Articles dormants">
-                            <div class="st-tools st-noprint"><input type="text" class="form-control st-q" placeholder="Filtrer le tableau…"><small><b>{{ $fm($data['dormants']['count'], 0) }}</b> articles actifs en stock sans vente sur la période · <b>{{ $eur($data['dormants']['value']) }}</b> immobilisés · {{ count($data['dormants']['rows']) }} plus gros affichés</small></div>
-                            <div class="table-responsive"><table class="st-table">
-                                <thead><tr><th>Article</th><th>Marque</th><th>Famille</th><th class="num">Stock</th><th class="num">Coût net</th><th class="num">Valeur</th><th>Dernière vente</th><th class="num">Jours</th></tr></thead>
-                                <tbody>
-                                @foreach($data['dormants']['rows'] as $a)
-                                <tr><td><b>{{ $a['code'] }}</b><div class="st-sub">{{ $a['name'] }}</div></td><td>{{ $a['brand'] }}</td><td>{{ $a['category'] }}</td>
-                                    {!! $num($a['stock'], 0) !!}{!! $num($a['net_cost'], 2) !!}
-                                    <td class="num st-bar st-bar-r" style="--w:{{ $data['dormants']['rows'][0]['val'] > 0 ? round($a['val'] / $data['dormants']['rows'][0]['val'] * 100) : 0 }}%" data-v="{{ $a['val'] }}"><b>{{ $fm($a['val']) }}</b></td>
-                                    <td data-v="{{ $a['last_sale'] }}">{{ $a['last_sale'] ? $fr($a['last_sale']) : 'Jamais vendu' }}</td>
-                                    {!! $num($a['idle_days'], 0) !!}</tr>
-                                @endforeach
-                                </tbody>
-                            </table></div>
+                            <div class="st-lazy" data-section="dormants"><div class="st-loading"><i class="fas fa-spinner fa-spin"></i> Chargement…</div></div>
                         </div>
 
-                        {{-- CLIENTS --}}
+                        {{-- CLIENTS (chargé à la demande) --}}
                         <div class="tab-pane fade" id="t-cli" data-title="Clients">
-                            <div class="st-tools st-noprint"><input type="text" class="form-control st-q" placeholder="Filtrer le tableau…"><small>{{ count($data['clients']) }} meilleurs clients</small></div>
-                            <div class="table-responsive"><table class="st-table">
-                                <thead><tr><th>Client</th><th class="num">CA HT</th><th class="num">Part</th><th class="num">BL</th><th class="num">Panier moyen</th><th class="num">Réf. achetées</th><th class="num">Marge %</th><th>Dernier achat</th></tr></thead>
-                                <tbody>
-                                @foreach($data['clients'] as $c)
-                                <tr><td><b>{{ $c['name'] }}</b><div class="st-sub">{{ $c['code'] }}</div></td>
-                                    <td class="num st-bar" style="--w:{{ min(100, $c['share'] * 3) }}%" data-v="{{ $c['ca'] }}"><b>{{ $fm($c['ca']) }}</b></td>
-                                    {!! $num($c['share'], 1) !!}{!! $num($c['docs'], 0) !!}{!! $num($c['basket'], 0) !!}{!! $num($c['articles'], 0) !!}{!! $num($c['margin_pc'], 1) !!}
-                                    <td data-v="{{ $c['last_buy'] }}">{{ $fr($c['last_buy']) }}</td></tr>
-                                @endforeach
-                                </tbody>
-                            </table></div>
+                            <div class="st-lazy" data-section="clients"><div class="st-loading"><i class="fas fa-spinner fa-spin"></i> Chargement…</div></div>
                         </div>
 
-                        {{-- VENDEURS --}}
+                        {{-- VENDEURS (chargé à la demande) --}}
                         <div class="tab-pane fade" id="t-ven" data-title="Vendeurs">
-                            <div class="table-responsive"><table class="st-table">
-                                <thead><tr><th>Vendeur</th><th class="num">CA HT</th><th class="num">Part</th><th class="num">BL</th><th class="num">Clients</th><th class="num">Panier moyen</th><th class="num">Marge</th><th class="num">Marge %</th></tr></thead>
-                                <tbody>
-                                @foreach($data['vendeurs'] as $v)
-                                <tr><td><b>{{ $v['name'] }}</b></td>
-                                    <td class="num st-bar" style="--w:{{ min(100, $v['share']) }}%" data-v="{{ $v['ca'] }}"><b>{{ $fm($v['ca']) }}</b></td>
-                                    {!! $num($v['share'], 1) !!}{!! $num($v['docs'], 0) !!}{!! $num($v['clients'], 0) !!}{!! $num($v['basket'], 0) !!}{!! $num($v['margin'], 0) !!}{!! $num($v['margin_pc'], 1) !!}</tr>
-                                @endforeach
-                                </tbody>
-                            </table></div>
+                            <div class="st-lazy" data-section="vendeurs"><div class="st-loading"><i class="fas fa-spinner fa-spin"></i> Chargement…</div></div>
                         </div>
 
                     </div>
@@ -562,30 +533,72 @@
         $('#stForm').submit();
     });
 
-    // ── Tableaux : tri par colonne + filtre texte ──────────────────────────
-    $('.st-table').each(function () {
-        var $t = $(this);
-        $t.find('th').each(function (i) {
-            $(this).on('click', function () {
-                var asc = !$(this).hasClass('asc');
-                $t.find('th').removeClass('asc desc'); $(this).addClass(asc ? 'asc' : 'desc');
-                var rows = $t.find('tbody tr').get();
-                rows.sort(function (a, b) {
-                    var x = $(a).children().eq(i), y = $(b).children().eq(i);
-                    var vx = x.attr('data-v'), vy = y.attr('data-v');
-                    if (vx === undefined) { vx = x.text().trim().toLowerCase(); vy = y.text().trim().toLowerCase(); }
-                    var nx = parseFloat(vx), ny = parseFloat(vy);
-                    var r = (!isNaN(nx) && !isNaN(ny) && /^-?[\d.]+$/.test(vx) ) ? nx - ny : String(vx).localeCompare(String(vy), 'fr');
-                    return asc ? r : -r;
+    // ── Tableaux : tri par colonne + filtre texte (tableaux chargés après coup inclus) ──
+    function initTables(root) {
+        $(root).find('.st-table').each(function () {
+            var $t = $(this);
+            $t.find('th').each(function (i) {
+                $(this).on('click', function () {
+                    var asc = !$(this).hasClass('asc');
+                    $t.find('th').removeClass('asc desc'); $(this).addClass(asc ? 'asc' : 'desc');
+                    var rows = $t.find('tbody tr').get();
+                    rows.sort(function (a, b) {
+                        var x = $(a).children().eq(i), y = $(b).children().eq(i);
+                        var vx = x.attr('data-v'), vy = y.attr('data-v');
+                        if (vx === undefined) { vx = x.text().trim().toLowerCase(); vy = y.text().trim().toLowerCase(); }
+                        var nx = parseFloat(vx), ny = parseFloat(vy);
+                        var r = (!isNaN(nx) && !isNaN(ny) && /^-?[\d.]+$/.test(vx)) ? nx - ny : String(vx).localeCompare(String(vy), 'fr');
+                        return asc ? r : -r;
+                    });
+                    $.each(rows, function (_, r) { $t.find('tbody').append(r); });
                 });
-                $.each(rows, function (_, r) { $t.find('tbody').append(r); });
             });
         });
-    });
-    $('.st-q').on('input', function () {
+    }
+    initTables(document);
+    $(document).on('input', '.st-q', function () {
         var q = this.value.toLowerCase(), $t = $(this).closest('.tab-pane').find('.st-table');
         $t.find('tbody tr').each(function () { $(this).toggle(!q || $(this).text().toLowerCase().indexOf(q) !== -1); });
     });
+
+    // ── Sections lourdes chargées à la demande (dormants, clients, vendeurs) ──
+    var SECTION_URL = {!! json_encode(url('/sales/stats/section')) !!} + '/', QS = {!! json_encode($qs) !!};
+    var loaded = {};
+    function loadSection(name) {
+        if (loaded[name]) return loaded[name];
+        var $box = $('.st-lazy[data-section=' + name + ']');
+        loaded[name] = fetch(SECTION_URL + name + '?' + QS, { credentials: 'same-origin', headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(function (d) {
+                $box.html(d.html); initTables($box);
+                if (d.kpi) { $('#kpiDormV').text(d.kpi.value); $('#kpiDormN').text(d.kpi.count); }
+                (d.insights || []).forEach(function (i) { $('.st-insights').append($('<div class="st-ins"></div>').addClass('i-' + i.type).text(i.text)); });
+                return d;
+            })
+            .catch(function (e) {
+                loaded[name] = null;
+                $box.html('<div class="st-err"><i class="fas fa-exclamation-triangle"></i> Chargement impossible (' + e.message + '). <a href="#" class="st-retry" data-s="' + name + '">Réessayer</a></div>');
+                if (name === 'dormants') { $('#kpiDormV').text('—'); $('#kpiDormN').text('indisponible'); }
+            });
+        return loaded[name];
+    }
+    $(document).on('click', '.st-retry', function (e) { e.preventDefault(); loadSection($(this).data('s')); });
+    $('button[data-bs-toggle=tab]').on('shown.bs.tab', function (e) {
+        var t = $(e.target).data('bs-target') || '', m = { '#t-dorm': 'dormants', '#t-cli': 'clients', '#t-ven': 'vendeurs' };
+        if (m[t]) loadSection(m[t]);
+    });
+    // Chargement en arrière-plan, l'un après l'autre, sans bloquer l'affichage
+    @if($hasSales)
+    setTimeout(function () { loadSection('dormants').then(function () { return loadSection('clients'); }).then(function () { return loadSection('vendeurs'); }); }, 300);
+    @else
+    $('#kpiDormV').text('—');
+    @endif
+    window.stPrint = function () {
+        Promise.all([loadSection('dormants'), loadSection('clients'), loadSection('vendeurs')]).then(function () {
+            if (window.stDrawPareto) window.stDrawPareto();
+            setTimeout(function () { window.print(); }, 150);
+        });
+    };
 
     // ── Graphiques ─────────────────────────────────────────────────────────
 @if($hasSales)
@@ -647,6 +660,7 @@
                 scales: { x: { type: 'linear', min: 0, max: 100, grid: { display: false }, ticks: { callback: function (v) { return v + ' %'; } }, title: { display: true, text: "% des articles (classés par CA)" } }, y: { min: 0, max: 100, grid: grid, ticks: { callback: function (v) { return v + ' %'; } } } } }
         });
     }
+    window.stDrawPareto = drawPareto;
     $('button[data-bs-target="#t-abc"]').on('shown.bs.tab', drawPareto);
     window.addEventListener('beforeprint', function () { drawPareto(); });
 @endif

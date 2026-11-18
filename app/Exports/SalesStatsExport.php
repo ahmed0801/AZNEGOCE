@@ -41,7 +41,7 @@ class SalesStatsExport implements WithMultipleSheets
                 $r['avg_price'], $r['margin'], $r['margin_pc'], $r['docs'], $r['clients'], $r['last_sale'], $r['stock'], $r['coverage'], $r['rotation']];
         }
         $sheets[] = new StatsTableSheet('Top articles',
-            ['#', 'Code', 'Désignation', 'Marque', 'Famille', 'ABC', 'Qté vendue', 'CA HT', 'Part CA %', 'Cumul %', 'Prix moyen HT', 'Marge', 'Marge %', 'Nb BL', 'Nb clients', 'Dernière vente', 'Stock', 'Couverture (j)', 'Rotation (x/an)'],
+            ['#', 'Code', 'Désignation', 'Marque', 'Famille', 'ABC', 'Qté vendue', 'CA HT', 'Part CA %', 'Cumul %', 'Prix moyen HT', 'Marge', 'Marge %', 'Nb BL (top 300)', 'Nb clients (top 300)', 'Dernière vente', 'Stock', 'Couverture (j)', 'Rotation (x/an)'],
             $rows, ['G' => 'qty', 'H' => 'money', 'I' => 'pc', 'J' => 'pc', 'K' => 'money', 'L' => 'money', 'M' => 'pc', 'Q' => 'qty', 'S' => 'dec'], 5);
 
         // ── Groupes ──────────────────────────────────────────
@@ -49,11 +49,11 @@ class SalesStatsExport implements WithMultipleSheets
         foreach ($groups as $g) {
             $rows = [];
             foreach ($d['groups'][$g[0]] as $r) {
-                $rows[] = [$r['label'], $r['ca'], $r['share'], $r['qty'], $r['docs'], $r['sold'], $r['catalog'], $r['sold_pc'], $r['margin'], $r['margin_pc'], $r['stock_qty'], $r['stock_val'], $r['coverage']];
+                $rows[] = [$r['label'], $r['ca'], $r['share'], $r['qty'], $r['sold'], $r['catalog'], $r['sold_pc'], $r['margin'], $r['margin_pc'], $r['stock_qty'], $r['stock_val'], $r['coverage']];
             }
             $sheets[] = new StatsTableSheet($g[1],
-                [$g[2], 'CA HT', 'Part CA %', 'Qté vendue', 'Nb BL', 'Réf. vendues', 'Réf. catalogue actif', '% réf. vendues', 'Marge', 'Marge %', 'Stock (qté)', 'Valeur stock (coût net)', 'Couverture (j)'],
-                $rows, ['B' => 'money', 'C' => 'pc', 'D' => 'qty', 'H' => 'pc', 'I' => 'money', 'J' => 'pc', 'K' => 'qty', 'L' => 'money'], 0);
+                [$g[2], 'CA HT', 'Part CA %', 'Qté vendue', 'Réf. vendues', 'Réf. catalogue actif', '% réf. vendues', 'Marge', 'Marge %', 'Stock (qté)', 'Valeur stock (coût net)', 'Couverture (j)'],
+                $rows, ['B' => 'money', 'C' => 'pc', 'D' => 'qty', 'G' => 'pc', 'H' => 'money', 'I' => 'pc', 'J' => 'qty', 'K' => 'money'], 0);
         }
 
         // ── ABC ──────────────────────────────────────────────
