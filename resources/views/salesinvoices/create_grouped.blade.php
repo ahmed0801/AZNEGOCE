@@ -158,6 +158,7 @@
                             <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
                             <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
                             <li><a href="/salesnotes/list"><span class="sub-item">Avoirs</span></a></li>
+                            <li><a href="{{ route('sales.stats') }}"><span class="sub-item">Statistiques ventes</span></a></li>
                         </ul>
                     </div>
                 </li>

@@ -738,6 +738,12 @@ Route::post('/sales/delivery/store-and-invoice', [SalesController::class, 'store
     // Search Routes
     Route::get('/sales/search', [SalesController::class, 'search'])->name('sales.search');
     Route::get('/sales/items/search', [SalesController::class, 'searchItems'])->name('sales.items.search');
+
+
+    Route::get('/sales/stats', [\App\Http\Controllers\SalesStatsController::class, 'index'])->name('sales.stats');
+Route::get('/sales/stats/export', [\App\Http\Controllers\SalesStatsController::class, 'export'])->name('sales.stats.export');
+
+
     Route::get('/sales/items/{itemId}/history', [SalesController::class, 'itemHistory'])->name('sales.items.history');
 
 

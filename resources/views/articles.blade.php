@@ -797,6 +797,7 @@
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createItemModal">
             <i class="fas fa-plus-circle"></i> Nouvel article
         </button>
+        <a href="{{ route('sales.stats') }}" class="btn btn-outline-dark" title="Statistiques de vente, rotation, top ventes"><i class="fas fa-chart-line"></i> Statistiques</a>
         <div class="dropdown">
             <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-sliders-h"></i> Gérer</button>
             <ul class="dropdown-menu dropdown-menu-end">

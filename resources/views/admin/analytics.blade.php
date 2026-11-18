@@ -71,6 +71,7 @@
                                     <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
                                     <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
                                     <li><a href="/salesnotes/list"><span class="sub-item">Avoirs</span></a></li>
+                                    <li><a href="{{ route('sales.stats') }}"><span class="sub-item">Statistiques ventes</span></a></li>
                                 </ul>
                             </div>
                         </li>
@@ -379,6 +380,10 @@
                         <a href="{{ route('customer.behavior') }}" class="btn btn-outline-danger btn-round ms-2">
         <i class="fas fa-chart-line fa-lg me-2"></i>
         Analyse Comportement Clients
+    </a>
+                        <a href="{{ route('sales.stats') }}" class="btn btn-outline-primary btn-round ms-2">
+        <i class="fas fa-chart-bar fa-lg me-2"></i>
+        Statistiques de vente
     </a>
     
                     <div class="d-flex gap-2">
