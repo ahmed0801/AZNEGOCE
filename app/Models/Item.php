@@ -69,6 +69,41 @@ public function stockMovements()
     return $this->hasMany(StockMovement::class);
 }
 
+/**
+ * Filtres « stock » et « rotation » de la page Articles (et de l'export Excel).
+ * Rotation : basée sur les lignes de bons de livraison (comme les suggestions).
+ *  - sold  : au moins une vente (sur la période si dates fournies)
+ *  - never : aucune vente (sur la période si dates fournies, sinon jamais)
+ * Des dates sans choix de rotation = « vendus sur la période ».
+ */
+public function scopeApplyStockRotation($query, $request)
+{
+    $stock = $request->input('stock');
+    $sumStock = '(select coalesce(sum(s.quantity),0) from stocks s where s.item_id = items.id)';
+    if ($stock === 'in')       $query->whereRaw($sumStock . ' > 0');
+    elseif ($stock === 'out')  $query->whereRaw($sumStock . ' <= 0');
+    elseif ($stock === 'low')  $query->where('items.stock_min', '>', 0)->whereRaw($sumStock . ' <= items.stock_min');
+
+    $parse = function ($v) {
+        if (!$v) return null;
+        try { return \Carbon\Carbon::parse($v)->format('Y-m-d'); } catch (\Exception $e) { return null; }
+    };
+    $from = $parse($request->input('date_from'));
+    $to   = $parse($request->input('date_to'));
+    $mode = $request->input('rotation');
+    if (!in_array($mode, ['sold', 'never'], true)) $mode = ($from || $to) ? 'sold' : null;
+    if (!$mode) return $query;
+
+    $sql = 'select 1 from delivery_note_lines l join delivery_notes d on d.id = l.delivery_note_id'
+         . ' where l.article_code = items.code and l.delivered_quantity > 0'
+         . " and d.status not in ('cancelled','canceled','annule','annulé','draft','brouillon')";
+    $bind = [];
+    if ($from) { $sql .= ' and d.delivery_date >= ?'; $bind[] = $from; }
+    if ($to)   { $sql .= ' and d.delivery_date <= ?'; $bind[] = $to . ' 23:59:59'; }
+
+    return $query->whereRaw(($mode === 'sold' ? 'exists' : 'not exists') . ' (' . $sql . ')', $bind);
+}
+
 public function getStockQuantityAttribute()
 {
     return $this->stocks->sum('quantity');

@@ -65,6 +65,7 @@ $query = Item::with(['category', 'subcategory', 'brand', 'tvaGroup', 'store', 's
     if (in_array($request->input('prix_net'), ['0', '1'], true)) {
         $query->where('prix_net', (int) $request->input('prix_net'));
     }
+    $query->applyStockRotation($request);
     if ($request->filled('codefournisseur')) {
     $query->where('codefournisseur', $request->codefournisseur);
 }
@@ -801,6 +802,7 @@ public function massUpdateDiscount(Request $request)
     if ($request->filled('store_id'))    $query->where('store_id', $request->store_id);
     if ($request->filled('discount_group_id')) $query->where('discount_group_id', $request->discount_group_id);
     if (in_array($request->input('prix_net'), ['0', '1'], true)) $query->where('prix_net', (int) $request->input('prix_net'));
+    $query->applyStockRotation($request);
     if ($request->filled('codefournisseur')) {
         $query->where('codefournisseur', $request->codefournisseur);
     }

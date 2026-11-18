@@ -54,6 +54,8 @@ class ArticleExport implements FromCollection, WithHeadings
             $query->where('prix_net', (int) $this->request->input('prix_net'));
         }
 
+        $query->applyStockRotation($this->request);
+
         if ($this->request->filled('codefournisseur')) {
             $query->where('codefournisseur', $this->request->codefournisseur);
         }

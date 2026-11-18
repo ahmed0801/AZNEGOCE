@@ -716,18 +716,80 @@
 .art-bar h4{margin:0;font-weight:700}
 .art-btns{display:flex;flex-wrap:wrap;gap:.5rem}
 .art-btns .btn,.art-filters .btn{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:0 1rem;font-size:.88rem;font-weight:600;border-radius:8px;white-space:nowrap;margin:0}
-.art-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem}
-.art-filters .art-search{flex:2 1 220px;position:relative}
-.art-filters .art-search i{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.8rem}
-.art-filters .art-search input{height:38px;padding-left:2.1rem;border-radius:8px;font-size:.88rem}
-.art-filters .art-sel{flex:1 1 150px;min-width:140px}
-.art-filters .art-sel select{width:100%}
-.art-filters .select2-container{width:100%!important}
-.art-filters .select2-container--default .select2-selection--single{height:38px!important;min-height:38px!important;border-radius:8px!important;display:flex;align-items:center;font-size:.88rem!important}
-.art-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px!important}
-.art-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px!important}
+.art-btns .dropdown-menu{border-radius:10px;border:1px solid #e5e9f2;box-shadow:0 8px 24px rgba(30,45,74,.12);font-size:.85rem;padding:.35rem}
+.art-btns .dropdown-item{border-radius:6px;padding:.4rem .7rem;display:flex;align-items:center;gap:.55rem}
+.art-btns .dropdown-item i{width:16px;text-align:center;color:#64748b}
+.art-btns .dropdown-divider{margin:.3rem 0}
+
+/* ===== Filtres ===== */
+.af-filters{background:#fff;border:1px solid #e5e9f2;border-radius:12px;padding:.6rem .7rem;margin-bottom:1rem;box-shadow:0 1px 3px rgba(30,45,74,.05)}
+.af-row{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center}
+.af-row + .af-adv{margin-top:.5rem}
+.af-filters .af-search{flex:2 1 230px;position:relative;min-width:200px}
+.af-filters .af-search i{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.78rem}
+.af-filters .af-search input{padding-left:2rem}
+.af-filters .form-control,.af-filters .btn{height:34px;font-size:.82rem;border-radius:8px}
+.af-filters .btn{display:inline-flex;align-items:center;gap:.4rem;padding:0 .85rem;font-weight:600;white-space:nowrap;margin:0}
+.af-filters .art-sel{flex:1 1 140px;min-width:130px}
+.af-filters .art-sel select{width:100%}
+.af-filters .select2-container{width:100%!important}
+.af-filters .select2-container--default .select2-selection--single{height:34px!important;min-height:34px!important;border-radius:8px!important;display:flex;align-items:center;font-size:.82rem!important}
+.af-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:32px!important}
+.af-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:32px!important}
+.af-adv{display:none;border-top:1px dashed #e5e9f2;padding-top:.55rem}
+.af-adv.show{display:block}
+.af-adv .af-row{align-items:flex-end}
+.af-fl{display:flex;flex-direction:column;gap:2px;flex:1 1 140px;min-width:130px}
+.af-fl>.af-fn{font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#94a3b8}
+.af-period{flex:2 1 300px}
+.af-period .af-pr{display:flex;gap:.35rem;align-items:center}
+.af-period .af-pr input{flex:1 1 0;min-width:0}
+.af-chips{display:flex;gap:.25rem;flex-wrap:wrap;margin-top:3px}
+.af-chip{border:1px solid #dbe3f0;background:#f8fafc;color:#475569;border-radius:20px;font-size:.68rem;font-weight:600;padding:1px 9px;cursor:pointer;line-height:1.5}
+.af-chip:hover{background:#eef4ff;border-color:#93c5fd;color:#1d4ed8}
+.af-btn-adv{background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}
+.af-btn-adv:hover{background:#e2e8f0}
+.af-btn-adv .badge{background:#2563eb;color:#fff;border-radius:10px;font-size:.65rem;padding:2px 6px}
+.af-spacer{flex:0 0 auto;display:flex;gap:.35rem}
+
+/* ===== Formulaires article (création / modification) ===== */
+.af .modal-content{border:0;border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(15,23,42,.25)}
+.af .modal-header{padding:.7rem 1.1rem;border-bottom:1px solid #eef1f6;background:linear-gradient(180deg,#fbfcfe,#f5f8fd)}
+.af .modal-title{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:.55rem;color:#1e2d4a}
+.af-ico{width:28px;height:28px;border-radius:8px;background:#e8f5ee;color:#16a34a;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem}
+.af-ico-e{background:#e8f0fe;color:#2563eb}
+.af .modal-body{padding:.85rem 1.1rem;background:#f6f8fc;max-height:calc(100vh - 180px);overflow-y:auto}
+.af .modal-footer{padding:.55rem 1.1rem;border-top:1px solid #eef1f6;background:#fff;gap:.4rem}
+.af-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:.7rem}
+.af-g{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:.45rem .6rem}
+.af .s-3{grid-column:span 3}.af .s-4{grid-column:span 4}.af .s-6{grid-column:span 6}.af .s-8{grid-column:span 8}.af .s-9{grid-column:span 9}.af .s-12{grid-column:span 12}
+.af-card{background:#fff;border:1px solid #e8edf5;border-radius:10px;padding:.65rem .75rem}
+.af-t{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#2563eb;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+.af-t i{font-size:.72rem}
+.af-l{display:block;font-size:.68rem;font-weight:600;color:#64748b;margin:0 0 2px}
+.af .form-control-sm,.af .form-select-sm{height:32px;font-size:.82rem;border-radius:7px;padding-top:.2rem;padding-bottom:.2rem}
+.af textarea.form-control-sm{height:auto;min-height:0;resize:vertical}
+.af .af-margin{font-style:italic;background:#f1f5f9}
+.af .select2-container{width:100%!important}
+.af .select2-container--default .select2-selection--single{height:32px!important;border-radius:7px!important;border:1px solid #ced4da!important;display:flex;align-items:center}
+.af .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:30px!important;font-size:.82rem;padding-left:.6rem}
+.af .select2-container--default .select2-selection--single .select2-selection__arrow{height:30px!important}
+.af-sw{display:flex;align-items:center;min-height:32px;background:#f8fafc;border:1px solid #e8edf5;border-radius:8px;padding:.25rem .6rem}
+.af-sw .form-check-label{font-size:.82rem;cursor:pointer}
+.af-h{font-size:.68rem;color:#94a3b8;font-weight:500;margin-left:.25rem}
+.af-sup{display:grid;grid-template-columns:minmax(0,1fr) 140px 140px;gap:.45rem;margin-bottom:.4rem;align-items:center}
+.af-sup:last-child{margin-bottom:0}
+.af-sup-h{margin-bottom:.15rem}
+.af-sup-h span{font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#94a3b8}
+.af-supsel{display:flex;align-items:center;gap:.5rem;min-width:0}
+.af-supsel .select2-container{flex:1 1 auto;min-width:0}
+.af-rk{flex:0 0 88px;font-size:.72rem;font-weight:600;color:#475569}
+.af-supsel select{flex:1 1 auto;min-width:0}
+.af .form-control[disabled],.af .form-select[disabled],.af textarea[disabled]{background-color:#f1f5f9;cursor:not-allowed;color:#334155}
+@media (max-width:991px){.af .s-3,.af .s-4,.af .s-6,.af .s-8,.af .s-9{grid-column:span 12}.af .af-g .s-6{grid-column:span 6}.af .af-g .s-3,.af .af-g .s-4{grid-column:span 6}.af-sup{grid-template-columns:1fr 1fr}.af-supsel{grid-column:span 2}.af-sup-h{display:none}}
 </style>
 
+@php $suppliersAll = \App\Models\Supplier::orderBy('code')->get(); @endphp
 <div class="art-bar">
     <h4><i class="fas fa-boxes text-primary me-2"></i>Articles</h4>
 
@@ -735,347 +797,209 @@
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createItemModal">
             <i class="fas fa-plus-circle"></i> Nouvel article
         </button>
-        <a href="{{ url('/categories') }}" class="btn btn-outline-primary"><i class="fas fa-sitemap"></i> Familles &amp; sous-familles</a>
-        <a href="{{ url('/brands') }}" class="btn btn-outline-primary"><i class="fas fa-tags"></i> Marques</a>
-        <a href="/groupremises" class="btn btn-outline-primary"><i class="fas fa-percent"></i> Groupes remises</a>
-        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createDiscountGroupModal"><i class="fas fa-plus"></i> Nouveau groupe remise</button>
-        <button type="button" class="btn btn-outline-warning" data-bs-toggle="collapse" data-bs-target="#massDiscountPanel" aria-expanded="false" aria-controls="massDiscountPanel"><i class="fas fa-percent"></i> Remise en masse</button>
-        <a href="{{ route('admin.golda.index') }}" class="btn btn-outline-success"><i class="fas fa-cloud-download-alt"></i> Import GOLDA</a>
-        <a href="{{ route('articles.import') }}" class="btn btn-outline-success"><i class="fas fa-file-excel"></i> Import Excel</a>
+        <div class="dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-sliders-h"></i> Gérer</button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{{ url('/categories') }}"><i class="fas fa-sitemap"></i> Familles &amp; sous-familles</a></li>
+                <li><a class="dropdown-item" href="{{ url('/brands') }}"><i class="fas fa-tags"></i> Marques</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/groupremises"><i class="fas fa-percent"></i> Groupes remises</a></li>
+                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#createDiscountGroupModal"><i class="fas fa-plus"></i> Nouveau groupe remise</button></li>
+                <li><button type="button" class="dropdown-item" data-bs-toggle="collapse" data-bs-target="#massDiscountPanel" aria-expanded="false" aria-controls="massDiscountPanel"><i class="fas fa-percent text-warning"></i> Remise en masse</button></li>
+            </ul>
+        </div>
+        <div class="dropdown">
+            <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-file-import"></i> Importer</button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{{ route('admin.golda.index') }}"><i class="fas fa-cloud-download-alt"></i> Import GOLDA</a></li>
+                <li><a class="dropdown-item" href="{{ route('articles.import') }}"><i class="fas fa-file-excel"></i> Import Excel</a></li>
+            </ul>
+        </div>
     </div>
 </div>
 
 
 
 
-<!-- Modal -->
-<div class="modal fade" id="createItemModal" tabindex="-1" aria-labelledby="createItemModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<!-- Modal création article -->
+<div class="modal fade af" id="createItemModal" tabindex="-1" aria-labelledby="createItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
-
             <div class="modal-header">
-                <h5 class="modal-title" id="createItemModalLabel">Créer un Article</h5>
+                <h5 class="modal-title" id="createItemModalLabel"><span class="af-ico"><i class="fas fa-plus"></i></span> Nouvel article</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
-
-            <div class="modal-body">
-                <form id="createItemForm" action="{{ route('items.store') }}" method="POST">
-                    @csrf
-
-                    <div class="row">
-                        <!-- Code -->
-                        <div class="mb-3 col-md-4">
-                            <label for="code" class="form-label">Code article</label>
-                            <input type="text" class="form-control" id="code" name="code" required>
-                        </div>
-
-                        <!-- Nom -->
-                        <div class="mb-3 col-md-8">
-                            <label for="name" class="form-label">Désignation</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                        </div>
-
-                        <!-- Catégorie -->
-                        <div class="mb-3 col-md-6">
-                            <label for="category_id" class="form-label">Famille</label>
-                            <select class="form-control" id="category_id" name="category_id">
-                                                    @foreach($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Sous-famille -->
-                        <div class="mb-3 col-md-6">
-                            <label class="form-label">Sous-famille</label>
-                            <select class="form-control" name="subcategory_id" data-subcat-select data-cat-source="#category_id">
-                                <option value="">-- Aucune --</option>
-                                @foreach($subcategories as $sub)
-                                    <option value="{{ $sub->id }}" data-category="{{ $sub->category_id }}">{{ $sub->code }} — {{ $sub->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Marque -->
-                        <div class="mb-3 col-md-6">
-                            <label for="brand_id" class="form-label">Marque</label>
-                            <select class="form-control" id="brand_id" name="brand_id">
-                                
-                                @foreach($brands as $brand)
-                                    <option value="{{ $brand->id }}">{{ $brand->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Unité -->
-                        <div class="mb-3 col-md-6">
-                            <label for="unit_id" class="form-label">Unité</label>
-                            <select class="form-control" id="unit_id" name="unit_id">
-                               
-                                @foreach($units as $unit)
-                                    <option value="{{ $unit->id }}">{{ $unit->label ?? $unit->code }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Groupe TVA -->
-                        <div class="mb-3 col-md-6">
-                            <label for="tva_group_id" class="form-label">TVA</label>
-                            <select class="form-control" id="tva_group_id" name="tva_group_id">
-                                
-                                @foreach($tvaGroups as $tva)
-                                    <option value="{{ $tva->id }}">{{ $tva->name }} ({{ $tva->rate }}%)</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Groupe de remise -->
-<div class="mb-3 col-md-6">
-    <label for="discount_group_id" class="form-label">Groupe de remise</label>
-    <select class="form-control" id="discount_group_id" name="discount_group_id">
-        <option value="">-- Aucun (utilise standard) --</option>
-        @foreach($discountGroups as $group)
-            <option value="{{ $group->id }}" {{ old('discount_group_id') == $group->id ? 'selected' : '' }}>
-                {{ $group->name }}
-                (G: {{ $group->discount_rate }}% | J: {{ $group->discount_rate_jobber }}% | P: {{ $group->discount_rate_professionnel }}%)
-            </option>
-        @endforeach
-    </select>
+            <form id="createItemForm" action="{{ route('items.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="af-grid">
+<div class="af-card s-8"><div class="af-t"><i class="fas fa-id-card"></i> Identification</div><div class="af-g">
+<div class="s-3"><label class="af-l">Code article</label><input type="text" name="code" id="code" class="form-control form-control-sm" value="{{ old('code') }}" required></div>
+<div class="s-9"><label class="af-l">Désignation</label><input type="text" name="name" id="name" class="form-control form-control-sm" value="{{ old('name') }}" required></div>
+<div class="s-6"><label class="af-l">Famille</label><select name="category_id" id="category_id" class="form-select form-select-sm">@foreach($categories as $category)<option value="{{ $category->id }}">{{ $category->name }}</option>@endforeach</select></div>
+<div class="s-6"><label class="af-l">Sous-famille</label><select name="subcategory_id" class="form-select form-select-sm" data-subcat-select data-cat-source="#category_id"><option value="">-- Aucune --</option>@foreach($subcategories as $sub)<option value="{{ $sub->id }}" data-category="{{ $sub->category_id }}">{{ $sub->code }} — {{ $sub->name }}</option>@endforeach</select></div>
+<div class="s-4"><label class="af-l">Marque</label><select name="brand_id" id="brand_id" class="form-select form-select-sm">@foreach($brands as $brand)<option value="{{ $brand->id }}">{{ $brand->name }}</option>@endforeach</select></div>
+<div class="s-4"><label class="af-l">Unité</label><select name="unit_id" id="unit_id" class="form-select form-select-sm">@foreach($units as $unit)<option value="{{ $unit->id }}">{{ $unit->label ?? $unit->code }}</option>@endforeach</select></div>
+<div class="s-4"><label class="af-l">TVA</label><select name="tva_group_id" id="tva_group_id" class="form-select form-select-sm">@foreach($tvaGroups as $tva)<option value="{{ $tva->id }}">{{ $tva->name }} ({{ $tva->rate }}%)</option>@endforeach</select></div>
+<div class="s-4"><label class="af-l">Code-barres</label><input type="text" name="barcode" id="barcode" class="form-control form-control-sm"></div>
+<div class="s-4"><label class="af-l">Magasin</label><select name="store_id" class="form-select form-select-sm">@foreach($stores as $store)<option value="{{ $store->id }}">{{ $store->name }}</option>@endforeach</select></div>
+<div class="s-4"><label class="af-l">Emplacement</label><input type="text" name="location" class="form-control form-control-sm" placeholder="Ex : Rayon A2"></div>
+<div class="s-12"><label class="af-l">Description technique</label><textarea name="description" class="form-control form-control-sm" rows="2"></textarea></div>
+</div></div>
+<div class="af-card s-4"><div class="af-t"><i class="fas fa-euro-sign"></i> Vente &amp; stock</div><div class="af-g">
+<div class="s-6"><label class="af-l">Marge (%)</label><input type="number" step="0.01" id="margin" class="form-control form-control-sm af-margin" placeholder="Ex : 20" autocomplete="off"></div>
+<div class="s-6"><label class="af-l">Prix de vente HT</label><input type="number" name="sale_price" step="0.01" class="form-control form-control-sm" value="0.00"></div>
+<div class="s-12"><label class="af-l">Groupe de remise</label><select name="discount_group_id" id="discount_group_id" class="form-select form-select-sm"><option value="">-- Aucun (standard) --</option>@foreach($discountGroups as $group)<option value="{{ $group->id }}" {{ old('discount_group_id') == $group->id ? 'selected' : '' }}>{{ $group->name }} (G:{{ $group->discount_rate }}% · J:{{ $group->discount_rate_jobber }}% · P:{{ $group->discount_rate_professionnel }}%)</option>@endforeach</select></div>
+<div class="s-12"><div class="af-sw"><input type="hidden" name="prix_net" value="0"><div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="prix_net" name="prix_net" value="1" {{ old('prix_net') == '1' ? 'checked' : '' }}><label class="form-check-label" for="prix_net"><b>Prix net</b> <span class="af-h">protégé des imports</span></label></div></div></div>
+<div class="s-6"><label class="af-l">Stock min</label><input type="number" name="stock_min" class="form-control form-control-sm" value="0"></div>
+<div class="s-6"><label class="af-l">Stock max</label><input type="number" name="stock_max" class="form-control form-control-sm" value="0"></div>
+</div></div>
+<div class="af-card s-12"><div class="af-t"><i class="fas fa-truck-loading"></i> Fournisseurs &amp; prix d'achat</div>
+<div class="af-sup af-sup-h"><span>Fournisseur</span><span>Prix achat</span><span>Remise (%)</span></div>
+<div class="af-sup"><div class="af-supsel"><span class="af-rk">Principal</span><select name="codefournisseur" class="form-select form-select-sm"><option value="">-- Aucun --</option>@foreach($suppliersAll as $s)<option value="{{ $s->code }}" {{ old('codefournisseur', '') == $s->code ? 'selected' : '' }}>{{ $s->code }} - {{ $s->name }}</option>@endforeach</select></div><input type="number" step="0.0001" name="cost_price" class="form-control form-control-sm" value="{{ old('cost_price', 0) }}" title="Prix achat"><input type="number" step="0.01" name="remise_achat" class="form-control form-control-sm" value="{{ old('remise_achat', 0) }}" title="Remise achat %"></div>
+<div class="af-sup"><div class="af-supsel"><span class="af-rk">Fournisseur 2</span><select name="codefournisseur_2" class="form-select form-select-sm"><option value="">-- Aucun --</option>@foreach($suppliersAll as $s)<option value="{{ $s->code }}" {{ old('codefournisseur_2', '') == $s->code ? 'selected' : '' }}>{{ $s->code }} - {{ $s->name }}</option>@endforeach</select></div><input type="number" step="0.0001" name="cost_price_2" class="form-control form-control-sm" value="{{ old('cost_price_2', 0) }}" title="Prix achat"><input type="number" step="0.01" name="remise_achat_2" class="form-control form-control-sm" value="{{ old('remise_achat_2', 0) }}" title="Remise achat %"></div>
+<div class="af-sup"><div class="af-supsel"><span class="af-rk">Fournisseur 3</span><select name="codefournisseur_3" class="form-select form-select-sm"><option value="">-- Aucun --</option>@foreach($suppliersAll as $s)<option value="{{ $s->code }}" {{ old('codefournisseur_3', '') == $s->code ? 'selected' : '' }}>{{ $s->code }} - {{ $s->name }}</option>@endforeach</select></div><input type="number" step="0.0001" name="cost_price_3" class="form-control form-control-sm" value="{{ old('cost_price_3', 0) }}" title="Prix achat"><input type="number" step="0.01" name="remise_achat_3" class="form-control form-control-sm" value="{{ old('remise_achat_3', 0) }}" title="Remise achat %"></div>
 </div>
-
-<!-- Prix net -->
-<div class="mb-3 col-md-6">
-    <label for="prix_net" class="form-label">Prix net <small class="text-muted">(protégé des imports)</small></label>
-    <select class="form-control" id="prix_net" name="prix_net">
-        <option value="0" {{ old('prix_net', '0') == '0' ? 'selected' : '' }}>Non</option>
-        <option value="1" {{ old('prix_net') == '1' ? 'selected' : '' }}>Oui — prix fixe, non modifié par les imports</option>
-    </select>
-</div>
-
-
-
-
-                        <!-- Marge (%) -->
-<div class="mb-3 col-md-2">
-    <label for="margin" class="form-label">Marge (%)</label>
-    <input type="number" step="0.01" id="margin" class="form-control" placeholder="EX : 20" style="font-style: italic; background-color: #f0f0f0;" autocomplete="off">
-</div>
-
-
-                        <!-- Prix de vente -->
-                        <div class="mb-3 col-md-3">
-                            <label for="sale_price" class="form-label">Prix de vente</label>
-                            <input type="number" step="0.01" class="form-control" name="sale_price" value="0.00">
-                        </div>
-
-                        <!-- Code-barres -->
-                        <div class="mb-3 col-md-4">
-                            <label for="barcode" class="form-label">Code-barres</label>
-                            <input type="text" class="form-control" name="barcode" id="barcode">
-                        </div>
-
-                        <!-- Stock min/max -->
-                        <div class="mb-3 col-md-3">
-                            <label for="stock_min" class="form-label">Stock minimum</label>
-                            <input type="number" class="form-control" name="stock_min" value="0">
-                        </div>
-
-                        <div class="mb-3 col-md-3">
-                            <label for="stock_max" class="form-label">Stock maximum</label>
-                            <input type="number" class="form-control" name="stock_max" value="0">
-                        </div>
-
-<!-- Code Fournisseur -->
-
-
-
-
-
-
-<div class="border p-3 rounded mb-4 bg-light">
-    <h6 class="mb-3 text-primary">Informations fournisseurs (prix d'achat)</h6>
-    <div class="row g-3">
-        <!-- Fournisseur 1 -->
-        <div class="col-md-4">
-            <label>Fournisseur principal</label>
-            <select name="codefournisseur" class="form-select">
-                <option value="">-- Aucun --</option>
-        @foreach(\App\Models\Supplier::all() as $s)
-                    <option value="{{ $s->code }}" {{ old('codefournisseur', $item->codefournisseur ?? '') == $s->code ? 'selected' : '' }}>
-                        {{ $s->code }} - {{ $s->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-4">
-            <label>Prix achat principal</label>
-            <input type="number" step="0.0001" name="cost_price" class="form-control" value="{{ old('cost_price', $item->cost_price ?? 0) }}">
-        </div>
-        <div class="col-md-4">
-            <label>Remise achat principal (%)</label>
-            <input type="number" step="0.01" name="remise_achat" class="form-control" value="{{ old('remise_achat', $item->remise_achat ?? 0) }}">
-        </div>
-
-        <!-- Fournisseur 2 -->
-        <div class="col-md-4">
-            <label>Fournisseur 2</label>
-            <select name="codefournisseur_2" class="form-select">
-                <option value="">-- Aucun --</option>
-        @foreach(\App\Models\Supplier::all() as $s)
-                    <option value="{{ $s->code }}" {{ old('codefournisseur_2', $item->codefournisseur_2 ?? '') == $s->code ? 'selected' : '' }}>
-                        {{ $s->code }} - {{ $s->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-4">
-            <label>Prix achat 2</label>
-            <input type="number" step="0.0001" name="cost_price_2" class="form-control" value="{{ old('cost_price_2', $item->cost_price_2 ?? 0) }}">
-        </div>
-        <div class="col-md-4">
-            <label>Remise achat 2 (%)</label>
-            <input type="number" step="0.01" name="remise_achat_2" class="form-control" value="{{ old('remise_achat_2', $item->remise_achat_2 ?? 0) }}">
-        </div>
-
-        <!-- Fournisseur 3 -->
-        <div class="col-md-4">
-            <label>Fournisseur 3</label>
-            <select name="codefournisseur_3" class="form-select">
-                <option value="">-- Aucun --</option>
-        @foreach(\App\Models\Supplier::all() as $s)
-                    <option value="{{ $s->code }}" {{ old('codefournisseur_3', $item->codefournisseur_3 ?? '') == $s->code ? 'selected' : '' }}>
-                        {{ $s->code }} - {{ $s->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-4">
-            <label>Prix achat 3</label>
-            <input type="number" step="0.0001" name="cost_price_3" class="form-control" value="{{ old('cost_price_3', $item->cost_price_3 ?? 0) }}">
-        </div>
-        <div class="col-md-4">
-            <label>Remise achat 3 (%)</label>
-            <input type="number" step="0.01" name="remise_achat_3" class="form-control" value="{{ old('remise_achat_3', $item->remise_achat_3 ?? 0) }}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success btn-sm px-4"><i class="fas fa-check me-1"></i> Créer l'article</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 
+@php
+    $advKeys = ['discount_group_id','prix_net','is_active','stock','rotation','date_from','date_to'];
+    $advCount = 0;
+    foreach ($advKeys as $k) { if (request($k) !== null && request($k) !== '') $advCount++; }
+@endphp
+<form method="GET" action="{{ route('articles.index') }}" class="af-filters" id="afFilters">
+    <div class="af-row">
+        <div class="af-search">
+            <i class="fas fa-search"></i>
+            <input type="text" name="search" class="form-control" placeholder="Référence, désignation…" value="{{ request('search') }}">
+        </div>
+        <div class="art-sel">
+            <select name="brand_id" class="form-select select2-filter">
+                <option value="">Marques (Toutes)</option>
+                @foreach($brands as $brand)
+                    <option value="{{ $brand->id }}" {{ (string) request('brand_id') === (string) $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="art-sel">
+            <select name="category_id" class="form-select select2-filter">
+                <option value="">Familles (Toutes)</option>
+                @foreach($categories as $category)
+                    <option value="{{ $category->id }}" {{ (string) request('category_id') === (string) $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="art-sel">
+            <select name="subcategory_id" class="form-select select2-filter" data-subcat-select data-cat-source="select[name=category_id].select2-filter">
+                <option value="">Sous-familles (Toutes)</option>
+                @foreach($subcategories as $sub)
+                    <option value="{{ $sub->id }}" data-category="{{ $sub->category_id }}" {{ (string) request('subcategory_id') === (string) $sub->id ? 'selected' : '' }}>{{ $sub->code }} — {{ $sub->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="art-sel">
+            <select name="codefournisseur" class="form-select select2-filter">
+                <option value="">Fournisseurs (Tous)</option>
+                @foreach($suppliersAll as $supplier)
+                    <option value="{{ $supplier->code }}" {{ request('codefournisseur') == $supplier->code ? 'selected' : '' }}>{{ $supplier->code }} - {{ $supplier->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="af-spacer">
+            <button type="button" class="btn af-btn-adv" id="afAdvBtn" title="Groupe remise, prix net, statut, stock, rotation…">
+                <i class="fas fa-sliders-h"></i> Plus de filtres
+                <span class="badge" id="afAdvCount" style="{{ $advCount ? '' : 'display:none' }}">{{ $advCount }}</span>
+            </button>
+            <button type="submit" name="action" value="filter" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrer</button>
+            <a href="{{ route('articles.index') }}" class="btn btn-outline-secondary" title="Réinitialiser"><i class="fas fa-undo"></i></a>
+            <button type="submit" name="action" value="export" formaction="{{ route('articles.export') }}" class="btn btn-outline-success" title="Exporter en Excel avec les filtres actifs"><i class="fas fa-file-excel"></i> Exporter</button>
+        </div>
+    </div>
 
-
-
-
-
-                        <!-- Magasin -->
-<div class="mb-3 col-md-6">
-    <label for="store_id" class="form-label">Magasin</label>
-    <select name="store_id" class="form-control">
-        
-        @foreach($stores as $store)
-            <option value="{{ $store->id }}">{{ $store->name }}</option>
-        @endforeach
-    </select>
-</div>
-
-<!-- Emplacement -->
-<div class="mb-3 col-md-6">
-    <label for="location" class="form-label">Emplacement</label>
-    <input type="text" class="form-control" name="location" placeholder="Ex : Rayon A2 - Étage 1">
-</div>
-
-
-
-                        <!-- Description -->
-                        <div class="mb-3 col-12">
-                            <label for="description" class="form-label">Description technique</label>
-                            <textarea class="form-control" name="description" rows="3"></textarea>
-                        </div>
-
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-success">Créer</button>
-                    </div>
-
-                </form>
+    <div class="af-adv {{ $advCount ? 'show' : '' }}" id="afAdv">
+        <div class="af-row">
+            <label class="af-fl"><span class="af-fn">Groupe remise</span>
+                <select name="discount_group_id" class="form-select select2-filter">
+                    <option value="">Tous</option>
+                    @foreach($discountGroups as $group)
+                        <option value="{{ $group->id }}" {{ (string) request('discount_group_id') === (string) $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label class="af-fl" style="flex:0 1 120px;min-width:110px"><span class="af-fn">Prix net</span>
+                <select name="prix_net" class="form-select select2-filter">
+                    <option value="">Tous</option>
+                    <option value="1" {{ request('prix_net') === '1' ? 'selected' : '' }}>Oui</option>
+                    <option value="0" {{ request('prix_net') === '0' ? 'selected' : '' }}>Non</option>
+                </select>
+            </label>
+            <label class="af-fl" style="flex:0 1 130px;min-width:120px"><span class="af-fn">Statut</span>
+                <select name="is_active" class="form-select select2-filter">
+                    <option value="">Tous</option>
+                    <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>Autorisé</option>
+                    <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>Bloqué</option>
+                </select>
+            </label>
+            <label class="af-fl" style="flex:0 1 150px;min-width:130px"><span class="af-fn">Stock</span>
+                <select name="stock" class="form-select select2-filter">
+                    <option value="">Tous</option>
+                    <option value="in" {{ request('stock') === 'in' ? 'selected' : '' }}>En stock</option>
+                    <option value="out" {{ request('stock') === 'out' ? 'selected' : '' }}>Rupture</option>
+                    <option value="low" {{ request('stock') === 'low' ? 'selected' : '' }}>Sous le minimum</option>
+                </select>
+            </label>
+            <label class="af-fl" style="flex:0 1 150px;min-width:130px" title="Basé sur les bons de livraison. Sans dates : jamais vendu. Avec dates : aucune vente sur la période."><span class="af-fn">Rotation</span>
+                <select name="rotation" class="form-select select2-filter">
+                    <option value="">Tous</option>
+                    <option value="sold" {{ request('rotation') === 'sold' ? 'selected' : '' }}>Vendus</option>
+                    <option value="never" {{ request('rotation') === 'never' ? 'selected' : '' }}>Non vendus</option>
+                </select>
+            </label>
+            <div class="af-fl af-period"><span class="af-fn">Période de ventes <em style="text-transform:none;font-weight:500">(optionnel)</em></span>
+                <div class="af-pr">
+                    <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}" title="Du">
+                    <span style="color:#94a3b8">→</span>
+                    <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}" title="Au">
+                </div>
+                <div class="af-chips">
+                    <button type="button" class="af-chip" data-days="30">30 j</button>
+                    <button type="button" class="af-chip" data-days="90">3 mois</button>
+                    <button type="button" class="af-chip" data-days="180">6 mois</button>
+                    <button type="button" class="af-chip" data-days="365">1 an</button>
+                    <button type="button" class="af-chip" data-days="0">Effacer</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-
-<form method="GET" action="{{ route('articles.index') }}" class="art-filters">
-    <div class="art-search">
-        <i class="fas fa-search"></i>
-        <input type="text" name="search" class="form-control" placeholder="Rechercher une référence, une désignation…" value="{{ request('search') }}">
-    </div>
-
-    <div class="art-sel">
-        <select name="brand_id" class="form-select select2-filter">
-            <option value="">Marques (Toutes)</option>
-            @foreach($brands as $brand)
-                <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
-            @endforeach
-        </select>
-    </div>
-
-    <div class="art-sel">
-        <select name="category_id" class="form-select select2-filter">
-            <option value="">Familles (Toutes)</option>
-            @foreach($categories as $category)
-                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-            @endforeach
-        </select>
-    </div>
-
-    <div class="art-sel">
-        <select name="subcategory_id" class="form-select select2-filter" data-subcat-select data-cat-source="select[name=category_id].select2-filter">
-            <option value="">Sous-familles (Toutes)</option>
-            @foreach($subcategories as $sub)
-                <option value="{{ $sub->id }}" data-category="{{ $sub->category_id }}" {{ request('subcategory_id') == $sub->id ? 'selected' : '' }}>{{ $sub->code }} — {{ $sub->name }}</option>
-            @endforeach
-        </select>
-    </div>
-
-    <div class="art-sel">
-        <select name="codefournisseur" class="form-select select2-filter">
-            <option value="">Fournisseurs (Tous)</option>
-            @foreach(\App\Models\Supplier::all() as $supplier)
-                <option value="{{ $supplier->code }}" {{ request('codefournisseur') == $supplier->code ? 'selected' : '' }}>{{ $supplier->code }} - {{ $supplier->name }}</option>
-            @endforeach
-        </select>
-    </div>
-
-    <div class="art-sel">
-        <select name="discount_group_id" class="form-select select2-filter">
-            <option value="">Groupes remise (Tous)</option>
-            @foreach($discountGroups as $group)
-                <option value="{{ $group->id }}" {{ (string) request('discount_group_id') === (string) $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
-            @endforeach
-        </select>
-    </div>
-
-    <div class="art-sel" style="flex:0 1 130px;min-width:120px">
-        <select name="prix_net" class="form-select select2-filter">
-            <option value="">Prix net (Tous)</option>
-            <option value="1" {{ request('prix_net') === '1' ? 'selected' : '' }}>Prix net : Oui</option>
-            <option value="0" {{ request('prix_net') === '0' ? 'selected' : '' }}>Prix net : Non</option>
-        </select>
-    </div>
-
-    <div class="art-sel" style="flex:0 1 130px;min-width:120px">
-        <select name="is_active" class="form-select select2-filter">
-            <option value="">Statut (Tous)</option>
-            <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>Autorisé</option>
-            <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>Bloqué</option>
-        </select>
-    </div>
-
-    <button type="submit" name="action" value="filter" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrer</button>
-    <a href="{{ route('articles.index') }}" class="btn btn-outline-secondary"><i class="fas fa-undo"></i> Réinitialiser</a>
-    <button type="submit" name="action" value="export" formaction="{{ route('articles.export') }}" class="btn btn-outline-success"><i class="fas fa-file-excel"></i> Exporter</button>
 </form>
+<script>
+(function () {
+    var btn = document.getElementById('afAdvBtn'), box = document.getElementById('afAdv');
+    if (!btn || !box) return;
+    btn.addEventListener('click', function () { box.classList.toggle('show'); });
+    function iso(d) { var m = d.getMonth() + 1, j = d.getDate(); return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (j < 10 ? '0' : '') + j; }
+    box.querySelectorAll('.af-chip').forEach(function (c) {
+        c.addEventListener('click', function () {
+            var f = box.querySelector('[name=date_from]'), t = box.querySelector('[name=date_to]'), n = parseInt(c.getAttribute('data-days'), 10);
+            if (!n) { f.value = ''; t.value = ''; return; }
+            var e = new Date(), s = new Date(); s.setDate(e.getDate() - n);
+            f.value = iso(s); t.value = iso(e);
+            var r = box.querySelector('[name=rotation]');
+            if (r && !r.value) { r.value = 'sold'; if (window.jQuery) jQuery(r).trigger('change.select2'); }
+        });
+    });
+})();
+</script>
 
 
 
@@ -1593,307 +1517,58 @@
 
 
                  <!-- Modal Modifier Article -->
-<div class="modal fade" id="editItemModal{{ $item->id }}" tabindex="-1" aria-labelledby="editItemModalLabel{{ $item->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade af" id="editItemModal{{ $item->id }}" tabindex="-1" aria-labelledby="editItemModalLabel{{ $item->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
-
             <div class="modal-header">
-                <h5 class="modal-title">Modifier l'article : {{ $item->code }}</h5>
-                <button type="button" class="btn btn-outline-primary btn-sm ms-2" id="editBtn{{ $item->id }}">
-                <i class="fas fa-edit"></i> Modifier
-                </button>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                <h5 class="modal-title" id="editItemModalLabel{{ $item->id }}"><span class="af-ico af-ico-e"><i class="fas fa-pen"></i></span> {{ $item->code }}
+                    @if($item->prix_net)<span class="badge bg-warning text-dark ms-1" style="font-size:.62rem">prix net</span>@endif
+                </h5>
+                <div class="ms-auto d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="editBtn{{ $item->id }}"><i class="fas fa-edit"></i> Modifier</button>
+                    <button type="button" class="btn-close m-0" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
             </div>
-
-            <div class="modal-body">
-                <form action="{{ route('items.update', $item->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-
-                    <div class="row" id="editForm{{ $item->id }}">
-                        <div class="mb-3 col-md-8">
-                            <label class="form-label">Désignation</label>
-                            <input type="text" name="name" class="form-control" value="{{ $item->name }}" required disabled>
-                        </div>
-
-                        <div class="mb-3 col-md-4">
-                            <label class="form-label">Code</label>
-                            <input type="text" name="code" class="form-control" value="{{ $item->code }}" required disabled>
-                        </div>
-
-                        <div class="mb-3 col-md-6">
-                            <label class="form-label">Famille</label>
-                            <select name="category_id" id="edit_cat_{{ $item->id }}" class="form-select" disabled>
-                                <option value="">-- Choisir --</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ $item->category_id == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="mb-3 col-md-6">
-                            <label class="form-label">Sous-famille</label>
-                            <select name="subcategory_id" class="form-select" data-subcat-select data-cat-source="#edit_cat_{{ $item->id }}" disabled>
-                                <option value="">-- Aucune --</option>
-                                @foreach($subcategories as $sub)
-                                    <option value="{{ $sub->id }}" data-category="{{ $sub->category_id }}" {{ $item->subcategory_id == $sub->id ? 'selected' : '' }}>{{ $sub->code }} — {{ $sub->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="mb-3 col-md-3">
-                            <label class="form-label">Marque</label>
-                            <select name="brand_id" class="form-select" disabled>
-                                <option value="">-- Choisir --</option>
-                                @foreach($brands as $brand)
-                                    <option value="{{ $brand->id }}" {{ $item->brand_id == $brand->id ? 'selected' : '' }}>
-                                        {{ $brand->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="mb-3 col-md-3">
-                            <label class="form-label">Unité</label>
-                            <select name="unit_id" class="form-select" disabled>
-                                <option value="">-- Choisir --</option>
-                                @foreach($units as $unit)
-                                    <option value="{{ $unit->id }}" {{ $item->unit_id == $unit->id ? 'selected' : '' }}>
-                                        {{ $unit->label }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="mb-3 col-md-3">
-                            <label class="form-label">TVA</label>
-                            <select class="form-select" name="tva_group_id" disabled>
-                                <option value="">-- Choisir --</option>
-                                @foreach($tvaGroups as $tva)
-                                    <option value="{{ $tva->id }}" {{ $item->tva_group_id == $tva->id ? 'selected' : '' }}>
-                                        {{ $tva->name }} ({{ $tva->rate }}%)
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Groupe de remise -->
-<div class="mb-3 col-md-4">
-    <label class="form-label">Groupe de remise</label>
-    <select name="discount_group_id" class="form-select" disabled>
-        <option value="">-- Aucun --</option>
-        @foreach($discountGroups as $group)
-            <option value="{{ $group->id }}" {{ $item->discount_group_id == $group->id ? 'selected' : '' }}>
-                {{ $group->name }}
-                (G: {{ $group->discount_rate }}% | J: {{ $group->discount_rate_jobber }}% | P: {{ $group->discount_rate_professionnel }}%)
-            </option>
-        @endforeach
-    </select>
+            <form action="{{ route('items.update', $item->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="af-grid" id="editForm{{ $item->id }}">
+<div class="af-card s-8"><div class="af-t"><i class="fas fa-id-card"></i> Identification</div><div class="af-g">
+<div class="s-3"><label class="af-l">Code article</label><input type="text" name="code" class="form-control form-control-sm" value="{{ $item->code }}" required disabled></div>
+<div class="s-9"><label class="af-l">Désignation</label><input type="text" name="name" class="form-control form-control-sm" value="{{ $item->name }}" required disabled></div>
+<div class="s-6"><label class="af-l">Famille</label><select name="category_id" id="edit_cat_{{ $item->id }}" class="form-select form-select-sm" disabled><option value="">-- Choisir --</option>@foreach($categories as $category)<option value="{{ $category->id }}" {{ $item->category_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>@endforeach</select></div>
+<div class="s-6"><label class="af-l">Sous-famille</label><select name="subcategory_id" class="form-select form-select-sm" data-subcat-select data-cat-source="#edit_cat_{{ $item->id }}" disabled><option value="">-- Aucune --</option>@foreach($subcategories as $sub)<option value="{{ $sub->id }}" data-category="{{ $sub->category_id }}" {{ $item->subcategory_id == $sub->id ? 'selected' : '' }}>{{ $sub->code }} — {{ $sub->name }}</option>@endforeach</select></div>
+<div class="s-4"><label class="af-l">Marque</label><select name="brand_id" class="form-select form-select-sm" disabled><option value="">-- Choisir --</option>@foreach($brands as $brand)<option value="{{ $brand->id }}" {{ $item->brand_id == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>@endforeach</select></div>
+<div class="s-4"><label class="af-l">Unité</label><select name="unit_id" class="form-select form-select-sm" disabled><option value="">-- Choisir --</option>@foreach($units as $unit)<option value="{{ $unit->id }}" {{ $item->unit_id == $unit->id ? 'selected' : '' }}>{{ $unit->label }}</option>@endforeach</select></div>
+<div class="s-4"><label class="af-l">TVA</label><select name="tva_group_id" class="form-select form-select-sm" disabled><option value="">-- Choisir --</option>@foreach($tvaGroups as $tva)<option value="{{ $tva->id }}" {{ $item->tva_group_id == $tva->id ? 'selected' : '' }}>{{ $tva->name }} ({{ $tva->rate }}%)</option>@endforeach</select></div>
+<div class="s-4"><label class="af-l">Code-barres</label><input type="text" name="barcode" class="form-control form-control-sm" value="{{ $item->barcode }}" disabled></div>
+<div class="s-4"><label class="af-l">Magasin</label><select name="store_id" class="form-select form-select-sm" disabled><option value="">-- Choisir --</option>@foreach($stores as $store)<option value="{{ $store->id }}" {{ $item->store_id == $store->id ? 'selected' : '' }}>{{ $store->name }}</option>@endforeach</select></div>
+<div class="s-4"><label class="af-l">Emplacement</label><input type="text" name="location" class="form-control form-control-sm" value="{{ $item->location }}" placeholder="Ex : Rayon A2" disabled></div>
+<div class="s-12"><label class="af-l">Description technique</label><textarea name="description" class="form-control form-control-sm" rows="2" disabled>{{ $item->description }}</textarea></div>
+</div></div>
+<div class="af-card s-4"><div class="af-t"><i class="fas fa-euro-sign"></i> Vente &amp; stock</div><div class="af-g">
+<div class="s-6"><label class="af-l">Marge (%)</label><input type="number" step="0.01" id="edit-margin-{{ $item->id }}" class="form-control form-control-sm af-margin" placeholder="Auto" autocomplete="off" disabled></div>
+<div class="s-6"><label class="af-l">Prix de vente HT</label><input type="number" name="sale_price" step="0.01" class="form-control form-control-sm" value="{{ $item->sale_price }}" disabled></div>
+<div class="s-12"><label class="af-l">Groupe de remise</label><select name="discount_group_id" class="form-select form-select-sm" disabled><option value="">-- Aucun --</option>@foreach($discountGroups as $group)<option value="{{ $group->id }}" {{ $item->discount_group_id == $group->id ? 'selected' : '' }}>{{ $group->name }} (G:{{ $group->discount_rate }}% · J:{{ $group->discount_rate_jobber }}% · P:{{ $group->discount_rate_professionnel }}%)</option>@endforeach</select></div>
+<div class="s-12"><div class="af-sw"><input type="hidden" name="prix_net" value="0" disabled><div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="prix_net_{{ $item->id }}" name="prix_net" value="1" {{ $item->prix_net ? 'checked' : '' }} disabled><label class="form-check-label" for="prix_net_{{ $item->id }}"><b>Prix net</b> <span class="af-h">protégé des imports</span></label></div></div></div>
+<div class="s-6"><label class="af-l">Stock min</label><input type="number" name="stock_min" class="form-control form-control-sm" value="{{ $item->stock_min }}" disabled></div>
+<div class="s-6"><label class="af-l">Stock max</label><input type="number" name="stock_max" class="form-control form-control-sm" value="{{ $item->stock_max }}" disabled></div>
+<div class="s-12"><div class="af-sw"><input type="hidden" name="is_active" value="0" disabled><div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="blockedSwitch{{ $item->id }}" name="is_active" value="1" {{ $item->is_active ? 'checked' : '' }} onchange="toggleBlockedLabel({{ $item->id }})" disabled><label class="form-check-label" id="blockedLabel{{ $item->id }}" for="blockedSwitch{{ $item->id }}" title="Le blocage concerne uniquement l'expédition des ventes. La facturation reste possible. Utile aussi pendant l'inventaire."><b>{{ $item->is_active ? 'Vente autorisée' : 'Vente bloquée' }}</b></label></div></div></div>
+</div></div>
+<div class="af-card s-12"><div class="af-t"><i class="fas fa-truck-loading"></i> Fournisseurs &amp; prix d'achat</div>
+<div class="af-sup af-sup-h"><span>Fournisseur</span><span>Prix achat</span><span>Remise (%)</span></div>
+<div class="af-sup"><div class="af-supsel"><span class="af-rk">Principal</span><select name="codefournisseur" class="form-select form-select-sm" disabled><option value="">-- Aucun --</option>@foreach($suppliersAll as $s)<option value="{{ $s->code }}" {{ $item->codefournisseur == $s->code ? 'selected' : '' }}>{{ $s->code }} - {{ $s->name }}</option>@endforeach</select></div><input type="number" step="0.0001" name="cost_price" class="form-control form-control-sm" value="{{ $item->cost_price ?? 0 }}" title="Prix achat" disabled><input type="number" step="0.01" name="remise_achat" class="form-control form-control-sm" value="{{ $item->remise_achat ?? 0 }}" title="Remise achat %" disabled></div>
+<div class="af-sup"><div class="af-supsel"><span class="af-rk">Fournisseur 2</span><select name="codefournisseur_2" class="form-select form-select-sm" disabled><option value="">-- Aucun --</option>@foreach($suppliersAll as $s)<option value="{{ $s->code }}" {{ $item->codefournisseur_2 == $s->code ? 'selected' : '' }}>{{ $s->code }} - {{ $s->name }}</option>@endforeach</select></div><input type="number" step="0.0001" name="cost_price_2" class="form-control form-control-sm" value="{{ $item->cost_price_2 ?? 0 }}" title="Prix achat" disabled><input type="number" step="0.01" name="remise_achat_2" class="form-control form-control-sm" value="{{ $item->remise_achat_2 ?? 0 }}" title="Remise achat %" disabled></div>
+<div class="af-sup"><div class="af-supsel"><span class="af-rk">Fournisseur 3</span><select name="codefournisseur_3" class="form-select form-select-sm" disabled><option value="">-- Aucun --</option>@foreach($suppliersAll as $s)<option value="{{ $s->code }}" {{ $item->codefournisseur_3 == $s->code ? 'selected' : '' }}>{{ $s->code }} - {{ $s->name }}</option>@endforeach</select></div><input type="number" step="0.0001" name="cost_price_3" class="form-control form-control-sm" value="{{ $item->cost_price_3 ?? 0 }}" title="Prix achat" disabled><input type="number" step="0.01" name="remise_achat_3" class="form-control form-control-sm" value="{{ $item->remise_achat_3 ?? 0 }}" title="Remise achat %" disabled></div>
 </div>
-
-<!-- Prix net -->
-<div class="mb-3 col-md-4">
-    <label class="form-label">Prix net</label>
-    <select name="prix_net" class="form-select" disabled>
-        <option value="0" {{ !$item->prix_net ? 'selected' : '' }}>Non</option>
-        <option value="1" {{ $item->prix_net ? 'selected' : '' }}>Oui</option>
-    </select>
-</div>
-
-
-
-
-                        <!-- Marge (%) - Calculée -->
-<!-- Marge (%) - Calculée -->
-<div class="mb-3 col-md-2">
-    <label class="form-label">Marge (%)</label>
-    <input 
-        type="number" 
-        step="0.01" 
-        id="edit-margin-{{ $item->id }}" 
-        class="form-control" 
-        placeholder="Calculée automatiquement"
-        style="font-style: italic; background-color: #f0f0f0;" 
-        disabled>
-</div>
-
-                        
-
-                        <div class="mb-3 col-md-3">
-                            <label class="form-label">Prix Vente</label>
-                            <input type="number" name="sale_price" step="0.01" class="form-control" value="{{ $item->sale_price }}" disabled>
-                        </div>
-
-                        <div class="mb-3 col-md-4">
-                            <label class="form-label">Code-barres</label>
-                            <input type="text" name="barcode" class="form-control" value="{{ $item->barcode }}" disabled>
-                        </div>
-
-                        <div class="mb-3 col-md-3">
-                            <label class="form-label">Stock Min</label>
-                            <input type="number" name="stock_min" class="form-control" value="{{ $item->stock_min }}" disabled>
-                        </div>
-
-                        <div class="mb-3 col-md-3">
-                            <label class="form-label">Stock Max</label>
-                            <input type="number" name="stock_max" class="form-control" value="{{ $item->stock_max }}" disabled>
-                        </div>
-
-                        <!-- Code Fournisseur -->
-
-                        
-
-
-
-
-
-
-<div class="border p-3 rounded mb-4 bg-light">
-    <h6 class="mb-3 text-primary">Informations fournisseurs (prix d'achat)</h6>
-    <div class="row g-3">
-        <!-- Fournisseur 1 -->
-        <div class="col-md-4">
-    <label>Fournisseur principal</label>
-    <select name="codefournisseur" class="form-select" disabled>
-        <option value="">-- Aucun --</option>
-        @foreach(\App\Models\Supplier::all() as $s)
-            <option value="{{ $s->code }}" {{ $item->codefournisseur == $s->code ? 'selected' : '' }}>
-                {{ $s->code }} - {{ $s->name }}
-            </option>
-        @endforeach
-    </select>
-</div>
-        <div class="col-md-4">
-            <label>Prix achat principal</label>
-            <input type="number" step="0.0001" name="cost_price" class="form-control" value="{{ $item->cost_price ?? 0 }}" disabled>
-        </div>
-        <div class="col-md-4">
-            <label>Remise achat principal (%)</label>
-            <input type="number" step="0.01" name="remise_achat" class="form-control" value="{{ $item->remise_achat ?? 0 }}" disabled>
-        </div>
-
-        <!-- Fournisseur 2 -->
-        
-<div class="col-md-4">
-    <label>Fournisseur 2</label>
-    <select name="codefournisseur_2" class="form-select" disabled>
-        <option value="">-- Aucun --</option>
-        @foreach(\App\Models\Supplier::all() as $s)
-            <option value="{{ $s->code }}" {{ $item->codefournisseur_2 == $s->code ? 'selected' : '' }}>
-                {{ $s->code }} - {{ $s->name }}
-            </option>
-        @endforeach
-    </select>
-</div>
-
-<div class="col-md-4">
-    <label>Prix achat 2</label>
-    <input type="number" step="0.0001" name="cost_price_2" class="form-control" value="{{ $item->cost_price_2 ?? 0 }}" disabled>
-</div>
-
-<div class="col-md-4">
-    <label>Remise achat 2 (%)</label>
-    <input type="number" step="0.01" name="remise_achat_2" class="form-control" value="{{ $item->remise_achat_2 ?? 0 }}" disabled>
-</div>
-        <!-- Fournisseur 3 -->
-        <div class="col-md-4">
-    <label>Fournisseur 3</label>
-    <select name="codefournisseur_3" class="form-select" disabled>
-        <option value="">-- Aucun --</option>
-        @foreach(\App\Models\Supplier::all() as $s)
-            <option value="{{ $s->code }}" {{ $item->codefournisseur_3 == $s->code ? 'selected' : '' }}>
-                {{ $s->code }} - {{ $s->name }}
-            </option>
-        @endforeach
-    </select>
-</div>
-
-<div class="col-md-4">
-    <label>Prix achat 3</label>
-    <input type="number" step="0.0001" name="cost_price_3" class="form-control" value="{{ $item->cost_price_3 ?? 0 }}" disabled>
-</div>
-
-<div class="col-md-4">
-    <label>Remise achat 3 (%)</label>
-    <input type="number" step="0.01" name="remise_achat_." class="form-control" value="{{ $item->remise_achat_3 ?? 0 }}" disabled>
-</div>
-    </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-                        <div class="mb-3 col-md-6">
-                            <label class="form-label">Magasin</label>
-                            <select name="store_id" class="form-select" disabled>
-                                <option value="">-- Choisir --</option>
-                                @foreach($stores as $store)
-                                    <option value="{{ $store->id }}" {{ $item->store_id == $store->id ? 'selected' : '' }}>
-                                        {{ $store->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="mb-3 col-md-6">
-                            <label class="form-label">Emplacement</label>
-                            <input type="text" name="location" class="form-control" value="{{ $item->location }}" disabled>
-                        </div>
-
-                           
-<div class="mb-3 col-md-6">
-    <label class="form-label d-block">Statut Article</label>
-
-    <!-- Hidden input toujours envoyé -->
-    <input type="hidden" name="is_active" value="0">
-
-    <!-- Switch visible -->
-    <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="blockedSwitch{{ $item->id }}" name="is_active" value="1"
-               {{ $item->is_active ? 'checked' : '' }} onchange="toggleBlockedLabel({{ $item->id }})" disabled>
-        <label class="form-check-label fw-bold" id="blockedLabel{{ $item->id }}" for="blockedSwitch{{ $item->id }}">
-            {{ $item->is_active ? 'Vente Autorisée ✅' : 'Vente Bloquée 🚫' }}
-        </label>
-    </div>
-
-    <small class="form-text text-muted">
-        ⚠️ Le blocage concerne uniquement l'expédition des ventes.<br>
-        La facturation reste possible même si l'article est bloqué, ce blocage est utile aussi au cours de l'inventaire.
-    </small>
-</div>
-<script>
-function toggleBlockedLabel(itemid) {
-    const checkbox = document.getElementById('blockedSwitch' + itemid);
-    const label = document.getElementById('blockedLabel' + itemid);
-    if (checkbox.checked) {
-        label.innerText = 'Vente Autorisée ✅';
-    } else {
-        label.innerText = 'Vente Bloquée 🚫';
-    }
-}
-</script>
-
-                        <div class="mb-3 col-6">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" class="form-control" rows="2" disabled>{{ $item->description }}</textarea>
-                        </div>
                     </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-success">Mettre à jour</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-success btn-sm px-4"><i class="fas fa-check me-1"></i> Mettre à jour</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -1903,37 +1578,41 @@ function toggleBlockedLabel(itemid) {
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("editForm{{ $item->id }}");
     const button = document.getElementById("editBtn{{ $item->id }}");
+    if (!form || !button) return;
     let isEditable = false;
+    const fields = Array.prototype.slice.call(form.querySelectorAll("input, select, textarea"));
 
-    // Sauvegarde des valeurs initiales
-    const originalValues = {};
-    form.querySelectorAll("input, select, textarea").forEach(el => {
-        originalValues[el.name] = el.value;
-    });
+    // Valeurs initiales (par élément, pas par nom : le champ caché et la case partagent le même name)
+    const original = fields.map(function (el) { return { v: el.value, c: el.checked }; });
 
     button.addEventListener("click", function () {
-        const fields = form.querySelectorAll("input, select, textarea");
-
         if (!isEditable) {
-            fields.forEach(el => el.removeAttribute("disabled"));
-            button.innerHTML = `<i class="fas fa-times-circle"></i> Annuler modification`;
+            fields.forEach(function (el) { el.removeAttribute("disabled"); });
+            button.innerHTML = '<i class="fas fa-times-circle"></i> Annuler la modification';
             button.classList.remove("btn-outline-primary");
             button.classList.add("btn-outline-danger");
             isEditable = true;
         } else {
-            fields.forEach(el => {
+            fields.forEach(function (el, k) {
                 el.setAttribute("disabled", true);
-                if (originalValues.hasOwnProperty(el.name)) {
-                    el.value = originalValues[el.name];
-                }
+                el.value = original[k].v;
+                if (el.type === "checkbox") el.checked = original[k].c;
+                if (window.jQuery && jQuery(el).data("select2")) jQuery(el).trigger("change.select2");
             });
-            button.innerHTML = `<i class="fas fa-edit"></i> Modifier`;
+            var sw = document.getElementById("blockedSwitch{{ $item->id }}");
+            if (sw) toggleBlockedLabel({{ $item->id }});
+            button.innerHTML = '<i class="fas fa-edit"></i> Modifier';
             button.classList.remove("btn-outline-danger");
             button.classList.add("btn-outline-primary");
             isEditable = false;
         }
     });
 });
+function toggleBlockedLabel(itemid) {
+    var cb = document.getElementById('blockedSwitch' + itemid);
+    var lb = document.getElementById('blockedLabel' + itemid);
+    if (cb && lb) lb.innerHTML = '<b>' + (cb.checked ? 'Vente autorisée' : 'Vente bloquée') + '</b>';
+}
 </script>
 
 
