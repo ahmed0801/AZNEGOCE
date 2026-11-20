@@ -272,6 +272,52 @@
         .lh-filters .select2-container--default .select2-selection--single{height:38px;border-radius:8px;display:flex;align-items:center}
         .lh-filters .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px;font-size:.88rem;padding-left:.6rem}
         .lh-filters .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px}
+        /* Barre de recherche compacte : la recherche fait la moitié de l'ancienne largeur, les filtres sont étroits et alignés */
+        .lh-filters.lh-compact{flex-wrap:wrap;gap:.5rem;margin-bottom:.4rem}
+        .lh-filters.lh-compact .lh-search{flex:0 0 280px;width:280px;min-width:200px}
+        .lh-filters.lh-compact .lh-f{flex:0 0 150px;width:150px;min-width:120px}
+        .lh-filters.lh-compact .lh-actions-right{margin-left:auto;display:inline-flex;gap:.5rem}
+        .lh-filters.lh-compact #filter_reset{padding:0 .8rem}
+        @media (max-width:768px){
+            .lh-filters.lh-compact .lh-search{flex:1 1 100%;width:100%}
+            .lh-filters.lh-compact .lh-f{flex:1 1 45%;width:auto}
+            .lh-filters.lh-compact .lh-actions-right{margin-left:0;width:100%}
+        }
+        /* Compléter la réparation : cartes compactes sur 2 lignes, référence en avant */
+        .cp-panel{border:1.5px solid #f6d77a;background:linear-gradient(135deg,#fffdf3,#fff8e1);border-radius:10px;padding:.3rem .6rem .4rem;margin-bottom:.5rem}
+        .cp-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.25rem}
+        .cp-title{font-weight:700;color:#8a6100;font-size:.84rem}
+        .cp-title i{color:#f0a500;margin-right:.3rem}
+        .cp-title small{font-weight:400;color:#8c7a4a;margin-left:.5rem;font-size:.72rem}
+        .cp-head-btns{display:inline-flex;gap:.35rem}
+        .cp-head-btns .btn{padding:.1rem .5rem;font-size:.74rem;line-height:1.5}
+        .cp-cards{display:flex;gap:.45rem;overflow-x:auto;padding:.2rem .2rem .1rem 0}
+        .cp-card{flex:0 0 330px;background:#fff;border:1px solid #ecd9a0;border-radius:8px;padding:.3rem .5rem;position:relative;display:flex;flex-direction:column;gap:.15rem;cursor:pointer;min-width:0}
+        .cp-card:hover{border-color:#f0a500;box-shadow:0 1px 6px rgba(240,165,0,.25)}
+        .cp-l1,.cp-l2{display:flex;align-items:center;gap:.4rem;min-width:0}
+        .cp-ref{flex:0 0 auto;font-weight:800;font-size:.84rem;color:#111827;letter-spacing:.2px;white-space:nowrap}
+        .cp-name{flex:1 1 auto;min-width:0;font-size:.72rem;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .cp-price{flex:0 0 auto;font-weight:700;color:#0f5132;font-size:.8rem;white-space:nowrap}
+        .cp-why{flex:1 1 auto;min-width:0;font-size:.68rem;color:#8a6100;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .cp-why b{color:#b45309}
+        .cp-stk{flex:0 0 auto;font-size:.64rem;color:#9ca3af;white-space:nowrap}
+        .cp-add{flex:0 0 auto;height:22px;padding:0 .5rem;font-size:.7rem;font-weight:700;border-radius:6px;line-height:20px}
+        .cp-x{position:absolute;top:-6px;right:-5px;width:16px;height:16px;border:0;border-radius:50%;background:#e5e7eb;color:#6b7280;font-size:.75rem;line-height:15px;padding:0;cursor:pointer;display:none}
+        .cp-card:hover .cp-x{display:block}
+        .cp-x:hover{background:#dc2626;color:#fff}
+        /* Dernier prix vendu à ce client (sous la désignation) */
+        .lp-hint{display:block;width:fit-content;max-width:100%;white-space:nowrap;margin-top:3px;padding:1px .5rem;border-radius:5px;font-size:.7rem;line-height:1.35;cursor:pointer;border:1px solid transparent}
+        .lp-hint .lp-t{font-weight:700}
+        .lp-lbl{margin-top:2px;font-size:.64rem;font-weight:700;line-height:1.15;white-space:normal;cursor:pointer}
+        .lp-lbl.same{color:#157347;cursor:default}
+        .lp-lbl.up{color:#0a58ca}
+        .lp-lbl.down{color:#b45309}
+        .lp-hint .lp-s{font-weight:700;margin-left:.3rem}
+        .lp-hint .lp-a{margin-left:.3rem;font-weight:700}
+        .lp-hint.same{background:#e8f7ee;color:#157347;cursor:default}
+        .lp-hint.up{background:#e7f1ff;color:#0a58ca;border-color:#cfe0ff}
+        .lp-hint.down{background:#fff1e0;color:#b45309;border-color:#fde0b8}
+        .lp-hint.up:hover,.lp-hint.down:hover{filter:brightness(.95)}
         .lh-check{display:inline-flex;align-items:center;gap:.4rem;margin:0;height:38px;font-size:.88rem;font-weight:600;cursor:pointer;user-select:none}
         .lh-check input{width:16px;height:16px;margin:0}
         .sr-hint{font-size:.74rem;color:#6b7280;margin:0 0 .35rem .2rem}
@@ -373,6 +419,7 @@
                             <li><a href="/delivery_notes/returns/list"><span class="sub-item">Retours Vente</span></a></li>
                             <li><a href="/salesinvoices"><span class="sub-item">Factures</span></a></li>
                             <li><a href="/salesnotes/list"><span class="sub-item">Avoirs</span></a></li>
+                            <li><a href="{{ route('sales.stats') }}"><span class="sub-item">Statistiques ventes</span></a></li>
                         </ul>
                     </div>
                 </li>
@@ -635,8 +682,8 @@
                                             <option value="">Aucun véhicule</option>
                                         </select>
                                         <div class="vg-actions">
-                                            <button type="button" class="btn btn-success" id="openVehicleModal" title="Nouveau véhicule (TECDOC)">
-                                                <i class="fas fa-plus"></i><i class="fas fa-car"></i>
+                                            <button type="button" class="btn btn-success" id="openVehicleModal" title="Créer un véhicule manuel">
+                                                <i class="fas fa-plus"></i><i class="fas fa-car"></i> <small style="font-size:.72rem;font-weight:700;white-space:nowrap">Véhicule manuel</small>
                                             </button>
                                             <a href="javascript:void(0)" id="loadCatalogBtn" class="btn btn-primary" disabled title="Catalogue du véhicule">
                                                 <i class="fas fa-book-open"></i>
@@ -696,21 +743,24 @@
 
                             {{-- RECHERCHE ARTICLE --}}
                             <div class="mb-2">
-                                <div class="lh-filters">
-                                    <div class="lh-field lh-wide">
+                                {{-- Une seule barre : recherche → Marque → Fournisseur → Famille → Sous-famille → options → actions --}}
+                                <div class="lh-filters lh-compact">
+                                    <div class="lh-field lh-search">
                                         <i class="fas fa-search lh-ico"></i>
                                         <input type="text" id="search_item" class="form-control"
-                                               placeholder="Référence, désignation... (min. 4 car.)" autocomplete="off">
+                                               placeholder="Référence, désignation… (4 car. min.)" autocomplete="off">
                                     </div>
-                                    <button type="button" id="add_divers_item" class="btn btn-primary">
-                                        <i class="fas fa-plus"></i> Créer un article
-                                    </button>
-                                    <button type="button" id="add_divers_item_consigne" data-type="consigne" class="btn btn-dark">
-                                        <i class="fas fa-plus"></i> Consigne
-                                    </button>
-                                </div>
-                                <div class="lh-filters">
-                                    <div class="lh-field">
+                                    <div class="lh-field lh-f">
+                                        <select id="filter_brand" class="form-control">
+                                            <option value="">Marque</option>
+                                        </select>
+                                    </div>
+                                    <div class="lh-field lh-f">
+                                        <select id="filter_supplier_brand" class="form-control">
+                                            <option value="">Fournisseur</option>
+                                        </select>
+                                    </div>
+                                    <div class="lh-field lh-f">
                                         <select id="filter_category" class="form-control">
                                             <option value="">Famille</option>
                                             @foreach(($categories ?? []) as $cat)
@@ -718,25 +768,23 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="lh-field">
+                                    <div class="lh-field lh-f">
                                         <select id="filter_subcategory" class="form-control">
                                             <option value="">Sous-famille</option>
                                         </select>
                                     </div>
-                                    <div class="lh-field">
-                                        <select id="filter_brand" class="form-control">
-                                            <option value="">Marque</option>
-                                        </select>
-                                    </div>
-                                    <div class="lh-field">
-                                        <select id="filter_supplier_brand" class="form-control">
-                                            <option value="">Fournisseur</option>
-                                        </select>
-                                    </div>
                                     <label class="lh-check"><input type="checkbox" id="filter_stock"> En stock</label>
                                     <button type="button" id="filter_reset" class="btn btn-outline-secondary" title="Réinitialiser les filtres">
-                                        <i class="fas fa-undo"></i> Réinitialiser
+                                        <i class="fas fa-undo"></i>
                                     </button>
+                                    <span class="lh-actions-right">
+                                        <button type="button" id="add_divers_item" class="btn btn-primary">
+                                            <i class="fas fa-plus"></i> Créer un article
+                                        </button>
+                                        <button type="button" id="add_divers_item_consigne" data-type="consigne" class="btn btn-dark">
+                                            <i class="fas fa-plus"></i> Consigne
+                                        </button>
+                                    </span>
                                 </div>
                                 <div class="sr-hint">↑ ↓ naviguer &nbsp;·&nbsp; Entrée ajouter &nbsp;·&nbsp; Échap fermer</div>
                                 <div id="search_results"></div>
@@ -763,6 +811,17 @@
                             </div>
 
                             {{-- TABLEAU DES LIGNES --}}
+                            {{-- Compléter la réparation : bandeau compact d'articles souvent vendus avec ceux du document --}}
+                            <div id="companion_panel" class="cp-panel" style="display:none">
+                                <div class="cp-head">
+                                    <span class="cp-title"><i class="fas fa-lightbulb"></i> Compléter la réparation <small>Souvent vendus avec les articles de ce document</small></span>
+                                    <span class="cp-head-btns">
+                                        <button type="button" id="cp_addall" class="btn btn-sm btn-success" style="display:none"><i class="fas fa-plus"></i> Tout ajouter (<span id="cp_addall_n">0</span>)</button>
+                                        <button type="button" id="cp_hide" class="btn btn-sm btn-outline-secondary" title="Masquer les suggestions"><i class="fas fa-times"></i></button>
+                                    </span>
+                                </div>
+                                <div id="cp_cards" class="cp-cards"></div>
+                            </div>
                             <div class="mb-3">
                                 <div style="overflow-x:auto;"><div id="lines_table_wrap" style="max-height:420px; overflow-y:auto;">
                                     <table class="table table-striped table-bordered table-text-small" id="lines_table">
@@ -916,6 +975,7 @@ window.hadServerError = {{ session('error') ? 'true' : 'false' }};
 </script>
 
 <script>
+function vehLabel(v){ var b=$.trim((v.brand_name||'')+' '+(v.model_name||'')); return b ? v.license_plate+' ('+v.brand_name+' '+v.model_name+' - '+v.engine_description+')' : v.license_plate; }
 $(document).ready(function () {
 
 // === OUTILS ===
@@ -1105,7 +1165,7 @@ $('#customer_id').on('change', function () {
             success: function (data) {
                 if (data.length > 0) {
                     data.forEach(function (vehicle) {
-                        $vehicleSelect.append('<option value="' + vehicle.id + '">' + vehicle.license_plate + ' (' + vehicle.brand_name + ' ' + vehicle.model_name + ' - ' + vehicle.engine_description + ')</option>');
+                        $vehicleSelect.append('<option value="' + vehicle.id + '">' + vehLabel(vehicle).replace(/</g,'&lt;') + '</option>');
                     });
                 } else {
                     $vehicleSelect.append('<option value="" disabled>(Aucun véhicule enregistré)</option>');
@@ -1461,6 +1521,146 @@ $(document).on('click', '#search_results .sr-item', function () {
     var item = lastResults[parseInt($(this).attr('data-idx'), 10)];
     if (item) addItemLine(item);
 });
+
+// ═══ Compléter la réparation : suggestions « souvent vendu avec » ═══
+var compData = [], compDismissed = {}, compTimer = null, compXhr = null, compKey = '', compHidden = false;
+function compDocCodes() {
+    var codes = [];
+    $('#lines_body tr').each(function () {
+        if ($(this).data('is-consigne') == '1' || $(this).attr('data-is-consigne') == '1') return;
+        var v = $.trim($(this).find('input[name$="[article_code]"]').first().val() || '');
+        if (v && codes.indexOf(v) < 0) codes.push(v);
+    });
+    return codes;
+}
+function scheduleCompanions() { clearTimeout(compTimer); compTimer = setTimeout(refreshCompanions, 500); }
+function refreshCompanions() {
+    var codes = compDocCodes(), key = codes.join('|');
+    if (!codes.length) { compKey = ''; compData = []; renderCompanions(); return; }
+    if (key === compKey) return;
+    compKey = key; compHidden = false;
+    if (compXhr) { compXhr.abort(); compXhr = null; }
+    compXhr = $.ajax({
+        url: '{{ route("sales.items.companions") }}', method: 'GET', data: { codes: codes },
+        success: function (d) { compData = Array.isArray(d) ? d : []; renderCompanions(); },
+        error: function (x, s) { if (s !== 'abort') { compData = []; renderCompanions(); } },
+        complete: function () { compXhr = null; }
+    });
+}
+function renderCompanions() {
+    var list = compData.map(function (it, i) { return { it: it, i: i }; }).filter(function (o) { return !compDismissed[o.it.code]; }).slice(0, 8);
+    var $p = $('#companion_panel');
+    if (!list.length || compHidden) { $p.hide(); return; }
+    var html = '';
+    list.forEach(function (o) {
+        var it = o.it, st = parseFloat(it.stock_quantity) || 0, c = it.companion || {};
+        html += '<div class="cp-card" data-i="' + o.i + '" title="' + esc(it.name + (it.brand ? ' — ' + it.brand : '')) + '">' +
+            '<button type="button" class="cp-x" title="Ne plus proposer">&times;</button>' +
+            '<div class="cp-l1"><span class="cp-ref">' + esc(it.code) + '</span><span class="cp-name">' + esc(it.name) + '</span>' +
+              '<span class="cp-price">' + (parseFloat(it.sale_price) || 0).toFixed(2) + ' € HT</span></div>' +
+            '<div class="cp-l2"><span class="cp-why">Avec <b>' + esc(c.anchor) + '</b> · <b>' + c.percent + ' %</b> des ventes (' + c.times + '×)</span>' +
+              '<span class="cp-stk">stock ' + st + '</span>' +
+              '<button type="button" class="btn btn-warning cp-add"><i class="fas fa-plus"></i> Ajouter</button></div></div>';
+    });
+    $('#cp_cards').html(html);
+    $('#cp_addall_n').text(list.length);
+    $('#cp_addall').toggle(list.length > 1);
+    $p.show();
+}
+$(document).on('click', '#cp_cards .cp-card', function (e) {
+    if ($(e.target).closest('.cp-x').length) return;
+    var it = compData[parseInt($(this).attr('data-i'), 10)];
+    if (it) { addItemLine(it); if (typeof dirty !== 'undefined') dirty = true; }
+});
+$(document).on('click', '#cp_cards .cp-x', function () {
+    var it = compData[parseInt($(this).closest('.cp-card').attr('data-i'), 10)];
+    if (it) { compDismissed[it.code] = true; renderCompanions(); }
+});
+$(document).on('click', '#cp_addall', function () {
+    compData.slice(0, 8).forEach(function (it) { if (!compDismissed[it.code]) addItemLine(it); });
+    if (typeof dirty !== 'undefined') dirty = true;
+});
+$(document).on('click', '#cp_hide', function () { compHidden = true; renderCompanions(); });
+// toute modification des lignes (ajout, suppression, restauration de brouillon) relance l'analyse
+(function () {
+    var body = document.getElementById('lines_body');
+    if (body && window.MutationObserver) new MutationObserver(scheduleCompanions).observe(body, { childList: true });
+    scheduleCompanions();
+})();
+
+// ═══ Dernier prix vendu à ce client ═══
+var lpData = {}, lpCust = null, lpTimer = null, lpXhr = null;
+function lpCodes() {
+    var codes = [];
+    $('#lines_body tr').each(function () {
+        var v = $.trim($(this).find('input[name$="[article_code]"]').first().val() || '');
+        if (v && v !== 'CONSIGNE' && codes.indexOf(v) < 0) codes.push(v);
+    });
+    return codes;
+}
+function scheduleLastPrices() { clearTimeout(lpTimer); lpTimer = setTimeout(refreshLastPrices, 400); }
+function refreshLastPrices() {
+    var cid = String($('#customer_id').val() || '');
+    if (!/^\d+$/.test(cid)) { lpCust = null; lpData = {}; renderLastPrices(); return; }
+    if (lpCust !== cid) { lpCust = cid; lpData = {}; }
+    var need = lpCodes().filter(function (c) { return !(c in lpData); });
+    if (!need.length) { renderLastPrices(); return; }
+    if (lpXhr) { lpXhr.abort(); lpXhr = null; }
+    lpXhr = $.ajax({
+        url: '/sales/customers/' + cid + '/last-prices', method: 'GET', data: { codes: need },
+        success: function (d) {
+            if (lpCust !== cid) return;
+            need.forEach(function (c) { lpData[c] = (d && d[c]) ? d[c] : []; });
+            renderLastPrices();
+        },
+        complete: function () { lpXhr = null; }
+    });
+}
+function lpNum(x) { return parseFloat(String(x || '0').replace(',', '.')) || 0; }
+function lpFmt(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
+function renderLastPriceRow($r) {
+    var $des = $r.find('.des-name').first();
+    var $td = $des.length ? $des.closest('td') : $r.find('.unit_price_ht').first().closest('td');
+    var $refTd = $r.find('.ref-code').first().closest('td');
+    $r.find('.lp-hint, .lp-lbl').remove();
+    var code = $.trim($r.find('input[name$="[article_code]"]').first().val() || '');
+    var hist = lpData[code];
+    if (!hist || !hist.length) return;
+    var h = hist[0];
+    var netLast = h.price * (1 - h.remise / 100);
+    var netCur = lpNum($r.find('.unit_price_ht').val()) * (1 - lpNum($r.find('.remise').val()) / 100);
+    var diff = netCur - netLast, cls, state, action = '';
+    if (Math.abs(diff) < 0.005) { cls = 'same'; state = '✓ même prix'; }
+    else if (diff > 0) { cls = 'up'; state = '▲ +' + lpFmt(diff); action = '↺'; }
+    else { cls = 'down'; state = '▼ −' + lpFmt(-diff); action = '↺'; }
+    var tip = 'Dernières ventes de cet article à ce client :\n' + hist.map(function (x) {
+        return (x.date || '—') + ' : ' + lpFmt(x.price) + (x.remise ? ' (remise ' + x.remise + ' %)' : '') + ' × ' + x.qty;
+    }).join('\n') + (action ? '\n\n▲/▼ = écart du prix net actuel par rapport au dernier prix\n↺ ou clic : reprendre le dernier prix et sa remise' : '');
+    var $h = $('<div class="lp-hint ' + cls + '" title="' + esc(tip) + '"></div>');
+    if ($refTd.length) $('<div class="lp-lbl ' + cls + '" title="' + esc(tip) + '"></div>').text('Dernier prix client :').appendTo($refTd);
+    else $('<span class="lp-t"></span>').text('Dernier prix client : ').appendTo($h);
+    $h.append(document.createTextNode(lpFmt(h.price) + (h.remise ? ' (remise ' + h.remise + ' %)' : '') + (h.date ? ' · ' + h.date.replace(/(\d+\/\d+\/)\d{2}(\d{2})/, '$1$2') : '')));
+    $('<span class="lp-s"></span>').text(state).appendTo($h);
+    if (action) $('<span class="lp-a"></span>').text(action).appendTo($h);
+    $h.appendTo($td);
+}
+function renderLastPrices() { $('#lines_body tr').each(function () { renderLastPriceRow($(this)); }); }
+$(document).on('input', '#lines_body .unit_price_ht, #lines_body .unit_price_ttc, #lines_body .remise', function () { renderLastPriceRow($(this).closest('tr')); });
+$(document).on('click', '.lp-hint.up, .lp-hint.down, .lp-lbl.up, .lp-lbl.down', function () {
+    var $r = $(this).closest('tr'), code = $.trim($r.find('input[name$="[article_code]"]').first().val() || '');
+    var h = (lpData[code] || [])[0];
+    if (!h) return;
+    $r.find('.unit_price_ht').val(h.price.toFixed(2)).trigger('input');
+    $r.find('.remise').val(h.remise.toFixed(2)).trigger('input');
+    if (typeof dirty !== 'undefined') dirty = true;
+});
+$('#customer_id').on('change', scheduleLastPrices);
+(function () {
+    var body = document.getElementById('lines_body');
+    if (body && window.MutationObserver) new MutationObserver(scheduleLastPrices).observe(body, { childList: true });
+    scheduleLastPrices();
+})();
+
 
 // Suppression ligne
 $(document).on('click', '.remove_line', function () {
@@ -1890,11 +2090,16 @@ setTimeout(function () {
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="fas fa-car"></i> Associer un nouveau véhicule</h5>
+                <h5 class="modal-title"><i class="fas fa-car"></i> Créer un véhicule manuel</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" data-bs-dismiss="modal"><span>&times;</span></button>
             </div>
-            <form id="quickVehicleForm">
+            <form id="quickVehicleForm" novalidate>
                 <div class="modal-body">
+                            <div class="btn-group w-100 mb-3" role="group" id="vehModeTabs">
+                                <button type="button" class="btn btn-primary" data-mode="free"><i class="fas fa-keyboard"></i> Saisie libre</button>
+                                <button type="button" class="btn btn-outline-primary" data-mode="tecdoc"><i class="fas fa-database"></i> À partir de TecDoc</button>
+                            </div>
+                            <div id="vehPaneTecdoc" style="display:none">
                     <div class="row">
                         <div class="col-md-4">
                             <label class="form-label">Immatriculation <span class="text-danger">*</span></label>
@@ -1929,6 +2134,12 @@ setTimeout(function () {
                         </div>
                     </div>
                 </div>
+                            <div id="vehPaneFree">
+                                <label class="form-label">Immatriculation ou description du véhicule <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="free_vehicle_label" maxlength="50" autocomplete="off" placeholder="Ex : AB-123-CD   ou   Polo 6 modèle 2012">
+                                <small class="text-muted">Saisie libre : tout ce que vous écrivez ici est enregistré tel quel dans le champ « immatriculation » (50 caractères max.). Aucune marque ni motorisation à choisir.</small>
+                            </div>
+                        </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Annuler</button>
                     <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Créer et sélectionner</button>
@@ -1954,9 +2165,9 @@ $(document).ready(function () {
 
     function initTecdocSelect2() {
         ['#quick_brand_id','#quick_model_id','#quick_engine_id'].forEach(function (s) { if ($(s).hasClass('select2-hidden-accessible')) $(s).select2('destroy'); });
-        $('#quick_brand_id').select2({ width:'100%', placeholder:'Rechercher une marque...', dropdownParent:$modal });
-        $('#quick_model_id').select2({ width:'100%', placeholder:'Choisir un modèle', allowClear:true, dropdownParent:$modal });
-        $('#quick_engine_id').select2({ width:'100%', placeholder:'Choisir une motorisation', allowClear:true, dropdownParent:$modal });
+        $('#quick_brand_id').select2({ width:'100%', placeholder:'Rechercher une marque...', dropdownParent:$modal, minimumResultsForSearch: 0, language:{noResults:function(){return "Aucun résultat";},searching:function(){return "Recherche…";}} });
+        $('#quick_model_id').select2({ width:'100%', placeholder:'Choisir un modèle', allowClear:true, dropdownParent:$modal, minimumResultsForSearch: 0, language:{noResults:function(){return "Aucun résultat";},searching:function(){return "Recherche…";}} });
+        $('#quick_engine_id').select2({ width:'100%', placeholder:'Choisir une motorisation', allowClear:true, dropdownParent:$modal, minimumResultsForSearch: 0, language:{noResults:function(){return "Aucun résultat";},searching:function(){return "Recherche…";}} });
     }
 
     $modal.on('shown.bs.modal', function () {
@@ -1996,6 +2207,52 @@ $(document).ready(function () {
         var $opt = $(this).find('option:selected');
         $('#quick_engine_description').val($opt.data('description') || $opt.text());
         $('#quick_linkage_target_id').val($opt.data('linking-target-id') || $(this).val());
+    });
+
+    // ── Mode « saisie libre » du véhicule manuel ──
+    var vehMode = 'free';
+    function setVehMode(m) {
+        vehMode = m;
+        $('#vehModeTabs button').each(function () {
+            var on = $(this).data('mode') === m;
+            $(this).toggleClass('btn-primary', on).toggleClass('btn-outline-primary', !on);
+        });
+        $('#vehPaneTecdoc').toggle(m === 'tecdoc');
+        $('#vehPaneFree').toggle(m === 'free');
+        if (m === 'free') { $('#free_vehicle_label').trigger('focus'); }
+        else { initTecdocSelect2(); $('#quick_license_plate').trigger('focus'); }   // (ré)initialise les listes une fois le panneau visible
+    }
+    $(document).on('click', '#vehModeTabs button', function () { setVehMode($(this).data('mode')); });
+    $('#addVehicleInlineModal').on('show.bs.modal', function () { $('#free_vehicle_label').val(''); setVehMode('free'); });
+    $('#addVehicleInlineModal').on('shown.bs.modal', function () { if (vehMode === 'free') $('#free_vehicle_label').trigger('focus'); });
+    // listes déroulantes TecDoc : toujours un champ de recherche, et le curseur y va dès l'ouverture
+    $(document).on('select2:open', '#quick_brand_id, #quick_model_id, #quick_engine_id', function () {
+        setTimeout(function () { var f = document.querySelector('.select2-container--open .select2-search__field'); if (f) f.focus(); }, 0);
+    });
+    // enregistré AVANT le handler TecDoc : en mode libre, celui-ci n'est pas exécuté
+    $form.on('submit', function (e) {
+        if (vehMode !== 'free') return;
+        e.preventDefault(); e.stopImmediatePropagation();
+        var customerId = $('#customer_id').val();
+        if (!customerId || customerId === '%%%') { Swal.fire('Erreur', 'Sélectionnez un client d\'abord', 'error'); return; }
+        var label = $.trim($('#free_vehicle_label').val());
+        if (!label) { Swal.fire('Champ manquant', 'Saisissez une immatriculation ou une description du véhicule.', 'warning'); return; }
+        $.ajax({
+            url: '/customers/' + customerId + '/vehicles/quick-store-free', method: 'POST', data: { _token: csrfToken, license_plate: label },
+            success: function (res) {
+                if (res.success) {
+                    var $v = $('#vehicle_id');
+                    if (!$v.find('option[value="' + res.vehicle.id + '"]').length) $v.append(new Option(res.vehicle.text, res.vehicle.id, true, true));
+                    $v.val(res.vehicle.id).trigger('change');
+                    $('#addVehicleInlineModal').modal('hide');
+                    Swal.fire('Succès', 'Véhicule créé et sélectionné !', 'success');
+                } else { Swal.fire('Erreur', res.message || 'Erreur inconnue', 'error'); }
+            },
+            error: function (xhr) {
+                var m = (xhr.responseJSON && xhr.responseJSON.errors && xhr.responseJSON.errors.license_plate) ? xhr.responseJSON.errors.license_plate.join(', ') : ((xhr.responseJSON && xhr.responseJSON.message) || 'Erreur inconnue');
+                Swal.fire('Erreur', m, 'error');
+            }
+        });
     });
 
     $form.on('submit', function (e) {

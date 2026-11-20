@@ -1894,7 +1894,12 @@ window.addEventListener('pageshow', function (ev) {
 #quickCustomerModal .is-invalid{border-color:#EF4444!important}
 #quickCustomerModal .ncm-err{color:#EF4444;font-size:.72rem;margin-top:2px;display:none}
 #quickCustomerModal .ncm-hint{font-size:.72rem;color:#6B7A99;margin-top:3px}
-#quickCustomerModal .ncm-more{background:none;border:0;color:#3B82F6;font-weight:600;font-size:.8rem;padding:4px 0;cursor:pointer}
+#quickCustomerModal .ncm-toggle{cursor:pointer;user-select:none}
+#quickCustomerModal .ncm-toggle .ncm-chev{margin-left:auto;color:#6B7A99;transition:transform .2s}
+#quickCustomerModal .ncm-toggle.closed .ncm-chev{transform:rotate(-90deg)}
+#quickCustomerModal .ncm-toggle:hover{color:#3B82F6}
+#quickCustomerModal .ncm-opt{font-size:.62rem;font-weight:700;color:#6B7A99;background:#E2E8F0;border-radius:10px;padding:1px 8px;letter-spacing:.03em;text-transform:none}
+
 #quickCustomerModal .modal-footer{background:#fff;border-top:1.5px solid #E2E8F0;padding:12px 22px;display:flex;justify-content:space-between;align-items:center}
 #quickCustomerModal .ncm-cancel{background:none;border:1.5px solid #E2E8F0;color:#6B7A99;border-radius:8px;padding:8px 18px;font-size:.84rem;font-weight:600;cursor:pointer}
 #quickCustomerModal .ncm-cancel:hover{border-color:#3B82F6;color:#3B82F6}
@@ -1922,7 +1927,7 @@ window.addEventListener('pageshow', function (ev) {
                     <div class="row g-2">
                         <div class="col-md-8">
                             <label>Nom complet <span class="ncm-req">*</span></label>
-                            <input type="text" name="name" class="form-control" maxlength="255" placeholder="Ex : DUPONT Jean" required>
+                            <input type="text" name="name" class="form-control" maxlength="255" placeholder="Ex : DUPONT JEAN" required style="text-transform:uppercase;" autocapitalize="characters" spellcheck="false">
                             <div class="ncm-err" data-for="name"></div>
                         </div>
                         <div class="col-md-4">
@@ -1970,7 +1975,8 @@ window.addEventListener('pageshow', function (ev) {
                         </div>
                     </div>
 
-                    <div class="ncm-sec"><i class="fas fa-euro-sign"></i> Paramètres de vente</div>
+                    <div class="ncm-sec ncm-toggle closed" id="ncmSaleHead" role="button" tabindex="0"><i class="fas fa-euro-sign"></i> Paramètres de vente <span class="ncm-opt">Jobber / Professionnel</span><i class="fas fa-chevron-down ncm-chev"></i></div>
+                    <div id="ncmSale" style="display:none;">
                     <div class="row g-2">
                         <div class="col-md-4">
                             <label>TVA <span class="ncm-req">*</span></label>
@@ -1998,8 +2004,9 @@ window.addEventListener('pageshow', function (ev) {
                             <div class="ncm-err" data-for="payment_mode_id"></div>
                         </div>
                     </div>
+                    </div>
 
-                    <button type="button" class="ncm-more" id="ncmMoreBtn"></button>
+                    <div class="ncm-sec ncm-toggle closed" id="ncmMoreBtn" role="button" tabindex="0"><i class="fas fa-building"></i> Informations professionnelles <span class="ncm-opt">SIRET · IBAN · pays</span><i class="fas fa-chevron-down ncm-chev"></i></div>
                     <div id="ncmMore" style="display:none;">
                         <div class="row g-2">
                             <div class="col-md-4"><label>SIRET</label><input type="text" name="matfiscal" class="form-control" maxlength="100" placeholder="14 chiffres"><div class="ncm-err" data-for="matfiscal"></div></div>
@@ -2055,19 +2062,25 @@ window.addEventListener('pageshow', function (ev) {
         if (box) { box.textContent = msg; box.style.display = 'block'; }
         // si le champ est dans la partie facultative, on l'ouvre
         if (el && el.closest('#ncmMore')) showMore(true);
+        if (el && el.closest('#ncmSale')) showSale(true);
     }
     function showGlobal(msg) { globalE.textContent = msg; globalE.style.display = 'block'; }
 
     function showMore(open) {
         document.getElementById('ncmMore').style.display = open ? 'block' : 'none';
-        document.getElementById('ncmMoreBtn').innerHTML = open
-            ? '<i class="fas fa-chevron-up me-1"></i> Masquer SIRET, IBAN et pays'
-            : '<i class="fas fa-plus-circle me-1"></i> Client professionnel ? Ajouter SIRET, IBAN, pays';
+        document.getElementById('ncmMoreBtn').classList.toggle('closed', !open);
     }
-    showMore(false);
-    document.getElementById('ncmMoreBtn').addEventListener('click', function () {
-        showMore(document.getElementById('ncmMore').style.display === 'none');
-    });
+    function showSale(open) {
+        document.getElementById('ncmSale').style.display = open ? 'block' : 'none';
+        document.getElementById('ncmSaleHead').classList.toggle('closed', !open);
+    }
+    showMore(false); showSale(false);
+    var moreHead = document.getElementById('ncmMoreBtn');
+    moreHead.addEventListener('click', function () { showMore(document.getElementById('ncmMore').style.display === 'none'); });
+    moreHead.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); moreHead.click(); } });
+    var saleHead = document.getElementById('ncmSaleHead');
+    saleHead.addEventListener('click', function () { showSale(document.getElementById('ncmSale').style.display === 'none'); });
+    saleHead.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); saleHead.click(); } });
 
     /* ---------- listes déroulantes (chargées une seule fois) ---------- */
     function fillSelect(sel, rows, labelFn) {
@@ -2100,14 +2113,26 @@ window.addEventListener('pageshow', function (ev) {
             ? '<i class="fas fa-info-circle"></i> Un particulier ne peut pas avoir de bon de livraison : la vente se fait en facture directe.'
             : '';
     }
-    form.elements.type.addEventListener('change', typeHint);
+    /* particulier : « Paramètres de vente » repliés ; jobber / professionnel : dépliés (+ infos professionnelles) */
+    function syncType() {
+        var t = form.elements.type.value;
+        showSale(t !== 'particulier');
+        showMore(t !== 'particulier');
+    }
+    form.elements.type.addEventListener('change', function () { typeHint(); syncType(); });
+
+    /* nom complet : toujours en MAJUSCULES (le curseur reste en place) */
+    form.elements.name.addEventListener('input', function () {
+        var el = this, a = el.selectionStart, b = el.selectionEnd, up = el.value.toLocaleUpperCase('fr-FR');
+        if (up !== el.value) { el.value = up; try { el.setSelectionRange(a, b); } catch (e) {} }
+    });
 
     /* ---------- ouverture ---------- */
     document.addEventListener('click', function (e) {
         var b = e.target.closest ? e.target.closest('#openCreateCustomerModal') : null;
         if (!b) return;
         e.preventDefault();
-        form.reset(); clearErrors(); showMore(false); typeHint();
+        form.reset(); clearErrors(); typeHint(); syncType();
         getModal().show();
         loadOptions().catch(function () {
             showGlobal('Impossible de charger les listes (TVA, remises, paiements). Fermez puis rouvrez la fenêtre.');
@@ -2133,6 +2158,7 @@ window.addEventListener('pageshow', function (ev) {
     function send(force) {
         var payload = {};
         new FormData(form).forEach(function (v, k) { payload[k] = v; });
+        if (payload.name) payload.name = String(payload.name).trim().toLocaleUpperCase('fr-FR');
         if (force) payload.force = 1;
         return fetch(STORE_URL, {
             method: 'POST', credentials: 'same-origin',
