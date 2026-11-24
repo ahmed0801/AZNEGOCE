@@ -294,6 +294,8 @@
                     </div>
                 </li>
 
+                @include('partials.portal_orders_menu')
+                
                 <!-- Paramètres -->
                 <li class="nav-item">
                     <a data-bs-toggle="collapse" href="#parametres" aria-expanded="false">
@@ -639,6 +641,34 @@
                         </div>
 
                         <div class="mb-3 col-md-6">
+                            <label class="form-label">Type de groupe</label>
+                            <select name="type" class="form-select" required>
+                                <option value="article">Article (remise appliquée aux articles)</option>
+                                <option value="client">Client (profil tarifaire du client / portail B2B)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3 col-md-12">
+                            <label class="form-label">Mode de remise sur le portail B2B (groupes « Client » uniquement)</label>
+                            <select name="price_mode" class="form-select">
+                                <option value="profile">Profil : on applique la remise du groupe de chaque article</option>
+                                <option value="fixed">Taux fixe garanti : le plus avantageux entre le taux ci-dessous et la remise du groupe de l'article (jamais cumulés)</option>
+                            </select>
+                            <small class="text-muted">En mode « Taux fixe », les remises Générale / Jobber / Professionnel ci-dessous sont les taux garantis ; la colonne utilisée suit le profil tarifaire (ou le type du client).</small>
+                        </div>
+
+                        <div class="mb-3 col-md-12">
+                            <label class="form-label">Profil tarifaire (portail B2B, groupes « Client » uniquement)</label>
+                            <select name="price_tier" class="form-select">
+                                <option value="">Suivre le type du client (particulier / jobber / professionnel)</option>
+                                <option value="general">Remise générale des groupes articles</option>
+                                <option value="jobber">Remise Jobber des groupes articles</option>
+                                <option value="professionnel">Remise Professionnel des groupes articles</option>
+                            </select>
+                            <small class="text-muted">Détermine quelle colonne de remise du groupe article s'applique à un client de ce groupe sur le portail.</small>
+                        </div>
+
+                        <div class="mb-3 col-md-6">
                             <label for="rate" class="form-label">Remise générale (%)</label>
                             <input type="number" step="0.01" min="0" max="100" class="form-control" name="rate" required>
                         </div>
@@ -718,6 +748,7 @@
             <thead class="table-dark">
                 <tr>
                     <th>Nom</th>
+                    <th>Type</th>
                     <th>Remise générale (%)</th>
         <th>Remise Jobber (%)</th>
         <th>Remise Professionnel (%)</th>
@@ -728,6 +759,7 @@
                 @foreach ($groupremises as $groupremise)
                     <tr>
                         <td>{{ $groupremise->name }}</td>
+                        <td><span class="badge {{ ($groupremise->type ?? 'article') === 'client' ? 'bg-info' : 'bg-secondary' }}">{{ ($groupremise->type ?? 'article') === 'client' ? 'Client' : 'Article' }}</span></td>
                         <td>{{ $groupremise->discount_rate }}</td>
                         <td>{{ $groupremise->discount_rate_jobber ?? 0 }}</td>
             <td>{{ $groupremise->discount_rate_professionnel ?? 0 }}</td>
@@ -774,6 +806,35 @@
                         <div class="mb-3 col-md-6">
                             <label class="form-label">Nom du groupe</label>
                             <input type="text" name="name" class="form-control" value="{{ $groupremise->name }}" required>
+                        </div>
+
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label">Type de groupe</label>
+                            <select name="type" class="form-select" required>
+                                <option value="article" {{ ($groupremise->type ?? 'article') === 'article' ? 'selected' : '' }}>Article</option>
+                                <option value="client" {{ ($groupremise->type ?? 'article') === 'client' ? 'selected' : '' }}>Client</option>
+                            </select>
+                            <small class="text-muted">Modifiable uniquement tant que le groupe n'est utilisé par aucun article ni client.</small>
+                        </div>
+
+                        <div class="mb-3 col-md-12">
+                            <label class="form-label">Mode de remise sur le portail B2B (groupes « Client » uniquement)</label>
+                            <select name="price_mode" class="form-select">
+                                <option value="profile" {{ ($groupremise->price_mode ?? 'profile') !== 'fixed' ? 'selected' : '' }}>Profil : on applique la remise du groupe de chaque article</option>
+                                <option value="fixed" {{ ($groupremise->price_mode ?? 'profile') === 'fixed' ? 'selected' : '' }}>Taux fixe garanti : le plus avantageux entre le taux ci-dessous et la remise du groupe de l'article (jamais cumulés)</option>
+                            </select>
+                            <small class="text-muted">En mode « Taux fixe », les remises Générale / Jobber / Professionnel ci-dessous sont les taux garantis ; la colonne utilisée suit le profil tarifaire (ou le type du client).</small>
+                        </div>
+
+                        <div class="mb-3 col-md-12">
+                            <label class="form-label">Profil tarifaire (portail B2B, groupes « Client » uniquement)</label>
+                            <select name="price_tier" class="form-select">
+                                <option value="">Suivre le type du client (particulier / jobber / professionnel)</option>
+                                <option value="general" {{ ($groupremise->price_tier ?? '') === 'general' ? 'selected' : '' }}>Remise générale des groupes articles</option>
+                                <option value="jobber" {{ ($groupremise->price_tier ?? '') === 'jobber' ? 'selected' : '' }}>Remise Jobber des groupes articles</option>
+                                <option value="professionnel" {{ ($groupremise->price_tier ?? '') === 'professionnel' ? 'selected' : '' }}>Remise Professionnel des groupes articles</option>
+                            </select>
+                            <small class="text-muted">Détermine quelle colonne de remise du groupe article s'applique à un client de ce groupe sur le portail.</small>
                         </div>
 
                         <div class="mb-3 col-md-6">

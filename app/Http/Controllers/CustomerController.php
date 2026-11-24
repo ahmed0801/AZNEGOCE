@@ -24,7 +24,8 @@ class CustomerController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Customer::with(['vehicles', 'tvaGroup', 'discountGroup', 'paymentMode', 'paymentTerm']);
+        $query = Customer::with(['vehicles', 'tvaGroup', 'discountGroup', 'paymentMode', 'paymentTerm'])
+            ->withCount(['b2bUsers as b2b_active_count' => function ($q) { $q->where('status', 'active'); }]);
 
         // Filtres
         if ($request->filled('search')) {
@@ -77,7 +78,7 @@ class CustomerController extends Controller
         $customers = $query->orderBy('name')->paginate(20);
 
         $tvaGroups = TvaGroup::all();
-        $discountGroups = DiscountGroup::all();
+        $discountGroups = DiscountGroup::forClients()->orderBy('name')->get();
         $paymentModes = PaymentMode::where('type', 'encaissement')->get();
 
         $paymentTerms = PaymentTerm::all();
@@ -617,7 +618,7 @@ public function getAllAccountingEntriesHT()
 
 
         $tvaGroups = TvaGroup::all();
-        $discountGroups = DiscountGroup::all();
+        $discountGroups = DiscountGroup::forClients()->orderBy('name')->get();
         $paymentModes = PaymentMode::where('type', 'encaissement')->get();
 
         $paymentTerms = PaymentTerm::all();
@@ -780,7 +781,7 @@ return response()->json([
     {
         return response()->json([
             'tvaGroups'      => TvaGroup::orderBy('id')->get(['id', 'name', 'rate']),
-            'discountGroups' => DiscountGroup::orderBy('id')->get(['id', 'name', 'discount_rate']),
+            'discountGroups' => DiscountGroup::forClients()->orderBy('id')->get(['id', 'name', 'discount_rate']),
             'paymentTerms'   => PaymentTerm::orderBy('id')->get(['id', 'label']),
             'paymentModes'   => PaymentMode::where('type', 'encaissement')->orderBy('id')->get(['id', 'name']),
         ]);
@@ -803,7 +804,7 @@ return response()->json([
             'bank_no'           => 'nullable|string|max:100',
             'plafond'           => 'nullable|numeric|min:0',
             'tva_group_id'      => 'required|exists:tva_groups,id',
-            'discount_group_id' => 'required|exists:discount_groups,id',
+            'discount_group_id' => 'required|exists:discount_groups,id,type,client',
             'payment_mode_id'   => 'required|exists:payment_modes,id',
             'payment_term_id'   => 'required|exists:payment_terms,id',
         ]);

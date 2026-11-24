@@ -320,6 +320,43 @@
 .az-tab.active { color:var(--c-blue); background:white; border-bottom-color:var(--c-blue); }
 .az-tab-panel { display:none; padding:20px 24px; background:var(--c-bg); }
 .az-tab-panel.active { display:block; animation:fadeSlide 0.25s ease; }
+/* ── Onglet Accès B2B ── */
+.cl-pill.st-b2b{background:#DBEAFE;color:#1D4ED8}
+.b2b-wrap{font-size:.84rem;color:#334155}
+.b2b-load{padding:30px;text-align:center;color:var(--c-sub)}
+.b2b-warn{display:flex;gap:8px;align-items:flex-start;padding:9px 12px;border-radius:9px;margin-bottom:8px;font-size:.78rem;line-height:1.35}
+.b2b-warn.warn{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
+.b2b-warn.info{background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE}
+.b2b-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 14px}
+.b2b-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:white;border:1.5px solid var(--c-border);font-size:.74rem;font-weight:600;color:#475569}
+.b2b-card2{background:white;border:1.5px solid var(--c-border);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.b2b-card2 h6{font-size:.8rem;font-weight:800;color:var(--c-navy);margin:0 0 10px;display:flex;align-items:center;gap:7px;text-transform:uppercase;letter-spacing:.04em}
+.b2b-card2 h6 i{color:var(--c-blue)}
+.b2b-user{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid #EEF2F7}
+.b2b-user:first-of-type{border-top:0}
+.b2b-user .u-main{min-width:200px;flex:1}
+.b2b-user .u-name{font-weight:700;color:#0F172A}
+.b2b-user .u-sub{font-size:.74rem;color:var(--c-sub)}
+.b2b-st{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.68rem;font-weight:700;margin-left:6px;vertical-align:middle}
+.b2b-st.active{background:#DCFCE7;color:#166534}
+.b2b-st.suspended{background:#FEE2E2;color:#B91C1C}
+.b2b-st.pwd{background:#FEF3C7;color:#92400E}
+.b2b-acts{display:flex;gap:6px;flex-wrap:wrap}
+.b2b-btn{border:1.5px solid var(--c-border);background:white;color:#334155;border-radius:8px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s}
+.b2b-btn:hover{border-color:var(--c-blue);color:var(--c-blue)}
+.b2b-btn.danger:hover{border-color:#EF4444;color:#DC2626}
+.b2b-btn.primary{background:var(--c-blue);border-color:var(--c-blue);color:white}
+.b2b-btn.primary:hover{filter:brightness(.93);color:white}
+.b2b-btn:disabled{opacity:.55;cursor:wait}
+.b2b-temp{background:#ECFDF5;border:1.5px solid #6EE7B7;border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.b2b-temp .pw{font-family:monospace;font-size:1.15rem;font-weight:800;letter-spacing:.06em;background:white;border:1.5px dashed #34D399;border-radius:8px;padding:5px 12px;display:inline-block;margin:6px 8px 6px 0;user-select:all}
+.b2b-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.b2b-lbl{display:block;font-size:.68rem;font-weight:700;color:var(--c-sub);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.b2b-sw{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1.5px solid var(--c-border);border-radius:10px;background:#FAFBFD;cursor:pointer;font-size:.8rem;font-weight:600}
+.b2b-sw input{width:16px;height:16px;margin:0}
+.b2b-msg{font-size:.76rem;margin-left:8px}
+.b2b-err{color:#DC2626;font-size:.74rem;margin-top:4px}
+.b2b-wrap .az-input{box-sizing:border-box;width:100%}
 .az-solde-card {
     background:linear-gradient(135deg, var(--c-navy), #2D4A8A);
     border-radius:12px; padding:16px 20px; color:white;
@@ -1390,6 +1427,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                             @if ($customer->blocked)
                                                 <span class="cl-pill st-blocked"><i class="fas fa-ban"></i> Bloqué</span>
                                             @endif
+                                            @if (($customer->b2b_active_count ?? 0) > 0)
+                                                <span class="cl-pill st-b2b" title="Accès au portail B2B actif"><i class="fas fa-globe"></i> B2B</span>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -1726,6 +1766,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                             <button type="button" class="az-tab" data-tab="contact-{{ $customer->id }}" onclick="switchTab(this, {{ $customer->id }})">Contact</button>
                                             <button type="button" class="az-tab" data-tab="finances-{{ $customer->id }}" onclick="switchTab(this, {{ $customer->id }})">Finances</button>
                                             <button type="button" class="az-tab" data-tab="statut-{{ $customer->id }}" onclick="switchTab(this, {{ $customer->id }})">Statut</button>
+                                            @if(!auth()->check() || auth()->user()->role !== 'vendeur')
+                                            <button type="button" class="az-tab" data-tab="b2b-{{ $customer->id }}" onclick="switchTab(this, {{ $customer->id }})"><i class="fas fa-globe" style="font-size:.7rem"></i> Accès B2B @if(($customer->b2b_active_count ?? 0) > 0)<span class="b2b-st active" style="margin-left:4px">{{ $customer->b2b_active_count }}</span>@endif</button>
+                                            @endif
                                         </div>
 
                                         {{-- Tab Identité --}}
@@ -1885,6 +1928,15 @@ document.addEventListener('DOMContentLoaded', function () {
                                                 La facturation reste possible même si le client est bloqué.
                                             </small>
                                         </div>
+
+                                        @if(!auth()->check() || auth()->user()->role !== 'vendeur')
+                                        {{-- Tab Accès B2B (chargé à l'ouverture de l'onglet, aucun formulaire imbriqué) --}}
+                                        <div class="az-tab-panel" id="tab-b2b-{{ $customer->id }}">
+                                            <div class="b2b-wrap" id="b2bBox{{ $customer->id }}" data-loaded="0">
+                                                <div class="b2b-load"><i class="fas fa-spinner fa-spin"></i> Chargement…</div>
+                                            </div>
+                                        </div>
+                                        @endif
 
                                         <div class="modal-footer" style="justify-content:flex-end;background:white;border-top:1.5px solid var(--c-border);padding:14px 24px;">
                                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fermer</button>
@@ -2678,7 +2730,229 @@ function switchTab(btn, id) {
     var tabId = btn.getAttribute('data-tab');
     var panel = document.getElementById('tab-' + tabId);
     if (panel) panel.classList.add('active');
+    if (tabId.indexOf('b2b-') === 0 && typeof b2bLoad === 'function') b2bLoad(id);
 }
+
+// ════════════════════════════════════════════════════════
+// ONGLET « ACCÈS B2B » (fiche client)
+// ════════════════════════════════════════════════════════
+var B2B_BASE  = {!! json_encode(url('/customers')) !!};
+var B2B_CSRF  = {!! json_encode(csrf_token()) !!};
+var b2bTemp   = {};   // mot de passe provisoire à afficher (par client), jusqu'à fermeture
+var b2bState  = {};
+var b2bAddOpen = {};
+
+function b2bEsc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+}
+
+function b2bCall(id, method, path, data, done) {
+    var opts = {
+        method: method, credentials: 'same-origin',
+        headers: { 'X-CSRF-TOKEN': B2B_CSRF, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json' }
+    };
+    if (data) opts.body = JSON.stringify(data);
+    return fetch(B2B_BASE + '/' + id + '/b2b' + path, opts).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, json: j }; });
+    }).then(function (x) {
+        if (x.status === 403) { return done(null, 'Action réservée aux administrateurs.'); }
+        if (x.status === 422) {
+            var m = 'Données invalides.';
+            if (x.json && x.json.errors) { m = Object.keys(x.json.errors).map(function (k) { return x.json.errors[k][0]; }).join(' '); }
+            return done(null, m);
+        }
+        if (x.status >= 400) { return done(null, (x.json && x.json.message ? x.json.message : 'Erreur ' + x.status + ' — réessayez.')); }
+        done(x.json, null);
+    }).catch(function () { done(null, 'Connexion impossible.'); });
+}
+
+function b2bLoad(id, force) {
+    var box = document.getElementById('b2bBox' + id);
+    if (!box || (box.getAttribute('data-loaded') === '1' && !force)) return;
+    b2bCall(id, 'GET', '', null, function (st, err) {
+        if (err) { box.innerHTML = '<div class="b2b-warn warn"><i class="fas fa-exclamation-triangle"></i><span>' + b2bEsc(err) + '</span></div>'; return; }
+        box.setAttribute('data-loaded', '1');
+        b2bRender(id, st);
+    });
+}
+
+function b2bRender(id, st) {
+    b2bState[id] = st;
+    var box = document.getElementById('b2bBox' + id);
+    if (!box) return;
+    var h = '';
+
+    (st.warnings || []).forEach(function (w) {
+        h += '<div class="b2b-warn ' + w.level + '"><i class="fas ' + (w.level === 'warn' ? 'fa-exclamation-triangle' : 'fa-info-circle') + '"></i><span>' + b2bEsc(w.text) + '</span></div>';
+    });
+
+    // mot de passe provisoire (affiché une seule fois)
+    var t = b2bTemp[id];
+    if (t) {
+        h += '<div class="b2b-temp"><b><i class="fas fa-key"></i> Mot de passe provisoire pour ' + b2bEsc(t.username || t.email) + '</b><br>'
+           + '<span class="pw" id="b2bPw' + id + '">' + b2bEsc(t.password) + '</span>'
+           + '<button type="button" class="b2b-btn" onclick="b2bCopy(' + id + ')"><i class="fas fa-copy"></i> Copier</button> '
+           + '<button type="button" class="b2b-btn" onclick="b2bHideTemp(' + id + ')">J’ai noté, masquer</button>'
+           + '<div style="font-size:.78rem;margin-top:2px">Adresse du portail : <b>' + b2bEsc(st.portal_url) + '</b></div>'
+           + '<div class="u-sub" style="font-size:.74rem;color:#047857;margin-top:4px">Transmettez-le au client. Il devra le changer à sa première connexion. Il ne pourra plus être affiché ensuite (vous pourrez le réinitialiser).</div></div>';
+    }
+
+    // résumé
+    h += '<div class="b2b-head">'
+       + '<span class="b2b-chip"><i class="fas fa-tags" style="color:#3B82F6"></i> Groupe remise : ' + (st.group ? b2bEsc(st.group.name) + ' (' + st.group.rate + ' %)' : 'aucun') + '</span>'
+       + '<span class="b2b-chip"><i class="fas fa-users" style="color:#3B82F6"></i> ' + st.users.length + ' utilisateur' + (st.users.length > 1 ? 's' : '') + '</span>'
+       + '</div>';
+
+    // utilisateurs
+    h += '<div class="b2b-card2"><h6><i class="fas fa-user-lock"></i> Utilisateurs du portail</h6>';
+    if (!st.users.length) {
+        h += '<div class="u-sub" style="color:#64748B">Aucun accès créé pour ce client.</div>';
+    }
+    st.users.forEach(function (u) {
+        h += '<div class="b2b-user"><div class="u-main"><div class="u-name">' + b2bEsc(u.name)
+           + '<span class="b2b-st ' + u.status + '">' + (u.status === 'active' ? 'Actif' : 'Suspendu') + '</span>'
+           + (u.must_change ? '<span class="b2b-st pwd">Mot de passe à changer</span>' : '')
+           + (u.reset_requested ? '<span class="b2b-st suspended" title="Demande faite depuis le portail">Demande de réinitialisation ' + b2bEsc(u.reset_requested) + '</span>' : '') + '</div>'
+           + '<div class="u-sub">Identifiant : <b>' + b2bEsc(u.username || '—') + '</b> · ' + b2bEsc(u.email) + (u.phone ? ' · ' + b2bEsc(u.phone) : '') + '</div>'
+           + '<div class="u-sub">' + (u.last_login ? 'Dernière connexion : ' + b2bEsc(u.last_login) : 'Jamais connecté') + ' · créé le ' + b2bEsc(u.created) + '</div></div>'
+           + '<div class="b2b-acts">'
+           + '<button type="button" class="b2b-btn" onclick="b2bReset(' + id + ',' + u.id + ')"><i class="fas fa-redo"></i> Réinitialiser le mot de passe</button>'
+           + (u.status === 'active'
+                ? '<button type="button" class="b2b-btn" onclick="b2bStatus(' + id + ',' + u.id + ',\'suspended\')"><i class="fas fa-pause"></i> Suspendre</button>'
+                : '<button type="button" class="b2b-btn" onclick="b2bStatus(' + id + ',' + u.id + ',\'active\')"><i class="fas fa-play"></i> Réactiver</button>')
+           + '<button type="button" class="b2b-btn danger" onclick="b2bDelete(' + id + ',' + u.id + ')"><i class="fas fa-trash"></i></button>'
+           + '</div></div>';
+    });
+
+    var open = b2bAddOpen[id] || !st.users.length;
+    h += '<div style="margin-top:10px">';
+    if (!open) {
+        h += '<button type="button" class="b2b-btn primary" onclick="b2bToggleAdd(' + id + ')"><i class="fas fa-plus"></i> Ajouter un utilisateur</button>';
+    } else {
+        h += '<div class="b2b-grid">'
+           + '<div><label class="b2b-lbl">Nom *</label><input type="text" class="az-input" id="b2bName' + id + '" value="' + b2bEsc(st.customer.name) + '" autocomplete="off"></div>'
+           + '<div><label class="b2b-lbl">E-mail de connexion *</label><input type="email" class="az-input" id="b2bEmail' + id + '" value="' + b2bEsc(st.customer.email || '') + '" autocomplete="off"></div>'
+           + '<div><label class="b2b-lbl">Nom d’utilisateur (facultatif)</label><input type="text" class="az-input" id="b2bUser' + id + '" placeholder="généré automatiquement" autocomplete="off" autocapitalize="none" maxlength="60"></div>'
+           + '<div><label class="b2b-lbl">Téléphone</label><input type="text" class="az-input" id="b2bPhone' + id + '" autocomplete="off"></div>'
+           + '</div><div id="b2bAddErr' + id + '" class="b2b-err"></div>'
+           + '<div style="margin-top:10px"><button type="button" class="b2b-btn primary" id="b2bCreateBtn' + id + '" onclick="b2bCreate(' + id + ')"><i class="fas fa-check"></i> Créer l’accès</button> '
+           + (st.users.length ? '<button type="button" class="b2b-btn" onclick="b2bToggleAdd(' + id + ')">Annuler</button>' : '')
+           + '<span class="u-sub" style="margin-left:8px">Un mot de passe provisoire sera généré.</span></div>';
+    }
+    h += '</div></div>';
+
+    // réglages client
+    var s = st.settings;
+    h += '<div class="b2b-card2"><h6><i class="fas fa-sliders-h"></i> Réglages pour ce client</h6><div class="b2b-grid">'
+       + '<label class="b2b-sw"><input type="checkbox" id="b2bPortal' + id + '" ' + (s.portal_enabled ? 'checked' : '') + '> Accès au portail autorisé</label>'
+       + '<label class="b2b-sw"><input type="checkbox" id="b2bOrder' + id + '" ' + (s.can_order ? 'checked' : '') + '> Peut passer commande</label>'
+       + '<label class="b2b-sw"><input type="checkbox" id="b2bPrices' + id + '" ' + (s.show_prices ? 'checked' : '') + '> Voit les prix</label>'
+       + '<label class="b2b-sw"><input type="checkbox" id="b2bFinance' + id + '" ' + (s.show_finance ? 'checked' : '') + '> Voit sa situation financière (factures, BL, solde)</label>'
+       + '</div><div class="b2b-grid" style="margin-top:10px">'
+       + '<div><label class="b2b-lbl">Validation de ses commandes</label><select class="az-input az-select" id="b2bValid' + id + '">'
+       + '<option value="inherit"' + (s.validation_mode === 'inherit' ? ' selected' : '') + '>Selon le réglage général (' + (st.global.auto_validate ? 'automatique' : 'manuelle') + ')</option>'
+       + '<option value="manual"' + (s.validation_mode === 'manual' ? ' selected' : '') + '>Toujours validée par un vendeur</option>'
+       + '<option value="auto"' + (s.validation_mode === 'auto' ? ' selected' : '') + '>Validation automatique</option></select></div>'
+       + '<div><label class="b2b-lbl">Réception de ses commandes</label><select class="az-input az-select" id="b2bFulfil' + id + '">'
+       + '<option value="both"' + (s.fulfillment === 'both' ? ' selected' : '') + '>Livraison ou retrait sur place (au choix)</option>'
+       + '<option value="delivery"' + (s.fulfillment === 'delivery' ? ' selected' : '') + '>Livraison uniquement</option>'
+       + '<option value="pickup"' + (s.fulfillment === 'pickup' ? ' selected' : '') + '>Retrait sur place uniquement</option></select></div>'
+       + '<div style="grid-column:1/-1"><label class="b2b-lbl">Note interne (invisible pour le client)</label><textarea class="az-input" id="b2bNote' + id + '" rows="2" maxlength="1000">' + b2bEsc(s.note || '') + '</textarea></div>'
+       + '</div><div style="margin-top:10px"><button type="button" class="b2b-btn primary" id="b2bSaveBtn' + id + '" onclick="b2bSave(' + id + ')"><i class="fas fa-save"></i> Enregistrer ces réglages</button><span class="b2b-msg" id="b2bMsg' + id + '"></span></div>'
+       + '<div class="u-sub" style="margin-top:8px;color:#64748B">Ces réglages s’enregistrent tout seuls dès que vous les changez (ils ne dépendent pas du bouton « Modifier le client »). Le groupe de remise se règle dans l’onglet « Finances ».</div></div>';
+
+    box.innerHTML = h;
+
+    // Enregistrement automatique : ces réglages ne font PAS partie du bouton « Modifier le client » de la fiche.
+    ['b2bPortal', 'b2bOrder', 'b2bPrices', 'b2bFinance', 'b2bValid', 'b2bFulfil', 'b2bNote'].forEach(function (k) {
+        var el = document.getElementById(k + id);
+        if (el) el.addEventListener('change', function () { b2bSave(id); });
+    });
+}
+
+function b2bMsg(id, text, ok) {
+    var m = document.getElementById('b2bMsg' + id);
+    if (!m) return;
+    m.style.color = ok ? '#16A34A' : '#DC2626';
+    m.textContent = text;
+    if (ok) setTimeout(function () { if (m.textContent === text) m.textContent = ''; }, 2500);
+}
+
+function b2bToggleAdd(id) { b2bAddOpen[id] = !b2bAddOpen[id]; b2bRender(id, b2bState[id]); }
+function b2bHideTemp(id) { delete b2bTemp[id]; b2bRender(id, b2bState[id]); }
+function b2bCopy(id) {
+    var el = document.getElementById('b2bPw' + id); if (!el) return;
+    try { navigator.clipboard.writeText(el.textContent); } catch (e) {
+        var r = document.createRange(); r.selectNodeContents(el); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); document.execCommand('copy');
+    }
+}
+
+function b2bCreate(id) {
+    var btn = document.getElementById('b2bCreateBtn' + id), err = document.getElementById('b2bAddErr' + id);
+    err.textContent = ''; btn.disabled = true;
+    b2bCall(id, 'POST', '/users', {
+        name:  document.getElementById('b2bName' + id).value,
+        email: document.getElementById('b2bEmail' + id).value,
+        username: document.getElementById('b2bUser' + id).value,
+        phone: document.getElementById('b2bPhone' + id).value
+    }, function (st, e) {
+        btn.disabled = false;
+        if (e) { err.textContent = e; return; }
+        b2bTemp[id] = { email: st.temp_for, username: st.temp_username, password: st.temp_password };
+        b2bAddOpen[id] = false;
+        b2bRender(id, st);
+    });
+}
+
+function b2bReset(id, uid) {
+    if (!confirm('Réinitialiser le mot de passe de cet utilisateur ? L’ancien mot de passe ne fonctionnera plus.')) return;
+    b2bCall(id, 'POST', '/users/' + uid + '/reset-password', null, function (st, e) {
+        if (e) { alert(e); return; }
+        b2bTemp[id] = { email: st.temp_for, username: st.temp_username, password: st.temp_password };
+        b2bRender(id, st);
+    });
+}
+
+function b2bStatus(id, uid, status) {
+    b2bCall(id, 'POST', '/users/' + uid + '/status/' + status, null, function (st, e) {
+        if (e) { alert(e); return; }
+        b2bRender(id, st);
+    });
+}
+
+function b2bDelete(id, uid) {
+    if (!confirm('Supprimer définitivement cet accès ?')) return;
+    b2bCall(id, 'DELETE', '/users/' + uid, null, function (st, e) {
+        if (e) { alert(e); return; }
+        b2bRender(id, st);
+    });
+}
+
+function b2bSave(id) {
+    var btn = document.getElementById('b2bSaveBtn' + id); btn.disabled = true;
+    b2bCall(id, 'POST', '/settings', {
+        portal_enabled:  document.getElementById('b2bPortal' + id).checked ? 1 : 0,
+        can_order:       document.getElementById('b2bOrder' + id).checked ? 1 : 0,
+        show_prices:     document.getElementById('b2bPrices' + id).checked ? 1 : 0,
+        show_finance:    document.getElementById('b2bFinance' + id).checked ? 1 : 0,
+        fulfillment:     document.getElementById('b2bFulfil' + id).value,
+        validation_mode: document.getElementById('b2bValid' + id).value,
+        note:            document.getElementById('b2bNote' + id).value
+    }, function (st, e) {
+        if (e) { btn.disabled = false; b2bMsg(id, e, false); return; }
+        b2bRender(id, st);
+        b2bMsg(id, '✔ Enregistré', true);
+    });
+}
+
+// Entrée dans un champ de l'onglet B2B : ne jamais envoyer le formulaire de la fiche
+document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter' && ev.target && ev.target.closest && ev.target.closest('.b2b-wrap') && ev.target.tagName !== 'TEXTAREA') {
+        ev.preventDefault();
+    }
+}, true);
 
 function toggleEdit(id) {
     var fields  = document.querySelectorAll('.ef-' + id);

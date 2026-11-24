@@ -86,7 +86,7 @@ if ($request->has('is_active') && $request->is_active !== null && $request->is_a
         'units' => Unit::all(),
         'stores' => Store::all(),
         'tvaGroups' => TvaGroup::all(),
-        'discountGroups' => DiscountGroup::orderBy('name')->get(), // ← À ajouter
+        'discountGroups' => DiscountGroup::forArticles()->orderBy('name')->get(),
         'search' => $request->search,
         'brand_id' => $request->brand_id,
         'category_id' => $request->category_id,

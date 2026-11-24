@@ -38,6 +38,18 @@ public function paymentTerm()
     {
         return $this->hasMany(Vehicle::class);
     }
+
+    /** Comptes de connexion au portail B2B. */
+    public function b2bUsers()
+    {
+        return $this->hasMany(B2bUser::class);
+    }
+
+    /** Reglages B2B propres a ce client (peut ne pas exister). */
+    public function b2bSetting()
+    {
+        return $this->hasOne(CustomerB2bSetting::class);
+    }
     
 
 

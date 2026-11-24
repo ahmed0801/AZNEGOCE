@@ -3,6 +3,7 @@
 use App\Http\Controllers\VoiceCommandController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PrintAgentController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -71,3 +72,12 @@ Route::post('/articles/update-barcode', function (Request $request) {
 
     return response()->json(['success' => true]);
 });
+
+
+
+// ── Agent d'impression : à placer dans routes/api.php (préfixe /api automatique, sans CSRF ni session) ──
+// + en haut du fichier :  use App\Http\Controllers\PrintAgentController;
+Route::get('/print-agent/next', [PrintAgentController::class, 'next']);
+Route::post('/print-agent/{id}/ack', [PrintAgentController::class, 'ack'])->whereNumber('id');
+Route::get('/print-agent/ping', [PrintAgentController::class, 'ping']);
+

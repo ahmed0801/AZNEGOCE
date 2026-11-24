@@ -255,6 +255,8 @@
                     </div>
                 </li>
 
+                @include('partials.portal_orders_menu')
+                
                 <!-- Paramètres -->
                 <li class="nav-item">
                     <a data-bs-toggle="collapse" href="#parametres" aria-expanded="false">
@@ -577,6 +579,7 @@
                     <a href="#section-purchases">Achats</a>
                     <a href="#section-accounting">Comptabilité</a>
                     <a href="#section-users">Utilisateurs</a>
+                    <a href="#section-b2b">Portail B2B</a>
                 </div>
             </div>
 
@@ -806,6 +809,30 @@
 
 
 
+
+            <!-- Section Portail B2B -->
+            @if(Auth::user()->role != "vendeur")
+            <div class="settings-section" id="section-b2b" data-section="b2b">
+                <h4 class="section-header company">Portail B2B</h4>
+                <p class="section-description">Personnalisez le portail de vente en ligne de vos clients : identité, commandes, impression, stock et prix.</p>
+                <div class="row">
+                    <div class="col-sm-6 col-md-4 mb-3 setting-card" data-keywords="portail b2b clients commande en ligne logo société validation impression imprimante">
+                        <a href="{{ route('b2b.settings.edit') }}" class="text-decoration-none">
+                            <div class="card card-stats card-info card-round text-center">
+                                <div class="card-body">
+                                    <div class="icon-big text-center text-info">
+                                        <i class="fas fa-globe"></i>
+                                    </div>
+                                    <div class="numbers mt-2">
+                                        <p class="card-category">Paramètres Portail B2B</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endif
 
             <!-- Section Utilisateurs -->
             <div class="settings-section" id="section-users" data-section="users">

@@ -153,6 +153,7 @@
                         </ul>
                     </div>
                 </li>
+                @include('partials.portal_orders_menu')
                 <li class="nav-item">
                     <a data-bs-toggle="collapse" href="#parametres" aria-expanded="false"><i class="fas fa-cogs"></i><p>Paramètres</p><span class="caret"></span></a>
                     <div class="collapse" id="parametres">

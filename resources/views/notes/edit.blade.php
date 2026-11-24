@@ -294,6 +294,7 @@
                         </ul>
                     </div>
                 </li>
+                @include('partials.portal_orders_menu')
 
                 <!-- Paramètres -->
                 <li class="nav-item">

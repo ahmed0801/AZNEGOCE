@@ -50,6 +50,22 @@ use App\Http\Controllers\TvaGroupController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\VoiceCommandController;
+
+use App\Http\Controllers\B2bSettingController;
+use App\Http\Controllers\CustomerB2bController;
+use App\Http\Controllers\B2bPricingController;
+
+  use App\Http\Controllers\Portal\PortalAuthController;
+  use App\Http\Controllers\Portal\PortalCatalogController;
+  use App\Http\Controllers\Portal\PortalCartController;
+  use App\Http\Controllers\Portal\PortalOrderController;
+  use App\Http\Controllers\Portal\PortalAccountController;
+  use App\Http\Middleware\PortalAuth;
+  use App\Http\Middleware\PortalHeaders;
+
+  use App\Http\Controllers\PortalOrderAdminController;
+
+
 use App\Models\Arrivage;
 use App\Models\Brand;
 use App\Models\Invoice;
@@ -764,6 +780,59 @@ Route::post('/sales/convert-devis/{id}', [SalesController::class, 'convertDevisT
 
 
 
+
+
+// ── Portail B2B : paramètres (à placer dans le groupe auth, à côté de Route::get('/setting', …)) ──
+// + en haut de web.php :  use App\Http\Controllers\B2bSettingController;
+Route::get('/b2b/settings', [B2bSettingController::class, 'edit'])->name('b2b.settings.edit');
+Route::post('/b2b/settings', [B2bSettingController::class, 'update'])->name('b2b.settings.update');
+Route::post('/b2b/settings/test-printer', [B2bSettingController::class, 'testPrinter'])->name('b2b.settings.test_printer');
+Route::post('/b2b/settings/test-mail', [B2bSettingController::class, 'testMail'])->name('b2b.settings.test_mail');
+
+Route::post('/b2b/settings/regenerate-token', [B2bSettingController::class, 'regenerateToken'])->name('b2b.settings.regenerate_token');
+Route::get('/b2b/settings/print-status', [B2bSettingController::class, 'printStatus'])->name('b2b.settings.print_status');
+
+// ── Accès B2B dans la fiche client : à placer dans le groupe auth (avant/après les routes /customers existantes) ──
+// + en haut de web.php :  use App\Http\Controllers\CustomerB2bController;
+Route::get('/customers/{customer}/b2b', [CustomerB2bController::class, 'show'])->name('customer.b2b.show');
+Route::post('/customers/{customer}/b2b/settings', [CustomerB2bController::class, 'saveSettings'])->name('customer.b2b.settings');
+Route::post('/customers/{customer}/b2b/users', [CustomerB2bController::class, 'storeUser'])->name('customer.b2b.users.store');
+Route::post('/customers/{customer}/b2b/users/{user}/status/{status}', [CustomerB2bController::class, 'setStatus'])->name('customer.b2b.users.status');
+Route::post('/customers/{customer}/b2b/users/{user}/reset-password', [CustomerB2bController::class, 'resetPassword'])->name('customer.b2b.users.reset');
+Route::delete('/customers/{customer}/b2b/users/{user}', [CustomerB2bController::class, 'destroyUser'])->name('customer.b2b.users.destroy');
+
+
+// ── Simulateur de prix B2B : à placer dans le groupe auth, à côté des routes b2b.settings.* ──
+// + en haut de web.php :  use App\Http\Controllers\B2bPricingController;
+Route::get('/b2b/pricing/customers', [B2bPricingController::class, 'searchCustomers'])->name('b2b.pricing.customers');
+Route::get('/b2b/pricing/items', [B2bPricingController::class, 'searchItems'])->name('b2b.pricing.items');
+Route::post('/b2b/pricing/simulate', [B2bPricingController::class, 'simulate'])->name('b2b.pricing.simulate');
+
+
+
+
+
+
+
+
+
+// ── Commandes portail (côté ERP) : à placer dans le groupe auth de web.php ──
+// + en haut :  use App\Http\Controllers\PortalOrderAdminController;
+Route::get('/b2b/orders', [PortalOrderAdminController::class, 'index'])->name('b2b.orders');
+Route::get('/b2b/orders/data', [PortalOrderAdminController::class, 'data'])->name('b2b.orders.data');
+Route::get('/b2b/orders/count', [PortalOrderAdminController::class, 'count'])->name('b2b.orders.count');
+Route::get('/b2b/orders/{order}', [PortalOrderAdminController::class, 'show'])->whereNumber('order')->name('b2b.orders.show');
+Route::post('/b2b/orders/{order}/update', [PortalOrderAdminController::class, 'update'])->whereNumber('order')->name('b2b.orders.update');
+Route::post('/b2b/orders/{order}/validate', [PortalOrderAdminController::class, 'validateOrder'])->whereNumber('order')->name('b2b.orders.validate');
+Route::post('/b2b/orders/{order}/refuse', [PortalOrderAdminController::class, 'refuse'])->whereNumber('order')->name('b2b.orders.refuse');
+Route::post('/b2b/orders/{order}/note', [PortalOrderAdminController::class, 'note'])->whereNumber('order')->name('b2b.orders.note');
+Route::post('/b2b/orders/{order}/reprint', [PortalOrderAdminController::class, 'reprint'])->whereNumber('order')->name('b2b.orders.reprint');
+Route::post('/b2b/orders/{order}/retry-erp', [PortalOrderAdminController::class, 'retryErp'])->whereNumber('order')->name('b2b.orders.retry_erp');
+
+
+
+
+
     Route::get('/tecdoc', function () {
         $reference="";
         $response = Http::withHeaders([
@@ -1023,9 +1092,80 @@ Route::post('/admin/golda/run', [GoldaController::class, 'runImport'])->name('ad
 
 
 
+
 // tv client
 Route::get('/tvclient', [DeliveryNotesController::class, 'tvClient'])->name('tvclient');
 Route::get('/tvclient/data', [DeliveryNotesController::class, 'tvClientData'])->name('tvclient.data');
+
+
+
+
+
+
+
+// ── PORTAIL B2B : à placer dans routes/web.php, EN DEHORS du groupe « auth » de l'ERP ──
+// + en haut de web.php :
+//   use App\Http\Controllers\Portal\PortalAuthController;
+//   use App\Http\Controllers\Portal\PortalCatalogController;
+//   use App\Http\Controllers\Portal\PortalCartController;
+//   use App\Http\Controllers\Portal\PortalOrderController;
+//   use App\Http\Controllers\Portal\PortalAccountController;
+//   use App\Http\Middleware\PortalAuth;
+//   use App\Http\Middleware\PortalHeaders;
+//
+// Avec PORTAL_DOMAIN défini (.env) : le portail vit UNIQUEMENT sur ce sous-domaine, à la racine
+//   (https://b2b.votre-domaine.com/connexion, /catalogue…) et n'existe pas sur le domaine de l'ERP.
+// Sans PORTAL_DOMAIN (développement local) : il est servi sous /portail.
+Route::group(config('portal.domain') ? ['domain' => config('portal.domain')] : ['prefix' => 'portail'], function () {
+    Route::middleware([PortalHeaders::class])->group(function () {
+
+        Route::get('/', function () { return redirect()->route('portal.catalog'); });
+
+        // pages publiques (limitées en fréquence contre les essais de mots de passe)
+        Route::get('/connexion', [PortalAuthController::class, 'showLogin'])->name('portal.login');
+        Route::post('/connexion', [PortalAuthController::class, 'login'])->middleware('throttle:8,1')->name('portal.login.post');
+        Route::get('/mot-de-passe-oublie', [PortalAuthController::class, 'showForgot'])->name('portal.forgot');
+        Route::post('/mot-de-passe-oublie', [PortalAuthController::class, 'forgot'])->middleware('throttle:5,1')->name('portal.forgot.post');
+
+        // pages réservées aux clients connectés
+        Route::middleware([PortalAuth::class])->group(function () {
+            Route::post('/deconnexion', [PortalAuthController::class, 'logout'])->name('portal.logout');
+            Route::get('/mot-de-passe', [PortalAuthController::class, 'showPassword'])->name('portal.password');
+            Route::post('/mot-de-passe', [PortalAuthController::class, 'updatePassword'])->name('portal.password.update');
+
+            Route::get('/catalogue', [PortalCatalogController::class, 'index'])->name('portal.catalog');
+            Route::get('/suggestions', [PortalCatalogController::class, 'suggest'])->middleware('throttle:120,1')->name('portal.suggest');
+            Route::get('/article/{item}', [PortalCatalogController::class, 'item'])->whereNumber('item')->name('portal.item');
+            Route::get('/article/{item}/equivalents', [PortalCatalogController::class, 'equivalents'])->whereNumber('item')->name('portal.equivalents');
+
+            // panier, favoris, liste de références
+            Route::get('/panier', [PortalCartController::class, 'summary'])->name('portal.cart');
+            Route::post('/panier/ajouter', [PortalCartController::class, 'add'])->middleware('throttle:120,1')->name('portal.cart.add');
+            Route::post('/panier/modifier', [PortalCartController::class, 'update'])->middleware('throttle:120,1')->name('portal.cart.update');
+            Route::post('/panier/vider', [PortalCartController::class, 'clear'])->name('portal.cart.clear');
+            Route::post('/favoris/{item}', [PortalCartController::class, 'favorite'])->whereNumber('item')->name('portal.favorite');
+            // commandes
+            Route::post('/commande', [PortalOrderController::class, 'store'])->middleware('throttle:10,1')->name('portal.order.store');
+            Route::get('/commandes', [PortalOrderController::class, 'index'])->name('portal.orders');
+            Route::get('/commandes/{order}', [PortalOrderController::class, 'show'])->whereNumber('order')->name('portal.order');
+            Route::post('/commandes/{order}/annuler', [PortalOrderController::class, 'cancel'])->whereNumber('order')->name('portal.order.cancel');
+            Route::post('/commandes/{order}/recommander', [PortalOrderController::class, 'reorder'])->whereNumber('order')->middleware('throttle:30,1')->name('portal.order.reorder');
+            // espace compte (situation financière, factures, bons de livraison) : réservé aux clients autorisés dans la fiche client
+            Route::get('/compte', [PortalAccountController::class, 'index'])->name('portal.account');
+            Route::get('/compte/factures', [PortalAccountController::class, 'invoices'])->name('portal.account.invoices');
+            Route::get('/compte/factures/{id}', [PortalAccountController::class, 'invoice'])->whereNumber('id')->name('portal.account.invoice');
+            Route::get('/compte/factures/{id}/pdf', [PortalAccountController::class, 'invoicePdf'])->whereNumber('id')->middleware('throttle:30,1')->name('portal.account.invoice.pdf');
+            Route::get('/compte/bons-livraison', [PortalAccountController::class, 'deliveryNotes'])->name('portal.account.dns');
+            Route::get('/compte/bons-livraison/{id}', [PortalAccountController::class, 'deliveryNote'])->whereNumber('id')->name('portal.account.dn');
+            Route::get('/compte/bons-livraison/{id}/pdf', [PortalAccountController::class, 'deliveryNotePdf'])->whereNumber('id')->middleware('throttle:30,1')->name('portal.account.dn.pdf');
+            Route::post('/liste-references', [PortalCartController::class, 'bulk'])->middleware('throttle:30,1')->name('portal.bulk');
+        });
+    });
+});
+
+
+
+
 
 
 

@@ -234,6 +234,8 @@
                     </div>
                 </li>
 
+                @include('partials.portal_orders_menu')
+                
                 <!-- Paramètres -->
                 <li class="nav-item">
                     <a data-bs-toggle="collapse" href="#parametres" aria-expanded="false">
