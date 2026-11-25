@@ -16,7 +16,7 @@ use Closure;
  */
 class PortalHost
 {
-    const ALLOWED = '#^/(connexion|deconnexion|mot-de-passe|mot-de-passe-oublie|catalogue|suggestions|panier|panier/(ajouter|modifier|vider)|liste-references|commande|commandes|commandes/[0-9]+|commandes/[0-9]+/(annuler|recommander)|compte|compte/factures|compte/factures/[0-9]+|compte/factures/[0-9]+/pdf|compte/bons-livraison|compte/bons-livraison/[0-9]+|compte/bons-livraison/[0-9]+/pdf|favoris/[0-9]+|article/[0-9]+|article/[0-9]+/equivalents)?$#D';
+    const ALLOWED = '#^/(connexion|deconnexion|mot-de-passe|mot-de-passe-oublie|catalogue|promotions|suggestions|panier|panier/(ajouter|modifier|vider)|liste-references|commande|commandes|commandes/[0-9]+|commandes/[0-9]+/(annuler|recommander)|compte|compte/factures|compte/factures/[0-9]+|compte/factures/[0-9]+/pdf|compte/bons-livraison|compte/bons-livraison/[0-9]+|compte/bons-livraison/[0-9]+/pdf|devis|devis/nouveau|devis/[0-9]+|devis/[0-9]+/(accepter|refuser|annuler|pdf|renegocier)|devis/erp/[0-9]+/pdf|devis/plaque|devis/[0-9]+/fichiers|devis/[0-9]+/fichiers/[0-9]+|favoris/[0-9]+|article/[0-9]+|article/[0-9]+/equivalents)?$#D';
 
     public function handle($request, Closure $next)
     {

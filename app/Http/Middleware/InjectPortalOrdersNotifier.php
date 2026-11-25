@@ -29,7 +29,7 @@ class InjectPortalOrdersNotifier
             $html = $response->getContent();
             if (!is_string($html) || stripos($html, '</body>') === false || strpos($html, 'portal-orders-notify.js') !== false) return $response;
 
-            $tag = '<script charset="utf-8" src="' . e(asset('assets/js/portal-orders-notify.js')) . '?v=2" defer data-feed="' . e(route('b2b.orders.count')) . '" data-page="' . e(route('b2b.orders')) . '"></script>';
+            $tag = '<script charset="utf-8" src="' . e(asset('assets/js/portal-orders-notify.js')) . '?v=4" defer data-feed="' . e(route('b2b.orders.count')) . '" data-page="' . e(route('b2b.orders')) . '" data-qfeed="' . e(route('b2b.quotes.count')) . '" data-qpage="' . e(route('b2b.quotes')) . '"></script>';
             $pos = strripos($html, '</body>');
             $response->setContent(substr($html, 0, $pos) . $tag . substr($html, $pos));
         } catch (\Throwable $e) { /* jamais bloquant */ }

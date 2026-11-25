@@ -47,7 +47,7 @@ class PortalOrderService
                 if ($rows->isEmpty()) return ['err' => 'Votre panier est vide.'];
 
                 $items = Item::with(['brand', 'discountGroup'])->whereIn('id', $rows->pluck('item_id')->all())->where('is_active', 1)->get()->keyBy('id');
-                $lines = []; $ht = 0.0; $tva = 0.0; $units = 0;
+                $lines = []; $promoSold = []; $ht = 0.0; $tva = 0.0; $units = 0;
                 foreach ($rows as $r) {
                     $it = $items->get($r->item_id);
                     if (!$it) continue;                                   // article retiré du catalogue entre-temps
@@ -56,6 +56,7 @@ class PortalOrderService
                     if ((float) $p['net_ht'] <= 0 && in_array($this->s->zero_price_mode ?: 'both', ['block', 'both'], true)) return ['err' => '« ' . $it->code . ' » est sur demande : retirez-le du panier ou contactez-nous.'];
                     $lineHt = round($p['net_ht'] * $r->quantity, 2);
                     $ht += $lineHt; $tva += round($lineHt * $p['tva_rate'] / 100, 2); $units += (int) $r->quantity;
+                    if (!empty($p['promo'])) $promoSold[] = [(int) $p['promo']['promo_id'], (int) $it->id, (int) $r->quantity];
                     $lines[] = [
                         'item_id' => $it->id, 'code' => $it->code, 'name' => mb_substr($it->name, 0, 255), 'brand' => optional($it->brand)->name,
                         'qty' => (int) $r->quantity, 'list_ht' => $p['list_ht'], 'discount' => $p['effective_rate'],
@@ -80,6 +81,9 @@ class PortalOrderService
                 $o->number = 'WEB-' . str_pad($o->id, 6, '0', STR_PAD_LEFT);
                 $o->save();
                 foreach ($lines as $l) { $o->lines()->create($l); }
+                foreach ($promoSold as $ps) {   // quantités vendues en promo (plafond éventuel de la promotion)
+                    DB::table('portal_promotion_items')->where('promotion_id', $ps[0])->where('item_id', $ps[1])->increment('sold_qty', $ps[2]);
+                }
                 DB::table('portal_cart_items')->where('b2b_user_id', $this->user->id)->delete();
                 return ['order' => $o];
             });

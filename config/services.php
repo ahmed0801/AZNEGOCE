@@ -36,4 +36,6 @@ return [
     'site_id' => env('TOURNEE_SITE_ID', 1),
 ],
 
+'plate' => ['token' => env('PLATE_API_TOKEN')],
+
 ];

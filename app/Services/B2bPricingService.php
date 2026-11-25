@@ -19,6 +19,7 @@ use App\Models\Item;
  *     Si le groupe client est en mode « taux fixe », on prend le PLUS ÉLEVÉ entre ce taux fixe garanti
  *     (même colonne) et la remise du groupe article.
  *  4. Pas de cumul : une seule remise s'applique.
+ *  4b. Promotion en cours (portail) : prix le plus bas entre promo et prix habituel, sans cumul ; le garde-fou ne la bloque pas (alerte seulement).
  *  5. Garde-fou de marge : le prix ne descend jamais sous (coût d'achat net × (1 + marge minimale)).
  *     Le prix de base reste un plafond (le garde-fou ne peut pas rendre l'article plus cher que le tarif).
  */
@@ -103,12 +104,29 @@ class B2bPricingService
 
         $net = round($list * (1 - $rate / 100), 2);
 
+        // Promotion en cours : on retient le prix le plus bas entre la promo et le prix habituel (pas de cumul)
+        $promo = null; $promoWins = false;
+        $promoHit = $this->promoFor($item, $customer, $list);
+        if ($promoHit) {
+            $promo = ['name' => $promoHit['name'], 'ends_at' => $promoHit['ends_at'], 'promo_id' => $promoHit['promo_id'], 'price' => $promoHit['price'],
+                      'regular_net' => $net, 'remaining' => $promoHit['remaining']];
+            if ($promoHit['price'] < $net) {
+                $steps[] = 'Promotion « ' . $promoHit['name'] . ' » : ' . $this->fmt($promoHit['price']) . ' (moins cher que le prix habituel ' . $this->fmt($net) . ').';
+                $net = $promoHit['price'];
+                $rate = $list > 0 ? round((1 - $net / $list) * 100, 2) : 0.0;
+                $source = 'promo'; $promoWins = true;
+            } else {
+                $steps[] = 'Promotion « ' . $promoHit['name'] . ' » (' . $this->fmt($promoHit['price']) . ') non retenue : le prix habituel ' . $this->fmt($net) . ' est plus bas.';
+                $promo = null;
+            }
+        }
+
         // coût d'achat net
         $cost    = (float) $item->cost_price;
         $costNet = round($cost * (1 - ((float) $item->remise_achat) / 100), 2);
 
         $guard = null;
-        if ($this->settings->margin_guard && $costNet > 0) {
+        if (!$promoWins && $this->settings->margin_guard && $costNet > 0) {
             $min = round($costNet * (1 + ((float) $this->settings->min_margin_percent) / 100), 2);
             if ($net < $min) {
                 $floor = min($min, $list);          // jamais au-dessus du tarif
@@ -139,10 +157,94 @@ class B2bPricingService
             'tier_source'    => $this->tierSource($customer),
             'prix_net'       => $isNet,
             'guard'          => $guard,
+            'promo'          => $promoWins ? $promo : null,
+            'below_margin'   => $promoWins && $costNet > 0 && $this->settings->margin_guard
+                                && $net < round($costNet * (1 + ((float) $this->settings->min_margin_percent) / 100), 2),
             'cost_net'       => $costNet,
             'margin_percent' => $margin,
             'steps'          => $steps,
         ];
+    }
+
+    /** @var array|null  item_id => [lignes de promotions en cours] (une seule requête par requête HTTP) */
+    private static $promoCache = null;
+    private static $promoCacheAt = 0;
+
+    /** Promotions en cours, indexées par article. Silencieux si les tables n'existent pas encore. */
+    private function activePromos()
+    {
+        if (self::$promoCache !== null && (time() - self::$promoCacheAt) < 30) return self::$promoCache;
+        $map = [];
+        try {
+            $now = now();
+            $rows = \DB::table('portal_promotion_items as pi')
+                ->join('portal_promotions as p', 'p.id', '=', 'pi.promotion_id')
+                ->where('p.active', 1)->where('p.starts_at', '<=', $now)->where('p.ends_at', '>=', $now)
+                ->select('pi.item_id', 'pi.mode', 'pi.promo_price', 'pi.percent', 'pi.amount', 'pi.max_qty', 'pi.sold_qty', 'p.id as promo_id', 'p.name', 'p.ends_at', 'p.audience')
+                ->get();
+            $groups = [];
+            foreach (\DB::table('portal_promotion_groups')->get() as $g) { $groups[$g->promotion_id][] = (int) $g->discount_group_id; }
+            foreach ($rows as $r) {
+                $r->group_ids = isset($groups[$r->promo_id]) ? $groups[$r->promo_id] : [];
+                $map[$r->item_id][] = $r;
+            }
+        } catch (\Throwable $e) { }
+        self::$promoCache = $map; self::$promoCacheAt = time();
+        return $map;
+    }
+
+    /** Vide le cache (après modification d'une promotion). */
+    public static function forgetPromos()
+    {
+        self::$promoCache = null;
+    }
+
+    /** Meilleur prix promo applicable à ce client pour cet article, ou null. @return array|null [price, name, ends_at, promo_id, remaining] */
+    public function promoFor(Item $item, Customer $customer, $list)
+    {
+        $all = $this->activePromos();
+        if (empty($all[$item->id]) || $list <= 0) return null;
+        $best = null;
+        foreach ($all[$item->id] as $r) {
+            if ($r->audience === 'groups' && !in_array((int) $customer->discount_group_id, $r->group_ids, true)) continue;
+            $remaining = $r->max_qty === null ? null : (int) $r->max_qty - (int) $r->sold_qty;
+            if ($remaining !== null && $remaining <= 0) continue;
+            if ($r->mode === 'percent') $price = round($list * (1 - (float) $r->percent / 100), 2);
+            elseif ($r->mode === 'amount') $price = round($list - (float) $r->amount, 2);
+            else $price = round((float) $r->promo_price, 2);
+            if ($price < 0 || $price >= $list) continue;           // une promo doit être sous le tarif
+            if ($best === null || $price < $best['price']) {
+                $best = ['price' => $price, 'name' => $r->name, 'ends_at' => (string) $r->ends_at, 'promo_id' => (int) $r->promo_id, 'remaining' => $remaining];
+            }
+        }
+        return $best;
+    }
+
+    /**
+     * TOUTES les promotions applicables à ce client pour cet article (une ligne par promotion, prix propre à chacune).
+     * Sert à la page « Promotions » : une promotion affiche ses articles même si une autre promotion est encore moins chère.
+     * @return array[] [price, name, ends_at, promo_id, remaining]
+     */
+    public function allPromosFor($itemId, Customer $customer, $list, $withSkipped = false)
+    {
+        $all = $this->activePromos();
+        $out = [];
+        if (empty($all[$itemId])) return $out;
+        foreach ($all[$itemId] as $r) {
+            if ($r->audience === 'groups' && !in_array((int) $customer->discount_group_id, $r->group_ids, true)) continue;
+            $base = ['name' => $r->name, 'ends_at' => (string) $r->ends_at, 'promo_id' => (int) $r->promo_id, 'remaining' => null, 'price' => 0.0, 'skip' => null];
+            $remaining = $r->max_qty === null ? null : (int) $r->max_qty - (int) $r->sold_qty;
+            $base['remaining'] = $remaining;
+            if ($list <= 0) { if ($withSkipped) { $base['skip'] = 'tarif'; $out[] = $base; } continue; }
+            if ($r->mode === 'percent') $price = round($list * (1 - (float) $r->percent / 100), 2);
+            elseif ($r->mode === 'amount') $price = round($list - (float) $r->amount, 2);
+            else $price = round((float) $r->promo_price, 2);
+            $base['price'] = $price;
+            if ($remaining !== null && $remaining <= 0) { if ($withSkipped) { $base['skip'] = 'epuise'; $out[] = $base; } continue; }
+            if ($price < 0 || $price >= $list) { if ($withSkipped) { $base['skip'] = 'tarif'; $out[] = $base; } continue; }
+            $out[] = $base;
+        }
+        return $out;
     }
 
     private function fmt($v)     { return number_format((float) $v, 2, ',', ' ') . ' €'; }

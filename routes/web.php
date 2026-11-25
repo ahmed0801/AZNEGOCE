@@ -60,12 +60,13 @@ use App\Http\Controllers\B2bPricingController;
   use App\Http\Controllers\Portal\PortalCartController;
   use App\Http\Controllers\Portal\PortalOrderController;
   use App\Http\Controllers\Portal\PortalAccountController;
-  use App\Http\Middleware\PortalAuth;
+use App\Http\Controllers\Portal\PortalQuoteController;
+use App\Http\Middleware\PortalAuth;
   use App\Http\Middleware\PortalHeaders;
 
   use App\Http\Controllers\PortalOrderAdminController;
-
-
+use App\Http\Controllers\PortalPromotionAdminController;
+use App\Http\Controllers\PortalQuoteAdminController;
 use App\Models\Arrivage;
 use App\Models\Brand;
 use App\Models\Invoice;
@@ -830,7 +831,35 @@ Route::post('/b2b/orders/{order}/reprint', [PortalOrderAdminController::class, '
 Route::post('/b2b/orders/{order}/retry-erp', [PortalOrderAdminController::class, 'retryErp'])->whereNumber('order')->name('b2b.orders.retry_erp');
 
 
+Route::get('/b2b/quotes', [PortalQuoteAdminController::class, 'index'])->name('b2b.quotes');
+Route::get('/b2b/quotes/data', [PortalQuoteAdminController::class, 'data'])->name('b2b.quotes.data');
+Route::get('/b2b/quotes/count', [PortalQuoteAdminController::class, 'count'])->name('b2b.quotes.count');
+Route::get('/b2b/quotes/items', [PortalQuoteAdminController::class, 'itemsSearch'])->name('b2b.quotes.items');
+Route::get('/b2b/quotes/{quote}/pdf', [PortalQuoteAdminController::class, 'pdf'])->whereNumber('quote')->name('b2b.quotes.pdf');
+Route::post('/b2b/quotes/{quote}/erp', [PortalQuoteAdminController::class, 'toErp'])->whereNumber('quote')->name('b2b.quotes.erp');
+Route::get('/b2b/quotes/{quote}', [PortalQuoteAdminController::class, 'show'])->whereNumber('quote')->name('b2b.quotes.show');
+Route::post('/b2b/quotes/{quote}/update', [PortalQuoteAdminController::class, 'update'])->whereNumber('quote')->name('b2b.quotes.update');
+Route::post('/b2b/quotes/{quote}/decline', [PortalQuoteAdminController::class, 'decline'])->whereNumber('quote')->name('b2b.quotes.decline');
+Route::get('/b2b/quotes/{quote}/files/{file}', [PortalQuoteAdminController::class, 'file'])->whereNumber('quote')->whereNumber('file')->name('b2b.quotes.file');
+Route::post('/b2b/quotes/{quote}/files', [PortalQuoteAdminController::class, 'uploadFiles'])->whereNumber('quote')->name('b2b.quotes.files.upload');
+Route::post('/b2b/quotes/{quote}/files/{file}/delete', [PortalQuoteAdminController::class, 'deleteFile'])->whereNumber('quote')->whereNumber('file')->name('b2b.quotes.files.delete');
+Route::post('/b2b/quotes/{quote}/note', [PortalQuoteAdminController::class, 'note'])->whereNumber('quote')->name('b2b.quotes.note');
 
+
+
+Route::get('/b2b/promotions', [PortalPromotionAdminController::class, 'index'])->name('b2b.promotions');
+Route::get('/b2b/promotions/data', [PortalPromotionAdminController::class, 'data'])->name('b2b.promotions.data');
+Route::get('/b2b/promotions/items', [PortalPromotionAdminController::class, 'items'])->name('b2b.promotions.items');
+Route::post('/b2b/promotions/import', [PortalPromotionAdminController::class, 'import'])->middleware('throttle:20,1')->name('b2b.promotions.import');
+Route::get('/b2b/promotions/modele', [PortalPromotionAdminController::class, 'template'])->name('b2b.promotions.template');
+Route::post('/b2b/promotions/resolve', [PortalPromotionAdminController::class, 'resolve'])->name('b2b.promotions.resolve');
+Route::post('/b2b/promotions/save', [PortalPromotionAdminController::class, 'save'])->name('b2b.promotions.create');
+Route::get('/b2b/promotions/{id}', [PortalPromotionAdminController::class, 'show'])->whereNumber('id')->name('b2b.promotions.show');
+Route::post('/b2b/promotions/{id}/save', [PortalPromotionAdminController::class, 'save'])->whereNumber('id')->name('b2b.promotions.save');
+Route::get('/b2b/promotions/{id}/recipients', [PortalPromotionAdminController::class, 'recipientsData'])->whereNumber('id')->name('b2b.promotions.recipients');
+Route::post('/b2b/promotions/{id}/notify', [PortalPromotionAdminController::class, 'notify'])->whereNumber('id')->middleware('throttle:60,1')->name('b2b.promotions.notify');
+Route::post('/b2b/promotions/{id}/toggle', [PortalPromotionAdminController::class, 'toggle'])->whereNumber('id')->name('b2b.promotions.toggle');
+Route::post('/b2b/promotions/{id}/delete', [PortalPromotionAdminController::class, 'destroy'])->whereNumber('id')->name('b2b.promotions.delete');
 
 
     Route::get('/tecdoc', function () {
@@ -952,9 +981,9 @@ Route::get('/invoices/{NumFacture}/export-pdf/{DateFacture}/{CodeClient}', [Invo
      ->name('invoices.exportPdfduplic');
 
 
-Route::get('/avoirs', [AvoirController::class, 'index'])->name('avoirs.index');
-Route::get('/avoirs/{NumAvoir}', [AvoirController::class, 'show'])->name('avoirs.show');
-Route::get('/avoirs/{NumAvoir}/export-pdf/{DateFacture}/{CustomerNo}', [AvoirController::class, 'exportCreditNotePdf'])->name('avoirs.export_pdf');
+// Route::get('/avoirs', [AvoirController::class, 'index'])->name('avoirs.index');
+// Route::get('/avoirs/{NumAvoir}', [AvoirController::class, 'show'])->name('avoirs.show');
+// Route::get('/avoirs/{NumAvoir}/export-pdf/{DateFacture}/{CustomerNo}', [AvoirController::class, 'exportCreditNotePdf'])->name('avoirs.export_pdf');
 
 
 Route::get('/arrivage', [AdminController::class, 'arrivage'])->name('arrivage');
@@ -1099,10 +1128,6 @@ Route::get('/tvclient/data', [DeliveryNotesController::class, 'tvClientData'])->
 
 
 
-
-
-
-
 // ── PORTAIL B2B : à placer dans routes/web.php, EN DEHORS du groupe « auth » de l'ERP ──
 // + en haut de web.php :
 //   use App\Http\Controllers\Portal\PortalAuthController;
@@ -1110,6 +1135,7 @@ Route::get('/tvclient/data', [DeliveryNotesController::class, 'tvClientData'])->
 //   use App\Http\Controllers\Portal\PortalCartController;
 //   use App\Http\Controllers\Portal\PortalOrderController;
 //   use App\Http\Controllers\Portal\PortalAccountController;
+//   use App\Http\Controllers\Portal\PortalQuoteController;
 //   use App\Http\Middleware\PortalAuth;
 //   use App\Http\Middleware\PortalHeaders;
 //
@@ -1119,7 +1145,7 @@ Route::get('/tvclient/data', [DeliveryNotesController::class, 'tvClientData'])->
 Route::group(config('portal.domain') ? ['domain' => config('portal.domain')] : ['prefix' => 'portail'], function () {
     Route::middleware([PortalHeaders::class])->group(function () {
 
-        Route::get('/', function () { return redirect()->route('portal.catalog'); });
+        Route::get('/', function () { return redirect()->route(\App\Models\B2bSetting::current()->homeRoute()); });
 
         // pages publiques (limitées en fréquence contre les essais de mots de passe)
         Route::get('/connexion', [PortalAuthController::class, 'showLogin'])->name('portal.login');
@@ -1142,6 +1168,7 @@ Route::group(config('portal.domain') ? ['domain' => config('portal.domain')] : [
             Route::get('/panier', [PortalCartController::class, 'summary'])->name('portal.cart');
             Route::post('/panier/ajouter', [PortalCartController::class, 'add'])->middleware('throttle:120,1')->name('portal.cart.add');
             Route::post('/panier/modifier', [PortalCartController::class, 'update'])->middleware('throttle:120,1')->name('portal.cart.update');
+            Route::get('/promotions', [\App\Http\Controllers\Portal\PortalPromotionController::class, 'index'])->name('portal.promotions');
             Route::post('/panier/vider', [PortalCartController::class, 'clear'])->name('portal.cart.clear');
             Route::post('/favoris/{item}', [PortalCartController::class, 'favorite'])->whereNumber('item')->name('portal.favorite');
             // commandes
@@ -1158,10 +1185,27 @@ Route::group(config('portal.domain') ? ['domain' => config('portal.domain')] : [
             Route::get('/compte/bons-livraison', [PortalAccountController::class, 'deliveryNotes'])->name('portal.account.dns');
             Route::get('/compte/bons-livraison/{id}', [PortalAccountController::class, 'deliveryNote'])->whereNumber('id')->name('portal.account.dn');
             Route::get('/compte/bons-livraison/{id}/pdf', [PortalAccountController::class, 'deliveryNotePdf'])->whereNumber('id')->middleware('throttle:30,1')->name('portal.account.dn.pdf');
+            // demandes de devis (disponibles aussi en mode « devis seulement »)
+            Route::get('/devis', [PortalQuoteController::class, 'index'])->name('portal.quotes');
+            Route::get('/devis/nouveau', [PortalQuoteController::class, 'create'])->name('portal.quote.new');
+            Route::post('/devis', [PortalQuoteController::class, 'store'])->middleware('throttle:10,1')->name('portal.quote.store');
+            Route::get('/devis/{id}', [PortalQuoteController::class, 'show'])->whereNumber('id')->name('portal.quote');
+            Route::get('/devis/{id}/pdf', [PortalQuoteController::class, 'pdf'])->whereNumber('id')->middleware('throttle:30,1')->name('portal.quote.pdf');
+            Route::get('/devis/erp/{id}/pdf', [PortalQuoteController::class, 'erpPdf'])->whereNumber('id')->middleware('throttle:30,1')->name('portal.quote.erp.pdf');
+            Route::post('/devis/plaque', [PortalQuoteController::class, 'plate'])->middleware('throttle:20,1')->name('portal.quote.plate');
+            Route::get('/devis/{id}/fichiers/{fileId}', [PortalQuoteController::class, 'file'])->whereNumber('id')->whereNumber('fileId')->middleware('throttle:120,1')->name('portal.quote.file');
+            Route::post('/devis/{id}/fichiers', [PortalQuoteController::class, 'addFiles'])->whereNumber('id')->middleware('throttle:20,1')->name('portal.quote.files');
+            Route::post('/devis/{id}/renegocier', [PortalQuoteController::class, 'negotiate'])->whereNumber('id')->middleware('throttle:20,1')->name('portal.quote.negotiate');
+            Route::post('/devis/{id}/accepter', [PortalQuoteController::class, 'accept'])->whereNumber('id')->middleware('throttle:20,1')->name('portal.quote.accept');
+            Route::post('/devis/{id}/refuser', [PortalQuoteController::class, 'decline'])->whereNumber('id')->middleware('throttle:20,1')->name('portal.quote.decline');
+            Route::post('/devis/{id}/annuler', [PortalQuoteController::class, 'cancel'])->whereNumber('id')->middleware('throttle:20,1')->name('portal.quote.cancel');
             Route::post('/liste-references', [PortalCartController::class, 'bulk'])->middleware('throttle:30,1')->name('portal.bulk');
         });
     });
 });
+
+
+
 
 
 

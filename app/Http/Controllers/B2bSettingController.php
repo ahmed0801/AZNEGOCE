@@ -49,6 +49,8 @@ class B2bSettingController extends Controller
             'min_margin_percent'  => 'nullable|numeric|min:0|max:500',
             'stock_display'       => 'required|in:exact,threshold,hidden',
             'zero_price_mode'     => 'sometimes|in:allow,hide,block,both',
+            'portal_mode'         => 'sometimes|in:full,quotes',
+            'portal_show_erp_quotes' => 'sometimes|boolean',
             'stock_low_threshold' => 'nullable|integer|min:0|max:100000',
             'print_document'      => 'required|in:order,delivery_note',
             'printer_name'        => 'nullable|string|max:100',
@@ -70,6 +72,7 @@ class B2bSettingController extends Controller
         foreach (B2bSetting::BOOLEANS as $b) {
             $data[$b] = $request->boolean($b);
         }
+        if (empty($data['portal_mode'])) $data['portal_mode'] = $s->portal_mode ?: 'full';
         if (empty($data['zero_price_mode'])) $data['zero_price_mode'] = $s->zero_price_mode ?: 'both';
         $data['min_margin_percent']  = isset($data['min_margin_percent']) ? $data['min_margin_percent'] : 0;
         $data['min_order_amount']    = isset($data['min_order_amount']) ? $data['min_order_amount'] : 0;

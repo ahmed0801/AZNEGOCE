@@ -14,8 +14,9 @@
       @if($p['discount'] > 0 && $p['list_ht'] > $p['net_ht'])
         <div class="was" style="justify-content:flex-start">Tarif public <s>{{ number_format($p['list_ht'], 2, ',', ' ') }} €</s><span class="tag off">−{{ rtrim(rtrim(number_format($p['discount'], 1, ',', ''), '0'), ',') }} %</span></div>
       @elseif(!empty($p['prix_net']))<div class="was" style="justify-content:flex-start"><span class="tag pn">Prix net</span></div>@endif
+      @if(!empty($p['promo']))<div class="was" style="justify-content:flex-start"><span class="tag promo">Promo jusqu'au {{ $p['promo']['ends'] }}</span></div>@endif
     </div>
-  @else<div class="ask">Prix sur demande</div>@endif
+  @else<div class="ask">Prix sur demande <a class="link" style="font-size:.8rem" href="{{ route('portal.quote.new', ['ref' => $r['code'], 'name' => $r['name'], 'brand' => $r['brand']]) }}">Demander un devis</a></div>@endif
   <div class="c-buy" style="justify-content:flex-start">
     @if($canBuy && ($r['can_buy'] ?? true))
       <div class="qty"><button type="button" class="js-dec" aria-label="Moins">−</button><input type="number" inputmode="numeric" min="1" max="9999" value="1" class="js-qty" aria-label="Quantité"><button type="button" class="js-inc" aria-label="Plus">+</button></div>

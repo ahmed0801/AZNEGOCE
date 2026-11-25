@@ -42,6 +42,11 @@ class PortalAuth
             return redirect()->route('portal.password');
         }
 
+        // mode « devis seulement » : tout le reste du portail (catalogue, panier, commandes, compte) est fermé
+        if ($s->quotesOnly() && !$request->routeIs('portal.quote*', 'portal.password', 'portal.password.update', 'portal.logout')) {
+            return redirect()->route('portal.quotes');
+        }
+
         $request->attributes->set('portal_user', $user);
         $request->attributes->set('portal_customer_settings', $cs);
         $request->attributes->set('portal_settings', $s);

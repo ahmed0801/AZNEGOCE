@@ -835,6 +835,12 @@
                 <div class="sub">Ouvrez le portail à vos clients quand tout est prêt, ou fermez-le temporairement.</div>
                 <div class="b2b-switch"><input class="form-check-input" type="checkbox" role="switch" name="portal_enabled" id="portal_enabled" value="1" {{ old('portal_enabled', $s->portal_enabled) ? 'checked' : '' }}><label for="portal_enabled" class="mb-0"><b>Portail ouvert aux clients</b><span>Fermé : les clients voient le message de maintenance. Les accès se gèrent dans la fiche de chaque client.</span></label></div>
                 <div class="row g-3 mt-1">
+                    <div class="col-12"><label class="fl">Fonctionnalités ouvertes aux clients</label><select name="portal_mode" id="portal_mode" class="form-select">
+                        @php $pm = old('portal_mode', $s->portal_mode ?: 'full'); @endphp
+                        <option value="full" {{ $pm === 'full' ? 'selected' : '' }}>Portail complet : catalogue, panier, commandes, compte et demandes de devis</option>
+                        <option value="quotes" {{ $pm === 'quotes' ? 'selected' : '' }}>Demandes de devis uniquement (catalogue, panier, commandes et compte fermés)</option>
+                    </select><div class="form-text">Pratique pour démarrer en douceur : vos clients envoient leurs demandes, vous répondez avec prix et disponibilité. Passez en « complet » quand le catalogue est prêt.</div></div>
+                    <div class="col-12"><div class="b2b-switch"><input class="form-check-input" type="checkbox" role="switch" name="portal_show_erp_quotes" id="portal_show_erp_quotes" value="1" {{ old('portal_show_erp_quotes', $s->portal_show_erp_quotes ?? true) ? 'checked' : '' }}><label for="portal_show_erp_quotes">Montrer aux clients les devis créés dans l'ERP (statut « Devis »), avec notification</label></div></div>
                     <div class="col-12"><label class="fl">Message affiché quand le portail est fermé</label><input type="text" name="maintenance_message" id="maintenance_message" class="form-control @error('maintenance_message') is-invalid @enderror" value="{{ old('maintenance_message', $s->maintenance_message) }}" placeholder="Retour très bientôt !" >@error('maintenance_message')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
                 </div>
             </div>

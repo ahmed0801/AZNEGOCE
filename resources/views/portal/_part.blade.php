@@ -25,8 +25,9 @@
       @elseif(!empty($p['prix_net']))
         <div class="was"><span class="tag pn">Prix net</span></div>
       @endif
+      @if(!empty($p['promo']))<div class="was"><span class="tag promo">Promo jusqu'au {{ $p['promo']['ends'] }}</span></div>@endif
     @else
-      <div class="ask">Prix sur demande</div>
+      <div class="ask">Prix sur demande <a class="link" style="font-size:.8rem" href="{{ route('portal.quote.new', ['ref' => $r['code'], 'name' => $r['name'], 'brand' => $r['brand']]) }}">Demander un devis</a></div>
     @endif
   </div>
   <div class="c-buy">

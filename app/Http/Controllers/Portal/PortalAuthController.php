@@ -19,7 +19,7 @@ class PortalAuthController extends Controller
         if (!$s->portal_enabled) {
             return response()->view('portal.off', ['s' => $s, 'message' => $s->maintenance_message], 503);
         }
-        if (session('portal_user_id')) return redirect()->route('portal.catalog');
+        if (session('portal_user_id')) return redirect()->route($s->homeRoute());
         return view('portal.login', ['s' => $s]);
     }
 
@@ -72,7 +72,7 @@ class PortalAuthController extends Controller
         Log::channel('single')->info('Portail B2B : connexion', ['user' => $user->id, 'customer' => $user->customer_id, 'ip' => $request->ip()]);
 
         // jamais de redirection vers une adresse mémorisée (qui pourrait venir de l'ERP)
-        return redirect()->route('portal.catalog');
+        return redirect()->route(B2bSetting::current()->homeRoute());
     }
 
     public function logout(Request $request)
@@ -117,7 +117,7 @@ class PortalAuthController extends Controller
         $request->session()->regenerate();
         session(['portal_user_id' => $user->id]);
 
-        return redirect()->route('portal.catalog')->with('status', 'Mot de passe modifié.');
+        return redirect()->route(B2bSetting::current()->homeRoute())->with('status', 'Mot de passe modifié.');
     }
 
     public function showForgot()

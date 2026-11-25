@@ -395,6 +395,11 @@ class PortalCatalogService
                     'list_ht'  => $price['list_ht'],
                     'discount' => $price['effective_rate'],
                     'prix_net' => $price['prix_net'],
+                    'promo'    => !empty($price['promo']) ? [
+                        'promo_id' => $price['promo']['promo_id'], 'name' => $price['promo']['name'], 'ends_at' => $price['promo']['ends_at'],
+                        'ends' => date('d/m', strtotime($price['promo']['ends_at'])), 'remaining' => $price['promo']['remaining'],
+                        'regular_net' => $price['promo']['regular_net'],
+                    ] : null,
                 ] : null,
                 'equivalents' => isset($eqCount[$it->id]) ? count($eqCount[$it->id]) : 0,
                 'fav'      => isset($favs[$it->id]),

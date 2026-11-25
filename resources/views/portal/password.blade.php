@@ -20,7 +20,7 @@
       <div class="fld"><label for="password_confirmation">Confirmer le nouveau mot de passe</label><input type="password" id="password_confirmation" name="password_confirmation" required autocomplete="new-password"></div>
       <button class="btn" type="submit">Enregistrer</button>
     </form>
-    @if(!$forced)<div class="links"><a href="{{ route('portal.catalog') }}">Retour au catalogue</a></div>
+    @if(!$forced)<div class="links"><a href="{{ route($s->homeRoute()) }}">{{ $s->quotesOnly() ? 'Retour à mes demandes' : 'Retour au catalogue' }}</a></div>
     @else<div class="links"><form method="POST" action="{{ route('portal.logout') }}" style="display:inline">@csrf<button type="submit" class="link">Me déconnecter</button></form></div>@endif
   </div></main>
 </div>

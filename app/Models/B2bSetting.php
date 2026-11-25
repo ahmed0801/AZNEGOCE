@@ -18,13 +18,14 @@ class B2bSetting extends Model
         'show_stock'        => 'boolean',
         'auto_print'        => 'boolean',
         'notify_new_order'  => 'boolean',
+        'portal_show_erp_quotes' => 'boolean',
         'margin_guard'      => 'boolean',
         'min_margin_percent' => 'float',
         'min_order_amount'  => 'float',
     ];
 
     const BOOLEANS = ['portal_enabled', 'auto_validate', 'block_over_credit', 'allow_particulier',
-                      'show_prices', 'show_stock', 'auto_print', 'notify_new_order', 'margin_guard'];
+                      'show_prices', 'show_stock', 'auto_print', 'notify_new_order', 'margin_guard', 'portal_show_erp_quotes'];
 
     /** La ligne unique de paramètres (créée avec les valeurs par défaut au premier appel). */
     public static function current()
@@ -41,6 +42,18 @@ class B2bSetting extends Model
             ]);
         }
         return $s;
+    }
+
+    /** Portail « devis seulement » : seules les demandes de devis (+ mot de passe / déconnexion) sont accessibles. */
+    public function quotesOnly()
+    {
+        return ($this->portal_mode ?? 'full') === 'quotes';
+    }
+
+    /** Nom de la route d'accueil du portail selon le mode. */
+    public function homeRoute()
+    {
+        return $this->quotesOnly() ? 'portal.quotes' : 'portal.catalog';
     }
 
     public function getLogoUrlAttribute()

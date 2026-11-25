@@ -6,3 +6,6 @@
         <span class="badge badge-danger" id="poSideBadge" style="display:none">0</span>
     </a>
 </li>
+@include('partials.portal_quotes_menu')
+
+@include('partials.portal_promotions_menu')
